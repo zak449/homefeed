@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Listing {
+  id             String   @id @default(cuid())
+  source         String   // "zillow" | "mls" | "seed"
+  sourceId       String
+  address        String
+  city           String
+  state          String
+  zip            String
+  neighborhood   String?
+  price          Int
+  listingType    String   // "sale" | "rent"
+  propertyType   String   // "house" | "condo" | "townhouse" | "apartment"
+  bedrooms       Int?
+  bathrooms      Float?
+  sqft           Int?
+  lotSqft        Int?
+  yearBuilt      Int?
+  parking        String?
+  description    String?
+  photos         String[]
+  agentName      String?
+  agentPhone     String?
+  agentEmail     String?
+  agentPhoto     String?
+  agentBrokerage String?
+  listingUrl     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  comments      Comment[]
+  subscriptions EmailSubscription[]
+
+  @@unique([source, sourceId])
+  @@index([city, listingType])
+  @@index([price])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  reactions Reaction[]
+
+  @@index([listingId, createdAt])
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  email     String
+  type      String   // "❤️" | "🔥" | "😂" | "😮" | "💭"
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, email, type])
+}
+
+model EmailSubscription {
+  id        String   @id @default(cuid())
+  listingId String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  email     String
+  createdAt DateTime @default(now())
+
+  @@unique([listingId, email])
+}
