@@ -26,7 +26,7 @@ export async function sendAgentMessage({
   await resend.emails.send({
     from: FROM,
     to: agentEmail,
-    replyTo: senderEmail,
+    reply_to: senderEmail,
     subject: `New inquiry about ${listingAddress}`,
     html: `
       <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #FAFAF7; padding: 40px; border-radius: 16px;">
