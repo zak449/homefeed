@@ -26,7 +26,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const listing = await prisma.listing.findUnique({ where: { id } });
+  const [listing, commentCount, reactionCount] = await Promise.all([
+    prisma.listing.findUnique({ where: { id } }),
+    prisma.comment.count({ where: { listingId: id } }),
+    prisma.reaction.count({ where: { comment: { listingId: id } } }),
+  ]);
   if (!listing) notFound();
 
   const colorIndex = listing.id.charCodeAt(0) % COLORS.length;
@@ -77,6 +81,31 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     {capitalize(listing.propertyType)}
                   </span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Social stats strip */}
+          <div className="flex gap-3 flex-wrap">
+            <div className="flex items-center gap-2 bg-white rounded-xl border-3 border-ink px-4 py-2.5 shadow-brute-sm">
+              <span className="text-xl">💬</span>
+              <div>
+                <p className="font-display text-xl text-ink leading-none">{commentCount}</p>
+                <p className="font-display text-xs uppercase text-ink/50">Comments</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-white rounded-xl border-3 border-ink px-4 py-2.5 shadow-brute-sm">
+              <span className="text-xl">🔥</span>
+              <div>
+                <p className="font-display text-xl text-ink leading-none">{reactionCount}</p>
+                <p className="font-display text-xs uppercase text-ink/50">Reactions</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 bg-goldenrod rounded-xl border-3 border-ink px-4 py-2.5 shadow-brute-sm">
+              <span className="text-xl">🏡</span>
+              <div>
+                <p className="font-display text-xl text-ink leading-none">{commentCount + reactionCount}</p>
+                <p className="font-display text-xs uppercase text-ink/50">Total Activity</p>
               </div>
             </div>
           </div>

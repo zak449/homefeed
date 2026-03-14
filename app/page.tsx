@@ -49,6 +49,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         price: true, listingType: true, propertyType: true,
         bedrooms: true, bathrooms: true, sqft: true, photos: true, agentName: true,
         _count: { select: { comments: true } },
+        comments: { select: { _count: { select: { reactions: true } } } },
       },
     }),
     prisma.listing.count({ where }),

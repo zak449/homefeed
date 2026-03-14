@@ -27,12 +27,15 @@ type Listing = {
   photos: string[];
   agentName?: string | null;
   _count?: { comments: number };
+  comments?: { _count: { reactions: number } }[];
 };
 
 export default function ListingCard({ listing, index }: { listing: Listing; index: number }) {
   const color = COLORS[index % COLORS.length];
   const photo = listing.photos[0];
   const isRent = listing.listingType === "rent";
+  const commentCount = listing._count?.comments ?? 0;
+  const reactionCount = listing.comments?.reduce((sum, c) => sum + c._count.reactions, 0) ?? 0;
   const price = isRent
     ? `$${listing.price.toLocaleString()}/mo`
     : `$${(listing.price / 1000).toFixed(0)}k`;
@@ -79,11 +82,18 @@ export default function ListingCard({ listing, index }: { listing: Listing; inde
           {listing.sqft      != null && <Pill>{listing.sqft.toLocaleString()} sqft</Pill>}
           <Pill>{capitalize(listing.propertyType)}</Pill>
         </div>
-        {(listing._count?.comments ?? 0) > 0 && (
-          <span className="font-display text-xs uppercase border-2 border-ink px-2.5 py-1 rounded-full bg-goldenrod text-ink ml-2 shadow-brute-sm">
-            💬 {listing._count?.comments}
-          </span>
-        )}
+        <div className="flex gap-1.5 ml-2 shrink-0">
+          {commentCount > 0 && (
+            <span className="font-display text-xs uppercase border-2 border-ink px-2 py-1 rounded-full bg-goldenrod text-ink shadow-brute-sm">
+              💬 {commentCount}
+            </span>
+          )}
+          {reactionCount > 0 && (
+            <span className="font-display text-xs uppercase border-2 border-ink px-2 py-1 rounded-full bg-coral text-white shadow-brute-sm">
+              🔥 {reactionCount}
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
