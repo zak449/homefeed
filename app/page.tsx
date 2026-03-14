@@ -59,13 +59,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
       {/* Hero */}
-      <div className="mb-10">
-        <h1 className="font-display text-5xl sm:text-6xl text-ink leading-tight mb-3">
+      <div className="mb-12">
+        <div className="inline-flex items-center gap-2 bg-goldenrod border-2 border-ink px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-widest text-ink mb-6 shadow-brute-sm">
+          ★ The Social Home Search ★
+        </div>
+        <h1 className="font-display text-5xl sm:text-7xl text-ink leading-none mb-5 uppercase">
           Find your next<br />
           <span className="text-coral">favorite place.</span>
         </h1>
-        <p className="text-gray-500 text-lg max-w-xl">
+        <p className="text-gray-600 text-lg max-w-xl font-medium leading-relaxed">
           Browse homes for sale and rent, see what the community thinks, and connect directly with listing agents.
         </p>
       </div>
@@ -77,13 +81,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* Results header */}
       <div className="flex items-center justify-between mt-10 mb-6">
-        <h2 className="font-display text-2xl text-ink">
+        <h2 className="font-display text-2xl text-ink uppercase">
           {hasFilters
             ? `${total} ${total === 1 ? "result" : "results"}`
             : "All listings"}
         </h2>
         {total > 0 && (
-          <p className="text-sm text-gray-400">
+          <p className="text-sm font-bold text-ink/50 uppercase tracking-wide">
             Page {page} of {totalPages}
           </p>
         )}
@@ -91,11 +95,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* Grid */}
       {listings.length === 0 ? (
-        <div className="text-center py-24">
-          <p className="text-4xl mb-4">🔍</p>
-          <p className="font-display text-2xl text-ink mb-2">No listings found</p>
-          <p className="text-gray-500">Try adjusting your filters or searching a different city.</p>
-          <a href="/" className="inline-block mt-6 bg-coral text-white font-bold px-6 py-3 rounded-xl hover:bg-coral/90 transition-colors text-sm">
+        <div className="text-center py-24 rounded-2xl border-3 border-dashed border-ink/30">
+          <p className="text-5xl mb-4">🔍</p>
+          <p className="font-display text-2xl text-ink uppercase mb-2">No listings found</p>
+          <p className="text-gray-500 font-medium">Try adjusting your filters or searching a different city.</p>
+          <a href="/" className="inline-block mt-6 font-display text-sm uppercase bg-coral text-white border-2 border-ink px-6 py-3 rounded-xl hover:bg-goldenrod hover:text-ink transition-colors shadow-brute-sm">
             Clear filters
           </a>
         </div>
@@ -122,8 +126,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               <a
                 key={p}
                 href={`/?${params.toString()}`}
-                className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-semibold transition-colors ${
-                  p === page ? "bg-coral text-white" : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                className={`w-10 h-10 flex items-center justify-center rounded-xl font-display text-sm uppercase border-2 border-ink transition-all shadow-brute-sm ${
+                  p === page
+                    ? "bg-coral text-white"
+                    : "bg-white text-ink hover:bg-goldenrod hover:text-ink"
                 }`}
               >
                 {p}

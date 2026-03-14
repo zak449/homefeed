@@ -6,10 +6,10 @@ import Image from "next/image";
 const COLORS = [
   { bg: "bg-coral",     text: "text-white" },
   { bg: "bg-goldenrod", text: "text-ink" },
-  { bg: "bg-sage",      text: "text-ink" },
+  { bg: "bg-sage",      text: "text-white" },
   { bg: "bg-sky",       text: "text-white" },
   { bg: "bg-lavender",  text: "text-white" },
-  { bg: "bg-clay",      text: "text-white" },
+  { bg: "bg-pink",      text: "text-white" },
 ];
 
 type Listing = {
@@ -38,15 +38,20 @@ export default function ListingCard({ listing, index }: { listing: Listing; inde
     : `$${(listing.price / 1000).toFixed(0)}k`;
 
   return (
-    <Link href={`/listing/${listing.id}`} className="group block rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-200 bg-white">
+    <Link
+      href={`/listing/${listing.id}`}
+      className="group block rounded-2xl overflow-hidden border-3 border-ink bg-white shadow-brute transition-all duration-150 hover:shadow-brute-lg hover:-translate-x-0.5 hover:-translate-y-0.5"
+    >
       {/* Color block header */}
-      <div className={`${color.bg} ${color.text} px-5 pt-5 pb-4`}>
+      <div className={`${color.bg} ${color.text} px-5 pt-5 pb-4 border-b-3 border-ink`}>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <p className="font-display text-xl leading-tight font-normal truncate">{listing.address}</p>
-            <p className="text-sm mt-0.5 opacity-80 truncate">{listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}</p>
+            <p className="font-display text-base leading-tight uppercase truncate">{listing.address}</p>
+            <p className="text-xs mt-0.5 opacity-80 truncate font-medium">
+              {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}
+            </p>
           </div>
-          <span className={`shrink-0 text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${color.text === "text-white" ? "border-white/40 bg-white/20" : "border-ink/20 bg-ink/10"}`}>
+          <span className="shrink-0 font-display text-xs uppercase tracking-wide px-2.5 py-1 rounded-full border-2 border-ink bg-cream text-ink">
             {isRent ? "Rent" : "Sale"}
           </span>
         </div>
@@ -55,7 +60,7 @@ export default function ListingCard({ listing, index }: { listing: Listing; inde
 
       {/* Photo */}
       {photo && (
-        <div className="relative h-44 overflow-hidden">
+        <div className="relative h-44 overflow-hidden border-b-3 border-ink">
           <Image
             src={photo}
             alt={listing.address}
@@ -68,20 +73,14 @@ export default function ListingCard({ listing, index }: { listing: Listing; inde
 
       {/* Stats row */}
       <div className="px-5 py-4 bg-cream flex items-center justify-between">
-        <div className="flex gap-3 flex-wrap">
-          {listing.bedrooms != null && (
-            <Pill>{listing.bedrooms} bd</Pill>
-          )}
-          {listing.bathrooms != null && (
-            <Pill>{listing.bathrooms} ba</Pill>
-          )}
-          {listing.sqft != null && (
-            <Pill>{listing.sqft.toLocaleString()} sqft</Pill>
-          )}
-          <Pill type={listing.propertyType}>{capitalize(listing.propertyType)}</Pill>
+        <div className="flex gap-2 flex-wrap">
+          {listing.bedrooms  != null && <Pill>{listing.bedrooms} bd</Pill>}
+          {listing.bathrooms != null && <Pill>{listing.bathrooms} ba</Pill>}
+          {listing.sqft      != null && <Pill>{listing.sqft.toLocaleString()} sqft</Pill>}
+          <Pill>{capitalize(listing.propertyType)}</Pill>
         </div>
         {(listing._count?.comments ?? 0) > 0 && (
-          <span className="text-xs text-gray-400 shrink-0 ml-2">
+          <span className="font-display text-xs uppercase border-2 border-ink px-2.5 py-1 rounded-full bg-goldenrod text-ink ml-2 shadow-brute-sm">
             💬 {listing._count?.comments}
           </span>
         )}
@@ -90,16 +89,9 @@ export default function ListingCard({ listing, index }: { listing: Listing; inde
   );
 }
 
-function Pill({ children, type }: { children: React.ReactNode; type?: string }) {
-  const typeColors: Record<string, string> = {
-    house:     "bg-coral/10 text-coral",
-    condo:     "bg-sky/10 text-sky",
-    townhouse: "bg-sage/10 text-sage",
-    apartment: "bg-lavender/10 text-lavender",
-  };
-  const cls = type ? typeColors[type] ?? "bg-gray-100 text-gray-600" : "bg-gray-100 text-gray-600";
+function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cls}`}>
+    <span className="text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full border-2 border-ink bg-white text-ink">
       {children}
     </span>
   );

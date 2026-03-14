@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma";
 import AgentContactForm from "@/components/AgentContactForm";
 import CommentSection from "@/components/CommentSection";
 
-const COLORS = ["bg-coral", "bg-goldenrod", "bg-sage", "bg-sky", "bg-lavender", "bg-clay"];
-const TEXT_COLORS = ["text-white", "text-ink", "text-ink", "text-white", "text-white", "text-white"];
+const COLORS = ["bg-coral", "bg-goldenrod", "bg-sage", "bg-sky", "bg-lavender", "bg-pink"];
+const TEXT_COLORS = ["text-white", "text-ink", "text-white", "text-white", "text-white", "text-white"];
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -50,7 +50,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
       {/* Back */}
-      <Link href="/" className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-ink transition-colors mb-8">
+      <Link href="/" className="inline-flex items-center gap-2 font-display text-xs uppercase tracking-wide border-2 border-ink px-4 py-1.5 rounded-full hover:bg-ink hover:text-cream transition-all shadow-brute-sm mb-8">
         ← Back to listings
       </Link>
 
@@ -58,11 +58,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* Left: listing detail */}
         <div className="lg:col-span-2 space-y-8">
           {/* Header color block */}
-          <div className={`${headerBg} ${headerText} rounded-3xl px-8 py-8`}>
+          <div className={`${headerBg} ${headerText} rounded-2xl border-3 border-ink shadow-brute px-8 py-8`}>
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <h1 className="font-display text-4xl sm:text-5xl leading-tight">{listing.address}</h1>
-                <p className="text-lg mt-1 opacity-80">
+                <h1 className="font-display text-4xl sm:text-5xl leading-tight uppercase">{listing.address}</h1>
+                <p className="text-lg mt-1 opacity-80 font-medium">
                   {listing.neighborhood ? `${listing.neighborhood} · ` : ""}
                   {listing.city}, {listing.state} {listing.zip}
                 </p>
@@ -70,10 +70,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               <div className="text-right shrink-0">
                 <p className="font-display text-4xl">{price}</p>
                 <div className="flex gap-2 mt-2 justify-end flex-wrap">
-                  <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${headerText === "text-white" ? "border-white/40 bg-white/20" : "border-ink/20 bg-ink/10"}`}>
+                  <span className="font-display text-xs uppercase tracking-widest px-3 py-1 rounded-full border-2 border-ink bg-cream text-ink">
                     For {isRent ? "Rent" : "Sale"}
                   </span>
-                  <span className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full border ${headerText === "text-white" ? "border-white/40 bg-white/20" : "border-ink/20 bg-ink/10"}`}>
+                  <span className="font-display text-xs uppercase tracking-widest px-3 py-1 rounded-full border-2 border-ink bg-cream text-ink">
                     {capitalize(listing.propertyType)}
                   </span>
                 </div>
@@ -90,8 +90,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {stats.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {stats.map((s) => (
-                <div key={s.label} className="bg-white rounded-2xl px-5 py-4 border border-gray-100 shadow-sm">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{s.label}</p>
+                <div key={s.label} className="bg-white rounded-2xl border-3 border-ink px-5 py-4 shadow-brute-sm">
+                  <p className="font-display text-xs uppercase tracking-wider text-ink/50 mb-1">{s.label}</p>
                   <p className="font-display text-2xl text-ink">{s.value}</p>
                 </div>
               ))}
@@ -100,9 +100,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
           {/* Description */}
           {listing.description && (
-            <div className="bg-white rounded-3xl px-7 py-6 border border-gray-100 shadow-sm">
-              <h2 className="font-display text-xl text-ink mb-3">About this home</h2>
-              <p className="text-gray-600 leading-relaxed">{listing.description}</p>
+            <div className="bg-white rounded-2xl border-3 border-ink px-7 py-6 shadow-brute-sm">
+              <h2 className="font-display text-xl text-ink uppercase mb-3">About this home</h2>
+              <p className="text-gray-600 leading-relaxed font-medium">{listing.description}</p>
             </div>
           )}
 
@@ -112,7 +112,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               href={listing.listingUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-sky hover:underline"
+              className="inline-flex items-center gap-2 font-display text-xs uppercase border-2 border-ink px-4 py-1.5 rounded-full hover:bg-sky hover:text-white hover:border-sky transition-all shadow-brute-sm"
             >
               View original listing →
             </a>
@@ -122,7 +122,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <CommentSection listingId={listing.id} />
         </div>
 
-        {/* Right: agent contact */}
+        {/* Right: agent contact + quick facts */}
         <div className="space-y-6">
           <AgentContactForm
             listingId={listing.id}
@@ -135,9 +135,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             }}
           />
 
-          {/* Quick facts sidebar */}
-          <div className="bg-white rounded-3xl px-6 py-5 border border-gray-100 shadow-sm">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Quick facts</p>
+          <div className="bg-white rounded-2xl border-3 border-ink px-6 py-5 shadow-brute-sm">
+            <p className="font-display text-xs uppercase tracking-wider text-ink/50 mb-4">Quick Facts</p>
             <dl className="space-y-3">
               <Row label="Status" value={isRent ? "For Rent" : "For Sale"} />
               <Row label="Type" value={capitalize(listing.propertyType)} />
@@ -156,9 +155,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-center border-b border-gray-50 pb-2 last:border-0">
-      <dt className="text-xs text-gray-400 font-medium">{label}</dt>
-      <dd className="text-sm font-semibold text-ink">{value}</dd>
+    <div className="flex justify-between items-center border-b border-ink/10 pb-2 last:border-0">
+      <dt className="font-display text-xs uppercase text-ink/50">{label}</dt>
+      <dd className="font-bold text-sm text-ink">{value}</dd>
     </div>
   );
 }
@@ -169,41 +168,37 @@ function capitalize(s: string) {
 
 function PhotoCarousel({ photos, address }: { photos: string[]; address: string }) {
   return (
-    <div className="rounded-3xl overflow-hidden">
-      <div className="relative">
-        {/* Main photo */}
-        <div className="relative h-80 sm:h-96">
-          <Image
-            src={photos[0]}
-            alt={address}
-            fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 65vw"
-            priority
-          />
-        </div>
-        {/* Thumbnails */}
-        {photos.length > 1 && (
-          <div className="flex gap-2 mt-2">
-            {photos.slice(1, 5).map((p, i) => (
-              <div key={i} className="relative flex-1 h-20 rounded-xl overflow-hidden">
-                <Image
-                  src={p}
-                  alt={`${address} photo ${i + 2}`}
-                  fill
-                  className="object-cover hover:opacity-90 transition-opacity"
-                  sizes="15vw"
-                />
-                {i === 3 && photos.length > 5 && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-sm font-bold">
-                    +{photos.length - 5}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+    <div className="rounded-2xl border-3 border-ink overflow-hidden shadow-brute">
+      <div className="relative h-80 sm:h-96">
+        <Image
+          src={photos[0]}
+          alt={address}
+          fill
+          className="object-cover"
+          sizes="(max-width: 1024px) 100vw, 65vw"
+          priority
+        />
       </div>
+      {photos.length > 1 && (
+        <div className="flex border-t-3 border-ink">
+          {photos.slice(1, 5).map((p, i) => (
+            <div key={i} className="relative flex-1 h-20 border-r-3 border-ink last:border-r-0">
+              <Image
+                src={p}
+                alt={`${address} photo ${i + 2}`}
+                fill
+                className="object-cover hover:opacity-90 transition-opacity"
+                sizes="15vw"
+              />
+              {i === 3 && photos.length > 5 && (
+                <div className="absolute inset-0 bg-ink/60 flex items-center justify-center text-white font-display text-sm uppercase">
+                  +{photos.length - 5}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

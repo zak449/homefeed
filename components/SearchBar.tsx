@@ -31,35 +31,34 @@ export default function SearchBar() {
     router.push("/");
   }
 
+  const inputClass = "w-full rounded-xl border-2 border-ink px-4 py-2.5 text-sm font-medium bg-white focus:outline-none focus:border-coral focus:ring-2 focus:ring-coral/30";
+
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-3 border-ink p-5 shadow-brute">
       <div className="flex flex-wrap gap-3 items-end">
-        {/* City / Zip search */}
         <div className="flex-1 min-w-[160px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">City or Zip</label>
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">City or Zip</label>
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
             placeholder="Los Angeles, 90026…"
-            className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-coral/50 bg-cream"
+            className={inputClass}
           />
         </div>
 
-        {/* Sale vs Rent */}
         <div className="min-w-[120px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-coral/50">
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">Type</label>
+          <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
             <option value="">For Sale or Rent</option>
             <option value="sale">For Sale</option>
             <option value="rent">For Rent</option>
           </select>
         </div>
 
-        {/* Property type */}
         <div className="min-w-[130px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Home type</label>
-          <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-coral/50">
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">Home Type</label>
+          <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className={inputClass}>
             <option value="">Any type</option>
             <option value="house">House</option>
             <option value="condo">Condo</option>
@@ -68,31 +67,36 @@ export default function SearchBar() {
           </select>
         </div>
 
-        {/* Price range */}
         <div className="min-w-[100px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Min price</label>
-          <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-coral/50" />
-        </div>
-        <div className="min-w-[100px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Max price</label>
-          <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Any" className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-coral/50" />
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">Min Price</label>
+          <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className={inputClass} />
         </div>
 
-        {/* Min beds */}
+        <div className="min-w-[100px]">
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">Max Price</label>
+          <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Any" className={inputClass} />
+        </div>
+
         <div className="min-w-[80px]">
-          <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase tracking-wider">Min beds</label>
-          <select value={minBeds} onChange={(e) => setMinBeds(e.target.value)} className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm bg-cream focus:outline-none focus:ring-2 focus:ring-coral/50">
+          <label className="block font-display text-xs uppercase tracking-wider text-ink mb-1.5">Min Beds</label>
+          <select value={minBeds} onChange={(e) => setMinBeds(e.target.value)} className={inputClass}>
             <option value="">Any</option>
             {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}+</option>)}
           </select>
         </div>
 
-        {/* Buttons */}
         <div className="flex gap-2">
-          <button type="submit" className="bg-coral text-white font-bold px-6 py-2.5 rounded-xl hover:bg-coral/90 transition-colors text-sm">
+          <button
+            type="submit"
+            className="font-display text-sm uppercase bg-coral text-white border-2 border-ink px-6 py-2.5 rounded-xl hover:bg-goldenrod hover:text-ink transition-colors shadow-brute-sm"
+          >
             Search
           </button>
-          <button type="button" onClick={handleReset} className="text-gray-400 hover:text-gray-700 text-sm px-3 py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-sm font-bold text-ink/40 hover:text-ink px-3 py-2.5 rounded-xl hover:bg-ink/5 transition-colors"
+          >
             Clear
           </button>
         </div>

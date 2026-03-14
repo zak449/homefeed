@@ -1,32 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #FAFAF7;
-  --foreground: #1A1A2E;
+  --background: #FFF9F0;
+  --foreground: #111111;
 }
 
 body {
   background-color: var(--background);
+  background-image: radial-gradient(circle, rgba(17,17,17,0.11) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
   color: var(--foreground);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .font-display {
-  font-family: 'DM Serif Display', Georgia, serif;
+  font-family: 'Archivo Black', 'Arial Black', sans-serif;
 }
 
-/* Smooth scrollbar */
 html {
   scroll-behavior: smooth;
 }
 
-/* Hide number input spinners */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+  display: flex;
+  width: max-content;
+  will-change: transform;
 }

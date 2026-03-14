@@ -4,6 +4,15 @@ import { useEffect, useState } from "react";
 
 const REACTIONS = ["❤️", "🔥", "😂", "😮", "💭"];
 
+const BUBBLE_COLORS = [
+  { bg: "bg-goldenrod", text: "text-ink",   hex: "#FFD000" },
+  { bg: "bg-coral",     text: "text-white", hex: "#FF4040" },
+  { bg: "bg-sage",      text: "text-white", hex: "#4DB861" },
+  { bg: "bg-sky",       text: "text-white", hex: "#3A8EF6" },
+  { bg: "bg-lavender",  text: "text-white", hex: "#A855F7" },
+  { bg: "bg-pink",      text: "text-white", hex: "#FF5FA0" },
+];
+
 type Comment = {
   id: string;
   name: string;
@@ -41,18 +50,15 @@ export default function CommentSection({ listingId }: { listingId: string }) {
     e.preventDefault();
     setPosting(true);
     setPostError("");
-
     const res = await fetch("/api/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ listingId, name, email, content }),
     });
-
     if (res.ok) {
       const newComment = await res.json();
       setComments((prev) => [...prev, newComment]);
       setContent("");
-      // Persist email/name in state so user can react later
       setReactingEmail(email);
     } else {
       const err = await res.json();
@@ -65,13 +71,11 @@ export default function CommentSection({ listingId }: { listingId: string }) {
     const reactEmail = reactingEmail || email;
     const reactName = name;
     if (!reactEmail || !reactName) return;
-
     const res = await fetch(`/api/comments/${commentId}/react`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: reactEmail, name: reactName, type }),
     });
-
     if (res.ok) {
       const { reactions } = await res.json();
       setComments((prev) =>
@@ -82,25 +86,34 @@ export default function CommentSection({ listingId }: { listingId: string }) {
 
   return (
     <div>
-      <h2 className="font-display text-2xl text-ink mb-6">The Conversation</h2>
+      {/* Section header */}
+      <div className="flex items-center gap-3 mb-8">
+        <h2 className="font-display text-2xl uppercase text-ink">The Conversation</h2>
+        {comments.length > 0 && (
+          <span className="font-display text-xs uppercase border-2 border-ink px-3 py-1 rounded-full bg-goldenrod text-ink shadow-brute-sm">
+            {comments.length} {comments.length === 1 ? "take" : "takes"}
+          </span>
+        )}
+      </div>
 
       {loading && (
-        <div className="space-y-3">
+        <div className="space-y-4 mb-8">
           {[1, 2].map((i) => (
-            <div key={i} className="bg-gray-100 rounded-2xl h-24 animate-pulse" />
+            <div key={i} className="h-24 rounded-2xl border-3 border-ink/20 animate-pulse bg-ink/5" />
           ))}
         </div>
       )}
 
       {!loading && comments.length === 0 && (
-        <div className="text-center py-10 bg-cream rounded-3xl border border-dashed border-gray-200">
-          <p className="text-3xl mb-2">🏡</p>
-          <p className="text-gray-500 font-medium">No comments yet. Be the first to share your thoughts!</p>
+        <div className="text-center py-12 rounded-2xl border-3 border-dashed border-ink/30 bg-cream mb-8">
+          <p className="text-4xl mb-3">🏡</p>
+          <p className="font-display text-lg uppercase text-ink">No takes yet.</p>
+          <p className="text-gray-500 text-sm mt-1 font-medium">Be the first to share your hot take on this place!</p>
         </div>
       )}
 
       {!loading && comments.length > 0 && (
-        <div className="space-y-4 mb-8">
+        <div className="space-y-6 mb-10">
           {comments.map((comment) => (
             <CommentBubble
               key={comment.id}
@@ -113,8 +126,8 @@ export default function CommentSection({ listingId }: { listingId: string }) {
       )}
 
       {/* Post form */}
-      <div className="bg-ink rounded-3xl p-6">
-        <p className="font-display text-xl text-white mb-4">Join the chat</p>
+      <div className="rounded-2xl border-3 border-ink bg-coral p-6 shadow-brute">
+        <p className="font-display text-2xl text-white uppercase mb-5">Drop Your Take 💬</p>
         <form onSubmit={handlePost} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <input
@@ -123,36 +136,36 @@ export default function CommentSection({ listingId }: { listingId: string }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="rounded-xl bg-white/10 text-white placeholder-white/40 border border-white/20 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-coral/50"
+              className="rounded-xl border-2 border-ink bg-cream text-ink placeholder-ink/40 px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-goldenrod"
             />
             <input
               type="email"
-              placeholder="Your email (private)"
+              placeholder="Email (private)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="rounded-xl bg-white/10 text-white placeholder-white/40 border border-white/20 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-coral/50"
+              className="rounded-xl border-2 border-ink bg-cream text-ink placeholder-ink/40 px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-goldenrod"
             />
           </div>
           <textarea
-            placeholder="What do you think about this place? Love the kitchen? The neighborhood? Spill it."
+            placeholder="Love the kitchen? Hate the HOA? Obsessed with the yard? Spill it all."
             value={content}
             onChange={(e) => setContent(e.target.value)}
             required
             rows={3}
             maxLength={1000}
-            className="w-full rounded-xl bg-white/10 text-white placeholder-white/40 border border-white/20 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-coral/50 resize-none"
+            className="w-full rounded-xl border-2 border-ink bg-cream text-ink placeholder-ink/40 px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-goldenrod resize-none"
           />
-          <div className="flex items-center justify-between">
-            <p className="text-xs text-white/40">Your email is never shown publicly. You&apos;ll get alerts when someone reacts.</p>
-            {postError && <p className="text-xs text-coral">{postError}</p>}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <p className="text-xs text-white/80 font-medium">Email stays private. You&apos;ll get notified when someone reacts.</p>
+            {postError && <p className="text-xs text-goldenrod font-bold">{postError}</p>}
           </div>
           <button
             type="submit"
             disabled={posting}
-            className="bg-coral text-white font-bold px-6 py-2.5 rounded-xl hover:bg-coral/90 transition-colors text-sm disabled:opacity-50"
+            className="font-display text-sm uppercase bg-goldenrod text-ink border-2 border-ink px-6 py-2.5 rounded-xl hover:bg-cream transition-colors disabled:opacity-50 shadow-brute-sm"
           >
-            {posting ? "Posting…" : "Post comment →"}
+            {posting ? "Posting…" : "Post Comment →"}
           </button>
         </form>
       </div>
@@ -170,42 +183,63 @@ function CommentBubble({
   onReact: (type: string) => void;
 }) {
   const initials = comment.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
-  const avatarColors = ["bg-coral", "bg-sky", "bg-sage", "bg-lavender", "bg-clay", "bg-goldenrod"];
-  const colorIndex = comment.name.charCodeAt(0) % avatarColors.length;
+  const colorIndex = comment.name.charCodeAt(0) % BUBBLE_COLORS.length;
+  const color = BUBBLE_COLORS[colorIndex];
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-      <div className="flex gap-3">
-        <div className={`w-9 h-9 rounded-full ${avatarColors[colorIndex]} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
-          {initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="font-semibold text-sm text-ink">{comment.name}</span>
-            <span className="text-xs text-gray-400">{timeAgo(comment.createdAt)}</span>
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">{comment.content}</p>
+    <div className="flex items-start gap-3">
+      {/* Avatar */}
+      <div
+        className={`w-10 h-10 rounded-full border-3 border-ink flex items-center justify-center font-display text-xs shrink-0 shadow-brute-sm ${color.bg} ${color.text}`}
+      >
+        {initials}
+      </div>
 
-          {/* Reactions */}
-          <div className="flex gap-1.5 mt-3 flex-wrap">
-            {REACTIONS.map((r) => {
-              const count = comment.reactions[r] ?? 0;
-              return (
-                <button
-                  key={r}
-                  onClick={() => canReact && onReact(r)}
-                  title={canReact ? `React with ${r}` : "Post a comment to react"}
-                  className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full transition-all border ${
-                    count > 0
-                      ? "bg-goldenrod/20 border-goldenrod/40 text-ink font-semibold"
-                      : "bg-gray-50 border-gray-100 text-gray-400 hover:bg-goldenrod/10 hover:border-goldenrod/30"
-                  } ${canReact ? "cursor-pointer" : "cursor-default"}`}
-                >
-                  <span>{r}</span>
-                  {count > 0 && <span>{count}</span>}
-                </button>
-              );
-            })}
+      {/* Speech bubble */}
+      <div className="flex-1 min-w-0">
+        <div className="relative">
+          {/* Bubble tail */}
+          <div className="absolute top-4 -left-3 w-0 h-0 pointer-events-none">
+            <div style={{
+              borderTop: "7px solid transparent",
+              borderBottom: "7px solid transparent",
+              borderRight: "12px solid #111111",
+              position: "absolute", left: 0, top: -1,
+            }} />
+            <div style={{
+              borderTop: "5px solid transparent",
+              borderBottom: "5px solid transparent",
+              borderRight: `9px solid ${color.hex}`,
+              position: "absolute", left: 3, top: 1,
+            }} />
+          </div>
+
+          <div className={`rounded-2xl border-3 border-ink p-4 shadow-brute-sm ${color.bg}`}>
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <span className={`font-display text-sm uppercase ${color.text}`}>{comment.name}</span>
+              <span className={`text-xs opacity-60 ${color.text} font-medium`}>{timeAgo(comment.createdAt)}</span>
+            </div>
+            <p className={`text-sm leading-relaxed font-medium ${color.text}`}>{comment.content}</p>
+
+            {/* Reactions */}
+            <div className="flex gap-1.5 mt-3 flex-wrap">
+              {REACTIONS.map((r) => {
+                const count = comment.reactions[r] ?? 0;
+                return (
+                  <button
+                    key={r}
+                    onClick={() => canReact && onReact(r)}
+                    title={canReact ? `React with ${r}` : "Post a comment to react"}
+                    className={`flex items-center gap-1 text-sm px-2.5 py-1 rounded-full border-2 border-ink font-bold transition-all ${
+                      count > 0 ? "bg-ink text-cream" : "bg-white/60 text-ink hover:bg-white"
+                    } ${canReact ? "cursor-pointer active:scale-95" : "cursor-default"}`}
+                  >
+                    <span>{r}</span>
+                    {count > 0 && <span className="text-xs">{count}</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
