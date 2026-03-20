@@ -48,7 +48,7 @@ export default function ShareableComment({
       try {
         await navigator.share({
           title: `Take on ${address}`,
-          text: `"${content}" — ${name} on home.feed\n\n${address} · ${price}`,
+          text: `"${content}" — ${name} on gwakgwak\n\n${address} · ${price}`,
           url: window.location.href,
         });
         return;
@@ -60,7 +60,7 @@ export default function ShareableComment({
   }
 
   async function handleCopyText() {
-    const text = `"${content}"\n\n— ${name} on ${address} (${price})\nhome.feed`;
+    const text = `"${content}"\n\n— ${name} on ${address} (${price})\ngwakgwak`;
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -104,7 +104,7 @@ export default function ShareableComment({
                       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     </svg>
                   </div>
-                  <span className="text-[11px] font-semibold text-white/70">home.feed</span>
+                  <span className="text-[11px] font-semibold text-white/70">gwakgwak</span>
                 </div>
                 <p className="text-white text-sm leading-relaxed font-medium">
                   &ldquo;{content}&rdquo;

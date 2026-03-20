@@ -277,7 +277,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
             {/* Affordability hook */}
             <div className="mt-4 bg-social-light rounded-lg px-4 py-3">
               <p className="text-xs font-semibold text-ink flex items-center gap-1.5">
-                <span>&#x1F4B0;</span> Can you afford this?
+                <span>💰</span> Can you afford this?
               </p>
               <p className="text-[11px] text-muted mt-1 leading-relaxed">
                 To keep housing at 28% of income, you&apos;d need a household income of{" "}

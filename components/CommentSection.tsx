@@ -203,7 +203,7 @@ export default function CommentSection({
       });
       setReplyStatus("success");
       try {
-        localStorage.setItem("homefeed_subscribed_email", replyEmail);
+        localStorage.setItem("gwakgwak_subscribed_email", replyEmail);
       } catch {
         // ignore
       }

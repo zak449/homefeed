@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — homefeed",
+  title: "Terms of Service — gwakgwak",
   description:
-    "Terms and conditions governing your use of homefeed, the social commentary platform for real estate.",
+    "Terms and conditions governing your use of gwakgwak, the social commentary platform for real estate.",
 };
 
 export default function TermsPage() {
@@ -27,7 +27,7 @@ export default function TermsPage() {
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-        Back to homefeed
+        Back to gwakgwak
       </a>
 
       {/* Header */}
@@ -39,7 +39,7 @@ export default function TermsPage() {
         <p className="text-base text-muted mt-4 leading-relaxed">
           Welcome to{" "}
           <span className="font-display font-semibold text-ink">
-            home<span className="social-gradient">feed</span>
+            gwak<span className="social-gradient">gwak</span>
           </span>
           . By accessing or using our platform, you agree to be bound by these
           Terms of Service. Please read them carefully.
@@ -55,14 +55,14 @@ export default function TermsPage() {
           </h2>
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
-              By accessing or using homefeed (the &ldquo;Platform&rdquo;), you
+              By accessing or using gwakgwak (the &ldquo;Platform&rdquo;), you
               agree to comply with and be bound by these Terms of Service
               (&ldquo;Terms&rdquo;). If you do not agree to these Terms, you may
               not access or use the Platform.
             </p>
             <p>
               These Terms constitute a legally binding agreement between you and
-              homefeed. Your continued use of the Platform following any
+              gwakgwak. Your continued use of the Platform following any
               modifications to these Terms constitutes acceptance of those
               changes.
             </p>
@@ -76,10 +76,10 @@ export default function TermsPage() {
           </h2>
           <div className="text-[15px] text-muted leading-relaxed">
             <p>
-              homefeed is a social commentary platform for real estate. The
+              gwakgwak is a social commentary platform for real estate. The
               Platform aggregates publicly available real estate listings and
               allows users to view, comment on, react to, and discuss
-              properties. homefeed does not own, manage, sell, or lease any
+              properties. gwakgwak does not own, manage, sell, or lease any
               properties displayed on the Platform.
             </p>
           </div>
@@ -97,11 +97,11 @@ export default function TermsPage() {
               for your User Content and the consequences of posting it.
             </p>
             <p>
-              By submitting User Content, you grant homefeed a non-exclusive,
+              By submitting User Content, you grant gwakgwak a non-exclusive,
               worldwide, royalty-free, perpetual, irrevocable, sublicensable
               license to use, reproduce, modify, adapt, publish, display,
               distribute, and create derivative works from your User Content in
-              connection with the Platform and homefeed&rsquo;s business
+              connection with the Platform and gwakgwak&rsquo;s business
               operations.
             </p>
             <p>
@@ -174,7 +174,7 @@ export default function TermsPage() {
               </li>
             </ul>
             <p>
-              homefeed reserves the right to remove any content that violates
+              gwakgwak reserves the right to remove any content that violates
               these Terms and to restrict or terminate access for users who
               engage in prohibited conduct, at our sole discretion and without
               prior notice.
@@ -190,7 +190,7 @@ export default function TermsPage() {
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
               The Platform, including its design, features, branding, logos,
-              code, and all non-user content, is owned by homefeed and is
+              code, and all non-user content, is owned by gwakgwak and is
               protected by copyright, trademark, and other intellectual property
               laws. You may not copy, modify, distribute, sell, or lease any
               part of the Platform without our prior written consent.
@@ -198,7 +198,7 @@ export default function TermsPage() {
             <p>
               Real estate listing data displayed on the Platform may be sourced
               from third-party providers and is subject to their respective
-              terms and conditions. homefeed does not claim ownership of
+              terms and conditions. gwakgwak does not claim ownership of
               third-party listing content.
             </p>
           </div>
@@ -212,13 +212,13 @@ export default function TermsPage() {
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <div className="bg-social-light border border-social/10 rounded-xl p-5">
               <p className="font-semibold text-ink mb-2">
-                Important: homefeed is not a licensed real estate broker, agent,
+                Important: gwakgwak is not a licensed real estate broker, agent,
                 or advisor.
               </p>
               <p>
                 Nothing on the Platform constitutes professional real estate
                 advice, financial advice, investment advice, or legal advice.
-                All content on homefeed, including user comments and reactions,
+                All content on gwakgwak, including user comments and reactions,
                 is provided for informational and entertainment purposes only.
               </p>
             </div>
@@ -240,7 +240,7 @@ export default function TermsPage() {
           </h2>
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, HOMEFEED AND
+              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, GWAKGWAK AND
               ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND AFFILIATES SHALL
               NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
               CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION
@@ -248,7 +248,7 @@ export default function TermsPage() {
               CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE PLATFORM.
             </p>
             <p>
-              IN NO EVENT SHALL HOMEFEED&rsquo;S TOTAL LIABILITY TO YOU FOR ALL
+              IN NO EVENT SHALL GWAKGWAK&rsquo;S TOTAL LIABILITY TO YOU FOR ALL
               CLAIMS ARISING OUT OF OR RELATING TO THE PLATFORM EXCEED ONE
               HUNDRED DOLLARS ($100.00).
             </p>
@@ -269,7 +269,7 @@ export default function TermsPage() {
           </h2>
           <div className="text-[15px] text-muted leading-relaxed">
             <p>
-              You agree to indemnify, defend, and hold harmless homefeed, its
+              You agree to indemnify, defend, and hold harmless gwakgwak, its
               officers, directors, employees, agents, and affiliates from and
               against any and all claims, damages, losses, liabilities, costs,
               and expenses (including reasonable attorneys&rsquo; fees) arising
@@ -308,7 +308,7 @@ export default function TermsPage() {
           </h2>
           <div className="text-[15px] text-muted leading-relaxed">
             <p>
-              homefeed reserves the right to modify these Terms at any time.
+              gwakgwak reserves the right to modify these Terms at any time.
               When we make changes, we will update the effective date at the top
               of this page and, for material changes, may provide additional
               notice (such as a banner on the Platform or an email to
@@ -327,7 +327,7 @@ export default function TermsPage() {
           </h2>
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
-              homefeed may terminate or suspend your access to the Platform at
+              gwakgwak may terminate or suspend your access to the Platform at
               any time, with or without cause, and with or without notice. Upon
               termination, your right to use the Platform will immediately
               cease.
@@ -372,7 +372,7 @@ export default function TermsPage() {
               >
                 Privacy Policy
               </a>
-              , constitute the entire agreement between you and homefeed
+              , constitute the entire agreement between you and gwakgwak
               regarding your use of the Platform and supersede any prior
               agreements, communications, or understandings, whether written or
               oral.
@@ -392,15 +392,15 @@ export default function TermsPage() {
             </p>
             <div className="mt-4 bg-tag rounded-xl p-5 space-y-2">
               <p className="font-display font-semibold text-ink">
-                home<span className="social-gradient">feed</span>
+                gwak<span className="social-gradient">gwak</span>
               </p>
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:support@homefeed.app"
+                  href="mailto:support@gwakgwak.app"
                   className="text-social hover:text-social/80 font-medium transition-colors"
                 >
-                  support@homefeed.app
+                  support@gwakgwak.app
                 </a>
               </p>
             </div>

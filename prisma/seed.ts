@@ -536,7 +536,7 @@ const SEED_REACTIONS: { sourceId: string; commentIndex: number; emoji: string; u
 ];
 
 async function main() {
-  console.log("🌱  Seeding home.feed listings…");
+  console.log("🌱  Seeding gwakgwak listings…");
 
   // Upsert all listings
   const listingMap: Record<string, string> = {}; // sourceId → db id
@@ -611,7 +611,7 @@ async function main() {
   }
   console.log(`⚡  Seeded ${SEED_REACTIONS.length} reactions`);
 
-  console.log("🎉  Done! home.feed is ready.");
+  console.log("🎉  Done! gwakgwak is ready.");
 }
 
 main()

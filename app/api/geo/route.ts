@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`,
       {
         headers: {
-          "User-Agent": "HomeFeed/1.0 (https://homefeed.app; contact@homefeed.app)",
+          "User-Agent": "GwakGwak/1.0 (https://gwakgwak.app; contact@gwakgwak.app)",
           "Accept": "application/json",
         },
         signal: AbortSignal.timeout(5000),

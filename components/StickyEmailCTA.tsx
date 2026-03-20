@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useRef, FormEvent } from "react";
 
-const LS_DISMISSED_KEY = "homefeed_sticky_cta_dismissed";
-const LS_SUBSCRIBED_KEY = "homefeed_subscribed_email";
+const LS_DISMISSED_KEY = "gwakgwak_sticky_cta_dismissed";
+const LS_SUBSCRIBED_KEY = "gwakgwak_subscribed_email";
 
 export default function StickyEmailCTA() {
   const [visible, setVisible] = useState(false);

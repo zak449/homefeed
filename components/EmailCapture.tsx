@@ -9,7 +9,7 @@ interface EmailCaptureProps {
   source?: string;
 }
 
-const LS_KEY = "homefeed_subscribed_email";
+const LS_KEY = "gwakgwak_subscribed_email";
 
 export default function EmailCapture({
   variant = "inline",

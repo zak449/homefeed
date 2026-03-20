@@ -52,10 +52,10 @@ export default function ContactPage() {
 
   return (
     <>
-      <title>Contact Us — homefeed</title>
+      <title>Contact Us — gwakgwak</title>
       <meta
         name="description"
-        content="Get in touch with the homefeed team. We'd love to hear from you."
+        content="Get in touch with the gwakgwak team. We'd love to hear from you."
       />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
@@ -77,7 +77,7 @@ export default function ContactPage() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Back to homefeed
+          Back to gwakgwak
         </a>
 
         {/* Header */}
@@ -96,7 +96,7 @@ export default function ContactPage() {
           <div className="lg:col-span-2">
             {status === "success" ? (
               <div className="bg-social-light border border-social/10 rounded-xl p-8 text-center">
-                <div className="text-4xl mb-3">&#x2709;&#xFE0F;</div>
+                <div className="text-4xl mb-3">✉️</div>
                 <p className="font-display text-lg font-semibold text-ink">
                   Message sent!
                 </p>
@@ -238,10 +238,10 @@ export default function ContactPage() {
                     Support
                   </p>
                   <a
-                    href="mailto:support@homefeed.app"
+                    href="mailto:support@gwakgwak.app"
                     className="text-[14px] text-social hover:text-social/80 font-medium transition-colors"
                   >
-                    support@homefeed.app
+                    support@gwakgwak.app
                   </a>
                 </div>
                 <div>
@@ -249,10 +249,10 @@ export default function ContactPage() {
                     Privacy
                   </p>
                   <a
-                    href="mailto:privacy@homefeed.app"
+                    href="mailto:privacy@gwakgwak.app"
                     className="text-[14px] text-social hover:text-social/80 font-medium transition-colors"
                   >
-                    privacy@homefeed.app
+                    privacy@gwakgwak.app
                   </a>
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default function ContactPage() {
               </h3>
               <div className="space-y-2.5">
                 <a
-                  href="https://twitter.com/homefeedapp"
+                  href="https://twitter.com/gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
@@ -283,7 +283,7 @@ export default function ContactPage() {
                   X (Twitter)
                 </a>
                 <a
-                  href="https://instagram.com/homefeedapp"
+                  href="https://instagram.com/gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
@@ -307,7 +307,7 @@ export default function ContactPage() {
                   Instagram
                 </a>
                 <a
-                  href="https://tiktok.com/@homefeedapp"
+                  href="https://tiktok.com/@gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"

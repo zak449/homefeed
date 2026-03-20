@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     ? `$${listing.price.toLocaleString()}/mo`
     : `$${listing.price.toLocaleString()}`;
   const statusLabel = listing.status === "sold" ? " (Sold)" : "";
-  const titleText = `${listing.address}${statusLabel} \u00b7 ${price} \u2014 home.feed`;
-  const descriptionText = `${listing.address}, ${listing.city}, ${listing.state}. ${price}. See what people are saying on home.feed.`;
+  const titleText = `${listing.address}${statusLabel} \u00b7 ${price} \u2014 gwakgwak`;
+  const descriptionText = `${listing.address}, ${listing.city}, ${listing.state}. ${price}. See what people are saying on gwakgwak.`;
   const ogImage = listingWithPhoto?.photos?.[0] ?? undefined;
 
   return {
@@ -166,7 +166,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       {/* 1. Breadcrumbs */}
       <Breadcrumbs
         items={[
-          { label: "homefeed", href: "/" },
+          { label: "gwakgwak", href: "/" },
           { label: listing.city, href: `/neighborhood/${encodeURIComponent(listing.city)}` },
           { label: listing.address },
         ]}
@@ -271,12 +271,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="flex gap-3 flex-wrap text-sm text-muted">
           {commentCount > 0 && (
             <span>
-              &#x1f4ac; <span className="font-semibold text-ink">{commentCount}</span> comments
+              💬 <span className="font-semibold text-ink">{commentCount}</span> comments
             </span>
           )}
           {reactionCount > 0 && (
             <span>
-              &#x1f525; <span className="font-semibold text-ink">{reactionCount}</span> reactions
+              🔥 <span className="font-semibold text-ink">{reactionCount}</span> reactions
             </span>
           )}
         </div>
@@ -572,7 +572,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                       <p className="text-[11px] text-muted truncate">{l.address}</p>
                       <p className="text-[11px] text-muted truncate">{l.city}, {l.state}</p>
                       <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
-                        &#x1f4ac; {l._count.comments} comments
+                        💬 {l._count.comments} comments
                       </span>
                     </div>
                   </div>

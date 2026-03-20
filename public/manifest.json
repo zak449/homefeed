@@ -1,6 +1,6 @@
 {
-  "name": "home.feed",
-  "short_name": "home.feed",
+  "name": "gwakgwak",
+  "short_name": "gwakgwak",
   "description": "Browse real estate listings. Read the comments. Call out the BS.",
   "start_url": "/",
   "display": "standalone",

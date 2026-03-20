@@ -85,18 +85,18 @@ export default function ListingCard({ listing }: { listing: Listing }) {
                   : "bg-white/95 backdrop-blur-sm text-ink text-[11px]"
             }`}>
               {isOnFire ? (
-                <span className="fire-animate">&#x1F525;</span>
+                <span className="fire-animate">🔥</span>
               ) : isHot ? (
-                "&#x1F525;"
+                "🔥"
               ) : (
-                "&#x1F4AC;"
+                "💬"
               )}
               {" "}{commentCount}
               {isOnFire && <span className="text-[10px] font-semibold ml-0.5 opacity-80">HOT</span>}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-white/80 backdrop-blur-sm text-muted/60">
-              &#x1F4AC; Be first
+              💬 Be first
             </span>
           )}
         </div>
@@ -149,32 +149,23 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           )}
         </div>
 
-        {/* Top comment preview — what makes this different from Zillow */}
+        {/* Top comment preview — THE social hook, always visible */}
         {listing.topComment ? (
-          <>
-            {/* Always visible: compact social signal */}
-            <div className="mt-2 flex items-center gap-1.5">
-              <span className="w-4 h-4 rounded-full bg-social/15 text-social text-[9px] font-bold flex items-center justify-center shrink-0">
-                {listing.topComment.name.charAt(0).toUpperCase()}
-              </span>
-              <p className="text-[11px] text-muted truncate">
-                <span className="font-semibold text-ink">{listing.topComment.name}</span>{" "}
-                left a take
-              </p>
-            </div>
-            {/* Hover reveal: full comment */}
-            <div className="listing-card-comment-reveal">
-              <div className="mt-1.5 bg-tag rounded-lg px-3 py-2">
-                <p className="text-[12px] text-muted line-clamp-2">
-                  &ldquo;{listing.topComment.content}&rdquo;
-                </p>
-              </div>
-            </div>
-          </>
+          <div className="mt-2.5 bg-tag rounded-lg px-3 py-2.5">
+            <p className="text-[12px] text-muted line-clamp-2">
+              &ldquo;{listing.topComment.content}&rdquo;
+            </p>
+            <p className="text-[11px] text-muted/60 mt-1">
+              &mdash; <span className="font-semibold text-ink/70">{listing.topComment.name}</span>
+              {commentCount > 1 && (
+                <span className="ml-1.5 text-social font-semibold">+{commentCount - 1} more</span>
+              )}
+            </p>
+          </div>
         ) : (
-          <div className="mt-2.5 border border-dashed border-border rounded-lg px-3 py-2">
-            <p className="text-[11px] text-muted/50 text-center">
-              No opinions yet — be the first to weigh in
+          <div className="mt-2.5 border border-dashed border-social/30 rounded-lg px-3 py-2.5 group-hover:border-social/60 group-hover:bg-social/[0.03] transition-all">
+            <p className="text-[12px] text-muted/60 text-center group-hover:text-social transition-colors">
+              Be the first to weigh in &rarr;
             </p>
           </div>
         )}

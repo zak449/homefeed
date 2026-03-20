@@ -3,9 +3,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
-  title: "About — homefeed",
+  title: "About — gwakgwak",
   description:
-    "homefeed is the social layer for real estate. Real opinions from real people on every listing.",
+    "gwakgwak is the social layer for real estate. Real opinions from real people on every listing.",
 };
 
 export default async function AboutPage() {
@@ -42,7 +42,7 @@ export default async function AboutPage() {
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-        Back to homefeed
+        Back to gwakgwak
       </Link>
 
       {/* Hero */}
@@ -52,7 +52,7 @@ export default async function AboutPage() {
           <span className="social-gradient">comment section</span>.
         </h1>
         <p className="text-lg text-muted mt-5 leading-relaxed max-w-xl">
-          homefeed is building the social layer for real estate &mdash; a place
+          gwakgwak is building the social layer for real estate &mdash; a place
           where real people share real opinions on the homes hitting the market.
         </p>
       </div>
@@ -79,7 +79,7 @@ export default async function AboutPage() {
               think the same thing you do. No comment section. No conversation.
             </p>
             <p className="text-[15px] text-ink leading-relaxed font-medium">
-              We built homefeed to change that. Every listing gets a comment
+              We built gwakgwak to change that. Every listing gets a comment
               section. Neighbors, buyers, renters, agents, and curious locals
               can all weigh in on the properties that matter to them. Real
               opinions from real people.
@@ -271,7 +271,7 @@ export default async function AboutPage() {
               </p>
               <div className="flex items-center gap-3 mt-4">
                 <a
-                  href="https://x.com/homefeedapp"
+                  href="https://x.com/gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 rounded-lg bg-tag flex items-center justify-center text-muted hover:text-ink hover:bg-tag/80 transition-colors"

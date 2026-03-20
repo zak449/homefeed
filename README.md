@@ -1,4 +1,4 @@
-# HomeFeed
+# gwakgwak
 
 A fun, color-blocked social real estate site. Browse homes for sale and rent, comment on listings, react to each other's thoughts, and message listing agents directly.
 
@@ -18,7 +18,7 @@ nvm install --lts
 ### 2. Install dependencies
 
 ```bash
-cd homefeed
+cd gwakgwak
 npm install
 ```
 
@@ -32,7 +32,7 @@ Edit `.env` and set your `DATABASE_URL` to a running Postgres instance. If you d
 
 Example for a local Postgres:
 ```
-DATABASE_URL="postgresql://postgres:password@localhost:5432/homefeed"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/gwakgwak"
 ```
 
 ### 4. Set up the database
@@ -72,7 +72,7 @@ Get a free API key at [resend.com](https://resend.com) and add it to `.env`:
 
 ```
 RESEND_API_KEY="re_..."
-EMAIL_FROM="HomeFeed <hello@yourdomain.com>"
+EMAIL_FROM="gwakgwak <hello@yourdomain.com>"
 ```
 
 Without this, contact forms and comment alerts are silently skipped (no errors).

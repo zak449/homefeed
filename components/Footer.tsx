@@ -51,7 +51,7 @@ export default function Footer() {
           <div className="sm:col-span-2 lg:col-span-1">
             <Link href="/" className="inline-block mb-3">
               <span className="font-display text-xl font-bold tracking-display">
-                home<span className="social-gradient">feed</span>
+                gwak<span className="social-gradient">gwak</span>
               </span>
             </Link>
             <p className="text-sm text-white/60 mb-5 leading-relaxed">
@@ -61,7 +61,7 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-6">
               {/* Twitter / X */}
               <a
-                href="https://x.com/homefeedapp"
+                href="https://x.com/gwakgwakapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow us on X (Twitter)"
@@ -73,7 +73,7 @@ export default function Footer() {
               </a>
               {/* Instagram */}
               <a
-                href="https://instagram.com/homefeedapp"
+                href="https://instagram.com/gwakgwakapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow us on Instagram"
@@ -87,7 +87,7 @@ export default function Footer() {
               </a>
               {/* TikTok */}
               <a
-                href="https://tiktok.com/@homefeedapp"
+                href="https://tiktok.com/@gwakgwakapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Follow us on TikTok"
@@ -139,7 +139,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/40">
-            &copy; 2026 homefeed. All rights reserved.
+            &copy; 2026 gwakgwak. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
             Made with opinions in California

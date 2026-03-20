@@ -77,7 +77,7 @@ export default async function BrowseByNeighborhood() {
   return (
     <section className="my-8 sm:my-10">
       <div className="flex items-center gap-2 mb-4">
-        <span className="text-lg">&#x1F3D8;&#xFE0F;</span>
+        <span className="text-lg">🏘️</span>
         <h2 className="font-display text-base font-bold text-ink uppercase tracking-widest">
           Browse by Neighborhood
         </h2>
@@ -139,11 +139,11 @@ function NeighborhoodCard({ neighborhood: n }: { neighborhood: NeighborhoodData 
         <span>
           <span className="font-semibold text-ink">{n.listingCount}</span> listing{n.listingCount !== 1 ? "s" : ""}
         </span>
-        <span className="text-border">&#xB7;</span>
+        <span className="text-border">·</span>
         <span>
           <span className="font-semibold text-ink">{n.commentCount}</span> comment{n.commentCount !== 1 ? "s" : ""}
         </span>
-        <span className="text-border">&#xB7;</span>
+        <span className="text-border">·</span>
         <span>
           avg <span className="font-semibold text-ink">${n.avgPrice.toLocaleString()}</span>
         </span>

@@ -4,7 +4,7 @@ import { Resend } from "resend";
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
-const FROM = process.env.EMAIL_FROM ?? "homefeed <hello@homefeed.app>";
+const FROM = process.env.EMAIL_FROM ?? "gwakgwak <hello@gwakgwak.app>";
 
 export async function POST(request: NextRequest) {
   try {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       // Send the contact form to support
       await resend.emails.send({
         from: FROM,
-        to: "support@homefeed.app",
+        to: "support@gwakgwak.app",
         reply_to: trimmedEmail,
         subject: `[Contact] ${trimmedSubject} — from ${trimmedName}`,
         html: `
@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
                 <p style="margin: 0; font-size: 15px; color: #0F0F0F; line-height: 1.6; white-space: pre-wrap;">${trimmedMessage}</p>
               </div>
               <p style="font-size: 12px; color: #9CA3AF; margin: 0;">
-                Sent via homefeed contact form &middot; ${new Date().toISOString()}
+                Sent via gwakgwak contact form &middot; ${new Date().toISOString()}
               </p>
             </div>
           </div>
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
       await resend.emails.send({
         from: FROM,
         to: trimmedEmail,
-        subject: `We got your message — homefeed`,
+        subject: `We got your message — gwakgwak`,
         html: `
           <div style="font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden;">
             <div style="background: linear-gradient(135deg, #FF6B2C 0%, #FF8F5C 100%); padding: 32px; text-align: center;">
@@ -126,13 +126,13 @@ export async function POST(request: NextRequest) {
                 In the meantime, feel free to browse the latest listings and join the conversation.
               </p>
               <div style="text-align: center;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://homefeed.app"}"
+                <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "https://gwakgwak.app"}"
                    style="display: inline-block; background: #FF6B2C; color: #FFFFFF; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
-                  Browse homefeed
+                  Browse gwakgwak
                 </a>
               </div>
               <p style="font-size: 13px; color: #9CA3AF; margin: 32px 0 0; text-align: center;">
-                &mdash; The homefeed team
+                &mdash; The gwakgwak team
               </p>
             </div>
           </div>

@@ -77,7 +77,7 @@ export default async function CommunityPulse() {
         <div className="bg-white border border-border rounded-xl p-4 hover:shadow-card-hover transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">Today</span>
-            <span className="text-lg">&#x1F4AC;</span>
+            <span className="text-lg">💬</span>
           </div>
           <p className="font-display text-2xl font-bold text-ink tracking-tight">
             {commentsToday}
@@ -131,7 +131,7 @@ export default async function CommunityPulse() {
         <div className="bg-white border border-border rounded-xl p-4 hover:shadow-card-hover transition-shadow">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] font-semibold text-muted uppercase tracking-wider">Hottest Markets</span>
-            <span className="text-lg">&#x1F4CD;</span>
+            <span className="text-lg">📍</span>
           </div>
           {topCities.length > 0 ? (
             <ul className="space-y-1.5">

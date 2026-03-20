@@ -10,6 +10,7 @@ import RecentlyViewed from "@/components/RecentlyViewed";
 import HotTakeOfTheDay from "@/components/HotTakeOfTheDay";
 import CommunityPulse from "@/components/CommunityPulse";
 import BrowseByNeighborhood from "@/components/NeighborhoodCard";
+import { lookupAddress } from "@/lib/address-lookup";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -242,33 +243,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     listings = all.slice(0, perPage);
   }
 
-  // If address search returned 0 results, try the address lookup API
+  // If address search returned 0 results, try direct address lookup (no self-fetch)
   let addressLookupResult: { id: string; address: string; city: string; state: string; status: string } | null = null;
   if (listings.length === 0 && city && looksLikeAddress) {
     try {
-      const baseUrl = process.env.VERCEL_URL
-        ? `https://${process.env.VERCEL_URL}`
-        : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
-      const lookupRes = await fetch(
-        `${baseUrl}/api/address-lookup?q=${encodeURIComponent(city)}`,
-        { cache: "no-store" }
-      );
-      if (lookupRes.ok) {
-        const lookupData = await lookupRes.json();
-        if (lookupData.results?.length > 0) {
-          // Re-query from DB now that it's been upserted
-          const freshResults = await prisma.listing.findMany({
-            where: {
-              id: { in: lookupData.results.map((r: any) => r.id) },
-            },
-            take: perPage,
-            select: selectFields,
-          });
-          if (freshResults.length > 0) {
-            listings = freshResults;
-            total = freshResults.length;
-            addressLookupResult = lookupData.results[0];
-          }
+      const lookupData = await lookupAddress(city);
+      if (lookupData.results.length > 0) {
+        // Re-query from DB now that it's been upserted
+        const freshResults = await prisma.listing.findMany({
+          where: {
+            id: { in: lookupData.results.map((r) => r.id) },
+          },
+          take: perPage,
+          select: selectFields,
+        });
+        if (freshResults.length > 0) {
+          listings = freshResults;
+          total = freshResults.length;
+          addressLookupResult = lookupData.results[0];
         }
       }
     } catch (e) {
@@ -288,6 +280,32 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   // Filter trending to only listings that actually have comments
   const trendingWithComments = trending.filter((t) => t._count.comments > 0);
+
+  // Community stats for filtered views (banners)
+  const filteredCommentCount = hasFilters
+    ? await prisma.comment.count({
+        where: { listing: where },
+      }).catch(() => 0)
+    : 0;
+
+  // Fetch community moments for the feed (random highlighted comments)
+  const communityMoments = hasFilters
+    ? await prisma.comment.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        where: {
+          listing: { status: { in: ["active", "off_market"] } },
+        },
+        select: {
+          id: true,
+          name: true,
+          content: true,
+          listing: {
+            select: { id: true, address: true, city: true, state: true },
+          },
+        },
+      }).catch(() => [])
+    : [];
 
   // Build search params record for the client component
   const feedParams: Record<string, string> = {};
@@ -547,7 +565,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     <p className={`text-[11px] ${
                       listingType === "sale" ? "text-emerald-600" : "text-blue-600"
                     }`}>
-                      {total} listing{total !== 1 ? "s" : ""} · See what people are saying
+                      {listingType === "sale"
+                        ? `${total} home${total !== 1 ? "s" : ""} for sale`
+                        : `${total} rental${total !== 1 ? "s" : ""}`}
+                      {filteredCommentCount > 0 && ` · ${filteredCommentCount} people are talking about these`}
+                      {filteredCommentCount === 0 && ` · See what people are saying`}
                     </p>
                   </div>
                 </div>
@@ -561,6 +583,26 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 >
                   Switch to {listingType === "sale" ? "Rent \uD83D\uDD11" : "Buy \uD83C\uDFE1"}
                 </a>
+              </div>
+            )}
+
+            {/* Community context banner — when no specific type is selected but filters are active */}
+            {hasFilters && !listingType && total > 0 && (
+              <div className="rounded-xl px-4 py-3 flex items-center gap-3 bg-gradient-to-r from-orange-50 to-orange-50/30 border border-orange-200/60 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-lg bg-orange-100">
+                  {"\uD83C\uDFD8\uFE0F"}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-orange-800">
+                    {total} listing{total !== 1 ? "s" : ""}
+                    {city && <span className="font-normal text-xs ml-1.5 opacity-70">in {city}</span>}
+                  </p>
+                  <p className="text-[11px] text-orange-600">
+                    {filteredCommentCount > 0
+                      ? `${filteredCommentCount} conversation${filteredCommentCount !== 1 ? "s" : ""} happening`
+                      : "Be the first to share your take"}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -625,21 +667,66 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== LISTING GRID ====== */}
       {sortedListings.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="text-center py-16">
           <p className="text-4xl mb-3">{"\uD83C\uDFDA\uFE0F"}</p>
-          <p className="font-display text-lg font-semibold text-ink mb-1">No listings here yet</p>
-          <p className="text-sm text-muted max-w-sm mx-auto">
-            Try searching a city to see what people are saying about homes in that area.
+          <p className="font-display text-lg font-semibold text-ink mb-1">
+            No active listings in this area
           </p>
-          <a href="/" className="inline-block mt-5 text-sm font-semibold text-social hover:text-social/80 transition-colors">
-            &larr; Back to all listings
-          </a>
+          <p className="text-sm text-muted max-w-md mx-auto">
+            But that doesn&apos;t mean the conversation is over. People are still
+            talking about homes nearby.
+          </p>
+
+          {/* Recent community activity from other areas */}
+          {communityMoments.length > 0 && (
+            <div className="mt-8 max-w-md mx-auto text-left">
+              <p className="text-xs font-semibold text-muted uppercase tracking-widest mb-3 text-center">
+                Recent conversations nearby
+              </p>
+              <div className="space-y-2">
+                {communityMoments.slice(0, 3).map((c) => (
+                  <a
+                    key={c.id}
+                    href={`/listing/${c.listing.id}`}
+                    className="block bg-white border border-border rounded-lg px-4 py-3 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+                  >
+                    <p className="text-[12px] text-muted line-clamp-2">
+                      <span className="font-semibold text-ink">{c.name}</span>
+                      {" on "}
+                      <span className="text-ink">{c.listing.address}</span>
+                      {": "}
+                      &ldquo;{c.content.slice(0, 80)}{c.content.length > 80 ? "..." : ""}&rdquo;
+                    </p>
+                    <p className="text-[11px] text-muted/60 mt-1">{c.listing.city}, {c.listing.state}</p>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <a href="/" className="text-sm font-semibold text-social hover:text-social/80 transition-colors">
+              &larr; Back to all listings
+            </a>
+            <a href="/?sort=comments" className="text-sm font-semibold text-muted hover:text-ink transition-colors">
+              See trending conversations &rarr;
+            </a>
+          </div>
         </div>
       ) : (
         <ListingFeed
           initialListings={sortedListings}
           initialHasMore={hasMore}
           searchParams={feedParams}
+          communityMoments={communityMoments.map((c) => ({
+            id: c.id,
+            name: c.name,
+            content: c.content,
+            listingId: c.listing.id,
+            address: c.listing.address,
+            city: c.listing.city,
+            state: c.listing.state,
+          }))}
         />
       )}
     </div>
