@@ -333,140 +333,147 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
-      {/* ====== HEADER area ====== */}
-      <div className="mb-6 sm:mb-8">
-        {hasFilters && (
-          <p className="text-[13px] text-muted mb-1">
-            {total} result{total !== 1 ? "s" : ""}
-          </p>
-        )}
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4">
-            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tighter">
-              {city
-                ? city
-                : sort === "comments"
-                  ? "🔥 Hot Takes"
-                  : "Explore"
-              }
-            </h1>
-            {/* Type pills */}
-            <div className="flex items-center gap-0.5 bg-tag rounded-lg p-0.5">
+      {/* ====== MODE TOGGLE — always prominent ====== */}
+      {(() => {
+        const makeHref = (typeVal: string) => {
+          const p = new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
+            )
+          );
+          if (typeVal) p.set("type", typeVal); else p.delete("type");
+          p.delete("page");
+          return `/?${p.toString()}`;
+        };
+        const current = listingType ?? "";
+        return (
+          <div className="mb-6 sm:mb-8">
+            {/* Mode toggle bar */}
+            <div className="flex items-center gap-1 bg-ink/[0.04] rounded-2xl p-1.5 mb-4 w-fit">
               {[
-                { key: "", label: "All" },
-                { key: "sale", label: "Buy" },
-                { key: "rent", label: "Rent" },
+                { key: "", label: "All Listings", icon: "🏘️" },
+                { key: "sale", label: "Buy", icon: "🏡" },
+                { key: "rent", label: "Rent", icon: "🔑" },
               ].map((t) => {
-                const params = new URLSearchParams(
-                  Object.fromEntries(
-                    Object.entries(sp)
-                      .filter(([, v]) => typeof v === "string") as [string, string][]
-                  )
-                );
-                if (t.key) params.set("type", t.key); else params.delete("type");
-                params.delete("page");
-                const isActive = (listingType ?? "") === t.key;
+                const isActive = current === t.key;
+                const activeClasses = t.key === "sale"
+                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                  : t.key === "rent"
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                    : "bg-white text-ink shadow-lg";
                 return (
                   <a
                     key={t.key}
-                    href={`/?${params.toString()}`}
-                    className={`px-3 py-1 rounded-md text-[12px] font-medium transition-all ${
-                      isActive
-                        ? "bg-white text-ink shadow-button"
-                        : "text-muted hover:text-ink"
+                    href={makeHref(t.key)}
+                    className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[13px] sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                      isActive ? activeClasses : "text-muted hover:text-ink hover:bg-white/60"
                     }`}
                   >
+                    <span className="text-base">{t.icon}</span>
                     {t.label}
                   </a>
                 );
               })}
             </div>
-          </div>
-          {/* Sort */}
-          <div className="flex items-center gap-0.5 text-[13px]">
-            {[
-              { key: "newest", label: "New" },
-              { key: "comments", label: "🔥 Hot Takes" },
-              { key: "price-low", label: "$ Low" },
-              { key: "price-high", label: "$ High" },
-            ].map((s) => {
-              const params = new URLSearchParams(
-                Object.fromEntries(
-                  Object.entries(sp)
-                    .filter(([, v]) => typeof v === "string") as [string, string][]
-                )
-              );
-              params.set("sort", s.key);
-              params.delete("page");
-              const isActive = sort === s.key;
-              return (
+
+            {/* Context banner — what you're viewing */}
+            {listingType && (
+              <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
+                listingType === "sale"
+                  ? "bg-gradient-to-r from-emerald-50 to-emerald-50/30 border border-emerald-200/60"
+                  : "bg-gradient-to-r from-blue-50 to-blue-50/30 border border-blue-200/60"
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
+                    listingType === "sale" ? "bg-emerald-100" : "bg-blue-100"
+                  }`}>
+                    {listingType === "sale" ? "🏡" : "🔑"}
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${
+                      listingType === "sale" ? "text-emerald-800" : "text-blue-800"
+                    }`}>
+                      {listingType === "sale" ? "Homes for Sale" : "Rentals"}
+                      {city && <span className="font-normal text-xs ml-1.5 opacity-70">in {city}</span>}
+                    </p>
+                    <p className={`text-[11px] ${
+                      listingType === "sale" ? "text-emerald-600" : "text-blue-600"
+                    }`}>
+                      {total} listing{total !== 1 ? "s" : ""} · See what people are saying
+                    </p>
+                  </div>
+                </div>
                 <a
-                  key={s.key}
-                  href={`/?${params.toString()}`}
-                  className={`px-3 py-1.5 rounded-lg transition-all font-medium ${
-                    isActive
-                      ? s.key === "comments" ? "bg-social text-white" : "bg-ink text-white"
-                      : "text-muted hover:text-ink"
+                  href={makeHref(listingType === "sale" ? "rent" : "sale")}
+                  className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                    listingType === "sale"
+                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/50"
+                      : "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50"
                   }`}
                 >
-                  {s.label}
+                  Switch to {listingType === "sale" ? "Rent 🔑" : "Buy 🏡"}
                 </a>
-              );
-            })}
+              </div>
+            )}
+
+            {/* Title + sort row */}
+            <div className="flex items-end justify-between gap-4 flex-wrap mt-4">
+              <div>
+                {hasFilters && !listingType && (
+                  <p className="text-[13px] text-muted mb-1">
+                    {total} result{total !== 1 ? "s" : ""}
+                  </p>
+                )}
+                <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tighter">
+                  {city
+                    ? city
+                    : sort === "comments"
+                      ? "🔥 Hot Takes"
+                      : "Explore"
+                  }
+                </h1>
+              </div>
+              {/* Sort */}
+              <div className="flex items-center gap-0.5 text-[13px]">
+                {[
+                  { key: "newest", label: "New" },
+                  { key: "comments", label: "🔥 Hot Takes" },
+                  { key: "price-low", label: "$ Low" },
+                  { key: "price-high", label: "$ High" },
+                ].map((s) => {
+                  const params = new URLSearchParams(
+                    Object.fromEntries(
+                      Object.entries(sp)
+                        .filter(([, v]) => typeof v === "string") as [string, string][]
+                    )
+                  );
+                  params.set("sort", s.key);
+                  params.delete("page");
+                  const isActive = sort === s.key;
+                  return (
+                    <a
+                      key={s.key}
+                      href={`/?${params.toString()}`}
+                      className={`px-3 py-1.5 rounded-lg transition-all font-medium ${
+                        isActive
+                          ? s.key === "comments" ? "bg-social text-white" : "bg-ink text-white"
+                          : "text-muted hover:text-ink"
+                      }`}
+                    >
+                      {s.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Search + filters */}
       <Suspense>
         <SearchBar />
       </Suspense>
-
-      {/* Buy/Rent mode banner */}
-      {listingType === "sale" && (
-        <div className="mt-4 mb-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 flex items-center justify-between">
-          <span className="text-[13px] font-semibold text-green-700">
-            Browsing homes for sale
-          </span>
-          <a
-            href={(() => {
-              const p = new URLSearchParams(
-                Object.fromEntries(
-                  Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
-                )
-              );
-              p.set("type", "rent");
-              p.delete("page");
-              return `/?${p.toString()}`;
-            })()}
-            className="text-[12px] font-medium text-green-600 hover:text-green-800 transition-colors"
-          >
-            Switch to rentals &rarr;
-          </a>
-        </div>
-      )}
-      {listingType === "rent" && (
-        <div className="mt-4 mb-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 flex items-center justify-between">
-          <span className="text-[13px] font-semibold text-blue-700">
-            Browsing rentals
-          </span>
-          <a
-            href={(() => {
-              const p = new URLSearchParams(
-                Object.fromEntries(
-                  Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
-                )
-              );
-              p.set("type", "sale");
-              p.delete("page");
-              return `/?${p.toString()}`;
-            })()}
-            className="text-[12px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            Switch to homes for sale &rarr;
-          </a>
-        </div>
-      )}
 
       {/* Recently Viewed */}
       <div className="mt-6">

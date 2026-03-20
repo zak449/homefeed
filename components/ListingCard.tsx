@@ -67,6 +67,17 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           </div>
         )}
 
+        {/* Listing type badge — always visible */}
+        <div className="absolute top-2.5 left-2.5">
+          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm ${
+            isRent
+              ? "bg-blue-500 text-white"
+              : "bg-emerald-500 text-white"
+          }`}>
+            {isRent ? "🔑 For Rent" : "🏡 For Sale"}
+          </span>
+        </div>
+
         {/* Comment count badge — THE social signal */}
         <div className="absolute top-2.5 right-2.5">
           {commentCount > 0 ? (
