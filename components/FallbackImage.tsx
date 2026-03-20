@@ -29,7 +29,7 @@ export default function FallbackImage({
   if (failed) {
     return (
       <div
-        className={`${className ?? ""} bg-gradient-to-br from-orange-50 via-gray-50 to-gray-100 flex items-center justify-center`}
+        className={`${className ?? ""} bg-gradient-to-br from-stone-100 via-stone-50 to-stone-100 flex items-center justify-center`}
         style={style}
       >
         <div className="text-center">
@@ -38,7 +38,7 @@ export default function FallbackImage({
             height="28"
             viewBox="0 0 24 24"
             fill="none"
-            className="mx-auto text-[#FF6B2C]/25"
+            className="mx-auto text-stone-300"
           >
             <path
               d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
@@ -55,7 +55,7 @@ export default function FallbackImage({
               strokeLinejoin="round"
             />
           </svg>
-          <p className="text-[10px] text-gray-400 mt-1 font-medium">
+          <p className="text-[10px] text-stone-400 mt-1 font-medium">
             No photo
           </p>
         </div>
@@ -63,19 +63,22 @@ export default function FallbackImage({
     );
   }
 
+  // Render img directly with className — no wrapper div
+  // This ensures the img gets the exact positioning/sizing from the parent
   return (
-    <div className={`relative ${className ?? ""}`} style={style}>
-      {/* Skeleton placeholder while loading */}
+    <>
+      {/* Skeleton shown behind while loading */}
       {!loaded && (
-        <div className="absolute inset-0 skeleton" />
+        <div className={`${className ?? ""} skeleton`} style={style} />
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imgSrc}
         alt={alt}
-        className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+        className={`${className ?? ""} transition-opacity duration-400 ease-out ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
+        style={style}
         loading={loading}
         onClick={onClick}
         onLoad={handleLoad}
@@ -88,6 +91,6 @@ export default function FallbackImage({
           }
         }}
       />
-    </div>
+    </>
   );
 }
