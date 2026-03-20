@@ -143,7 +143,15 @@ export async function fetchRealtorListings(params: {
     if (!Array.isArray(results)) return 0;
 
     // Build all upsert operations, then batch them in a single transaction
-    const toFullSize = (url: string) => url.replace(/s\.jpg$/i, "od.jpg");
+    // Convert thumbnail URLs to full-size: handles both "-s.jpg" and "s.jpg" suffixes
+    const toFullSize = (url: string) => {
+      // Try replacing common small-image suffixes with full-size
+      if (/[-_]s\.jpg$/i.test(url)) return url.replace(/[-_]s\.jpg$/i, "-od.jpg");
+      if (/s\.jpg$/i.test(url)) return url.replace(/s\.jpg$/i, "od.jpg");
+      // Try replacing size indicators in the middle of the URL
+      if (/\/s\//.test(url)) return url.replace(/\/s\//, "/od/");
+      return url; // Return as-is if no pattern matches
+    };
     const upsertOps = [];
 
     for (const item of results) {

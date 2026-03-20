@@ -89,9 +89,21 @@ export default function ListingFeed({
     return () => observer.disconnect();
   }, [fetchMore]);
 
+  // Count how many listings have comments
+  const withCommentsCount = listings.filter(l => (l._count?.comments ?? 0) > 0).length;
+
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5">
+      {/* Social activity summary bar */}
+      {withCommentsCount > 0 && (
+        <div className="flex items-center gap-2 mt-5 mb-2 px-1">
+          <span className="text-[12px] text-muted">
+            💬 <span className="font-semibold text-ink">{withCommentsCount}</span> of these listings have community opinions
+          </span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-3">
         {listings.map((listing) => (
           <ListingCard key={listing.id} listing={listing} />
         ))}
@@ -103,15 +115,18 @@ export default function ListingFeed({
       {/* Loading spinner */}
       {loading && (
         <div className="flex justify-center py-8">
-          <div className="w-6 h-6 border-2 border-ink/20 border-t-ink rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-social/30 border-t-social rounded-full animate-spin" />
         </div>
       )}
 
       {/* End of results */}
       {!hasMore && listings.length > 0 && (
-        <p className="text-center text-sm text-muted py-10">
-          You&apos;ve seen it all
-        </p>
+        <div className="text-center py-10">
+          <p className="text-sm text-muted mb-1">You&apos;ve seen it all</p>
+          <p className="text-xs text-muted/50">
+            Got an opinion? Click any listing to weigh in.
+          </p>
+        </div>
       )}
     </>
   );

@@ -8,6 +8,7 @@
   --bg: #FFFFFF;
   --ink: #0F0F0F;
   --accent: #000000;
+  --social: #FF6B2C;
 }
 
 * { box-sizing: border-box; margin: 0; }
@@ -44,7 +45,7 @@ input[type=number]::-webkit-outer-spin-button {
   top: 44px;
   bottom: 0;
   width: 1px;
-  background: #E5E5E5;
+  background: #E5E7EB;
 }
 .comment-thread:last-child::before {
   display: none;
@@ -65,7 +66,7 @@ input[type=number]::-webkit-outer-spin-button {
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #F5F5F5 25%, #EBEBEB 50%, #F5F5F5 75%);
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 6px;
@@ -80,6 +81,15 @@ input[type=number]::-webkit-outer-spin-button {
   animation: hotPulse 2s ease-in-out infinite;
 }
 
+/* Live dot */
+@keyframes livePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.4; }
+}
+.live-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
 /* Slide up */
 @keyframes slideUp {
   from { transform: translateY(100%); }
@@ -89,13 +99,30 @@ input[type=number]::-webkit-outer-spin-button {
   animation: slideUp 0.3s ease-out forwards;
 }
 
+/* Activity ticker scroll */
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-scroll {
+  animation: tickerScroll 30s linear infinite;
+}
+
 /* Selection */
 ::selection {
-  background: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 107, 44, 0.12);
 }
 
 /* Focus ring */
 :focus-visible {
   outline: 2px solid #0F0F0F;
   outline-offset: 2px;
+}
+
+/* Social accent gradient text */
+.social-gradient {
+  background: linear-gradient(135deg, #FF6B2C, #FF8F5E);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

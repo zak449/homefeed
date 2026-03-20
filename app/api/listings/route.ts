@@ -22,13 +22,15 @@ export async function GET(req: NextRequest) {
   const lat = searchParams.get("lat") ? Number(searchParams.get("lat")) : undefined;
   const lng = searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined;
   const radiusMiles = searchParams.get("radius") ? Number(searchParams.get("radius")) : 25;
+  const isGeoSearch = lat !== undefined && lng !== undefined;
 
   // Build filters — always filter to active listings only
   const conditions: Prisma.ListingWhereInput[] = [
     { status: "active" },
   ];
 
-  if (city) {
+  // Skip city text filter when doing geo search — haversine handles proximity
+  if (city && !isGeoSearch) {
     conditions.push({
       OR: [
         { city: { contains: city, mode: "insensitive" } },

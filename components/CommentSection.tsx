@@ -173,10 +173,10 @@ export default function CommentSection({
 
       {/* Empty state */}
       {!loading && comments.length === 0 && !isLocked && (
-        <div className="text-center py-10 rounded-xl border border-dashed border-border bg-white mb-6">
-          <p className="text-3xl mb-2">💬</p>
-          <p className="font-display font-semibold text-ink text-sm">Start the conversation</p>
-          <p className="text-xs text-muted mt-1">What do you think about this listing? Be the first to share.</p>
+        <div className="text-center py-10 rounded-xl border border-dashed border-[#FF6B2C]/20 bg-[#FFF7ED] mb-6">
+          <p className="text-3xl mb-2">👀</p>
+          <p className="font-display font-semibold text-ink text-sm">No one&apos;s weighed in yet</p>
+          <p className="text-xs text-muted mt-1">Be the first to share what you think about this listing.</p>
         </div>
       )}
 

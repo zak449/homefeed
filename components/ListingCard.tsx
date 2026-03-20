@@ -67,21 +67,25 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           </div>
         )}
 
-        {/* Comment count */}
-        {commentCount > 0 && (
-          <div className="absolute top-2.5 right-2.5">
-            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md ${
+        {/* Comment count badge — THE social signal */}
+        <div className="absolute top-2.5 right-2.5">
+          {commentCount > 0 ? (
+            <span className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm ${
               isHot
-                ? "bg-hot text-white"
-                : "bg-white/90 backdrop-blur-sm text-ink"
+                ? "bg-[#FF6B2C] text-white"
+                : "bg-white/95 backdrop-blur-sm text-ink"
             }`}>
               {isHot ? "🔥" : "💬"} {commentCount}
             </span>
-          </div>
-        )}
+          ) : (
+            <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-white/80 backdrop-blur-sm text-muted/60">
+              💬 Be first
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Info — tight, clean hierarchy */}
+      {/* Info */}
       <div className="pt-3 pb-1">
         {/* Row 1: Price + type */}
         <div className="flex items-baseline justify-between gap-2">
@@ -128,12 +132,18 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           )}
         </div>
 
-        {/* Top comment preview */}
-        {listing.topComment && (
-          <div className="mt-2 pt-2 border-t border-border">
+        {/* Top comment preview — what makes this different from Zillow */}
+        {listing.topComment ? (
+          <div className="mt-2.5 bg-tag rounded-lg px-3 py-2">
             <p className="text-[12px] text-muted line-clamp-2">
-              <span className="font-medium text-ink">{listing.topComment.name}</span>{" "}
+              <span className="font-semibold text-ink">{listing.topComment.name}</span>{" "}
               {listing.topComment.content}
+            </p>
+          </div>
+        ) : (
+          <div className="mt-2.5 border border-dashed border-border rounded-lg px-3 py-2">
+            <p className="text-[11px] text-muted/50 text-center">
+              No opinions yet — be the first to weigh in
             </p>
           </div>
         )}

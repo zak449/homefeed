@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
           "User-Agent": "HomeFeed/1.0 (https://homefeed.app; contact@homefeed.app)",
           "Accept": "application/json",
         },
-        signal: AbortSignal.timeout(3000),
+        signal: AbortSignal.timeout(5000),
       }
     );
     if (!geoRes.ok) throw new Error(`Nominatim status ${geoRes.status}`);
@@ -63,15 +63,16 @@ export async function POST(req: NextRequest) {
     console.log("[Geo] Calling BigDataCloud for", latitude, longitude);
     const geoRes = await fetch(
       `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-      { signal: AbortSignal.timeout(3000) }
+      { signal: AbortSignal.timeout(5000) }
     );
     if (!geoRes.ok) throw new Error(`BigDataCloud status ${geoRes.status}`);
     const geo = await geoRes.json();
     const c = geo.locality || geo.city || "";
     if (!c) throw new Error("BigDataCloud returned no city");
-    const rawState = geo.principalSubdivisionCode?.replace("US-", "") || "";
-    const s = stateMap[rawState] || rawState;
-    return { city: c, state: s, zip: geo.postcode || "" };
+    // principalSubdivisionCode is like "US-CA" → strip to "CA" (already an abbreviation)
+    const rawState = geo.principalSubdivisionCode?.replace(/^US-/, "") || "";
+    // rawState is already the abbreviation (e.g., "CA"), no need to look up in stateMap
+    return { city: c, state: rawState, zip: geo.postcode || "" };
   })();
 
   try {

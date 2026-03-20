@@ -23,7 +23,7 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <nav className="absolute top-14 left-0 right-0 bg-white border-b border-border z-50 animate-fade-in">
+        <nav className="absolute top-14 left-0 right-0 bg-white border-b border-border shadow-card z-50 animate-fade-in">
           <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col">
             <a
               href="/?type=sale"
@@ -41,10 +41,10 @@ export default function MobileNav() {
             </a>
             <a
               href="/?sort=comments"
-              className="px-3 py-3 text-[14px] font-medium text-ink transition-colors"
+              className="px-3 py-3 text-[14px] font-bold text-social flex items-center gap-1.5 transition-colors"
               onClick={() => setOpen(false)}
             >
-              Hot Takes
+              🔥 Hot Takes
             </a>
           </div>
         </nav>

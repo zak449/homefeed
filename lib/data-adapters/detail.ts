@@ -49,8 +49,11 @@ export async function enrichListingDetail(listingId: string): Promise<void> {
     if (Array.isArray(home.photos)) {
       for (const p of home.photos) {
         if (p?.href) {
-          // Convert small thumbnail to large: replace suffix before .jpg
-          const fullSize = p.href.replace(/s\.jpg$/, "od.jpg");
+          // Convert small thumbnail to full-size: handle various suffix patterns
+          let fullSize = p.href;
+          if (/[-_]s\.jpg$/i.test(fullSize)) fullSize = fullSize.replace(/[-_]s\.jpg$/i, "-od.jpg");
+          else if (/s\.jpg$/i.test(fullSize)) fullSize = fullSize.replace(/s\.jpg$/i, "od.jpg");
+          else if (/\/s\//.test(fullSize)) fullSize = fullSize.replace(/\/s\//, "/od/");
           photos.push(fullSize);
           if (photos.length >= 20) break;
         }

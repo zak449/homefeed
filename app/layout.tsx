@@ -27,13 +27,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
       <body className="min-h-screen flex flex-col bg-white">
-        {/* Nav — clean, precise */}
+        {/* Nav */}
         <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-border">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            {/* Logo — confident wordmark */}
-            <a href="/" className="shrink-0">
+            {/* Logo + social tagline */}
+            <a href="/" className="shrink-0 flex items-center gap-2">
               <span className="font-display text-[18px] font-bold text-ink tracking-display">
-                homefeed
+                home<span className="social-gradient">feed</span>
+              </span>
+              <span className="hidden sm:inline-block text-[10px] font-medium text-muted bg-tag px-2 py-0.5 rounded-full">
+                real talk on real estate
               </span>
             </a>
 
@@ -45,8 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/?type=rent" className="px-3.5 py-1.5 text-[13px] font-medium text-muted hover:text-ink rounded-lg transition-colors">
                 Rent
               </a>
-              <a href="/?sort=comments" className="px-3.5 py-1.5 text-[13px] font-medium text-muted hover:text-ink rounded-lg transition-colors">
-                Hot Takes
+              <a href="/?sort=comments" className="px-3.5 py-1.5 text-[13px] font-medium text-social hover:text-social/80 rounded-lg transition-colors flex items-center gap-1">
+                <span>🔥</span> Hot Takes
               </a>
             </nav>
 
@@ -57,13 +60,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <main className="flex-1 bg-subtle">{children}</main>
 
-        {/* Footer — barely there */}
+        {/* Footer */}
         <footer className="border-t border-border bg-white">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="font-display text-sm font-semibold text-ink tracking-display">homefeed</span>
+              <span className="font-display text-sm font-semibold text-ink tracking-display">
+                home<span className="social-gradient">feed</span>
+              </span>
               <p className="text-xs text-muted">
-                Real estate, real opinions.
+                Every listing has a comment section.
               </p>
               <p className="text-xs text-muted/50">&copy; {new Date().getFullYear()}</p>
             </div>
