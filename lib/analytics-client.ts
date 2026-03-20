@@ -62,10 +62,10 @@ export async function requestGeolocation(): Promise<{
   city: string;
   state: string;
 } | null> {
-  // Check if we already have a recent location (less than 1 hour old)
+  // Check if we already have a recent location (less than 5 minutes old)
   const stored = getStoredLocation();
   const storedTime = localStorage.getItem("hf_location_time");
-  if (stored && storedTime && Date.now() - Number(storedTime) < 3600_000) {
+  if (stored && storedTime && Date.now() - Number(storedTime) < 300_000) {
     return stored;
   }
 
@@ -109,7 +109,7 @@ export async function requestGeolocation(): Promise<{
         // User denied or error
         resolve(null);
       },
-      { enableHighAccuracy: false, timeout: 10000, maximumAge: 3600_000 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 300_000 }
     );
   });
 }
