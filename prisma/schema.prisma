@@ -85,6 +85,24 @@ model EmailSubscription {
   @@unique([listingId, email])
 }
 
+// ── Newsletter / Marketing Subscriptions ───────────────────
+
+model Subscriber {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  phone           String?
+  source          String?  // "hero" | "inline" | "footer" | "sticky" | "api"
+  klaviyoId       String?  // Klaviyo profile ID for syncing
+  listingAlerts   Boolean  @default(true)
+  hotTakesDigest  Boolean  @default(true)
+  commentReplies  Boolean  @default(true)
+  smsEnabled      Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([email])
+}
+
 // ── Analytics & User Profiles ──────────────────────────────
 
 model UserProfile {

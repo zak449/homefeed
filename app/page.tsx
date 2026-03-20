@@ -5,6 +5,7 @@ import GeoProvider from "@/components/GeoProvider";
 import ListingFeed from "@/components/ListingFeed";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
+import FallbackImage from "@/components/FallbackImage";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -449,13 +450,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     {/* Thumbnail */}
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-tag shrink-0">
                       {photo ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <FallbackImage
                           src={photo}
                           alt={t.address}
                           className="w-full h-full object-cover"
                           loading="lazy"
-                          onError={(e: any) => { e.currentTarget.style.display = 'none'; }}
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted/20">

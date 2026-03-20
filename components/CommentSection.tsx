@@ -2,7 +2,18 @@
 
 import { useEffect, useState, useRef } from "react";
 
-const REACTIONS = ["❤️", "🔥", "😂", "😮", "💀"];
+const REACTIONS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDC80"];
+
+const MILESTONES = [5, 10, 25, 50, 100];
+
+function getMilestoneMessage(count: number): string | null {
+  if (count >= 100) return `\uD83C\uDF1F This listing is legendary \u2014 ${count} opinions and counting`;
+  if (count >= 50) return `\uD83D\uDCA5 This listing went viral \u2014 ${count} opinions and counting`;
+  if (count >= 25) return `\uD83D\uDE80 This listing is blowing up \u2014 ${count} opinions and counting`;
+  if (count >= 10) return `\uD83D\uDD25 This listing is heating up \u2014 ${count} opinions and counting`;
+  if (count >= 5) return `\uD83D\uDCAC People are talking \u2014 ${count} opinions and counting`;
+  return null;
+}
 
 type Comment = {
   id: string;
@@ -36,6 +47,9 @@ export default function CommentSection({
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState("");
   const [reactingEmail, setReactingEmail] = useState("");
+  const [showReplyPrompt, setShowReplyPrompt] = useState(false);
+  const [replyEmail, setReplyEmail] = useState("");
+  const [replyStatus, setReplyStatus] = useState<"idle" | "loading" | "success">("idle");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Restore saved commenter identity from localStorage
@@ -80,6 +94,8 @@ export default function CommentSection({
         setComments((prev) => [...prev, newComment]);
         setContent("");
         setReactingEmail(email);
+        setShowReplyPrompt(true);
+        setReplyEmail(email);
         try {
           localStorage.setItem("hf_commenter", JSON.stringify({ name, email }));
         } catch {
@@ -93,6 +109,34 @@ export default function CommentSection({
       setPostError("Network error");
     }
     setPosting(false);
+  }
+
+  async function handleReplySubscribe(e: React.FormEvent) {
+    e.preventDefault();
+    if (!replyEmail) return;
+    setReplyStatus("loading");
+    try {
+      await fetch("/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: replyEmail,
+          source: `comment-reply-${listingId}`,
+        }),
+      });
+      setReplyStatus("success");
+      try {
+        localStorage.setItem("homefeed_subscribed_email", replyEmail);
+      } catch {
+        // ignore
+      }
+      setTimeout(() => {
+        setShowReplyPrompt(false);
+        setReplyStatus("idle");
+      }, 3000);
+    } catch {
+      setReplyStatus("idle");
+    }
   }
 
   async function handleReact(commentId: string, type: string) {
@@ -120,6 +164,8 @@ export default function CommentSection({
     sum + Object.values(c.reactions).reduce((a, b) => a + b, 0), 0
   );
 
+  const milestoneMessage = getMilestoneMessage(comments.length);
+
   return (
     <div>
       {/* Section header */}
@@ -135,21 +181,28 @@ export default function CommentSection({
           )}
           {totalReactions > 0 && (
             <span className="text-xs font-semibold text-accent bg-red-50 px-2.5 py-1 rounded-full">
-              🔥 {totalReactions}
+              \uD83D\uDD25 {totalReactions}
             </span>
           )}
         </div>
         {isLocked && (
           <span className="text-xs font-medium text-muted flex items-center gap-1">
-            🔒 This listing sold — comments are locked
+            \uD83D\uDD12 This listing sold &mdash; comments are locked
           </span>
         )}
       </div>
 
+      {/* Comment count milestone celebration */}
+      {!loading && milestoneMessage && (
+        <div className="mb-5 px-4 py-3 rounded-xl bg-gradient-to-r from-[#FFF7ED] to-[#FFF1E6] border border-[#FF6B2C]/15 flex items-center gap-3">
+          <span className="text-sm font-semibold text-ink">{milestoneMessage}</span>
+        </div>
+      )}
+
       {/* Locked banner */}
       {isLocked && comments.length > 0 && (
         <div className="bg-tag rounded-xl px-4 py-3 mb-6 flex items-center gap-2">
-          <span className="text-sm">🔒</span>
+          <span className="text-sm">\uD83D\uDD12</span>
           <p className="text-sm text-muted">
             This property is no longer active. Comments are preserved but new comments are disabled.
           </p>
@@ -174,7 +227,7 @@ export default function CommentSection({
       {/* Empty state */}
       {!loading && comments.length === 0 && !isLocked && (
         <div className="text-center py-10 rounded-xl border border-dashed border-[#FF6B2C]/20 bg-[#FFF7ED] mb-6">
-          <p className="text-3xl mb-2">👀</p>
+          <p className="text-3xl mb-2">\uD83D\uDC40</p>
           <p className="font-display font-semibold text-ink text-sm">No one&apos;s weighed in yet</p>
           <p className="text-xs text-muted mt-1">Be the first to share what you think about this listing.</p>
         </div>
@@ -183,7 +236,7 @@ export default function CommentSection({
       {/* Comments list */}
       {!loading && comments.length > 0 && (
         <div className="space-y-1 mb-8">
-          {comments.map((comment, i) => (
+          {comments.map((comment) => (
             <CommentItem
               key={comment.id}
               comment={comment}
@@ -271,6 +324,61 @@ export default function CommentSection({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* Reply notification prompt — appears after posting a comment */}
+      {showReplyPrompt && !isLocked && (
+        <div className="mt-4 bg-[#FFF7ED] border border-[#FF6B2C]/10 rounded-xl p-4 animate-fade-in">
+          {replyStatus === "success" ? (
+            <div className="flex items-center gap-2">
+              <svg
+                className="w-4 h-4 text-money shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="text-sm font-medium text-ink">
+                You&apos;ll be notified when someone replies!
+              </span>
+            </div>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-ink mb-1">
+                Want to get notified when someone replies?
+              </p>
+              <p className="text-xs text-muted mb-3">
+                We&apos;ll let you know when new opinions drop on this listing.
+              </p>
+              <form onSubmit={handleReplySubscribe} className="flex items-center gap-2">
+                <input
+                  type="email"
+                  required
+                  placeholder="your@email.com"
+                  value={replyEmail}
+                  onChange={(e) => setReplyEmail(e.target.value)}
+                  className="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-xl border border-border bg-white text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={replyStatus === "loading"}
+                  className="shrink-0 px-4 py-2 text-sm font-semibold rounded-xl text-white shadow-button transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ backgroundColor: "#FF6B2C" }}
+                >
+                  {replyStatus === "loading" ? "..." : "Notify me"}
+                </button>
+              </form>
+              <button
+                onClick={() => setShowReplyPrompt(false)}
+                className="mt-2 text-xs text-muted hover:text-ink transition-colors"
+              >
+                No thanks
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

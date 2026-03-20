@@ -6,6 +6,9 @@ import CommentSection from "@/components/CommentSection";
 import ListingViewTracker from "@/components/ListingViewTracker";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import SaveButton from "@/components/SaveButton";
+import ShareButton from "@/components/ShareButton";
+import EmailCapture from "@/components/EmailCapture";
+import FallbackImage from "@/components/FallbackImage";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -58,6 +61,69 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const priceHistory = listing.priceHistory as
     | { date: string; price: number; event?: string }[]
     | null;
+
+  // Fetch "More listings in [city]" — 3 other listings from same city
+  const moreSameCity = await prisma.listing.findMany({
+    where: {
+      city: { equals: listing.city, mode: "insensitive" },
+      status: "active",
+      id: { not: listing.id },
+    },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+    select: {
+      id: true,
+      address: true,
+      city: true,
+      state: true,
+      price: true,
+      listingType: true,
+      photos: true,
+      bedrooms: true,
+      bathrooms: true,
+      sqft: true,
+      _count: { select: { comments: true } },
+      comments: {
+        take: 1,
+        orderBy: { createdAt: "desc" },
+        select: { name: true, content: true },
+      },
+    },
+  });
+
+  // Fetch "Similar Hot Takes" — high-comment listings (only if this listing has 3+ comments)
+  const hotTakes = commentCount >= 3
+    ? await prisma.listing.findMany({
+        where: {
+          status: "active",
+          id: { not: listing.id },
+          comments: { some: {} },
+        },
+        orderBy: { comments: { _count: "desc" } },
+        take: 3,
+        select: {
+          id: true,
+          address: true,
+          city: true,
+          state: true,
+          price: true,
+          listingType: true,
+          photos: true,
+          bedrooms: true,
+          bathrooms: true,
+          sqft: true,
+          _count: { select: { comments: true } },
+          comments: {
+            take: 1,
+            orderBy: { createdAt: "desc" },
+            select: { name: true, content: true },
+          },
+        },
+      })
+    : [];
+
+  // Filter hot takes to only those with 3+ comments
+  const filteredHotTakes = hotTakes.filter((l) => l._count.comments >= 3);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
@@ -136,9 +202,17 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         yearBuilt={listing.yearBuilt}
       />
 
-      {/* 6. Save button + Activity */}
+      {/* 6. Save + Share buttons + Activity */}
       <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
-        <SaveButton listingId={listing.id} />
+        <div className="flex items-center gap-4">
+          <SaveButton listingId={listing.id} />
+          <ShareButton
+            listingId={listing.id}
+            address={listing.address}
+            city={listing.city}
+            price={price}
+          />
+        </div>
         <div className="flex gap-3 flex-wrap text-sm text-muted">
           {commentCount > 0 && (
             <span>
@@ -164,6 +238,17 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       {/* 8. Comments section — THE MAIN EVENT */}
       <div className="mb-6 border-t border-border pt-5">
         <CommentSection listingId={listing.id} isLocked={isLocked} />
+      </div>
+
+      {/* 9. Email capture after comments */}
+      <div className="mb-6 bg-[#FFF7ED] border border-[#FF6B2C]/10 rounded-xl p-5">
+        <p className="font-display font-semibold text-sm text-ink mb-1">
+          Want to know when people react to this listing?
+        </p>
+        <p className="text-xs text-muted mb-3">
+          Get notified when new comments and hot takes drop.
+        </p>
+        <EmailCapture variant="inline" source={`listing-${listing.id}`} />
       </div>
 
       {/* 10. Detailed Property Information */}
@@ -276,11 +361,162 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           }}
         />
       </div>
+
+      {/* 12. More listings in [city] */}
+      {moreSameCity.length > 0 && (
+        <div className="mb-6 border-t border-border pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-base font-bold text-ink">
+              More in {listing.city}
+            </h2>
+            <a
+              href={`/?city=${encodeURIComponent(listing.city)}`}
+              className="text-xs font-semibold text-social hover:text-social/80 transition-colors"
+            >
+              See all &rarr;
+            </a>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {moreSameCity.map((l) => {
+              const lPrice = l.listingType === "rent"
+                ? `$${l.price.toLocaleString()}/mo`
+                : `$${l.price.toLocaleString()}`;
+              const photo = l.photos[0];
+              const latestComment = l.comments[0];
+              return (
+                <a
+                  key={l.id}
+                  href={`/listing/${l.id}`}
+                  className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-tag">
+                    {photo ? (
+                      <FallbackImage
+                        src={photo}
+                        alt={l.address}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted/20">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                          <polyline points="9 22 9 12 15 12 15 22" />
+                        </svg>
+                      </div>
+                    )}
+                    {l._count.comments > 0 && (
+                      <span className={`absolute top-2 right-2 flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm ${
+                        l._count.comments >= 5
+                          ? "bg-[#FF6B2C] text-white"
+                          : "bg-white/95 backdrop-blur-sm text-ink"
+                      }`}>
+                        {l._count.comments >= 5 ? "\uD83D\uDD25" : "\uD83D\uDCAC"} {l._count.comments}
+                      </span>
+                    )}
+                  </div>
+                  <div className="p-3">
+                    <p className="text-[13px] font-semibold text-ink">{lPrice}</p>
+                    <p className="text-[12px] text-muted truncate">{l.address}</p>
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted">
+                      {l.bedrooms != null && <span>{l.bedrooms} bd</span>}
+                      {l.bedrooms != null && l.bathrooms != null && <span className="text-border">·</span>}
+                      {l.bathrooms != null && <span>{l.bathrooms} ba</span>}
+                      {l.sqft != null && (
+                        <>
+                          <span className="text-border">·</span>
+                          <span>{l.sqft.toLocaleString()} sqft</span>
+                        </>
+                      )}
+                    </div>
+                    {latestComment && (
+                      <div className="mt-2 bg-tag rounded-lg px-2.5 py-1.5">
+                        <p className="text-[11px] text-muted line-clamp-1">
+                          <span className="font-semibold text-ink">{latestComment.name}</span>{" "}
+                          {latestComment.content}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 13. Similar Hot Takes — only if this listing has 3+ comments */}
+      {filteredHotTakes.length > 0 && (
+        <div className="mb-6 border-t border-border pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="font-display text-base font-bold text-ink">
+              Similar Hot Takes
+            </h2>
+            <span className="text-[11px] font-semibold text-social bg-social-light px-2 py-0.5 rounded-full">
+              Most discussed
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {filteredHotTakes.map((l) => {
+              const lPrice = l.listingType === "rent"
+                ? `$${l.price.toLocaleString()}/mo`
+                : `$${l.price.toLocaleString()}`;
+              const photo = l.photos[0];
+              const latestComment = l.comments[0];
+              return (
+                <a
+                  key={l.id}
+                  href={`/listing/${l.id}`}
+                  className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+                >
+                  <div className="flex gap-3 p-4">
+                    <div className="w-14 h-14 rounded-lg overflow-hidden bg-tag shrink-0">
+                      {photo ? (
+                        <FallbackImage
+                          src={photo}
+                          alt={l.address}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted/20">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                            <polyline points="9 22 9 12 15 12 15 22" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold text-ink truncate">{lPrice}</p>
+                      <p className="text-[11px] text-muted truncate">{l.address}</p>
+                      <p className="text-[11px] text-muted truncate">{l.city}, {l.state}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
+                        &#x1f4ac; {l._count.comments} comments
+                      </span>
+                    </div>
+                  </div>
+                  {latestComment && (
+                    <div className="px-4 pb-3 -mt-1">
+                      <div className="bg-tag rounded-lg px-3 py-2">
+                        <p className="text-[12px] text-muted line-clamp-2">
+                          <span className="font-semibold text-ink">{latestComment.name}</span>{" "}
+                          {latestComment.content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-/* ── Sub-components ──────────────────────────────────────────── */
+/* -- Sub-components ---------------------------------------------------- */
 
 function KeyFactsBar({
   beds,
