@@ -177,7 +177,7 @@ export default function CommentSection({
       {!isLocked && (
         <div className="bg-white rounded-xl border border-border p-5">
           <p className="font-display font-semibold text-sm text-ink mb-4">
-            Drop your take
+            Leave a comment
           </p>
           <form onSubmit={handlePost} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -201,7 +201,7 @@ export default function CommentSection({
             <div className="relative">
               <textarea
                 ref={textareaRef}
-                placeholder="This price makes no sense... / That flip is wild... / This used to be..."
+                placeholder="Great price for this area... / Love the yard / Kitchen needs work / Too expensive for the neighborhood..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
@@ -212,6 +212,28 @@ export default function CommentSection({
               <span className="absolute bottom-2 right-3 text-xs text-muted/40">
                 {content.length}/1000
               </span>
+            </div>
+            {/* Quick comment suggestions */}
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                "Great price!",
+                "Overpriced",
+                "Love this neighborhood",
+                "Needs updating",
+                "Pet friendly?",
+                "How's the parking?",
+                "Beautiful kitchen",
+                "Noisy area",
+              ].map((suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  onClick={() => setContent((prev) => prev ? `${prev} ${suggestion}` : suggestion)}
+                  className="text-xs px-2.5 py-1 rounded-full border border-border text-muted hover:text-ink hover:border-ink/30 hover:bg-tag transition-colors"
+                >
+                  {suggestion}
+                </button>
+              ))}
             </div>
             {postError && (
               <p className="text-xs text-accent font-medium">{postError}</p>
