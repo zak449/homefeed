@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 
 const REACTIONS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDC80"];
 
@@ -22,6 +22,12 @@ type Comment = {
   createdAt: string;
   reactions: Record<string, number>;
 };
+
+type SortMode = "newest" | "oldest" | "reactions";
+
+function getReactionTotal(comment: Comment): number {
+  return Object.values(comment.reactions).reduce((a, b) => a + b, 0);
+}
 
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -50,6 +56,9 @@ export default function CommentSection({
   const [showReplyPrompt, setShowReplyPrompt] = useState(false);
   const [replyEmail, setReplyEmail] = useState("");
   const [replyStatus, setReplyStatus] = useState<"idle" | "loading" | "success">("idle");
+  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [expanded, setExpanded] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(5);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Restore saved commenter identity from localStorage
@@ -78,6 +87,68 @@ export default function CommentSection({
       })
       .catch(() => setLoading(false));
   }, [listingId]);
+
+  // Sorted comments (client-side)
+  const sortedComments = useMemo(() => {
+    const sorted = [...comments];
+    switch (sortMode) {
+      case "newest":
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        break;
+      case "oldest":
+        sorted.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+        break;
+      case "reactions":
+        sorted.sort((a, b) => getReactionTotal(b) - getReactionTotal(a));
+        break;
+    }
+    return sorted;
+  }, [comments, sortMode]);
+
+  // "Most Helpful" pinned comment — the comment with the most reactions (3+ required)
+  const pinnedComment = useMemo(() => {
+    if (comments.length === 0) return null;
+    let best: Comment | null = null;
+    let bestCount = 0;
+    for (const c of comments) {
+      const total = getReactionTotal(c);
+      if (total > bestCount) {
+        bestCount = total;
+        best = c;
+      }
+    }
+    return bestCount >= 3 ? best : null;
+  }, [comments]);
+
+  // Pagination logic
+  const commentsToShow = useMemo(() => {
+    // Filter out pinned comment from the main list to avoid duplication
+    const filtered = pinnedComment
+      ? sortedComments.filter((c) => c.id !== pinnedComment.id)
+      : sortedComments;
+
+    if (comments.length <= 5) {
+      // 5 or fewer: show all, no pagination
+      return filtered;
+    }
+
+    if (comments.length < 20) {
+      // 6-19 comments: show first 5, then "Show all X comments" expands
+      return expanded ? filtered : filtered.slice(0, 5);
+    }
+
+    // 20+ comments: paginate 10 at a time with "Load more"
+    return filtered.slice(0, visibleCount);
+  }, [sortedComments, pinnedComment, comments.length, expanded, visibleCount]);
+
+  const showExpandButton = !expanded && comments.length > 5 && comments.length < 20;
+  const remainingAfterExpand = pinnedComment
+    ? comments.length - 1 - 5
+    : comments.length - 5;
+
+  const showLoadMore =
+    comments.length >= 20 &&
+    visibleCount < (pinnedComment ? comments.length - 1 : comments.length);
 
   async function handlePost(e: React.FormEvent) {
     e.preventDefault();
@@ -166,6 +237,12 @@ export default function CommentSection({
 
   const milestoneMessage = getMilestoneMessage(comments.length);
 
+  const SORT_OPTIONS: { key: SortMode; label: string }[] = [
+    { key: "newest", label: "Newest" },
+    { key: "oldest", label: "Oldest" },
+    { key: "reactions", label: "Most Reactions" },
+  ];
+
   return (
     <div>
       {/* Section header */}
@@ -181,13 +258,13 @@ export default function CommentSection({
           )}
           {totalReactions > 0 && (
             <span className="text-xs font-semibold text-accent bg-red-50 px-2.5 py-1 rounded-full">
-              \uD83D\uDD25 {totalReactions}
+              🔥 {totalReactions}
             </span>
           )}
         </div>
         {isLocked && (
           <span className="text-xs font-medium text-muted flex items-center gap-1">
-            \uD83D\uDD12 This listing sold &mdash; comments are locked
+            🔒 This listing sold &mdash; comments are locked
           </span>
         )}
       </div>
@@ -202,7 +279,7 @@ export default function CommentSection({
       {/* Locked banner */}
       {isLocked && comments.length > 0 && (
         <div className="bg-tag rounded-xl px-4 py-3 mb-6 flex items-center gap-2">
-          <span className="text-sm">\uD83D\uDD12</span>
+          <span className="text-sm">🔒</span>
           <p className="text-sm text-muted">
             This property is no longer active. Comments are preserved but new comments are disabled.
           </p>
@@ -227,16 +304,53 @@ export default function CommentSection({
       {/* Empty state */}
       {!loading && comments.length === 0 && !isLocked && (
         <div className="text-center py-10 rounded-xl border border-dashed border-[#FF6B2C]/20 bg-[#FFF7ED] mb-6">
-          <p className="text-3xl mb-2">\uD83D\uDC40</p>
+          <p className="text-3xl mb-2">👀</p>
           <p className="font-display font-semibold text-ink text-sm">No one&apos;s weighed in yet</p>
           <p className="text-xs text-muted mt-1">Be the first to share what you think about this listing.</p>
+        </div>
+      )}
+
+      {/* Sort toggle — only show when there are 2+ comments */}
+      {!loading && comments.length >= 2 && (
+        <div className="flex items-center gap-1.5 mb-4">
+          {SORT_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => setSortMode(opt.key)}
+              className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                sortMode === opt.key
+                  ? "bg-ink text-white"
+                  : "bg-tag text-muted hover:text-ink hover:bg-tag/80"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* "Most Helpful" pinned comment */}
+      {!loading && pinnedComment && (
+        <div className="mb-4 rounded-xl border border-amber-200/60 bg-gradient-to-r from-amber-50/80 to-orange-50/50 px-1">
+          <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-0.5">
+            <span className="text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+              ⭐ Most helpful
+            </span>
+          </div>
+          <CommentItem
+            comment={pinnedComment}
+            canReact={!isLocked && !!(name && (email || reactingEmail))}
+            onReact={(type) => handleReact(pinnedComment.id, type)}
+            isLocked={isLocked}
+          />
         </div>
       )}
 
       {/* Comments list */}
       {!loading && comments.length > 0 && (
         <div className="space-y-1 mb-8">
-          {comments.map((comment) => (
+          {commentsToShow.map((comment) => (
             <CommentItem
               key={comment.id}
               comment={comment}
@@ -245,6 +359,28 @@ export default function CommentSection({
               isLocked={isLocked}
             />
           ))}
+
+          {/* "Show all X comments" button (6-19 comments) */}
+          {showExpandButton && remainingAfterExpand > 0 && (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="w-full text-center py-3 text-sm font-semibold text-ink hover:text-accent transition-colors rounded-lg hover:bg-tag/50"
+            >
+              Show all {comments.length} comments
+            </button>
+          )}
+
+          {/* "Load more" button (20+ comments) */}
+          {showLoadMore && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((prev) => prev + 10)}
+              className="w-full text-center py-3 text-sm font-semibold text-ink hover:text-accent transition-colors rounded-lg hover:bg-tag/50"
+            >
+              Load more comments
+            </button>
+          )}
         </div>
       )}
 

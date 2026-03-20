@@ -6,6 +6,7 @@ import ListingFeed from "@/components/ListingFeed";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
 import FallbackImage from "@/components/FallbackImage";
+import RecentlyViewed from "@/components/RecentlyViewed";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -420,6 +421,57 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <Suspense>
         <SearchBar />
       </Suspense>
+
+      {/* Buy/Rent mode banner */}
+      {listingType === "sale" && (
+        <div className="mt-4 mb-2 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5 flex items-center justify-between">
+          <span className="text-[13px] font-semibold text-green-700">
+            Browsing homes for sale
+          </span>
+          <a
+            href={(() => {
+              const p = new URLSearchParams(
+                Object.fromEntries(
+                  Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
+                )
+              );
+              p.set("type", "rent");
+              p.delete("page");
+              return `/?${p.toString()}`;
+            })()}
+            className="text-[12px] font-medium text-green-600 hover:text-green-800 transition-colors"
+          >
+            Switch to rentals &rarr;
+          </a>
+        </div>
+      )}
+      {listingType === "rent" && (
+        <div className="mt-4 mb-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5 flex items-center justify-between">
+          <span className="text-[13px] font-semibold text-blue-700">
+            Browsing rentals
+          </span>
+          <a
+            href={(() => {
+              const p = new URLSearchParams(
+                Object.fromEntries(
+                  Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
+                )
+              );
+              p.set("type", "sale");
+              p.delete("page");
+              return `/?${p.toString()}`;
+            })()}
+            className="text-[12px] font-medium text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            Switch to homes for sale &rarr;
+          </a>
+        </div>
+      )}
+
+      {/* Recently Viewed */}
+      <div className="mt-6">
+        <RecentlyViewed />
+      </div>
 
       {/* ====== TRENDING CONVERSATIONS — only on default landing ====== */}
       {isDefaultLanding && trendingWithComments.length > 0 && (

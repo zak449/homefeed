@@ -13,6 +13,14 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "homefeed",
   },
+  openGraph: {
+    type: "website",
+    siteName: "homefeed",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
 };
 
 export const viewport: Viewport = {

@@ -12,7 +12,7 @@ const companyLinks = [
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
   { label: "FAQ", href: "/faq" },
-  { label: "Careers", href: "#" },
+  { label: "Careers", href: "/careers" },
 ];
 
 const legalLinks = [

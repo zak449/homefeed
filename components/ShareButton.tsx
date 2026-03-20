@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface ShareButtonProps {
   listingId: string;
@@ -11,6 +11,8 @@ interface ShareButtonProps {
 
 export default function ShareButton({ listingId, address, city, price }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const url = typeof window !== "undefined"
     ? `${window.location.origin}/listing/${listingId}`
@@ -18,46 +20,54 @@ export default function ShareButton({ listingId, address, city, price }: ShareBu
 
   const shareText = `Check out what people are saying about this listing on homefeed — ${price} at ${address}, ${city}`;
 
-  async function handleShare() {
-    // Try native Web Share API first (mobile)
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({
-          title: `${price} — ${address}`,
-          text: shareText,
-          url,
-        });
-        return;
-      } catch (err: any) {
-        // User cancelled or share failed — fall through to clipboard
-        if (err?.name === "AbortError") return;
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false);
       }
     }
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [showDropdown]);
 
-    // Fallback: copy to clipboard
+  function handleToggle() {
+    setShowDropdown((prev) => !prev);
+  }
+
+  function handleShareX() {
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, "_blank", "noopener,noreferrer,width=550,height=420");
+    setShowDropdown(false);
+  }
+
+  async function handleCopyLink() {
     try {
-      await navigator.clipboard.writeText(`${shareText}\n${url}`);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      await navigator.clipboard.writeText(url);
     } catch {
-      // Final fallback for older browsers
+      // Fallback for older browsers
       const textarea = document.createElement("textarea");
-      textarea.value = `${shareText}\n${url}`;
+      textarea.value = url;
       textarea.style.position = "fixed";
       textarea.style.opacity = "0";
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand("copy");
       document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
     }
+    setCopied(true);
+    setTimeout(() => {
+      setCopied(false);
+      setShowDropdown(false);
+    }, 1500);
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
-        onClick={handleShare}
+        onClick={handleToggle}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink transition-colors"
         aria-label="Share listing"
       >
@@ -78,10 +88,33 @@ export default function ShareButton({ listingId, address, city, price }: ShareBu
         <span>Share</span>
       </button>
 
-      {/* Toast */}
-      {copied && (
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-ink text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-modal animate-fade-in">
-          Link copied!
+      {/* Dropdown */}
+      {showDropdown && (
+        <div className="absolute top-full right-0 mt-2 bg-white rounded-xl border border-border shadow-modal z-50 min-w-[180px] animate-fade-in overflow-hidden">
+          {/* Share on X */}
+          <button
+            onClick={handleShareX}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-tag transition-colors"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            <span className="text-ink font-medium">Share on X</span>
+          </button>
+
+          {/* Copy Link */}
+          <button
+            onClick={handleCopyLink}
+            className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left hover:bg-tag transition-colors border-t border-border"
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+            <span className="text-ink font-medium">
+              {copied ? "Copied!" : "Copy Link"}
+            </span>
+          </button>
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import SaveButton from "@/components/SaveButton";
 import ShareButton from "@/components/ShareButton";
 import EmailCapture from "@/components/EmailCapture";
 import FallbackImage from "@/components/FallbackImage";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -18,13 +19,35 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     select: { address: true, city: true, state: true, price: true, listingType: true, status: true },
   });
   if (!listing) return {};
+
+  const listingWithPhoto = await prisma.listing.findUnique({
+    where: { id },
+    select: { photos: true },
+  });
+
   const price = listing.listingType === "rent"
     ? `$${listing.price.toLocaleString()}/mo`
     : `$${listing.price.toLocaleString()}`;
   const statusLabel = listing.status === "sold" ? " (Sold)" : "";
+  const titleText = `${listing.address}${statusLabel} \u00b7 ${price} \u2014 home.feed`;
+  const descriptionText = `${listing.address}, ${listing.city}, ${listing.state}. ${price}. See what people are saying on home.feed.`;
+  const ogImage = listingWithPhoto?.photos?.[0] ?? undefined;
+
   return {
-    title: `${listing.address}${statusLabel} \u00b7 ${price} \u2014 home.feed`,
-    description: `${listing.address}, ${listing.city}, ${listing.state}. ${price}. See what people are saying on home.feed.`,
+    title: titleText,
+    description: descriptionText,
+    openGraph: {
+      title: titleText,
+      description: descriptionText,
+      type: "article",
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: titleText,
+      description: descriptionText,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
   };
 }
 
@@ -128,9 +151,25 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       {/* Track listing view */}
-      <ListingViewTracker listingId={listing.id} city={listing.city} />
+      <ListingViewTracker
+        listingId={listing.id}
+        city={listing.city}
+        address={listing.address}
+        price={listing.price}
+        photo={listing.photos[0] ?? null}
+        listingType={listing.listingType}
+      />
 
-      {/* 1. Back link */}
+      {/* 1. Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "homefeed", href: "/" },
+          { label: listing.city, href: `/?city=${encodeURIComponent(listing.city)}` },
+          { label: listing.address },
+        ]}
+      />
+
+      {/* Back link */}
       <Link
         href="/"
         className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink transition-colors mb-5"

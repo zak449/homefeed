@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useCallback, useRef, useEffect } from "react";
 import { requestGeolocation, getStoredLocation, trackEvent } from "@/lib/analytics-client";
+import SaveSearchButton, { getSavedSearches, removeSavedSearch, type SavedSearch } from "./SaveSearchButton";
 
 const POPULAR_CITIES = [
   "Los Angeles, CA",
@@ -60,15 +61,24 @@ export default function SearchBar() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locating, setLocating] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
 
-  // Load recent searches on mount
+  // Load recent & saved searches on mount
   useEffect(() => {
     setRecentSearches(getRecentSearches());
+    setSavedSearches(getSavedSearches());
   }, []);
+
+  // Refresh saved searches when suggestions open
+  useEffect(() => {
+    if (showSuggestions) {
+      setSavedSearches(getSavedSearches());
+    }
+  }, [showSuggestions]);
 
   // Close suggestions when clicking outside
   useEffect(() => {
@@ -113,6 +123,37 @@ export default function SearchBar() {
     if (maxSqft) params.set("maxSqft", maxSqft);
     trackEvent("search", { city: searchQuery, type, propertyType });
     router.push(`/?${params.toString()}`);
+  }
+
+  function runSavedSearch(s: SavedSearch) {
+    setShowSuggestions(false);
+    setCity(s.city);
+    setType(s.type);
+    setPropertyType(s.propertyType);
+    setMinPrice(s.minPrice);
+    setMaxPrice(s.maxPrice);
+    setMinBeds(s.minBeds);
+    setMinBaths(s.minBaths);
+    setMinSqft(s.minSqft);
+    setMaxSqft(s.maxSqft);
+    const params = new URLSearchParams();
+    if (s.city) params.set("city", s.city);
+    if (s.type) params.set("type", s.type);
+    if (s.propertyType) params.set("propertyType", s.propertyType);
+    if (s.minPrice) params.set("minPrice", s.minPrice);
+    if (s.maxPrice) params.set("maxPrice", s.maxPrice);
+    if (s.minBeds) params.set("minBeds", s.minBeds);
+    if (s.minBaths) params.set("minBaths", s.minBaths);
+    if (s.minSqft) params.set("minSqft", s.minSqft);
+    if (s.maxSqft) params.set("maxSqft", s.maxSqft);
+    trackEvent("search", { city: s.city, type: s.type, propertyType: s.propertyType, source: "saved_search" });
+    router.push(`/?${params.toString()}`);
+  }
+
+  function handleDeleteSavedSearch(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    removeSavedSearch(id);
+    setSavedSearches(getSavedSearches());
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -264,6 +305,34 @@ export default function SearchBar() {
                 </>
               )}
 
+              {/* Saved searches */}
+              {savedSearches.length > 0 && (
+                <>
+                  <div className="px-4 pt-2.5 pb-1 border-t border-border">
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">Saved Searches</p>
+                  </div>
+                  {savedSearches.map((s) => (
+                    <button
+                      key={`saved-${s.id}`}
+                      type="button"
+                      onClick={() => runSavedSearch(s)}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors group"
+                    >
+                      <span className="text-amber-500 shrink-0 text-sm leading-none">🔔</span>
+                      <span className="text-ink flex-1 truncate">{s.label}</span>
+                      <span
+                        onClick={(e) => handleDeleteSavedSearch(s.id, e)}
+                        className="text-muted/40 hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                        role="button"
+                        tabIndex={-1}
+                      >
+                        ✕
+                      </span>
+                    </button>
+                  ))}
+                </>
+              )}
+
               {/* Popular cities */}
               <div className="px-4 pt-2.5 pb-1 border-t border-border">
                 <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">
@@ -299,6 +368,17 @@ export default function SearchBar() {
         >
           Search
         </button>
+        <SaveSearchButton
+          city={city}
+          type={type}
+          propertyType={propertyType}
+          minPrice={minPrice}
+          maxPrice={maxPrice}
+          minBeds={minBeds}
+          minBaths={minBaths}
+          minSqft={minSqft}
+          maxSqft={maxSqft}
+        />
         <button
           type="button"
           onClick={() => setShowFilters(!showFilters)}
