@@ -137,9 +137,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <p className="text-sm font-medium text-muted mb-1">
           {hasFilters
             ? `${total} listing${total !== 1 ? "s" : ""} found`
-            : lat && lng
-              ? "listings near you"
-              : "what's happening on your block"}
+            : "what's happening on your block"}
         </p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
