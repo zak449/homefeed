@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import FallbackImage from "@/components/FallbackImage";
 
 export type CommentFeedItem = {
   id: string;
@@ -40,8 +41,8 @@ export default function CommentsFeed({ comments }: { comments: CommentFeedItem[]
   if (comments.length === 0) return null;
 
   return (
-    <div>
-      {comments.map((comment, idx) => {
+    <div className="space-y-3">
+      {comments.map((comment) => {
         const initials = comment.name
           .split(" ")
           .map((w) => w[0])
@@ -55,65 +56,65 @@ export default function CommentsFeed({ comments }: { comments: CommentFeedItem[]
           : `$${comment.listing.price.toLocaleString()}`;
         const reactionCounts = aggregateReactions(comment.reactions);
         const hasReactions = comment.reactions.length > 0;
+        const photo = comment.listing.photos[0];
 
         return (
-          <div key={comment.id}>
-            <Link
-              href={`/listing/${comment.listing.id}`}
-              className="group block py-6 hover:bg-surface/50 transition-colors -mx-2 px-2 rounded-card"
-            >
-              <div className="flex items-start gap-3">
-                {/* Avatar */}
-                <div className="w-9 h-9 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
-                  {initials}
+          <Link
+            key={comment.id}
+            href={`/listing/${comment.listing.id}`}
+            className="group flex gap-3 p-3 rounded-2xl hover:bg-surface transition-colors"
+          >
+            {/* Listing photo thumbnail */}
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface shrink-0">
+              {photo ? (
+                <FallbackImage
+                  src={photo}
+                  alt={comment.listing.address}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-tertiary/20">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  </svg>
                 </div>
+              )}
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  {/* Name + time + listing ref */}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-title text-ink">{comment.name}</span>
-                      <span className="text-caption text-tertiary">&middot;</span>
-                      <span className="text-caption text-tertiary">{timeAgo(comment.createdAt)}</span>
-                    </div>
-                    <span className="text-caption text-tertiary shrink-0 group-hover:text-secondary transition-colors">
-                      View listing &rsaquo;
-                    </span>
-                  </div>
-
-                  {/* Listing context */}
-                  <p className="text-caption text-tertiary mt-0.5 truncate">
-                    on {price} &middot; {comment.listing.address}
-                  </p>
-
-                  {/* Comment text */}
-                  <p className="text-body text-ink mt-2 leading-relaxed line-clamp-3">
-                    &ldquo;{comment.content}&rdquo;
-                  </p>
-
-                  {/* Reactions */}
-                  {hasReactions && (
-                    <div className="flex items-center gap-3 mt-2">
-                      {Object.entries(reactionCounts).map(([emoji, count]) => (
-                        <span
-                          key={emoji}
-                          className="text-caption text-tertiary"
-                        >
-                          {emoji} {count}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Header: name + time */}
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-active flex items-center justify-center">
+                  <span className="text-[8px] font-bold text-ink">{initials}</span>
                 </div>
+                <span className="text-sm font-semibold text-ink">{comment.name}</span>
+                <span className="text-xs text-tertiary">{timeAgo(comment.createdAt)}</span>
               </div>
-            </Link>
 
-            {/* Divider */}
-            {idx < comments.length - 1 && (
-              <div className="border-b border-divider" />
-            )}
-          </div>
+              {/* Listing context */}
+              <p className="text-[11px] text-tertiary mt-0.5 truncate">
+                {price} · {comment.listing.address}, {comment.listing.city}
+              </p>
+
+              {/* Comment text */}
+              <p className="text-sm text-ink mt-1.5 leading-relaxed line-clamp-2">
+                {comment.content}
+              </p>
+
+              {/* Reactions */}
+              {hasReactions && (
+                <div className="flex items-center gap-2.5 mt-1.5">
+                  {Object.entries(reactionCounts).map(([emoji, count]) => (
+                    <span key={emoji} className="text-xs text-tertiary">
+                      {emoji} {count}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Link>
         );
       })}
     </div>

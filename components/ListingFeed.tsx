@@ -46,7 +46,6 @@ export default function ListingFeed({
   initialListings,
   initialHasMore,
   searchParams,
-  communityMoments = [],
 }: Props) {
   const [listings, setListings] = useState<Listing[]>(initialListings);
   const [hasMore, setHasMore] = useState(initialHasMore);
@@ -102,8 +101,8 @@ export default function ListingFeed({
 
   return (
     <>
-      {/* Single column feed */}
-      <div className="space-y-2">
+      {/* Grid — 1 col mobile, 2 col tablet, 3 col desktop */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {listings.map((listing) => (
           <ListingCard key={listing.id} listing={listing} />
         ))}
@@ -114,15 +113,12 @@ export default function ListingFeed({
 
       {/* Loading skeletons */}
       {loading && (
-        <div className="space-y-6 mt-6">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={`skel-${i}`}>
-              <div className="aspect-[16/10] rounded-card skeleton" />
-              <div className="pt-3 space-y-2">
-                <div className="flex items-baseline justify-between">
-                  <div className="h-5 w-28 rounded skeleton" />
-                  <div className="h-4 w-16 rounded skeleton" />
-                </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-5">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={`skel-${i}`} className="rounded-2xl overflow-hidden">
+              <div className="aspect-[4/3] skeleton" />
+              <div className="p-4 space-y-2">
+                <div className="h-5 w-24 rounded skeleton" />
                 <div className="h-4 w-3/4 rounded skeleton" />
                 <div className="h-3 w-1/2 rounded skeleton" />
               </div>
@@ -134,7 +130,7 @@ export default function ListingFeed({
       {/* End of results */}
       {!hasMore && listings.length > 0 && (
         <div className="text-center py-12">
-          <p className="text-caption text-tertiary">You&apos;ve seen it all.</p>
+          <p className="text-xs text-tertiary">You&apos;ve seen everything.</p>
         </div>
       )}
     </>

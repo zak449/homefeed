@@ -38,38 +38,44 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
       </head>
-      <body className="min-h-screen flex flex-col bg-white">
-        {/* Nav */}
-        <header className="sticky top-0 z-50 bg-white">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <body className="min-h-screen flex flex-col bg-white pb-14 sm:pb-0">
+        {/* Top nav */}
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-divider">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
             {/* Logo */}
             <a href="/" className="shrink-0">
-              <span className="text-lg font-semibold text-ink tracking-tight">
-                gwakgwak
+              <span className="text-xl font-bold text-ink tracking-tight">
+                gwak<span className="text-secondary">gwak</span>
               </span>
             </a>
 
-            {/* Desktop nav */}
+            {/* Desktop nav — visible, not hidden */}
             <Suspense fallback={
-              <nav className="hidden sm:flex items-center gap-6">
-                <span className="text-caption text-tertiary">explore</span>
-                <span className="text-caption text-tertiary">trending</span>
-                <span className="text-caption text-tertiary">saved</span>
+              <nav className="hidden sm:flex items-center gap-1">
+                <span className="px-4 py-1.5 rounded-full text-sm text-secondary">Explore</span>
+                <span className="px-4 py-1.5 rounded-full text-sm text-secondary">Trending</span>
+                <span className="px-4 py-1.5 rounded-full text-sm text-secondary">Saved</span>
               </nav>
             }>
               <NavLinks />
             </Suspense>
 
-            {/* Mobile menu */}
-            <Suspense>
-              <MobileNav />
-            </Suspense>
+            {/* Mobile: show tagline instead of hamburger */}
+            <span className="sm:hidden text-[11px] text-tertiary tracking-wide">
+              real estate, real talk
+            </span>
           </div>
         </header>
 
         <main className="flex-1">{children}</main>
 
         <Footer />
+
+        {/* Bottom tab bar — mobile only, always visible */}
+        <Suspense>
+          <MobileNav />
+        </Suspense>
+
         <KlaviyoScript />
       </body>
     </html>

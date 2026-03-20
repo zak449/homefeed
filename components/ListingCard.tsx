@@ -23,6 +23,15 @@ type Listing = {
   topComment?: { name: string; content: string } | null;
 };
 
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+  return `${Math.floor(seconds / 604800)}w`;
+}
+
 export default function ListingCard({ listing }: { listing: Listing }) {
   const photo = listing.photos[0];
   const isRent = listing.listingType === "rent";
@@ -32,75 +41,100 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     ? `$${listing.price.toLocaleString()}/mo`
     : `$${listing.price.toLocaleString()}`;
 
-  const typeLabel = listing.status === "off_market"
-    ? "Off Market"
-    : isRent ? "For Rent" : "For Sale";
+  const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block transition-shadow duration-200 hover:shadow-hover rounded-card"
+      className="group block rounded-2xl overflow-hidden bg-white transition-all duration-200 hover:shadow-hover"
     >
-      {/* Photo -- full width, 16:10 aspect */}
-      <div className="relative aspect-[16/10] rounded-card overflow-hidden bg-surface">
+      {/* Photo — full width, visual hook */}
+      <div className="relative aspect-[4/3] overflow-hidden bg-surface">
         {photo ? (
           <FallbackImage
             src={photo}
             alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-tertiary/30">
+          <div className="w-full h-full flex items-center justify-center text-tertiary/20">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
               <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
               <polyline points="9 22 9 12 15 12 15 22" />
             </svg>
           </div>
         )}
-      </div>
 
-      {/* Content below photo */}
-      <div className="pt-3 pb-4">
-        {/* Price + type */}
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="text-headline text-ink">
-            {price}
-          </span>
-          <span className="text-caption text-secondary">
-            {typeLabel}
+        {/* Type badge — small, on photo */}
+        <div className="absolute top-3 left-3">
+          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+            listing.status === "off_market"
+              ? "bg-amber-500/90 text-white"
+              : isRent
+                ? "bg-blue-600/90 text-white"
+                : "bg-white/90 text-ink"
+          }`}>
+            {listing.status === "off_market" ? "Off Market" : isRent ? "For Rent" : "For Sale"}
           </span>
         </div>
 
+        {/* Comment count — social signal on photo */}
+        {commentCount > 0 && (
+          <div className="absolute top-3 right-3">
+            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+              commentCount >= 5
+                ? "bg-ink/80 text-white"
+                : "bg-white/90 text-ink"
+            }`}>
+              💬 {commentCount}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        {/* Price row */}
+        <div className="flex items-baseline justify-between gap-2">
+          <h3 className="text-lg font-bold text-ink tracking-tight">{price}</h3>
+          {listedAgo && (
+            <span className="text-xs text-tertiary">{listedAgo}</span>
+          )}
+        </div>
+
         {/* Address */}
-        <p className="text-body text-secondary mt-0.5 truncate">
-          {listing.address} &middot; {listing.city}, {listing.state}
+        <p className="text-sm text-secondary mt-0.5 truncate">
+          {listing.address}
+        </p>
+        <p className="text-xs text-tertiary truncate">
+          {listing.city}, {listing.state}
+          {listing.bedrooms != null && ` · ${listing.bedrooms} bd`}
+          {listing.bathrooms != null && ` · ${listing.bathrooms} ba`}
+          {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
         </p>
 
-        {/* Stats */}
-        <p className="text-caption text-tertiary mt-0.5">
-          {listing.bedrooms != null && `${listing.bedrooms} bd`}
-          {listing.bathrooms != null && ` \u00b7 ${listing.bathrooms} ba`}
-          {listing.sqft != null && ` \u00b7 ${listing.sqft.toLocaleString()} sqft`}
-        </p>
-
-        {/* Comment preview */}
+        {/* Comment preview — THE social layer */}
         {listing.topComment ? (
-          <div className="mt-3 bg-surface rounded-card px-4 py-3">
-            <p className="text-body text-ink leading-relaxed line-clamp-3">
+          <div className="mt-3 pt-3 border-t border-divider">
+            <p className="text-sm text-ink leading-relaxed line-clamp-2">
               &ldquo;{listing.topComment.content}&rdquo;
-              <span className="text-secondary ml-1">&mdash; {listing.topComment.name}</span>
             </p>
-            {commentCount > 1 && (
-              <p className="text-caption text-tertiary mt-2">
-                {commentCount} takes &rarr;
-              </p>
-            )}
+            <p className="text-xs text-tertiary mt-1">
+              — {listing.topComment.name}
+              {commentCount > 1 && (
+                <span className="ml-2 text-secondary font-medium">
+                  +{commentCount - 1} more
+                </span>
+              )}
+            </p>
           </div>
         ) : (
-          <p className="mt-3 text-caption text-tertiary">
-            No takes yet &mdash; be first &rarr;
-          </p>
+          <div className="mt-3 pt-3 border-t border-divider">
+            <p className="text-xs text-tertiary group-hover:text-secondary transition-colors">
+              Be the first to share your take →
+            </p>
+          </div>
         )}
       </div>
     </Link>

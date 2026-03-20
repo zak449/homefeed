@@ -306,28 +306,28 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (radiusMiles !== 25) feedParams.radius = String(radiusMiles);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
       {/* Geolocation (invisible) */}
       <Suspense>
         <GeoProvider />
       </Suspense>
 
-      {/* ====== HERO -- only on default landing ====== */}
+      {/* ====== HERO — only on default landing ====== */}
       {isDefaultLanding && (
-        <div className="mb-8">
-          <h1 className="text-display text-ink leading-[1.1] tracking-[-0.03em]">
+        <div className="mb-8 max-w-xl">
+          <h1 className="text-3xl sm:text-4xl font-bold text-ink tracking-tight leading-[1.15]">
             the comment section<br />
             of real estate.
           </h1>
-          {(commentCount > 0 || listingCount > 0) && (
-            <p className="text-caption text-tertiary mt-3">
-              {commentCount > 0 && `${commentCount.toLocaleString()} opinions`}
-              {commentCount > 0 && listingCount > 0 && " · "}
-              {listingCount > 0 && `${listingCount.toLocaleString()} listings`}
-              {(commentCount > 0 || listingCount > 0) && " · join the conversation"}
-            </p>
-          )}
+          <p className="text-sm text-secondary mt-3 leading-relaxed">
+            See what neighbors, agents, and locals actually think about listings.
+            {commentCount > 0 && (
+              <span className="text-tertiary">
+                {" "}· {commentCount.toLocaleString()} opinions shared
+              </span>
+            )}
+          </p>
         </div>
       )}
 
@@ -338,23 +338,38 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </Suspense>
       </div>
 
-      {/* ====== SORT ROW -- when filters are active ====== */}
-      {hasFilters && (
+      {/* ====== WHAT PEOPLE ARE SAYING — landing page only ====== */}
+      {isDefaultLanding && commentsFeedData.length > 0 && (
+        <div className="mb-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-ink">What people are saying</h2>
+            <a href="/?sort=comments" className="text-sm text-secondary hover:text-ink transition-colors">
+              See all →
+            </a>
+          </div>
+          <CommentsFeed comments={commentsFeedData.slice(0, 6)} />
+        </div>
+      )}
+
+      {/* ====== SORT + FILTER BAR ====== */}
+      {(hasFilters || !isDefaultLanding) && (
         <div className="mb-6">
           <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
-              <p className="text-caption text-tertiary mb-1">
-                {total} result{total !== 1 ? "s" : ""}
-                {city && ` in ${city}`}
-              </p>
-              <h1 className="text-headline text-ink">
+              {hasFilters && (
+                <p className="text-xs text-tertiary mb-1">
+                  {total} result{total !== 1 ? "s" : ""}
+                  {city && ` in ${city}`}
+                </p>
+              )}
+              <h2 className="text-xl font-semibold text-ink">
                 {city ? city : sort === "comments" ? "Trending" : "Explore"}
-              </h1>
+              </h2>
             </div>
-            <div className="flex items-center gap-4 text-caption">
+            <div className="flex items-center gap-1">
               {[
                 { key: "newest", label: "New" },
-                { key: "comments", label: "Trending" },
+                { key: "comments", label: "🔥 Trending" },
                 { key: "price-low", label: "$ Low" },
                 { key: "price-high", label: "$ High" },
               ].map((s) => {
@@ -371,10 +386,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   <a
                     key={s.key}
                     href={`/?${params.toString()}`}
-                    className={`transition-colors ${
+                    className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                       isActive
-                        ? "text-ink font-medium"
-                        : "text-tertiary hover:text-ink"
+                        ? "bg-ink text-white font-medium"
+                        : "text-secondary hover:bg-surface"
                     }`}
                   >
                     {s.label}
@@ -386,41 +401,28 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
-      {/* ====== THE FEED ====== */}
-      {isDefaultLanding && commentsFeedData.length > 0 && (
-        <div className="mb-8">
-          {/* Interleave: comments feed, then featured take, then listing cards */}
-          <CommentsFeed comments={commentsFeedData.slice(0, 3)} />
-
-          {/* Featured Take inline */}
-          <div className="my-6">
-            <Suspense fallback={<div className="h-32 skeleton rounded-card" />}>
-              <HotTakeOfTheDay />
-            </Suspense>
-          </div>
-
-          {commentsFeedData.length > 3 && (
-            <CommentsFeed comments={commentsFeedData.slice(3)} />
-          )}
+      {/* ====== LISTINGS GRID ====== */}
+      {isDefaultLanding && sortedListings.length > 0 && (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-ink">Latest listings</h2>
         </div>
       )}
 
-      {/* ====== LISTING FEED ====== */}
       {sortedListings.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-headline text-ink mb-2">
-            No active listings in this area
+          <div className="text-4xl mb-4">🏠</div>
+          <p className="text-xl font-semibold text-ink mb-2">
+            No listings found
           </p>
-          <p className="text-body text-secondary max-w-md mx-auto">
-            But that doesn&apos;t mean the conversation is over. People are still
-            talking about homes nearby.
+          <p className="text-sm text-secondary max-w-md mx-auto">
+            Try a different search or check out what&apos;s trending.
           </p>
-          <div className="flex items-center justify-center gap-6 mt-6">
-            <a href="/" className="text-caption font-medium text-ink hover:text-secondary transition-colors">
-              &larr; Back to all listings
+          <div className="flex items-center justify-center gap-4 mt-6">
+            <a href="/" className="px-4 py-2 rounded-full bg-ink text-white text-sm font-medium hover:bg-secondary transition-colors">
+              Browse all
             </a>
-            <a href="/?sort=comments" className="text-caption text-tertiary hover:text-ink transition-colors">
-              See trending &rarr;
+            <a href="/?sort=comments" className="px-4 py-2 rounded-full border border-divider text-sm text-secondary hover:text-ink transition-colors">
+              See trending
             </a>
           </div>
         </div>
