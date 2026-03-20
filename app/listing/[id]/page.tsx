@@ -4,6 +4,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import AgentContactForm from "@/components/AgentContactForm";
 import CommentSection from "@/components/CommentSection";
+import ListingViewTracker from "@/components/ListingViewTracker";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -49,6 +50,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+      {/* Track listing view */}
+      <ListingViewTracker listingId={listing.id} city={listing.city} />
+
       {/* Back link */}
       <Link
         href="/"

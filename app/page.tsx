@@ -2,7 +2,9 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import ListingCard from "@/components/ListingCard";
 import SearchBar from "@/components/SearchBar";
+import GeoProvider from "@/components/GeoProvider";
 import { Prisma } from "@prisma/client";
+import { autoSyncCity } from "@/lib/auto-sync";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -22,46 +24,94 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const page        = Math.max(1, Number(sp.page ?? 1));
   const perPage     = 12;
 
-  const where: Prisma.ListingWhereInput = {
-    status: "active",
-    ...(city && {
+  // Lat/lng for radius search
+  const lat = sp.lat ? Number(sp.lat) : undefined;
+  const lng = sp.lng ? Number(sp.lng) : undefined;
+  const radiusMiles = sp.radius ? Number(sp.radius) : 25;
+
+  // Auto-sync: when a city is searched, fetch real API data if stale
+  if (city) {
+    try {
+      await autoSyncCity(city);
+    } catch (e) {
+      console.error("[AutoSync] Error:", e);
+    }
+  }
+
+  // Build where clause
+  const conditions: Prisma.ListingWhereInput[] = [
+    { status: "active" },
+  ];
+
+  if (city) {
+    conditions.push({
       OR: [
         { city: { contains: city, mode: "insensitive" } },
         { state: { contains: city, mode: "insensitive" } },
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
       ],
-    }),
-    ...(listingType && { listingType }),
-    ...(propertyType && { propertyType }),
-    ...(minPrice !== undefined || maxPrice !== undefined
-      ? { price: { gte: minPrice, lte: maxPrice } }
-      : {}),
-    ...(minBeds !== undefined && { bedrooms: { gte: minBeds } }),
-  };
+    });
+  }
+
+  if (listingType) conditions.push({ listingType });
+  if (propertyType) conditions.push({ propertyType });
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    conditions.push({ price: { gte: minPrice, lte: maxPrice } });
+  }
+  if (minBeds !== undefined) conditions.push({ bedrooms: { gte: minBeds } });
+
+  const where: Prisma.ListingWhereInput = { AND: conditions };
 
   // Determine sort order
   let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
   if (sort === "price-low")  orderBy = { price: "asc" };
   if (sort === "price-high") orderBy = { price: "desc" };
-  // "comments" sort handled post-query for simplicity
 
-  const [listings, total] = await Promise.all([
+  let [listings, total] = await Promise.all([
     prisma.listing.findMany({
       where,
       orderBy: sort === "comments" ? { createdAt: "desc" } : orderBy,
       skip: (page - 1) * perPage,
-      take: sort === "comments" ? 100 : perPage, // Fetch more for comment sort
+      take: sort === "comments" ? 100 : (lat && lng ? 200 : perPage),
       select: {
         id: true, address: true, city: true, state: true, neighborhood: true,
         price: true, listingType: true, propertyType: true, status: true,
         bedrooms: true, bathrooms: true, sqft: true, photos: true,
-        agentName: true, createdAt: true,
+        agentName: true, createdAt: true, latitude: true, longitude: true,
         _count: { select: { comments: true } },
       },
     }),
     prisma.listing.count({ where }),
   ]);
+
+  // If lat/lng provided, sort by distance and filter to radius
+  if (lat && lng) {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const haversine = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+      const R = 3959; // miles
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    };
+
+    // Add distance and filter by radius
+    const withDistance = listings
+      .filter((l) => l.latitude != null && l.longitude != null)
+      .map((l) => ({
+        ...l,
+        distance: haversine(lat, lng, l.latitude!, l.longitude!),
+      }))
+      .filter((l) => l.distance <= radiusMiles)
+      .sort((a, b) => a.distance - b.distance);
+
+    // Also include listings without coordinates (city-matched)
+    const noCoords = listings.filter((l) => l.latitude == null || l.longitude == null);
+
+    listings = [...withDistance, ...noCoords].slice(0, perPage);
+    total = withDistance.length + noCoords.length;
+  }
 
   // If sorting by comments, sort and paginate in memory
   let sortedListings = listings;
@@ -77,12 +127,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
+      {/* Geolocation + analytics (invisible) */}
+      <Suspense>
+        <GeoProvider />
+      </Suspense>
+
       {/* Header area */}
       <div className="mb-6 sm:mb-8">
         <p className="text-sm font-medium text-muted mb-1">
           {hasFilters
             ? `${total} listing${total !== 1 ? "s" : ""} found`
-            : "what's happening on your block"}
+            : lat && lng
+              ? "listings near you"
+              : "what's happening on your block"}
         </p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">

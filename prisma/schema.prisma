@@ -84,3 +84,51 @@ model EmailSubscription {
 
   @@unique([listingId, email])
 }
+
+// ── Analytics & User Profiles ──────────────────────────────
+
+model UserProfile {
+  id            String   @id @default(cuid())
+  anonId        String   @unique  // browser fingerprint / cookie ID
+  latitude      Float?
+  longitude     Float?
+  city          String?
+  state         String?
+  zip           String?
+  searchRadius  Int      @default(25) // miles
+  lastSeenAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  events   AnalyticsEvent[]
+
+  @@index([city, state])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  anonId    String   // always set even if user record doesn't exist yet
+  type      String   // "page_view" | "search" | "listing_view" | "comment" | "reaction"
+  data      Json?    // flexible payload: { city, query, listingId, etc. }
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+
+  @@index([anonId, createdAt])
+  @@index([type, createdAt])
+}
+
+// Track when we last synced a city so we don't burn API calls
+model CitySync {
+  id        String   @id @default(cuid())
+  city      String
+  state     String?
+  lastSync  DateTime @default(now())
+  rentcastCount  Int @default(0)
+  realtorCount   Int @default(0)
+
+  @@unique([city, state])
+  @@index([lastSync])
+}

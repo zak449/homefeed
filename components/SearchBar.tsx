@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { requestGeolocation, trackEvent } from "@/lib/analytics-client";
 
 export default function SearchBar() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function SearchBar() {
   const [maxPrice, setMaxPrice] = useState(sp.get("maxPrice") ?? "");
   const [minBeds, setMinBeds] = useState(sp.get("minBeds") ?? "");
   const [showFilters, setShowFilters] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds);
 
@@ -26,6 +28,10 @@ export default function SearchBar() {
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (minBeds) params.set("minBeds", minBeds);
+
+    // Track search event
+    trackEvent("search", { city, type, propertyType, minPrice, maxPrice, minBeds });
+
     router.push(`/?${params.toString()}`);
   }
 
@@ -33,6 +39,30 @@ export default function SearchBar() {
     setCity(""); setType(""); setPropertyType(""); setMinPrice(""); setMaxPrice(""); setMinBeds("");
     router.push("/");
   }
+
+  const handleNearMe = useCallback(async () => {
+    setLocating(true);
+    try {
+      const loc = await requestGeolocation();
+      if (loc?.city) {
+        setCity(loc.city);
+        trackEvent("search", { type: "near_me", city: loc.city, latitude: loc.latitude, longitude: loc.longitude });
+        const params = new URLSearchParams();
+        params.set("city", loc.city);
+        params.set("lat", String(loc.latitude));
+        params.set("lng", String(loc.longitude));
+        params.set("radius", "25");
+        if (type) params.set("type", type);
+        if (propertyType) params.set("propertyType", propertyType);
+        if (minPrice) params.set("minPrice", minPrice);
+        if (maxPrice) params.set("maxPrice", maxPrice);
+        if (minBeds) params.set("minBeds", minBeds);
+        router.push(`/?${params.toString()}`);
+      }
+    } finally {
+      setLocating(false);
+    }
+  }, [type, propertyType, minPrice, maxPrice, minBeds, router]);
 
   const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors";
 
@@ -58,6 +88,27 @@ export default function SearchBar() {
           className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors shrink-0"
         >
           Search
+        </button>
+        {/* Near Me button */}
+        <button
+          type="button"
+          onClick={handleNearMe}
+          disabled={locating}
+          className="px-3 py-2.5 text-sm font-medium rounded-lg border border-border text-muted hover:text-ink hover:border-ink/30 transition-colors shrink-0 flex items-center gap-1.5 disabled:opacity-50"
+          title="Search near your location"
+        >
+          {locating ? (
+            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+          ) : (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+              <circle cx="12" cy="12" r="8" />
+            </svg>
+          )}
+          <span className="hidden sm:inline">{locating ? "Locating..." : "Near Me"}</span>
         </button>
         <button
           type="button"

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { autoSyncCity } from "@/lib/auto-sync";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
@@ -14,6 +15,15 @@ export async function GET(req: NextRequest) {
   const q = searchParams.get("q") ?? undefined;
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const perPage = 12;
+
+  // Auto-sync city data from real APIs if stale
+  if (city) {
+    try {
+      await autoSyncCity(city);
+    } catch (e) {
+      console.error("[Listings API] AutoSync error:", e);
+    }
+  }
 
   // Build filters — always filter to active listings only
   const conditions: Prisma.ListingWhereInput[] = [
@@ -73,6 +83,8 @@ export async function GET(req: NextRequest) {
         photos: true,
         agentName: true,
         agentPhone: true,
+        latitude: true,
+        longitude: true,
         _count: { select: { comments: true } },
       },
     }),
