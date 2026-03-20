@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 
 export default function FallbackImage({
   src,
@@ -21,10 +21,15 @@ export default function FallbackImage({
   const [failed, setFailed] = useState(false);
   const [triedProxy, setTriedProxy] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
-  const handleLoad = useCallback(() => {
-    setLoaded(true);
-  }, []);
+  // Check if image was already loaded from cache before React attached handlers
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+    }
+  }, [imgSrc]);
 
   if (failed) {
     return (
@@ -63,25 +68,23 @@ export default function FallbackImage({
     );
   }
 
-  // Render img directly with className — no wrapper div
-  // This ensures the img gets the exact positioning/sizing from the parent
   return (
     <>
-      {/* Skeleton shown behind while loading */}
       {!loaded && (
         <div className={`${className ?? ""} skeleton`} style={style} />
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={imgSrc}
         alt={alt}
-        className={`${className ?? ""} transition-opacity duration-400 ease-out ${
+        className={`${className ?? ""} transition-opacity duration-300 ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
         style={style}
         loading={loading}
         onClick={onClick}
-        onLoad={handleLoad}
+        onLoad={() => setLoaded(true)}
         onError={() => {
           if (!triedProxy && src.includes("rdcpix.com")) {
             setTriedProxy(true);
