@@ -60,6 +60,7 @@ export default function SearchBar() {
   const [showFilters, setShowFilters] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [geoResolved, setGeoResolved] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -181,6 +182,7 @@ export default function SearchBar() {
       const loc = await requestGeolocation();
       if (loc?.city) {
         setCity(loc.city);
+        setGeoResolved(true);
         addRecentSearch(loc.city);
         setRecentSearches(getRecentSearches());
         trackEvent("search", { type: "current_location", city: loc.city });
@@ -236,18 +238,31 @@ export default function SearchBar() {
       {/* Main search row */}
       <div className="flex gap-2">
         <div className="flex-1 relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
+          {locating ? (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">
+              <div className="w-4 h-4 border-2 border-social/30 border-t-social rounded-full animate-spin" />
+            </div>
+          ) : geoResolved ? (
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-social" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          ) : (
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+          )}
           <input
             ref={inputRef}
             type="text"
             value={city}
-            onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); }}
+            onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); setGeoResolved(false); }}
             onFocus={() => setShowSuggestions(true)}
-            placeholder="City, zip, neighborhood, or address..."
-            className="w-full rounded-lg border border-border pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors"
+            placeholder={locating ? "Finding your location..." : "City, zip, neighborhood, or address..."}
+            className={`w-full rounded-lg border border-border pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors ${
+              geoResolved ? "text-ink font-medium" : ""
+            }`}
             autoComplete="off"
           />
 
@@ -264,14 +279,21 @@ export default function SearchBar() {
                 disabled={locating}
                 className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-left hover:bg-tag transition-colors border-b border-border disabled:opacity-50"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent shrink-0">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-                  <circle cx="12" cy="12" r="8" />
-                </svg>
-                <span className="font-semibold text-ink">
-                  {locating ? "Finding your location..." : "Current Location"}
+                {locating ? (
+                  <div className="w-4 h-4 border-2 border-social/30 border-t-social rounded-full animate-spin shrink-0" />
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-social shrink-0">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                    <circle cx="12" cy="12" r="8" />
+                  </svg>
+                )}
+                <span className={`font-semibold ${locating ? "text-muted" : "text-ink"}`}>
+                  {locating ? "Finding your location..." : "Use Current Location"}
                 </span>
+                {locating && (
+                  <span className="ml-auto text-[11px] text-muted animate-pulse">locating</span>
+                )}
               </button>
 
               {/* Recent searches */}

@@ -240,3 +240,51 @@ input[type=number]::-webkit-outer-spin-button {
   max-height: 80px;
   opacity: 1;
 }
+
+/* Image blur-up fade-in */
+.img-blur-up {
+  filter: blur(8px);
+  opacity: 0;
+  transition: filter 0.4s ease-out, opacity 0.4s ease-out;
+}
+.img-blur-up.loaded {
+  filter: blur(0);
+  opacity: 1;
+}
+
+/* Glassmorphic surface */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Smooth banner entrance */
+@keyframes bannerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.banner-enter {
+  animation: bannerSlideIn 0.4s ease-out forwards;
+}
+
+/* Map hover zoom */
+.map-preview:hover img {
+  transform: scale(1.02);
+  transition: transform 0.3s ease-out;
+}
+
+/* Location pin bounce */
+@keyframes pinBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.pin-bounce {
+  animation: pinBounce 1.5s ease-in-out infinite;
+}

@@ -14,6 +14,7 @@ import MortgageCalculator from "@/components/MortgageCalculator";
 import PriceInsight from "@/components/PriceInsight";
 import EngagementPrompts from "@/components/EngagementPrompts";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
+import MapPreview from "@/components/MapPreview";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -281,6 +282,54 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
       </div>
+
+      {/* 6b. Map + Nearby — spatial context */}
+      {listing.latitude != null && listing.longitude != null && (
+        <div className="mb-5 stagger-in" style={{ animationDelay: "50ms" }}>
+          <h2 className="font-display font-semibold text-sm text-ink mb-2 flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-social">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+            Location
+          </h2>
+          <MapPreview
+            latitude={listing.latitude}
+            longitude={listing.longitude}
+            address={listing.address}
+            className="mb-3"
+          />
+          {/* Nearby info tags */}
+          <div className="flex flex-wrap gap-2">
+            {listing.neighborhood && (
+              <a
+                href={`/?city=${encodeURIComponent(listing.neighborhood)}`}
+                className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink bg-tag hover:bg-ink/10 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </svg>
+                {listing.neighborhood}
+              </a>
+            )}
+            <a
+              href={`/?city=${encodeURIComponent(listing.city)}`}
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-ink bg-tag hover:bg-ink/10 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              {listing.city}, {listing.state}
+            </a>
+            {listing.zip && (
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-muted bg-tag px-3 py-1.5 rounded-lg">
+                {listing.zip}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* 7. Mortgage Calculator + Price Insight — for sale listings */}
       {!isRent && (

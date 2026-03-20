@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export default function FallbackImage({
   src,
@@ -20,6 +20,11 @@ export default function FallbackImage({
   const [imgSrc, setImgSrc] = useState(src);
   const [failed, setFailed] = useState(false);
   const [triedProxy, setTriedProxy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
+  const handleLoad = useCallback(() => {
+    setLoaded(true);
+  }, []);
 
   if (failed) {
     return (
@@ -59,22 +64,30 @@ export default function FallbackImage({
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={imgSrc}
-      alt={alt}
-      className={className}
-      loading={loading}
-      onClick={onClick}
-      style={style}
-      onError={() => {
-        if (!triedProxy && src.includes("rdcpix.com")) {
-          setTriedProxy(true);
-          setImgSrc(`/api/photo-proxy?url=${encodeURIComponent(src)}`);
-        } else {
-          setFailed(true);
-        }
-      }}
-    />
+    <div className={`relative ${className ?? ""}`} style={style}>
+      {/* Skeleton placeholder while loading */}
+      {!loaded && (
+        <div className="absolute inset-0 skeleton" />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={imgSrc}
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-500 ease-out ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+        loading={loading}
+        onClick={onClick}
+        onLoad={handleLoad}
+        onError={() => {
+          if (!triedProxy && src.includes("rdcpix.com")) {
+            setTriedProxy(true);
+            setImgSrc(`/api/photo-proxy?url=${encodeURIComponent(src)}`);
+          } else {
+            setFailed(true);
+          }
+        }}
+      />
+    </div>
   );
 }

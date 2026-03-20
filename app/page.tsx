@@ -7,10 +7,12 @@ import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
 import FallbackImage from "@/components/FallbackImage";
 import RecentlyViewed from "@/components/RecentlyViewed";
+import LocationBanner from "@/components/LocationBanner";
 import HotTakeOfTheDay from "@/components/HotTakeOfTheDay";
 import CommunityPulse from "@/components/CommunityPulse";
 import BrowseByNeighborhood from "@/components/NeighborhoodCard";
 import { lookupAddress } from "@/lib/address-lookup";
+import { enrichBatch } from "@/lib/enrich-batch";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -135,6 +137,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     price: true, listingType: true, propertyType: true, status: true,
     bedrooms: true, bathrooms: true, sqft: true, photos: true,
     agentName: true, createdAt: true, latitude: true, longitude: true,
+    source: true,
     _count: { select: { comments: true } },
     comments: {
       take: 1,
@@ -266,6 +269,21 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     } catch (e) {
       console.error("[AddressLookup] Fallback error:", e);
     }
+  }
+
+  // Fire-and-forget: enrich listings with few photos
+  const needsEnrich = listings
+    .filter((l) => l.photos.length <= 1 && l.source === "realtor")
+    .slice(0, 5)
+    .map((l) => l.id);
+  if (needsEnrich.length > 0) {
+    void (async () => {
+      try {
+        await enrichBatch(needsEnrich);
+      } catch (e) {
+        console.error("[EnrichBatch] Error:", e);
+      }
+    })();
   }
 
   // Map listings to include topComment
@@ -659,6 +677,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </div>
         );
       })()}
+
+      {/* Location banner — smart geo-aware context */}
+      <Suspense>
+        <LocationBanner />
+      </Suspense>
 
       {/* Search + filters */}
       <Suspense>

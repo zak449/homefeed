@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { enrichBatch } from "@/lib/enrich-batch";
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
 
@@ -90,6 +91,7 @@ export async function GET(req: NextRequest) {
     createdAt: true,
     latitude: true,
     longitude: true,
+    source: true,
     _count: { select: { comments: true } },
     comments: {
       take: 1,
@@ -200,6 +202,21 @@ export async function GET(req: NextRequest) {
   }
 
   const hasMore = page * perPage < total;
+
+  // Fire-and-forget: enrich listings with few photos
+  const needsEnrich = listings
+    .filter((l) => l.photos.length <= 1 && l.source === "realtor")
+    .slice(0, 5)
+    .map((l) => l.id);
+  if (needsEnrich.length > 0) {
+    void (async () => {
+      try {
+        await enrichBatch(needsEnrich);
+      } catch (e) {
+        console.error("[EnrichBatch] Error:", e);
+      }
+    })();
+  }
 
   // Map listings to include topComment for the social layer
   const withComments = listings.map((l) => ({
