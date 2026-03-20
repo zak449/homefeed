@@ -22,6 +22,7 @@ type Listing = {
   latitude?: number | null;
   longitude?: number | null;
   _count?: { comments: number };
+  topComment?: { name: string; content: string } | null;
 };
 
 type Props = {

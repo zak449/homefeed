@@ -31,13 +31,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const lng = sp.lng ? Number(sp.lng) : undefined;
   const radiusMiles = sp.radius ? Number(sp.radius) : 25;
 
-  // Auto-sync: when a city is searched, fetch real API data if stale
+  // Auto-sync: fire-and-forget — don't block page render
   if (city) {
-    try {
-      await autoSyncCity(city);
-    } catch (e) {
-      console.error("[AutoSync] Error:", e);
-    }
+    void (async () => {
+      try {
+        await autoSyncCity(city);
+      } catch (e) {
+        console.error("[AutoSync] Error:", e);
+      }
+    })();
   }
 
   // Build where clause
@@ -81,6 +83,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     bedrooms: true, bathrooms: true, sqft: true, photos: true,
     agentName: true, createdAt: true, latitude: true, longitude: true,
     _count: { select: { comments: true } },
+    comments: {
+      take: 1,
+      orderBy: { createdAt: "desc" as const },
+      select: { name: true, content: true },
+    },
   } as const;
 
   let listings: Awaited<ReturnType<typeof prisma.listing.findMany<{ select: typeof selectFields }>>>;
@@ -184,7 +191,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     listings = all.slice(0, perPage);
   }
 
-  let sortedListings = listings;
+  // Map listings to include topComment
+  const withComments = listings.map((l) => ({
+    ...l,
+    topComment: l.comments?.[0] ?? null,
+  }));
+
+  let sortedListings = withComments;
 
   const hasMore = perPage < total;
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
@@ -212,6 +225,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       <Suspense>
         <GeoProvider />
       </Suspense>
+
+      {/* Hero — only on default landing page */}
+      {!hasFilters && sort === "newest" && (
+        <div className="mb-8 sm:mb-12">
+          <h1 className="font-display text-3xl sm:text-5xl font-bold text-ink tracking-tighter leading-[1.1]">
+            Real estate,<br />real opinions.
+          </h1>
+          <p className="text-base sm:text-lg text-muted mt-3 max-w-lg">
+            Every listing has a story. See what your neighbors, agents, and locals actually think — not just the price.
+          </p>
+        </div>
+      )}
 
       {/* Header area */}
       <div className="mb-6 sm:mb-8">
@@ -306,9 +331,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {sortedListings.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-4xl mb-3">🏚️</p>
-          <p className="font-display text-lg font-bold text-ink mb-1">Nothing here yet</p>
+          <p className="font-display text-lg font-semibold text-ink mb-1">No listings here yet</p>
           <p className="text-sm text-muted max-w-sm mx-auto">
-            Try a different city or remove some filters. Or just browse everything.
+            Try searching a city to see what people are saying about homes in that area.
           </p>
           <a href="/" className="inline-block mt-5 text-sm font-semibold text-accent hover:text-accent-hover transition-colors">
             ← Back to all listings

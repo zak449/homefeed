@@ -57,6 +57,7 @@ export default function PhotoLightbox({
             src={photos[0]}
             alt={address}
             className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </button>
       ) : (
@@ -70,6 +71,7 @@ export default function PhotoLightbox({
               src={photos[0]}
               alt={address}
               className="absolute inset-0 w-full h-full object-cover"
+              onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
           </button>
           {photos.slice(1, 5).map((p, i) => (
@@ -83,6 +85,7 @@ export default function PhotoLightbox({
                 src={p}
                 alt={`${address} photo ${i + 2}`}
                 className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
               {i === 3 && photos.length > 5 && (
                 <div className="absolute inset-0 bg-ink/50 flex items-center justify-center">
@@ -151,6 +154,7 @@ export default function PhotoLightbox({
             alt={`${address} photo ${index + 1}`}
             className="max-h-[90vh] max-w-[90vw] object-contain select-none"
             onClick={(e) => e.stopPropagation()}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </div>
       )}

@@ -32,12 +32,12 @@ export async function POST(req: NextRequest) {
     "Wisconsin": "WI", "Wyoming": "WY", "District of Columbia": "DC",
   };
 
-  // Reverse geocode using OpenStreetMap Nominatim (free, no key, accurate city names)
+  // Reverse geocode — run Nominatim and BigDataCloud in parallel, take whichever resolves first
   let city = "";
   let state = "";
   let zip = "";
 
-  try {
+  const nominatimPromise = (async (): Promise<{ city: string; state: string; zip: string }> => {
     console.log("[Geo] Calling Nominatim for", latitude, longitude);
     const geoRes = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=16&addressdetails=1`,
@@ -46,52 +46,41 @@ export async function POST(req: NextRequest) {
           "User-Agent": "HomeFeed/1.0 (https://homefeed.app; contact@homefeed.app)",
           "Accept": "application/json",
         },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(3000),
       }
     );
-    if (geoRes.ok) {
-      const geo = await geoRes.json();
-      const addr = geo.address || {};
-      console.log("[Geo] Nominatim address fields:", JSON.stringify(addr));
-      // Nominatim returns city, town, village, or hamlet — pick the most specific
-      city = addr.city || addr.town || addr.village || addr.hamlet || addr.suburb || addr.county || "";
-      state = addr.state || "";
-      zip = addr.postcode || "";
+    if (!geoRes.ok) throw new Error(`Nominatim status ${geoRes.status}`);
+    const geo = await geoRes.json();
+    const addr = geo.address || {};
+    const c = addr.city || addr.town || addr.village || addr.hamlet || addr.suburb || addr.county || "";
+    if (!c) throw new Error("Nominatim returned no city");
+    let s = addr.state || "";
+    if (s) s = stateMap[s] || s;
+    return { city: c, state: s, zip: addr.postcode || "" };
+  })();
 
-      // Convert full state name to abbreviation
-      if (state) {
-        state = stateMap[state] || state;
-      }
-    } else {
-      console.warn("[Geo] Nominatim returned status:", geoRes.status, await geoRes.text().catch(() => ""));
-    }
+  const bigDataCloudPromise = (async (): Promise<{ city: string; state: string; zip: string }> => {
+    console.log("[Geo] Calling BigDataCloud for", latitude, longitude);
+    const geoRes = await fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
+      { signal: AbortSignal.timeout(3000) }
+    );
+    if (!geoRes.ok) throw new Error(`BigDataCloud status ${geoRes.status}`);
+    const geo = await geoRes.json();
+    const c = geo.locality || geo.city || "";
+    if (!c) throw new Error("BigDataCloud returned no city");
+    const rawState = geo.principalSubdivisionCode?.replace("US-", "") || "";
+    const s = stateMap[rawState] || rawState;
+    return { city: c, state: s, zip: geo.postcode || "" };
+  })();
+
+  try {
+    const result = await Promise.any([nominatimPromise, bigDataCloudPromise]);
+    city = result.city;
+    state = result.state;
+    zip = result.zip;
   } catch (e) {
-    console.error("[Geo] Nominatim reverse geocode error:", e);
-  }
-
-  // Fallback to BigDataCloud if Nominatim didn't return a city
-  if (!city) {
-    try {
-      console.log("[Geo] Nominatim returned no city, trying BigDataCloud fallback");
-      const geoRes = await fetch(
-        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`,
-        { signal: AbortSignal.timeout(8000) }
-      );
-      if (geoRes.ok) {
-        const geo = await geoRes.json();
-        console.log("[Geo] BigDataCloud result:", geo.locality, geo.city, geo.principalSubdivisionCode);
-        city = geo.locality || geo.city || "";
-        if (!state) {
-          const rawState = geo.principalSubdivisionCode?.replace("US-", "") || "";
-          state = stateMap[rawState] || rawState;
-        }
-        zip = zip || (geo.postcode || "");
-      } else {
-        console.warn("[Geo] BigDataCloud returned status:", geoRes.status);
-      }
-    } catch (e) {
-      console.error("[Geo] BigDataCloud fallback error:", e);
-    }
+    console.error("[Geo] All reverse geocode providers failed:", e);
   }
 
   if (!city) {

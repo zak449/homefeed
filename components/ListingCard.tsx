@@ -19,6 +19,7 @@ type Listing = {
   agentName?: string | null;
   createdAt?: Date | string;
   _count?: { comments: number };
+  topComment?: { name: string; content: string } | null;
 };
 
 export default function ListingCard({ listing }: { listing: Listing }) {
@@ -41,13 +42,22 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       {/* Photo */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-tag">
         {photo ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={photo}
-            alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-            loading="lazy"
-          />
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo}
+              alt={listing.address}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+              loading="lazy"
+              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
+            />
+            <div className="hidden w-full h-full flex items-center justify-center text-muted/20">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted/20">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
@@ -117,6 +127,16 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             </>
           )}
         </div>
+
+        {/* Top comment preview */}
+        {listing.topComment && (
+          <div className="mt-2 pt-2 border-t border-border">
+            <p className="text-[12px] text-muted line-clamp-2">
+              <span className="font-medium text-ink">{listing.topComment.name}</span>{" "}
+              {listing.topComment.content}
+            </p>
+          </div>
+        )}
       </div>
     </Link>
   );

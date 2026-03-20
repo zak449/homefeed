@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { autoSyncCity } from "@/lib/auto-sync";
-
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
 
@@ -24,15 +22,6 @@ export async function GET(req: NextRequest) {
   const lat = searchParams.get("lat") ? Number(searchParams.get("lat")) : undefined;
   const lng = searchParams.get("lng") ? Number(searchParams.get("lng")) : undefined;
   const radiusMiles = searchParams.get("radius") ? Number(searchParams.get("radius")) : 25;
-
-  // Auto-sync city data from real APIs if stale
-  if (city) {
-    try {
-      await autoSyncCity(city);
-    } catch (e) {
-      console.error("[Listings API] AutoSync error:", e);
-    }
-  }
 
   // Build filters — always filter to active listings only
   const conditions: Prisma.ListingWhereInput[] = [
@@ -100,6 +89,11 @@ export async function GET(req: NextRequest) {
     latitude: true,
     longitude: true,
     _count: { select: { comments: true } },
+    comments: {
+      take: 1,
+      orderBy: { createdAt: "desc" as const },
+      select: { name: true, content: true },
+    },
   } as const;
 
   let listings: Awaited<ReturnType<typeof prisma.listing.findMany<{ select: typeof selectFields }>>>;
@@ -205,8 +199,14 @@ export async function GET(req: NextRequest) {
 
   const hasMore = page * perPage < total;
 
+  // Map listings to include topComment for the social layer
+  const withComments = listings.map((l) => ({
+    ...l,
+    topComment: l.comments?.[0] ?? null,
+  }));
+
   return NextResponse.json(
-    { listings, hasMore, total },
+    { listings: withComments, hasMore, total },
     {
       headers: {
         "Cache-Control": "s-maxage=60, stale-while-revalidate=300",

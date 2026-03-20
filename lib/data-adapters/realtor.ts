@@ -142,7 +142,9 @@ export async function fetchRealtorListings(params: {
     const results: RealtyResult[] = json?.data?.home_search?.results ?? [];
     if (!Array.isArray(results)) return 0;
 
-    let upserted = 0;
+    // Build all upsert operations, then batch them in a single transaction
+    const toFullSize = (url: string) => url.replace(/s\.jpg$/i, "od.jpg");
+    const upsertOps = [];
 
     for (const item of results) {
       const addr = item.location?.address;
@@ -158,8 +160,6 @@ export async function fetchRealtorListings(params: {
       const agentBrokerage = brand?.name ?? advertiser?.office?.name ?? item.source?.agents?.[0]?.office_name ?? null;
 
       // Collect photos — convert small thumbnails to full-size
-      // rdcpix URLs end in e.g. "...m1234s.jpg" — replace trailing "s.jpg" with "od.jpg"
-      const toFullSize = (url: string) => url.replace(/s\.jpg$/i, "od.jpg");
       const photos: string[] = [];
       if (item.primary_photo?.href) {
         photos.push(toFullSize(item.primary_photo.href));
@@ -176,8 +176,8 @@ export async function fetchRealtorListings(params: {
 
       const neighborhood = null; // This API doesn't return neighborhood names in list
 
-      try {
-        await prisma.listing.upsert({
+      upsertOps.push(
+        prisma.listing.upsert({
           where: { source_sourceId: { source: "realtor", sourceId: item.property_id } },
           update: {
             price: Math.round(price),
@@ -213,10 +213,17 @@ export async function fetchRealtorListings(params: {
             listingUrl: item.href ?? null,
             cachedAt: new Date(),
           },
-        });
-        upserted++;
+        })
+      );
+    }
+
+    let upserted = 0;
+    if (upsertOps.length > 0) {
+      try {
+        const results = await prisma.$transaction(upsertOps);
+        upserted = results.length;
       } catch (e) {
-        console.error("[Realtor] Upsert error:", e);
+        console.error("[Realtor] Batch upsert error:", e);
       }
     }
 

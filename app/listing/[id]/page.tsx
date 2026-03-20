@@ -27,12 +27,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // Enrich API listings with full photos + description on first view
-  try {
-    await enrichListingDetail(id);
-  } catch (e) {
-    console.error("[Detail] Enrich error:", e);
-  }
+  // Enrich API listings with full photos + description — fire-and-forget, don't block render
+  void (async () => {
+    try {
+      await enrichListingDetail(id);
+    } catch (e) {
+      console.error("[Detail] Enrich error:", e);
+    }
+  })();
 
   const [listing, commentCount, reactionCount] = await Promise.all([
     prisma.listing.findUnique({ where: { id } }),
