@@ -361,7 +361,7 @@ export default function SearchBar() {
 
       {/* Filters link */}
       <div className="flex items-center gap-3 mt-2">
-        {/* Filter chips for Buy/Rent/All */}
+        {/* Filter chips for Buy/Rent/All — navigate immediately on click */}
         <div className="flex items-center gap-1.5">
           {[
             { key: "", label: "All" },
@@ -371,7 +371,24 @@ export default function SearchBar() {
             <button
               key={t.key}
               type="button"
-              onClick={() => setType(t.key)}
+              onClick={() => {
+                setType(t.key);
+                // Navigate immediately — don't wait for form submit
+                const params = new URLSearchParams();
+                if (city.trim()) params.set("city", city.trim());
+                if (t.key) params.set("type", t.key);
+                if (propertyType) params.set("propertyType", propertyType);
+                if (minPrice) params.set("minPrice", minPrice);
+                if (maxPrice) params.set("maxPrice", maxPrice);
+                if (minBeds) params.set("minBeds", minBeds);
+                if (minBaths) params.set("minBaths", minBaths);
+                if (minSqft) params.set("minSqft", minSqft);
+                if (maxSqft) params.set("maxSqft", maxSqft);
+                // Preserve existing sort if any
+                const currentSort = sp.get("sort");
+                if (currentSort) params.set("sort", currentSort);
+                router.push(`/?${params.toString()}`);
+              }}
               className={`px-3 py-1 rounded-full text-caption transition-colors ${
                 type === t.key
                   ? "bg-ink text-white"
