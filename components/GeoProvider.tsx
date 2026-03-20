@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { requestGeolocation, getStoredLocation, trackEvent, getAnonId } from "@/lib/analytics-client";
+import { useEffect } from "react";
+import { requestGeolocation, trackEvent, getAnonId, getStoredLocation } from "@/lib/analytics-client";
 
 /**
- * GeoProvider — on first visit, requests geolocation and auto-navigates
- * to show listings near the user. Triggers API sync for their city.
+ * GeoProvider — silently requests geolocation and stores it.
+ * Does NOT auto-redirect. The user's location is saved so "Near Me"
+ * works instantly, and analytics track where users are from.
+ *
+ * The homepage always shows all listings until the user actively searches.
  */
 export default function GeoProvider() {
-  const router = useRouter();
-  const sp = useSearchParams();
-  const [prompted, setPrompted] = useState(false);
-
-  // Track page view on mount
+  // Track page view
   useEffect(() => {
     getAnonId();
     trackEvent("page_view", {
@@ -22,43 +20,14 @@ export default function GeoProvider() {
     });
   }, []);
 
-  // Request geolocation on first visit (no city/search active)
+  // Silently request + store geolocation (no redirect)
   useEffect(() => {
-    const hasCity = sp.get("city");
-    const hasLat = sp.get("lat");
-    const hasType = sp.get("type");
-    const hasSort = sp.get("sort");
-
-    // Don't auto-locate if user has any active search/filter
-    if (hasCity || hasLat || hasType || hasSort || prompted) return;
-
-    // Check stored location
     const stored = getStoredLocation();
-    if (stored?.city) {
-      // Trigger sync for their city in background, then navigate
-      triggerSyncAndNavigate(stored.city, stored.latitude, stored.longitude, router);
-      setPrompted(true);
-      return;
-    }
+    if (stored) return; // Already have location
 
-    // First visit — request location
-    setPrompted(true);
-    requestGeolocation().then((loc) => {
-      if (loc?.city) {
-        triggerSyncAndNavigate(loc.city, loc.latitude, loc.longitude, router);
-      }
-    });
-  }, [sp, prompted, router]);
+    // Request in background — just store it for "Near Me" button
+    requestGeolocation().catch(() => {});
+  }, []);
 
   return null;
-}
-
-async function triggerSyncAndNavigate(
-  city: string,
-  lat: number,
-  lng: number,
-  router: ReturnType<typeof useRouter>
-) {
-  // Navigate immediately so the user sees something
-  router.replace(`/?city=${encodeURIComponent(city)}&lat=${lat}&lng=${lng}&radius=30`);
 }

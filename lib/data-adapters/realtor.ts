@@ -157,16 +157,17 @@ export async function fetchRealtorListings(params: {
       const agentPhone = brand?.phone ?? null;
       const agentBrokerage = brand?.name ?? advertiser?.office?.name ?? item.source?.agents?.[0]?.office_name ?? null;
 
-      // Collect photos — convert small thumbnails to large
+      // Collect photos — convert small thumbnails to full-size
+      // rdcpix URLs end in e.g. "...m1234s.jpg" — replace trailing "s.jpg" with "od.jpg"
+      const toFullSize = (url: string) => url.replace(/s\.jpg$/i, "od.jpg");
       const photos: string[] = [];
       if (item.primary_photo?.href) {
-        // Replace small 's.jpg' suffix with large 'od.jpg'
-        photos.push(item.primary_photo.href.replace(/s\.jpg$/, "od.jpg"));
+        photos.push(toFullSize(item.primary_photo.href));
       }
       if (item.photos) {
         for (const p of item.photos) {
           if (p.href) {
-            const url = p.href.replace(/s\.jpg$/, "od.jpg");
+            const url = toFullSize(p.href);
             if (!photos.includes(url)) photos.push(url);
           }
           if (photos.length >= 10) break;

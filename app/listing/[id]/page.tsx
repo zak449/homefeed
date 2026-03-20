@@ -231,7 +231,8 @@ function PhotoGallery({ photos, address }: { photos: string[]; address: string }
   if (photos.length === 1) {
     return (
       <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-tag">
-        <Image src={photos[0]} alt={address} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 65vw" priority />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photos[0]} alt={address} className="absolute inset-0 w-full h-full object-cover" />
       </div>
     );
   }
@@ -239,13 +240,15 @@ function PhotoGallery({ photos, address }: { photos: string[]; address: string }
   return (
     <div className="grid grid-cols-4 gap-1.5 rounded-xl overflow-hidden">
       {/* Main photo */}
-      <div className="col-span-4 sm:col-span-2 sm:row-span-2 relative aspect-[4/3] sm:aspect-auto bg-tag">
-        <Image src={photos[0]} alt={address} fill className="object-cover" sizes="(max-width: 640px) 100vw, 50vw" priority />
+      <div className="col-span-4 sm:col-span-2 sm:row-span-2 relative aspect-[4/3] sm:aspect-auto min-h-[200px] bg-tag">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={photos[0]} alt={address} className="absolute inset-0 w-full h-full object-cover" />
       </div>
       {/* Secondary photos */}
       {photos.slice(1, 5).map((p, i) => (
         <div key={i} className="relative aspect-[4/3] bg-tag hidden sm:block">
-          <Image src={p} alt={`${address} photo ${i + 2}`} fill className="object-cover hover:opacity-90 transition-opacity" sizes="25vw" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={p} alt={`${address} photo ${i + 2}`} className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity" />
           {i === 3 && photos.length > 5 && (
             <div className="absolute inset-0 bg-ink/50 flex items-center justify-center">
               <span className="text-white font-semibold text-sm">+{photos.length - 5}</span>

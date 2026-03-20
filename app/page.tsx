@@ -142,18 +142,47 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               : "what's happening on your block"}
         </p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">
-            {city
-              ? `${city}`
-              : listingType === "rent"
-                ? "Rentals"
-                : listingType === "sale"
-                  ? "For Sale"
-                  : sort === "comments"
-                    ? "🔥 Hot Takes"
-                    : "The Feed"
-            }
-          </h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">
+              {city
+                ? `${city}`
+                : sort === "comments"
+                  ? "🔥 Hot Takes"
+                  : "The Feed"
+              }
+            </h1>
+            {/* For Sale / For Rent toggle */}
+            <div className="flex items-center bg-tag rounded-full p-0.5">
+              {[
+                { key: "", label: "All" },
+                { key: "sale", label: "Buy" },
+                { key: "rent", label: "Rent" },
+              ].map((t) => {
+                const params = new URLSearchParams(
+                  Object.fromEntries(
+                    Object.entries(sp)
+                      .filter(([, v]) => typeof v === "string") as [string, string][]
+                  )
+                );
+                if (t.key) params.set("type", t.key); else params.delete("type");
+                params.delete("page");
+                const isActive = (listingType ?? "") === t.key;
+                return (
+                  <a
+                    key={t.key}
+                    href={`/?${params.toString()}`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                      isActive
+                        ? "bg-white text-ink shadow-sm"
+                        : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    {t.label}
+                  </a>
+                );
+              })}
+            </div>
+          </div>
           {/* Sort */}
           <div className="flex items-center gap-1.5 text-sm">
             {[

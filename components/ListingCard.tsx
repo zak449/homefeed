@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 
 type Listing = {
   id: string;
@@ -46,12 +45,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       {/* Photo */}
       <div className="relative aspect-[4/3] overflow-hidden bg-tag">
         {photo ? (
-          <Image
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
             src={photo}
             alt={listing.address}
-            fill
-            className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            loading="lazy"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-4xl text-muted/30">

@@ -1,8 +1,47 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useCallback } from "react";
-import { requestGeolocation, trackEvent } from "@/lib/analytics-client";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { requestGeolocation, getStoredLocation, trackEvent } from "@/lib/analytics-client";
+
+const POPULAR_CITIES = [
+  "Los Angeles, CA",
+  "New York, NY",
+  "Miami, FL",
+  "Austin, TX",
+  "Chicago, IL",
+  "Nashville, TN",
+  "Denver, CO",
+  "Seattle, WA",
+  "San Francisco, CA",
+  "Atlanta, GA",
+  "Portland, OR",
+  "Boston, MA",
+  "Dallas, TX",
+  "Scottsdale, AZ",
+  "Savannah, GA",
+];
+
+// Recent searches stored in localStorage
+function getRecentSearches(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem("hf_recent_searches") || "[]");
+  } catch { return []; }
+}
+
+function addRecentSearch(query: string) {
+  if (typeof window === "undefined" || !query.trim()) return;
+  const recent = getRecentSearches().filter((s) => s !== query);
+  recent.unshift(query);
+  localStorage.setItem("hf_recent_searches", JSON.stringify(recent.slice(0, 8)));
+}
+
+function removeRecentSearch(query: string) {
+  if (typeof window === "undefined") return;
+  const recent = getRecentSearches().filter((s) => s !== query);
+  localStorage.setItem("hf_recent_searches", JSON.stringify(recent));
+}
 
 export default function SearchBar() {
   const router = useRouter();
@@ -15,43 +54,96 @@ export default function SearchBar() {
   const [maxPrice, setMaxPrice] = useState(sp.get("maxPrice") ?? "");
   const [minBeds, setMinBeds] = useState(sp.get("minBeds") ?? "");
   const [showFilters, setShowFilters] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Load recent searches on mount
+  useEffect(() => {
+    setRecentSearches(getRecentSearches());
+  }, []);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (
+        suggestionsRef.current &&
+        !suggestionsRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  // Filter cities based on input
+  const query = city.trim().toLowerCase();
+  const filteredCities = query
+    ? POPULAR_CITIES.filter((c) => c.toLowerCase().includes(query))
+    : POPULAR_CITIES;
+  const filteredRecent = query
+    ? recentSearches.filter((s) => s.toLowerCase().includes(query))
+    : recentSearches;
+
+  function doSearch(searchQuery: string) {
+    setShowSuggestions(false);
+    if (searchQuery.trim()) {
+      addRecentSearch(searchQuery.trim());
+      setRecentSearches(getRecentSearches());
+    }
     const params = new URLSearchParams();
-    if (city) params.set("city", city);
+    if (searchQuery) params.set("city", searchQuery);
     if (type) params.set("type", type);
     if (propertyType) params.set("propertyType", propertyType);
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (minBeds) params.set("minBeds", minBeds);
-
-    // Track search event
-    trackEvent("search", { city, type, propertyType, minPrice, maxPrice, minBeds });
-
+    trackEvent("search", { city: searchQuery, type, propertyType });
     router.push(`/?${params.toString()}`);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    doSearch(city);
   }
 
   function handleReset() {
     setCity(""); setType(""); setPropertyType(""); setMinPrice(""); setMaxPrice(""); setMinBeds("");
+    setShowSuggestions(false);
     router.push("/");
   }
 
-  const handleNearMe = useCallback(async () => {
+  function handleDeleteRecent(search: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    removeRecentSearch(search);
+    setRecentSearches(getRecentSearches());
+  }
+
+  const handleCurrentLocation = useCallback(async () => {
     setLocating(true);
+    setShowSuggestions(false);
     try {
-      const loc = await requestGeolocation();
+      let loc = getStoredLocation();
+      if (!loc) {
+        loc = await requestGeolocation();
+      }
       if (loc?.city) {
         setCity(loc.city);
-        trackEvent("search", { type: "near_me", city: loc.city, latitude: loc.latitude, longitude: loc.longitude });
+        addRecentSearch(loc.city);
+        setRecentSearches(getRecentSearches());
+        trackEvent("search", { type: "current_location", city: loc.city });
         const params = new URLSearchParams();
         params.set("city", loc.city);
         params.set("lat", String(loc.latitude));
         params.set("lng", String(loc.longitude));
-        params.set("radius", "25");
+        params.set("radius", "30");
         if (type) params.set("type", type);
         if (propertyType) params.set("propertyType", propertyType);
         if (minPrice) params.set("minPrice", minPrice);
@@ -76,39 +168,104 @@ export default function SearchBar() {
             <path d="M21 21l-4.35-4.35" />
           </svg>
           <input
+            ref={inputRef}
             type="text"
             value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Search by city, zip, or neighborhood..."
+            onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); }}
+            onFocus={() => setShowSuggestions(true)}
+            placeholder="City, zip, neighborhood, or address..."
             className="w-full rounded-lg border border-border pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors"
+            autoComplete="off"
           />
+
+          {/* Dropdown suggestions */}
+          {showSuggestions && (
+            <div
+              ref={suggestionsRef}
+              className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-border shadow-modal z-50 max-h-[400px] overflow-y-auto animate-fade-in"
+            >
+              {/* Current Location — always first */}
+              <button
+                type="button"
+                onClick={handleCurrentLocation}
+                disabled={locating}
+                className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-left hover:bg-tag transition-colors border-b border-border disabled:opacity-50"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-accent shrink-0">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                  <circle cx="12" cy="12" r="8" />
+                </svg>
+                <span className="font-semibold text-ink">
+                  {locating ? "Finding your location..." : "Current Location"}
+                </span>
+              </button>
+
+              {/* Recent searches */}
+              {filteredRecent.length > 0 && (
+                <>
+                  <div className="px-4 pt-2.5 pb-1">
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">Recent</p>
+                  </div>
+                  {filteredRecent.map((s) => (
+                    <button
+                      key={`recent-${s}`}
+                      type="button"
+                      onClick={() => { setCity(s); doSearch(s); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors group"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted shrink-0">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M12 6v6l4 2" />
+                      </svg>
+                      <span className="text-ink flex-1">{s}</span>
+                      <span
+                        onClick={(e) => handleDeleteRecent(s, e)}
+                        className="text-muted/40 hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                        role="button"
+                        tabIndex={-1}
+                      >
+                        ✕
+                      </span>
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {/* Popular cities */}
+              <div className="px-4 pt-2.5 pb-1 border-t border-border">
+                <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">
+                  {query ? "Matching Cities" : "Popular Cities"}
+                </p>
+              </div>
+              {filteredCities.slice(0, 8).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { const name = c.split(",")[0].trim(); setCity(name); doSearch(name); }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-ink">{c}</span>
+                </button>
+              ))}
+
+              {query && filteredCities.length === 0 && (
+                <div className="px-4 py-3 text-sm text-muted border-t border-border">
+                  Press Enter to search &ldquo;{city}&rdquo;
+                </div>
+              )}
+            </div>
+          )}
         </div>
         <button
           type="submit"
           className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors shrink-0"
         >
           Search
-        </button>
-        {/* Near Me button */}
-        <button
-          type="button"
-          onClick={handleNearMe}
-          disabled={locating}
-          className="px-3 py-2.5 text-sm font-medium rounded-lg border border-border text-muted hover:text-ink hover:border-ink/30 transition-colors shrink-0 flex items-center gap-1.5 disabled:opacity-50"
-          title="Search near your location"
-        >
-          {locating ? (
-            <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-            </svg>
-          ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-              <circle cx="12" cy="12" r="8" />
-            </svg>
-          )}
-          <span className="hidden sm:inline">{locating ? "Locating..." : "Near Me"}</span>
         </button>
         <button
           type="button"

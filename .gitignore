@@ -19,3 +19,5 @@ prisma/migrations/
 # Logs
 *.log
 .vercel
+.git 2/
+.next 2/
