@@ -9,11 +9,11 @@ export default function MobileNav() {
     <div className="sm:hidden">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="p-2 text-muted hover:text-ink rounded-lg"
+        className="p-2 text-muted hover:text-ink rounded-lg transition-colors"
         aria-label="Menu"
         aria-expanded={open}
       >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5">
           {open ? (
             <path d="M5 5l10 10M15 5L5 15" />
           ) : (
@@ -23,28 +23,28 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <nav className="absolute top-14 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-border shadow-nav z-50">
-          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
+        <nav className="absolute top-14 left-0 right-0 bg-white border-b border-border z-50 animate-fade-in">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex flex-col">
             <a
               href="/?type=sale"
-              className="px-3 py-2.5 text-sm font-medium text-muted hover:text-ink hover:bg-tag rounded-lg transition-colors"
+              className="px-3 py-3 text-[14px] font-medium text-ink border-b border-tag transition-colors"
               onClick={() => setOpen(false)}
             >
-              For Sale
+              Buy
             </a>
             <a
               href="/?type=rent"
-              className="px-3 py-2.5 text-sm font-medium text-muted hover:text-ink hover:bg-tag rounded-lg transition-colors"
+              className="px-3 py-3 text-[14px] font-medium text-ink border-b border-tag transition-colors"
               onClick={() => setOpen(false)}
             >
-              For Rent
+              Rent
             </a>
             <a
               href="/?sort=comments"
-              className="px-3 py-2.5 text-sm font-medium text-accent hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
+              className="px-3 py-3 text-[14px] font-medium text-ink transition-colors"
               onClick={() => setOpen(false)}
             >
-              🔥 Hot Takes
+              Hot Takes
             </a>
           </div>
         </nav>

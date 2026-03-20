@@ -215,23 +215,23 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* Header area */}
       <div className="mb-6 sm:mb-8">
-        <p className="text-sm text-muted mb-1">
-          {hasFilters
-            ? `${total} listing${total !== 1 ? "s" : ""} found`
-            : "what's happening on your block"}
-        </p>
+        {hasFilters && (
+          <p className="text-[13px] text-muted mb-1">
+            {total} result{total !== 1 ? "s" : ""}
+          </p>
+        )}
         <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <h1 className="font-editorial text-3xl sm:text-4xl text-ink leading-tight">
+          <div className="flex items-center gap-4">
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tighter">
               {city
                 ? city
                 : sort === "comments"
                   ? "Hot Takes"
-                  : "The Feed"
+                  : "Explore"
               }
             </h1>
-            {/* For Sale / For Rent toggle */}
-            <div className="flex items-center bg-tag rounded-full p-0.5">
+            {/* Type pills */}
+            <div className="flex items-center gap-0.5 bg-tag rounded-lg p-0.5">
               {[
                 { key: "", label: "All" },
                 { key: "sale", label: "Buy" },
@@ -250,9 +250,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   <a
                     key={t.key}
                     href={`/?${params.toString()}`}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    className={`px-3 py-1 rounded-md text-[12px] font-medium transition-all ${
                       isActive
-                        ? "bg-white text-ink shadow-sm"
+                        ? "bg-white text-ink shadow-button"
                         : "text-muted hover:text-ink"
                     }`}
                   >
@@ -263,7 +263,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </div>
           {/* Sort */}
-          <div className="flex items-center gap-1.5 text-sm">
+          <div className="flex items-center gap-0.5 text-[13px]">
             {[
               { key: "newest", label: "New" },
               { key: "comments", label: "🔥 Hot Takes" },
@@ -283,10 +283,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <a
                   key={s.key}
                   href={`/?${params.toString()}`}
-                  className={`px-3.5 py-1.5 rounded-full transition-all font-medium ${
+                  className={`px-3 py-1.5 rounded-lg transition-all font-medium ${
                     isActive
-                      ? "bg-ink text-white shadow-sm"
-                      : "text-muted hover:bg-tag hover:text-ink"
+                      ? "bg-ink text-white"
+                      : "text-muted hover:text-ink"
                   }`}
                 >
                   {s.label}

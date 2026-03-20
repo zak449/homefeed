@@ -28,9 +28,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   const price = isRent
     ? `$${listing.price.toLocaleString()}/mo`
-    : listing.price >= 1_000_000
-      ? `$${(listing.price / 1_000_000).toFixed(listing.price % 1_000_000 === 0 ? 0 : 1)}M`
-      : `$${(listing.price / 1_000).toFixed(0)}k`;
+    : `$${listing.price.toLocaleString()}`;
 
   const isHot = commentCount >= 5;
   const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
@@ -38,108 +36,90 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block bg-white rounded-2xl overflow-hidden border border-border hover:border-border/0 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
+      className="group block rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
     >
       {/* Photo */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-tag">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-tag">
         {photo ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={photo}
             alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover ken-burns"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-tag to-cream">
-            <span className="text-5xl opacity-30">🏠</span>
+          <div className="w-full h-full flex items-center justify-center text-muted/20">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              <polyline points="9 22 9 12 15 12 15 22" />
+            </svg>
           </div>
         )}
 
-        {/* Gradient overlay at bottom for readability */}
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
-
-        {/* Price overlay — on dark gradient */}
-        <div className="absolute bottom-3 left-3">
-          <span className="text-white font-display font-bold text-xl drop-shadow-lg">
-            {price}
-          </span>
-        </div>
-
-        {/* Status badge — pill style */}
-        <div className="absolute top-3 left-3">
-          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
-            isRent
-              ? "bg-cold/80 text-white"
-              : "bg-money/80 text-white"
-          }`}>
-            {isRent ? "Rent" : "Sale"}
-          </span>
-        </div>
-
         {/* Comment count */}
         {commentCount > 0 && (
-          <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+          <div className="absolute top-2.5 right-2.5">
+            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md ${
               isHot
-                ? "bg-accent text-white hot-pulse"
-                : "bg-white/80 text-ink"
+                ? "bg-hot text-white"
+                : "bg-white/90 backdrop-blur-sm text-ink"
             }`}>
               {isHot ? "🔥" : "💬"} {commentCount}
             </span>
           </div>
         )}
-
-        {/* Listed time — subtle bottom right */}
-        {listedAgo && (
-          <div className="absolute bottom-3 right-3">
-            <span className="text-[11px] font-medium text-white/80 drop-shadow">
-              {listedAgo}
-            </span>
-          </div>
-        )}
       </div>
 
-      {/* Info */}
-      <div className="p-3.5">
-        <h3 className="font-display font-semibold text-sm text-ink leading-snug truncate group-hover:text-accent transition-colors">
-          {listing.address}
-        </h3>
-        <p className="text-xs text-muted mt-0.5 truncate">
-          {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}
-        </p>
-
-        {/* Stats */}
-        <div className="flex items-center gap-2.5 mt-2.5 text-xs text-muted">
-          {listing.bedrooms != null && (
-            <span className="font-medium text-ink/70">{listing.bedrooms} <span className="text-muted/50">bd</span></span>
-          )}
-          {listing.bathrooms != null && (
-            <span className="font-medium text-ink/70">{listing.bathrooms} <span className="text-muted/50">ba</span></span>
-          )}
-          {listing.sqft != null && (
-            <span className="font-medium text-ink/70">{listing.sqft.toLocaleString()} <span className="text-muted/50">sqft</span></span>
-          )}
-          <span className="ml-auto text-muted/40 text-[11px]">
-            {capitalize(listing.propertyType)}
+      {/* Info — tight, clean hierarchy */}
+      <div className="pt-3 pb-1">
+        {/* Row 1: Price + type */}
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-display text-[15px] font-semibold text-ink tracking-tight">
+            {price}
+          </span>
+          <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${
+            isRent ? "text-cold bg-blue-50" : "text-money bg-green-50"
+          }`}>
+            {isRent ? "Rent" : "Sale"}
           </span>
         </div>
 
-        {/* Hot indicator */}
-        {isHot && (
-          <div className="mt-2.5 pt-2.5 border-t border-border">
-            <p className="text-xs font-medium gradient-text">
-              {commentCount} people are talking about this
-            </p>
-          </div>
-        )}
+        {/* Row 2: Address */}
+        <p className="text-[13px] text-ink mt-0.5 truncate">
+          {listing.address}
+        </p>
+        <p className="text-[12px] text-muted truncate">
+          {listing.city}, {listing.state}
+        </p>
+
+        {/* Row 3: Stats */}
+        <div className="flex items-center gap-1.5 mt-1.5 text-[12px] text-muted">
+          {listing.bedrooms != null && (
+            <span>{listing.bedrooms} bd</span>
+          )}
+          {listing.bedrooms != null && listing.bathrooms != null && (
+            <span className="text-border">·</span>
+          )}
+          {listing.bathrooms != null && (
+            <span>{listing.bathrooms} ba</span>
+          )}
+          {listing.sqft != null && (
+            <>
+              <span className="text-border">·</span>
+              <span>{listing.sqft.toLocaleString()} sqft</span>
+            </>
+          )}
+          {listedAgo && (
+            <>
+              <span className="text-border">·</span>
+              <span>{listedAgo}</span>
+            </>
+          )}
+        </div>
       </div>
     </Link>
   );
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function timeAgo(dateStr: string): string {

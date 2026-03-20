@@ -265,7 +265,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={posting}
-                className="px-5 py-2 bg-ink text-white text-sm font-semibold rounded-full hover:bg-ink/85 hover:shadow-md transition-all disabled:opacity-50"
+                className="px-5 py-2 bg-ink text-white text-[13px] font-medium rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
               >
                 {posting ? "Posting..." : "Post"}
               </button>
@@ -295,24 +295,24 @@ function CommentItem({
     .toUpperCase()
     .slice(0, 2);
 
-  // Deterministic gradient from name — more personality
-  const gradients = [
-    "from-blue-400 to-purple-500",
-    "from-green-400 to-emerald-500",
-    "from-purple-400 to-pink-500",
-    "from-orange-400 to-red-500",
-    "from-pink-400 to-rose-500",
-    "from-amber-400 to-orange-500",
-    "from-teal-400 to-cyan-500",
-    "from-indigo-400 to-blue-500",
+  // Deterministic color from name — clean, professional
+  const bgColors = [
+    "bg-neutral-900 text-white",
+    "bg-blue-600 text-white",
+    "bg-emerald-600 text-white",
+    "bg-violet-600 text-white",
+    "bg-amber-600 text-white",
+    "bg-rose-600 text-white",
+    "bg-cyan-600 text-white",
+    "bg-neutral-700 text-white",
   ];
-  const gradientIndex = comment.name.charCodeAt(0) % gradients.length;
+  const colorIndex = comment.name.charCodeAt(0) % bgColors.length;
 
   return (
-    <div className={`relative flex gap-3 py-3 comment-thread ${isLocked ? "opacity-60" : ""}`}>
-      {/* Avatar — gradient */}
+    <div className={`relative flex gap-3 py-3.5 comment-thread ${isLocked ? "opacity-50" : ""}`}>
+      {/* Avatar */}
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 text-white bg-gradient-to-br ${gradients[gradientIndex]} shadow-sm`}
+        className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-semibold shrink-0 ${bgColors[colorIndex]}`}
       >
         {initials}
       </div>
