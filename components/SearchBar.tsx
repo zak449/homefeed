@@ -67,6 +67,19 @@ export default function SearchBar() {
 
   const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
 
+  // Sync local state with URL params when they change (e.g. Buy/Rent pill clicks)
+  useEffect(() => {
+    setCity(sp.get("city") ?? "");
+    setType(sp.get("type") ?? "");
+    setPropertyType(sp.get("propertyType") ?? "");
+    setMinPrice(sp.get("minPrice") ?? "");
+    setMaxPrice(sp.get("maxPrice") ?? "");
+    setMinBeds(sp.get("minBeds") ?? "");
+    setMinBaths(sp.get("minBaths") ?? "");
+    setMinSqft(sp.get("minSqft") ?? "");
+    setMaxSqft(sp.get("maxSqft") ?? "");
+  }, [sp]);
+
   useEffect(() => {
     setRecentSearches(getRecentSearches());
     setSavedSearches(getSavedSearches());
