@@ -58,9 +58,19 @@ const config: Config = {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        "comment-slide": {
+          from: { opacity: "0", transform: "translateX(-12px)" },
+          to: { opacity: "1", transform: "translateX(0)" },
+        },
+        "top-take-glow": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(255, 107, 44, 0)" },
+          "50%": { boxShadow: "0 0 20px 4px rgba(255, 107, 44, 0.1)" },
+        },
       },
       animation: {
         "activity-pulse": "activity-pulse 2s ease-in-out infinite",
+        "comment-slide": "comment-slide 0.35s ease-out forwards",
+        "top-take-glow": "top-take-glow 3s ease-in-out infinite",
       },
     },
   },

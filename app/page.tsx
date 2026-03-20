@@ -11,6 +11,7 @@ import LocationBanner from "@/components/LocationBanner";
 import HotTakeOfTheDay from "@/components/HotTakeOfTheDay";
 import CommunityPulse from "@/components/CommunityPulse";
 import BrowseByNeighborhood from "@/components/NeighborhoodCard";
+import CommentsFeed, { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
 
@@ -37,8 +38,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
   const isDefaultLanding = !hasFilters && sort === "newest";
 
-  // Community stats + trending + recent activity — only on default landing
-  const [listingCount, commentCount, reactionCount, trending, recentComments] = isDefaultLanding
+  // Community stats + trending + recent activity + comments feed — only on default landing
+  const [listingCount, commentCount, reactionCount, trending, recentComments, latestCommentsFeed] = isDefaultLanding
     ? await Promise.all([
         prisma.listing.count({ where: { status: "active" } }),
         prisma.comment.count(),
@@ -54,7 +55,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             comments: { take: 1, orderBy: { createdAt: "desc" }, select: { name: true, content: true } },
           },
         }),
-        // Recent comments for the activity feed
+        // Recent comments for the activity ticker
         prisma.comment.findMany({
           take: 12,
           orderBy: { createdAt: "desc" },
@@ -65,8 +66,37 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             listing: { select: { city: true, state: true, price: true, listingType: true } },
           },
         }),
+        // THE MAIN EVENT: latest comments feed for the homepage
+        prisma.comment.findMany({
+          take: 20,
+          orderBy: { createdAt: "desc" },
+          include: {
+            listing: {
+              select: { id: true, address: true, city: true, state: true, price: true, photos: true, listingType: true },
+            },
+            reactions: true,
+          },
+        }),
       ])
-    : [0, 0, 0, [], []];
+    : [0, 0, 0, [], [], []];
+
+  // Map the prisma result to the CommentFeedItem type
+  const commentsFeedData: CommentFeedItem[] = latestCommentsFeed.map((c) => ({
+    id: c.id,
+    name: c.name,
+    content: c.content,
+    createdAt: c.createdAt.toISOString(),
+    reactions: c.reactions.map((r) => ({ type: r.type })),
+    listing: {
+      id: c.listing.id,
+      address: c.listing.address,
+      city: c.listing.city,
+      state: c.listing.state,
+      price: c.listing.price,
+      photos: c.listing.photos,
+      listingType: c.listing.listingType,
+    },
+  }));
 
   // Lat/lng for radius search
   const lat = sp.lat ? Number(sp.lat) : undefined;
@@ -351,19 +381,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== HERO — only on default landing ====== */}
       {isDefaultLanding && (
-        <div className="mb-8 sm:mb-12">
-          {/* Main headline */}
+        <div className="mb-6 sm:mb-8">
+          {/* Punchy headline */}
           <h1 className="font-display text-3xl sm:text-5xl font-bold text-ink tracking-tighter leading-[1.1]">
-            Every listing has a<br />
-            <span className="social-gradient">comment section.</span>
+            gwak<span className="social-gradient">gwak</span>
           </h1>
-          <p className="text-base sm:text-lg text-muted mt-3 max-w-lg">
-            See what neighbors, agents, and locals actually think about properties — not just the listing price. Browse, react, and weigh in.
+          <p className="text-sm sm:text-base text-muted mt-1.5 max-w-md">
+            the comment section of real estate.
           </p>
 
           {/* Live community stats */}
           {(commentCount > 0 || listingCount > 0) && (
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-5">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
               {commentCount > 0 && (
                 <div className="flex items-center gap-2 bg-social-light border border-social/10 px-3 py-1.5 rounded-full">
                   <span className="w-1.5 h-1.5 rounded-full bg-social live-dot" />
@@ -384,36 +413,23 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               )}
             </div>
           )}
+        </div>
+      )}
 
-          {/* Recent activity ticker — shows the app is alive */}
-          {recentComments.length > 0 && (
-            <div className="mt-6 overflow-hidden rounded-xl border border-border bg-white">
-              <div className="px-4 py-2 border-b border-border bg-tag/50 flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-social live-dot" />
-                <span className="text-[11px] font-semibold text-muted uppercase tracking-widest">Live Activity</span>
-              </div>
-              <div className="overflow-hidden relative">
-                <div className="flex ticker-scroll whitespace-nowrap py-3">
-                  {[...recentComments, ...recentComments].map((c, i) => {
-                    const isRent = c.listing.listingType === "rent";
-                    const price = isRent
-                      ? `$${c.listing.price.toLocaleString()}/mo`
-                      : `$${c.listing.price.toLocaleString()}`;
-                    return (
-                      <span key={i} className="inline-flex items-center gap-2 px-4 text-[13px] border-r border-border last:border-0">
-                        <span className="font-semibold text-ink">{c.name}</span>
-                        <span className="text-muted truncate max-w-[200px]">&ldquo;{c.content.slice(0, 60)}{c.content.length > 60 ? "..." : ""}&rdquo;</span>
-                        <span className="text-[11px] text-muted/50 shrink-0">on {price} in {c.listing.city}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-                {/* Fade edges */}
-                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent pointer-events-none" />
-                <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
-              </div>
-            </div>
-          )}
+      {/* ====== WHAT PEOPLE ARE SAYING — THE MAIN EVENT (default landing) ====== */}
+      {isDefaultLanding && commentsFeedData.length > 0 && (
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-lg">{"💬"}</span>
+            <h2 className="font-display text-base font-bold text-ink uppercase tracking-widest">
+              What People Are Saying
+            </h2>
+            <span className="text-[11px] font-semibold text-social bg-social-light px-2 py-0.5 rounded-full">
+              Live
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
+          </div>
+          <CommentsFeed comments={commentsFeedData} />
         </div>
       )}
 
@@ -501,6 +517,36 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 </a>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* ====== RECENT ACTIVITY TICKER — only on default landing ====== */}
+      {isDefaultLanding && recentComments.length > 0 && (
+        <div className="mt-6 mb-4 overflow-hidden rounded-xl border border-border bg-white">
+          <div className="px-4 py-2 border-b border-border bg-tag/50 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-social live-dot" />
+            <span className="text-[11px] font-semibold text-muted uppercase tracking-widest">Live Activity</span>
+          </div>
+          <div className="overflow-hidden relative">
+            <div className="flex ticker-scroll whitespace-nowrap py-3">
+              {[...recentComments, ...recentComments].map((c, i) => {
+                const isRent = c.listing.listingType === "rent";
+                const price = isRent
+                  ? `$${c.listing.price.toLocaleString()}/mo`
+                  : `$${c.listing.price.toLocaleString()}`;
+                return (
+                  <span key={i} className="inline-flex items-center gap-2 px-4 text-[13px] border-r border-border last:border-0">
+                    <span className="font-semibold text-ink">{c.name}</span>
+                    <span className="text-muted truncate max-w-[200px]">&ldquo;{c.content.slice(0, 60)}{c.content.length > 60 ? "..." : ""}&rdquo;</span>
+                    <span className="text-[11px] text-muted/50 shrink-0">on {price} in {c.listing.city}</span>
+                  </span>
+                );
+              })}
+            </div>
+            {/* Fade edges */}
+            <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-white to-transparent pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
           </div>
         </div>
       )}

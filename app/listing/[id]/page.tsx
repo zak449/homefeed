@@ -55,6 +55,28 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
+function getCommentPrompt(price: number, commentCount: number, listingType: string): { text: string; emoji: string } {
+  if (commentCount === 0) {
+    return { text: "You found it first. Drop the first take.", emoji: "👀" };
+  }
+  if (commentCount >= 10) {
+    return { text: "This listing is trending", emoji: "🔥" };
+  }
+  if (price >= 1000000 && listingType === "sale") {
+    return { text: "Is it worth it?", emoji: "🤔" };
+  }
+  if (price <= 200000 && listingType === "sale") {
+    return { text: "What's the catch?", emoji: "🧐" };
+  }
+  if (listingType === "rent" && price <= 1000) {
+    return { text: "What's the catch?", emoji: "🧐" };
+  }
+  if (listingType === "rent" && price >= 3000) {
+    return { text: "Is it worth it?", emoji: "🤔" };
+  }
+  return { text: "What do you think?", emoji: "💬" };
+}
+
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   // Enrich API listings with full photos + description — fire-and-forget, don't block render
@@ -88,6 +110,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const priceHistory = listing.priceHistory as
     | { date: string; price: number; event?: string }[]
     | null;
+
+  const commentPrompt = getCommentPrompt(listing.price, commentCount, listing.listingType);
 
   // Fetch "More listings in [city]" — 3 other listings from same city
   const moreSameCity = await prisma.listing.findMany({
@@ -181,7 +205,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         &larr; Back
       </Link>
 
-      {/* 2. Status banner */}
+      {/* Status banner */}
       {listing.status === "off_market" && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-lg shrink-0">🏠</div>
@@ -209,14 +233,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* 3. Photos */}
+      {/* 2. Photos */}
       {listing.photos.length > 0 && (
         <div className="mb-4">
           <PhotoLightbox photos={listing.photos} address={listing.address} />
         </div>
       )}
 
-      {/* 4. Price + Address + Tags */}
+      {/* 3. Price + Address + Key Facts — COMPACT (2-3 lines) */}
       <div className="mb-3">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
@@ -228,10 +252,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 </span>
               )}
             </h1>
-            <p className="text-sm text-muted mt-1">{listing.address}</p>
-            <p className="text-sm text-muted">
-              {listing.neighborhood ? `${listing.neighborhood} \u00b7 ` : ""}
-              {listing.city}, {listing.state} {listing.zip}
+            <p className="text-sm text-muted mt-1">
+              {listing.address} &middot; {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state} {listing.zip}
+              {listing.bedrooms != null && ` · ${listing.bedrooms} bd`}
+              {listing.bathrooms != null && ` ${listing.bathrooms} ba`}
+              {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
@@ -242,23 +267,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             >
               {isRent ? "For Rent" : "For Sale"}
             </span>
-            <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-tag text-muted">
-              {capitalize(listing.propertyType)}
-            </span>
           </div>
         </div>
       </div>
 
-      {/* 5. Key Facts row */}
-      <KeyFactsBar
-        beds={listing.bedrooms}
-        baths={listing.bathrooms}
-        sqft={listing.sqft}
-        lotSqft={listing.lotSqft}
-        yearBuilt={listing.yearBuilt}
-      />
-
-      {/* 6. Save + Share buttons + Activity */}
+      {/* Save + Share buttons + Activity — compact bar */}
       <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
         <div className="flex items-center gap-4">
           <SaveButton listingId={listing.id} />
@@ -283,9 +296,42 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      {/* 6b. Map + Nearby — spatial context */}
+      {/* ====== 4. THE CONVERSATION — THE MAIN EVENT ====== */}
+      <div className="mb-6 stagger-in" style={{ animationDelay: "50ms" }}>
+        {/* Provocative prompt before comments */}
+        {!isLocked && (
+          <div className="mb-4 bg-gradient-to-r from-social-light to-white border border-social/10 rounded-xl px-5 py-4 flex items-center gap-3">
+            <span className="text-2xl">{commentPrompt.emoji}</span>
+            <p className="font-display font-bold text-base text-ink">
+              {commentPrompt.text}
+            </p>
+          </div>
+        )}
+
+        <CommentSection
+          listingId={listing.id}
+          isLocked={isLocked}
+          listingAddress={listing.address}
+          listingPrice={price}
+        />
+      </div>
+
+      {/* Email capture after comments */}
+      <div className="mb-6 bg-[#FFF7ED] border border-[#FF6B2C]/10 rounded-xl p-5">
+        <p className="font-display font-semibold text-sm text-ink mb-1">
+          Want to know when people react to this listing?
+        </p>
+        <p className="text-xs text-muted mb-3">
+          Get notified when new comments and hot takes drop.
+        </p>
+        <EmailCapture variant="inline" source={`listing-${listing.id}`} />
+      </div>
+
+      {/* ====== 5. Everything else — secondary content ====== */}
+
+      {/* Map + Nearby — spatial context */}
       {listing.latitude != null && listing.longitude != null && (
-        <div className="mb-5 stagger-in" style={{ animationDelay: "50ms" }}>
+        <div className="mb-5 stagger-in" style={{ animationDelay: "100ms" }}>
           <h2 className="font-display font-semibold text-sm text-ink mb-2 flex items-center gap-2">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-social">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
@@ -331,15 +377,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* 7. Mortgage Calculator + Price Insight — for sale listings */}
+      {/* Mortgage Calculator + Price Insight — for sale listings */}
       {!isRent && (
-        <div className="mb-5 space-y-3 stagger-in" style={{ animationDelay: "100ms" }}>
+        <div className="mb-5 space-y-3 stagger-in" style={{ animationDelay: "150ms" }}>
           <MortgageCalculator price={listing.price} />
           <PriceInsight price={listing.price} sqft={listing.sqft} city={listing.city} />
         </div>
       )}
 
-      {/* 8. Description — About this property */}
+      {/* Description — About this property */}
       {listing.description && (
         <div className="mb-6 stagger-in" style={{ animationDelay: "200ms" }}>
           <h2 className="font-display font-semibold text-sm text-ink mb-2">About this property</h2>
@@ -347,7 +393,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* 9. Engagement prompt — drives comments */}
+      {/* Engagement prompt — drives comments */}
       {!isLocked && (
         <div className="mb-4">
           <EngagementPrompts
@@ -359,28 +405,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* 10. Comments section — THE MAIN EVENT */}
-      <div className="mb-6 border-t border-border pt-5 stagger-in" style={{ animationDelay: "300ms" }}>
-        <CommentSection
-          listingId={listing.id}
-          isLocked={isLocked}
-          listingAddress={listing.address}
-          listingPrice={price}
-        />
-      </div>
-
-      {/* 9. Email capture after comments */}
-      <div className="mb-6 bg-[#FFF7ED] border border-[#FF6B2C]/10 rounded-xl p-5">
-        <p className="font-display font-semibold text-sm text-ink mb-1">
-          Want to know when people react to this listing?
-        </p>
-        <p className="text-xs text-muted mb-3">
-          Get notified when new comments and hot takes drop.
-        </p>
-        <EmailCapture variant="inline" source={`listing-${listing.id}`} />
-      </div>
-
-      {/* 10. Detailed Property Information */}
+      {/* Detailed Property Information */}
       <div className="mb-6 border-t border-border pt-6 space-y-6">
         {/* Property Details */}
         <DetailSection title="Property Details">
@@ -477,7 +502,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </DetailSection>
       </div>
 
-      {/* 11. Agent Contact Form */}
+      {/* Agent Contact Form */}
       <div className="mb-6 border-t border-border pt-5">
         <AgentContactForm
           listingId={listing.id}
@@ -491,7 +516,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         />
       </div>
 
-      {/* 12. More listings in [city] */}
+      {/* More listings in [city] */}
       {moreSameCity.length > 0 && (
         <div className="mb-6 border-t border-border pt-6">
           <div className="flex items-center justify-between mb-4">
@@ -574,7 +599,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
 
-      {/* 13. Similar Hot Takes — only if this listing has 3+ comments */}
+      {/* Similar Hot Takes — only if this listing has 3+ comments */}
       {filteredHotTakes.length > 0 && (
         <div className="mb-6 border-t border-border pt-6">
           <div className="flex items-center gap-2 mb-4">

@@ -34,141 +34,108 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   const isHot = commentCount >= 5;
   const isOnFire = commentCount >= 10;
-  const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
+      className="group block rounded-xl overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover bg-white border border-border"
     >
-      {/* Photo */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-tag">
-        {photo ? (
-          <FallbackImage
-            src={photo}
-            alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted/20">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-          </div>
-        )}
-
-        {/* Listing type badge — always visible */}
-        <div className="absolute top-2.5 left-2.5">
-          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm ${
-            listing.status === "off_market"
-              ? "bg-amber-500 text-white"
-              : isRent
-                ? "bg-blue-500 text-white"
-                : "bg-emerald-500 text-white"
-          }`}>
-            {listing.status === "off_market"
-              ? "🏠 Off Market"
-              : isRent ? "🔑 For Rent" : "🏡 For Sale"}
-          </span>
-        </div>
-
-        {/* Comment count badge — THE social signal */}
-        <div className="absolute top-2.5 right-2.5">
-          {commentCount > 0 ? (
-            <span className={`flex items-center gap-1 font-bold px-2.5 py-1 rounded-lg shadow-sm ${
-              isOnFire
-                ? "bg-[#FF6B2C] text-white text-[12px]"
-                : isHot
-                  ? "bg-[#FF6B2C] text-white text-[11px]"
-                  : "bg-white/95 backdrop-blur-sm text-ink text-[11px]"
-            }`}>
-              {isOnFire ? (
-                <span className="fire-animate">🔥</span>
-              ) : isHot ? (
-                "🔥"
-              ) : (
-                "💬"
-              )}
-              {" "}{commentCount}
-              {isOnFire && <span className="text-[10px] font-semibold ml-0.5 opacity-80">HOT</span>}
-            </span>
+      {/* Horizontal layout: Photo left, comment right */}
+      <div className="flex flex-col sm:flex-row">
+        {/* Photo — 40% of the card */}
+        <div className="relative sm:w-[40%] aspect-[4/3] sm:aspect-auto overflow-hidden bg-tag shrink-0">
+          {photo ? (
+            <FallbackImage
+              src={photo}
+              alt={listing.address}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+              loading="lazy"
+            />
           ) : (
-            <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-white/80 backdrop-blur-sm text-muted/60">
-              💬 Be first
+            <div className="w-full h-full flex items-center justify-center text-muted/20 min-h-[120px]">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+          )}
+
+          {/* Listing type badge */}
+          <div className="absolute top-2.5 left-2.5">
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm ${
+              listing.status === "off_market"
+                ? "bg-amber-500 text-white"
+                : isRent
+                  ? "bg-blue-500 text-white"
+                  : "bg-emerald-500 text-white"
+            }`}>
+              {listing.status === "off_market"
+                ? "Off Market"
+                : isRent ? "Rent" : "Sale"}
             </span>
-          )}
-        </div>
-      </div>
-
-      {/* Info */}
-      <div className="pt-3 pb-1">
-        {/* Row 1: Price + type */}
-        <div className="flex items-baseline justify-between gap-2">
-          <span className="font-display text-[15px] font-semibold text-ink tracking-tight">
-            {price}
-          </span>
-          <span className={`text-[11px] font-medium px-1.5 py-0.5 rounded ${
-            isRent ? "text-cold bg-blue-50" : "text-money bg-green-50"
-          }`}>
-            {isRent ? "Rent" : "Sale"}
-          </span>
+          </div>
         </div>
 
-        {/* Row 2: Address */}
-        <p className="text-[13px] text-ink mt-0.5 truncate">
-          {listing.address}
-        </p>
-        <p className="text-[12px] text-muted truncate">
-          {listing.city}, {listing.state}
-        </p>
-
-        {/* Row 3: Stats */}
-        <div className="flex items-center gap-1.5 mt-1.5 text-[12px] text-muted">
-          {listing.bedrooms != null && (
-            <span>{listing.bedrooms} bd</span>
-          )}
-          {listing.bedrooms != null && listing.bathrooms != null && (
-            <span className="text-border">·</span>
-          )}
-          {listing.bathrooms != null && (
-            <span>{listing.bathrooms} ba</span>
-          )}
-          {listing.sqft != null && (
-            <>
-              <span className="text-border">·</span>
-              <span>{listing.sqft.toLocaleString()} sqft</span>
-            </>
-          )}
-          {listedAgo && (
-            <>
-              <span className="text-border">·</span>
-              <span>{listedAgo}</span>
-            </>
-          )}
-        </div>
-
-        {/* Top comment preview — THE social hook, always visible */}
-        {listing.topComment ? (
-          <div className="mt-2.5 bg-tag rounded-lg px-3 py-2.5">
-            <p className="text-[12px] text-muted line-clamp-2">
-              &ldquo;{listing.topComment.content}&rdquo;
-            </p>
-            <p className="text-[11px] text-muted/60 mt-1">
-              &mdash; <span className="font-semibold text-ink/70">{listing.topComment.name}</span>
-              {commentCount > 1 && (
-                <span className="ml-1.5 text-social font-semibold">+{commentCount - 1} more</span>
+        {/* Right side: Property info + comment */}
+        <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between min-w-0">
+          {/* Property info — compact */}
+          <div>
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="font-display text-[15px] font-semibold text-ink tracking-tight">
+                {price}
+              </span>
+              {commentCount > 0 && (
+                <span className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-lg shrink-0 ${
+                  isOnFire
+                    ? "bg-social text-white"
+                    : isHot
+                      ? "bg-social text-white"
+                      : "bg-tag text-ink"
+                }`}>
+                  {isOnFire ? (
+                    <span className="fire-animate">{"🔥"}</span>
+                  ) : isHot ? "🔥" : "💬"}
+                  {" "}{commentCount}
+                </span>
               )}
+            </div>
+            <p className="text-[13px] text-ink mt-0.5 truncate">
+              {listing.address}
+            </p>
+            <p className="text-[12px] text-muted truncate">
+              {listing.city}, {listing.state}
+              {listing.bedrooms != null && ` · ${listing.bedrooms} bd`}
+              {listing.bathrooms != null && ` ${listing.bathrooms} ba`}
+              {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
             </p>
           </div>
-        ) : (
-          <div className="mt-2.5 border border-dashed border-social/30 rounded-lg px-3 py-2.5 group-hover:border-social/60 group-hover:bg-social/[0.03] transition-all">
-            <p className="text-[12px] text-muted/60 text-center group-hover:text-social transition-colors">
-              Be the first to weigh in &rarr;
-            </p>
-          </div>
-        )}
+
+          {/* THE COMMENT — equal weight to property info */}
+          {listing.topComment ? (
+            <div className="mt-2.5 bg-tag rounded-lg px-3 py-2.5 flex-1 flex flex-col justify-center">
+              <p className="text-[11px] text-muted/60 mb-1 font-semibold">
+                {listing.topComment.name}&apos;s take:
+              </p>
+              <p className="text-[13px] text-ink leading-relaxed line-clamp-3 font-medium">
+                &ldquo;{listing.topComment.content}&rdquo;
+              </p>
+              {commentCount > 1 && (
+                <p className="text-[11px] text-social font-semibold mt-1.5">
+                  See all {commentCount} takes &rarr;
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="mt-2.5 border-2 border-dashed border-social/30 rounded-lg px-3 py-4 group-hover:border-social/60 group-hover:bg-social/[0.03] transition-all flex-1 flex flex-col items-center justify-center text-center">
+              <p className="text-[13px] text-muted/70 font-medium group-hover:text-social transition-colors">
+                No one&apos;s said anything yet.
+              </p>
+              <p className="text-[12px] text-social font-semibold mt-0.5">
+                Be the first. &rarr;
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );

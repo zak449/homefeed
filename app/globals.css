@@ -288,3 +288,41 @@ input[type=number]::-webkit-outer-spin-button {
 .pin-bounce {
   animation: pinBounce 1.5s ease-in-out infinite;
 }
+
+/* Comment feed card entrance — slide in from left */
+@keyframes commentSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.comment-feed-card {
+  animation: commentSlideIn 0.35s ease-out forwards;
+}
+.comment-feed-card:nth-child(1) { animation-delay: 0ms; }
+.comment-feed-card:nth-child(2) { animation-delay: 40ms; }
+.comment-feed-card:nth-child(3) { animation-delay: 80ms; }
+.comment-feed-card:nth-child(4) { animation-delay: 120ms; }
+.comment-feed-card:nth-child(5) { animation-delay: 160ms; }
+.comment-feed-card:nth-child(6) { animation-delay: 200ms; }
+.comment-feed-card:nth-child(7) { animation-delay: 240ms; }
+.comment-feed-card:nth-child(8) { animation-delay: 280ms; }
+.comment-feed-card:nth-child(n+9) { animation-delay: 300ms; }
+
+/* Top Take glow effect */
+@keyframes topTakeGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
+  50% { box-shadow: 0 0 20px 4px rgba(255, 107, 44, 0.1); }
+}
+.top-take-glow {
+  animation: topTakeGlow 3s ease-in-out infinite;
+}
+
+/* Comment card hover lift */
+.comment-feed-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+}

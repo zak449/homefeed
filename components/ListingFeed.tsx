@@ -130,7 +130,7 @@ export default function ListingFeed({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-3">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mt-3">
         {items.map((item, idx) => {
           if (item.type === "listing") {
             return <ListingCard key={item.data.id} listing={item.data} />;
@@ -142,7 +142,7 @@ export default function ListingFeed({
             <a
               key={`moment-${moment.id}`}
               href={`/listing/${moment.listingId}`}
-              className="col-span-1 sm:col-span-2 lg:col-span-3 bg-gradient-to-r from-orange-50 via-white to-orange-50 border border-orange-200/50 rounded-xl px-5 py-4 flex items-start gap-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+              className="col-span-1 lg:col-span-2 bg-gradient-to-r from-orange-50 via-white to-orange-50 border border-orange-200/50 rounded-xl px-5 py-4 flex items-start gap-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
             >
               <div className="w-9 h-9 rounded-full bg-social/10 text-social text-sm font-bold flex items-center justify-center shrink-0 mt-0.5">
                 {moment.name.charAt(0).toUpperCase()}
@@ -173,8 +173,8 @@ export default function ListingFeed({
 
       {/* Loading skeletons while fetching next page */}
       {loading && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 mt-4">
+          {Array.from({ length: 2 }).map((_, i) => (
             <div key={`skel-${i}`} className="rounded-xl overflow-hidden animate-fade-in">
               <div className="aspect-[4/3] rounded-xl skeleton" />
               <div className="pt-3 pb-1 space-y-2">

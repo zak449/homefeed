@@ -55,7 +55,8 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-sm text-white/60 mb-5 leading-relaxed">
-              Every listing has a comment section.
+              Every listing has a comment section.<br />
+              Every comment section has a story.
             </p>
             {/* Social icons */}
             <div className="flex items-center gap-3 mb-6">
@@ -142,7 +143,7 @@ export default function Footer() {
             &copy; 2026 gwakgwak. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
-            Made with opinions in California
+            Every listing has a comment section. Every comment section has a story.
           </p>
         </div>
       </div>
