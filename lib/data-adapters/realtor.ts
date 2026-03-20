@@ -1,59 +1,87 @@
 /**
- * Realtor Data API adapter (via RapidAPI)
- * Handles: homes for sale, recently sold
- * Free tier: 100 calls/month
+ * Realty in US API adapter (via RapidAPI)
+ * Handles: homes for sale AND rentals (single API for both)
+ * Free tier: 500 requests/month
  *
- * Docs: https://rapidapi.com/apidojo/api/realtor-com4
+ * Docs: https://rapidapi.com/apidojo/api/realty-in-us
  */
 
 import { prisma } from "@/lib/prisma";
 
-const API_HOST = process.env.REALTOR_API_HOST ?? "realtor-com4.p.rapidapi.com";
+const API_HOST = process.env.REALTOR_API_HOST ?? "realty-in-us.p.rapidapi.com";
 const API_KEY = process.env.RAPIDAPI_KEY ?? "";
 
-type RealtorResult = {
+type RealtyResult = {
   property_id: string;
-  list_price: number;
-  list_price_max?: number;
+  listing_id?: string;
+  status: string;
+  photo_count?: number;
+  location?: {
+    address?: {
+      city?: string;
+      line?: string;
+      postal_code?: string;
+      state_code?: string;
+      state?: string;
+      coordinate?: { lat?: number; lon?: number };
+    };
+    county?: { fips_code?: string };
+  };
   description?: {
+    type?: string;
+    sub_type?: string;
     beds?: number;
     baths?: number;
     sqft?: number;
     lot_sqft?: number;
     year_built?: number;
-    type?: string;
     text?: string;
+    baths_full?: number;
+    baths_half?: number;
   };
-  location?: {
-    address?: {
-      line?: string;
-      city?: string;
-      state_code?: string;
-      postal_code?: string;
-      coordinate?: { lat?: number; lon?: number };
-    };
-    county?: { name?: string };
-    neighborhoods?: { name?: string }[];
-  };
-  photos?: { href?: string }[];
   advertisers?: {
     name?: string;
-    phone?: string;
     email?: string;
-    photo?: { href?: string };
+    href?: string;
+    type?: string;
     office?: { name?: string };
   }[];
-  status?: string;
+  branding?: {
+    name?: string;
+    photo?: string;
+    phone?: string;
+  }[];
+  source?: {
+    agents?: {
+      agent_name?: string;
+      office_name?: string;
+    }[];
+  };
+  primary_photo?: { href?: string };
+  photos?: { href?: string }[];
+  list_price?: number;
+  list_price_min?: number;
+  list_price_max?: number;
+  price_reduced_amount?: number;
+  href?: string;
+  flags?: {
+    is_new_listing?: boolean;
+    is_price_reduced?: boolean;
+    is_foreclosure?: boolean;
+    is_pending?: boolean;
+    is_contingent?: boolean;
+  };
   last_update_date?: string;
-  permalink?: string;
+  list_date?: string;
 };
 
-function mapPropertyType(raw?: string): string {
-  const lower = raw?.toLowerCase() ?? "";
-  if (lower.includes("single") || lower.includes("house")) return "house";
-  if (lower.includes("condo") || lower.includes("condos")) return "condo";
-  if (lower.includes("town")) return "townhouse";
-  if (lower.includes("apartment") || lower.includes("multi")) return "apartment";
+function mapPropertyType(raw?: string, subType?: string): string {
+  const type = (subType || raw || "").toLowerCase();
+  if (type.includes("single") || type.includes("house")) return "house";
+  if (type.includes("condo")) return "condo";
+  if (type.includes("town")) return "townhouse";
+  if (type.includes("apartment") || type.includes("multi") || type.includes("duplex")) return "apartment";
+  if (type.includes("land") || type.includes("lot")) return "house";
   return "house";
 }
 
@@ -68,24 +96,34 @@ export async function fetchRealtorListings(params: {
     return 0;
   }
 
-  const endpoint = params.listingType === "rent"
-    ? "v2/for-rent"
-    : "v2/for-sale";
+  const status = params.listingType === "rent"
+    ? ["for_rent"]
+    : ["for_sale", "ready_to_build"];
 
-  const body = {
-    query: `${params.city}${params.stateCode ? `, ${params.stateCode}` : ""}`,
+  const body: Record<string, unknown> = {
     limit: params.limit ?? 20,
     offset: 0,
+    status,
     sort: { direction: "desc", field: "list_date" },
-    status: ["for_sale"],
   };
 
-  if (params.listingType === "rent") {
-    body.status = ["for_rent"];
+  // Use city + state_code if we have both, otherwise just city
+  if (params.stateCode) {
+    body.city = params.city;
+    body.state_code = params.stateCode;
+  } else {
+    // Try to extract state from "City, ST" format
+    const parts = params.city.split(",").map((s) => s.trim());
+    if (parts.length === 2 && parts[1].length === 2) {
+      body.city = parts[0];
+      body.state_code = parts[1].toUpperCase();
+    } else {
+      body.city = params.city;
+    }
   }
 
   try {
-    const res = await fetch(`https://${API_HOST}/${endpoint}`, {
+    const res = await fetch(`https://${API_HOST}/properties/v3/list`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -101,36 +139,51 @@ export async function fetchRealtorListings(params: {
     }
 
     const json = await res.json();
-    const results: RealtorResult[] = json.data?.results ?? json.results ?? [];
+    const results: RealtyResult[] = json?.data?.home_search?.results ?? [];
     if (!Array.isArray(results)) return 0;
 
     let upserted = 0;
 
     for (const item of results) {
       const addr = item.location?.address;
-      if (!addr?.line || !addr?.city || !item.list_price) continue;
+      const price = item.list_price ?? item.list_price_max;
+      if (!addr?.line || !addr?.city || !price) continue;
 
-      const agent = item.advertisers?.[0];
-      const photos = (item.photos ?? [])
-        .map((p) => p.href)
-        .filter(Boolean)
-        .slice(0, 10) as string[];
+      // Get agent info from advertisers or branding
+      const advertiser = item.advertisers?.[0];
+      const brand = item.branding?.[0];
+      const agentName = advertiser?.name ?? null;
+      const agentEmail = advertiser?.email ?? null;
+      const agentPhone = brand?.phone ?? null;
+      const agentBrokerage = brand?.name ?? advertiser?.office?.name ?? item.source?.agents?.[0]?.office_name ?? null;
 
-      const neighborhood = item.location?.neighborhoods?.[0]?.name ?? null;
+      // Collect photos
+      const photos: string[] = [];
+      if (item.primary_photo?.href) {
+        photos.push(item.primary_photo.href);
+      }
+      if (item.photos) {
+        for (const p of item.photos) {
+          if (p.href && !photos.includes(p.href)) photos.push(p.href);
+          if (photos.length >= 10) break;
+        }
+      }
+
+      const neighborhood = null; // This API doesn't return neighborhood names in list
 
       try {
         await prisma.listing.upsert({
           where: { source_sourceId: { source: "realtor", sourceId: item.property_id } },
           update: {
-            price: Math.round(item.list_price),
-            status: item.status === "sold" ? "sold" : "active",
-            photos,
+            price: Math.round(price),
+            status: item.flags?.is_pending ? "pending" : item.status === "sold" ? "sold" : "active",
+            photos: photos.length > 0 ? photos : undefined,
             cachedAt: new Date(),
           },
           create: {
             source: "realtor",
             sourceId: item.property_id,
-            status: item.status === "sold" ? "sold" : "active",
+            status: item.flags?.is_pending ? "pending" : "active",
             address: addr.line,
             city: addr.city,
             state: addr.state_code ?? "",
@@ -138,9 +191,9 @@ export async function fetchRealtorListings(params: {
             neighborhood,
             latitude: addr.coordinate?.lat ?? null,
             longitude: addr.coordinate?.lon ?? null,
-            price: Math.round(item.list_price),
+            price: Math.round(price),
             listingType: params.listingType === "rent" ? "rent" : "sale",
-            propertyType: mapPropertyType(item.description?.type),
+            propertyType: mapPropertyType(item.description?.type, item.description?.sub_type),
             bedrooms: item.description?.beds ?? null,
             bathrooms: item.description?.baths ?? null,
             sqft: item.description?.sqft ?? null,
@@ -148,14 +201,11 @@ export async function fetchRealtorListings(params: {
             yearBuilt: item.description?.year_built ?? null,
             description: item.description?.text ?? null,
             photos,
-            agentName: agent?.name ?? null,
-            agentPhone: agent?.phone ?? null,
-            agentEmail: agent?.email ?? null,
-            agentPhoto: agent?.photo?.href ?? null,
-            agentBrokerage: agent?.office?.name ?? null,
-            listingUrl: item.permalink
-              ? `https://www.realtor.com/realestateandhomes-detail/${item.permalink}`
-              : null,
+            agentName,
+            agentPhone,
+            agentEmail,
+            agentBrokerage,
+            listingUrl: item.href ?? null,
             cachedAt: new Date(),
           },
         });
@@ -165,7 +215,7 @@ export async function fetchRealtorListings(params: {
       }
     }
 
-    console.log(`[Realtor] Upserted ${upserted} listings for ${params.city}`);
+    console.log(`[Realtor] Upserted ${upserted} ${params.listingType} listings for ${params.city}`);
     return upserted;
   } catch (e) {
     console.error("[Realtor] Fetch error:", e);

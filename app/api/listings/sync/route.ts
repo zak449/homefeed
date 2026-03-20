@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchRentCastListings } from "@/lib/data-adapters/rentcast";
 import { fetchRealtorListings } from "@/lib/data-adapters/realtor";
 
 /**
  * POST /api/listings/sync
  *
- * Triggers a data sync from RentCast (rentals) and Realtor (sales)
+ * Triggers a data sync from Realty in US API (both sales + rentals)
  * for a given city. Protected by API key.
  *
  * Body: { city: string, stateCode?: string }
@@ -25,17 +24,17 @@ export async function POST(req: NextRequest) {
 
   const stateCode = body?.stateCode;
 
-  // Fetch from both sources in parallel
-  const [rentcastCount, realtorCount] = await Promise.all([
-    fetchRentCastListings({ city, state: stateCode, listingType: "rent", limit: 20 }),
+  // Fetch sales and rentals in parallel
+  const [saleCount, rentCount] = await Promise.all([
     fetchRealtorListings({ city, stateCode, listingType: "sale", limit: 20 }),
+    fetchRealtorListings({ city, stateCode, listingType: "rent", limit: 20 }),
   ]);
 
   return NextResponse.json({
     synced: {
-      rentcast: rentcastCount,
-      realtor: realtorCount,
-      total: rentcastCount + realtorCount,
+      sales: saleCount,
+      rentals: rentCount,
+      total: saleCount + rentCount,
     },
     city,
   });
