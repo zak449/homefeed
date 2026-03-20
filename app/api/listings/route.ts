@@ -15,30 +15,41 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(searchParams.get("page") ?? 1));
   const perPage = 12;
 
-  const where: Prisma.ListingWhereInput = {
-    ...(city && {
+  // Build filters — always filter to active listings only
+  const conditions: Prisma.ListingWhereInput[] = [
+    { status: "active" },
+  ];
+
+  if (city) {
+    conditions.push({
       OR: [
         { city: { contains: city, mode: "insensitive" } },
         { state: { contains: city, mode: "insensitive" } },
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
       ],
-    }),
-    ...(listingType && { listingType }),
-    ...(propertyType && { propertyType }),
-    ...(minPrice !== undefined || maxPrice !== undefined
-      ? { price: { gte: minPrice, lte: maxPrice } }
-      : {}),
-    ...(minBeds !== undefined && { bedrooms: { gte: minBeds } }),
-    ...(q && {
+    });
+  }
+
+  if (q) {
+    conditions.push({
       OR: [
         { address: { contains: q, mode: "insensitive" } },
         { city: { contains: q, mode: "insensitive" } },
         { description: { contains: q, mode: "insensitive" } },
         { neighborhood: { contains: q, mode: "insensitive" } },
       ],
-    }),
-  };
+    });
+  }
+
+  if (listingType) conditions.push({ listingType });
+  if (propertyType) conditions.push({ propertyType });
+  if (minPrice !== undefined || maxPrice !== undefined) {
+    conditions.push({ price: { gte: minPrice, lte: maxPrice } });
+  }
+  if (minBeds !== undefined) conditions.push({ bedrooms: { gte: minBeds } });
+
+  const where: Prisma.ListingWhereInput = { AND: conditions };
 
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
@@ -55,6 +66,7 @@ export async function GET(req: NextRequest) {
         price: true,
         listingType: true,
         propertyType: true,
+        status: true,
         bedrooms: true,
         bathrooms: true,
         sqft: true,
@@ -67,5 +79,12 @@ export async function GET(req: NextRequest) {
     prisma.listing.count({ where }),
   ]);
 
-  return NextResponse.json({ listings, total, page, perPage });
+  return NextResponse.json(
+    { listings, total, page, perPage },
+    {
+      headers: {
+        "Cache-Control": "s-maxage=60, stale-while-revalidate=300",
+      },
+    }
+  );
 }

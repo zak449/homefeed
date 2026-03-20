@@ -6,6 +6,15 @@ export async function GET(req: NextRequest) {
   const listingId = req.nextUrl.searchParams.get("listingId");
   if (!listingId) return NextResponse.json({ error: "listingId required" }, { status: 400 });
 
+  // Check listing status
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { status: true },
+  });
+
+  if (!listing) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+
+  // If listing is sold/off_market, still return comments but mark as locked
   const comments = await prisma.comment.findMany({
     where: { listingId },
     orderBy: { createdAt: "asc" },
@@ -16,8 +25,7 @@ export async function GET(req: NextRequest) {
     },
   });
 
-  // Group reactions by type with counts, hide raw emails
-  const formatted = comments.map((c) => {
+  const formatted = comments.map((c: { id: string; name: string; content: string; createdAt: Date; reactions: { type: string; email: string }[] }) => {
     const reactionMap: Record<string, number> = {};
     for (const r of c.reactions) {
       reactionMap[r.type] = (reactionMap[r.type] ?? 0) + 1;
@@ -50,11 +58,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
 
+  // Check listing exists AND is active — no comments on sold/off_market listings
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
-    select: { id: true, address: true },
+    select: { id: true, address: true, status: true },
   });
+
   if (!listing) return NextResponse.json({ error: "Listing not found" }, { status: 404 });
+
+  if (listing.status !== "active") {
+    return NextResponse.json(
+      { error: "Comments are locked — this listing is no longer active" },
+      { status: 403 }
+    );
+  }
 
   const comment = await prisma.comment.create({
     data: { listingId, name: name.trim().slice(0, 80), email, content: content.trim() },
@@ -74,7 +91,7 @@ export async function POST(req: NextRequest) {
   });
 
   sendNewCommentAlert({
-    subscribers: subs.map((s) => s.email),
+    subscribers: subs.map((s: { email: string }) => s.email),
     commenterName: name.trim(),
     listingAddress: listing.address,
     listingId: listing.id,

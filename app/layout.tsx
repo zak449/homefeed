@@ -1,70 +1,81 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HomeFeed — Browse, Comment, Connect",
-  description: "A social space for home hunters. Browse listings, share your thoughts, and connect with agents.",
+  title: "home.feed — see what your neighborhood is really worth",
+  description: "Browse real estate listings. Read the comments. Call out the BS. home.feed is where neighborhoods talk about the houses on their block.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "home.feed",
+  },
 };
 
-const TICKER = "Browse Homes ★ Share Your Thoughts ★ Connect With Agents ★ Join The Conversation ★ Hot Takes Welcome ★ Find Your Favorite Place ★ ";
+export const viewport: Viewport = {
+  themeColor: "#1A1A2E",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const repeated = TICKER + TICKER;
   return (
     <html lang="en">
-      <body className="min-h-screen">
-
-        {/* Rainbow top stripe */}
-        <div className="h-2 flex">
-          <div className="flex-1 bg-coral" />
-          <div className="flex-1 bg-goldenrod" />
-          <div className="flex-1 bg-sage" />
-          <div className="flex-1 bg-sky" />
-          <div className="flex-1 bg-lavender" />
-          <div className="flex-1 bg-pink" />
-        </div>
-
+      <head>
+        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+      </head>
+      <body className="min-h-screen flex flex-col">
         {/* Nav */}
-        <header className="sticky top-0 z-50 bg-cream border-b-3 border-ink">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-            <a href="/" className="font-display text-3xl text-ink leading-none hover:text-coral transition-colors tracking-tight">
-              HomeFeed
+        <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-border shadow-nav">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+            {/* Logo */}
+            <a href="/" className="flex items-center gap-1.5 shrink-0">
+              <span className="font-display font-bold text-xl text-ink tracking-tight">home</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1.5"></span>
+              <span className="font-display font-bold text-xl text-ink tracking-tight">feed</span>
             </a>
-            <div className="flex items-center gap-2">
-              <a href="/?type=sale" className="font-display text-xs uppercase tracking-wide border-2 border-ink px-4 py-1.5 rounded-full hover:bg-coral hover:border-coral hover:text-white transition-all shadow-brute-sm">
+
+            {/* Desktop nav */}
+            <nav className="hidden sm:flex items-center gap-1">
+              <a href="/?type=sale" className="px-3 py-1.5 text-sm font-medium text-muted hover:text-ink hover:bg-tag rounded-lg transition-colors">
                 For Sale
               </a>
-              <a href="/?type=rent" className="font-display text-xs uppercase tracking-wide border-2 border-ink px-4 py-1.5 rounded-full hover:bg-sage hover:border-sage hover:text-white transition-all shadow-brute-sm">
+              <a href="/?type=rent" className="px-3 py-1.5 text-sm font-medium text-muted hover:text-ink hover:bg-tag rounded-lg transition-colors">
                 For Rent
               </a>
-            </div>
+              <a href="/?sort=comments" className="px-3 py-1.5 text-sm font-medium text-accent hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1">
+                🔥 Hot Takes
+              </a>
+            </nav>
+
+            {/* Mobile menu button */}
+            <button className="sm:hidden p-2 text-muted hover:text-ink rounded-lg" aria-label="Menu">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 5h14M3 10h14M3 15h14" />
+              </svg>
+            </button>
           </div>
         </header>
 
-        {/* Scrolling ticker */}
-        <div className="bg-goldenrod border-b-3 border-ink overflow-hidden py-2.5">
-          <div className="animate-marquee">
-            <span className="font-display text-xs uppercase tracking-widest text-ink">{repeated}</span>
-            <span className="font-display text-xs uppercase tracking-widest text-ink">{repeated}</span>
-          </div>
-        </div>
+        <main className="flex-1">{children}</main>
 
-        <main>{children}</main>
-
-        <footer className="mt-24 bg-ink text-cream border-t-3 border-ink py-12">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <p className="font-display text-4xl">HomeFeed</p>
-              <div className="flex gap-3">
-                {(["bg-coral","bg-goldenrod","bg-sage","bg-sky","bg-lavender","bg-pink"] as const).map((c) => (
-                  <div key={c} className={`w-5 h-5 rounded-full border-2 border-white/30 ${c}`} />
-                ))}
+        {/* Footer */}
+        <footer className="mt-20 border-t border-border bg-white">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="font-display font-bold text-lg text-ink tracking-tight">home</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1"></span>
+                <span className="font-display font-bold text-lg text-ink tracking-tight">feed</span>
               </div>
-              <p className="text-sm text-white/50 font-medium">Browse · Comment · Connect</p>
+              <p className="text-sm text-muted">
+                where neighborhoods talk about the houses on their block
+              </p>
+              <p className="text-xs text-muted/60">© {new Date().getFullYear()} home.feed</p>
             </div>
           </div>
         </footer>
-
       </body>
     </html>
   );

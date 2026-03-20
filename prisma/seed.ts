@@ -4,8 +4,9 @@ const prisma = new PrismaClient();
 
 const LISTINGS = [
   {
-    source: "seed", sourceId: "s001",
+    source: "seed", sourceId: "s001", status: "active",
     address: "2847 Sunset Blvd", city: "Los Angeles", state: "CA", zip: "90026", neighborhood: "Silver Lake",
+    latitude: 34.0782, longitude: -118.2606,
     price: 1_295_000, listingType: "sale", propertyType: "house",
     bedrooms: 3, bathrooms: 2, sqft: 1820, lotSqft: 5400, yearBuilt: 1952, parking: "1-car garage",
     description: "A sun-drenched Silver Lake bungalow with original hardwood floors, a remodeled kitchen, and a backyard fig tree that produces every summer.",
@@ -20,7 +21,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s002",
+    source: "seed", sourceId: "s002", status: "active",
     address: "415 Maple Ave #3B", city: "Brooklyn", state: "NY", zip: "11238", neighborhood: "Prospect Heights",
     price: 4_200, listingType: "rent", propertyType: "apartment",
     bedrooms: 2, bathrooms: 1, sqft: 950, yearBuilt: 1927, parking: "Street",
@@ -36,7 +37,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s003",
+    source: "seed", sourceId: "s003", status: "active",
     address: "1102 Dragonfly Ct", city: "Austin", state: "TX", zip: "78704", neighborhood: "Travis Heights",
     price: 875_000, listingType: "sale", propertyType: "house",
     bedrooms: 4, bathrooms: 3, sqft: 2350, lotSqft: 7200, yearBuilt: 2019, parking: "2-car garage",
@@ -52,7 +53,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s004",
+    source: "seed", sourceId: "s004", status: "active",
     address: "88 Harbor View Dr #1202", city: "Miami", state: "FL", zip: "33132", neighborhood: "Brickell",
     price: 2_100_000, listingType: "sale", propertyType: "condo",
     bedrooms: 3, bathrooms: 3.5, sqft: 2100, yearBuilt: 2018, parking: "2 assigned spots",
@@ -68,7 +69,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s005",
+    source: "seed", sourceId: "s005", status: "active",
     address: "342 Birchwood Ln", city: "Portland", state: "OR", zip: "97209", neighborhood: "Pearl District",
     price: 3_500, listingType: "rent", propertyType: "condo",
     bedrooms: 1, bathrooms: 1, sqft: 780, yearBuilt: 2016, parking: "1 spot included",
@@ -83,7 +84,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s006",
+    source: "seed", sourceId: "s006", status: "active",
     address: "2210 Peach Tree Rd NE", city: "Atlanta", state: "GA", zip: "30309", neighborhood: "Buckhead",
     price: 1_650_000, listingType: "sale", propertyType: "house",
     bedrooms: 5, bathrooms: 4.5, sqft: 4200, lotSqft: 12000, yearBuilt: 1998, parking: "3-car garage",
@@ -99,7 +100,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s007",
+    source: "seed", sourceId: "s007", status: "active",
     address: "780 N Clark St #507", city: "Chicago", state: "IL", zip: "60610", neighborhood: "River North",
     price: 2_750, listingType: "rent", propertyType: "apartment",
     bedrooms: 1, bathrooms: 1, sqft: 720, yearBuilt: 2014, parking: "None",
@@ -114,7 +115,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s008",
+    source: "seed", sourceId: "s008", status: "sold",
     address: "19 Tidal Marsh Rd", city: "Charleston", state: "SC", zip: "29401", neighborhood: "Downtown",
     price: 989_000, listingType: "sale", propertyType: "house",
     bedrooms: 3, bathrooms: 2.5, sqft: 2020, lotSqft: 4800, yearBuilt: 1887, parking: "Off-street",
@@ -129,7 +130,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s009",
+    source: "seed", sourceId: "s009", status: "active",
     address: "455 Observatory Way", city: "Denver", state: "CO", zip: "80209", neighborhood: "Washington Park",
     price: 740_000, listingType: "sale", propertyType: "house",
     bedrooms: 3, bathrooms: 2, sqft: 1650, lotSqft: 6000, yearBuilt: 1963, parking: "Detached garage",
@@ -144,7 +145,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s010",
+    source: "seed", sourceId: "s010", status: "active",
     address: "603 Catalina St #B", city: "San Francisco", state: "CA", zip: "94110", neighborhood: "Mission District",
     price: 3_800, listingType: "rent", propertyType: "apartment",
     bedrooms: 2, bathrooms: 1, sqft: 1100, yearBuilt: 1908, parking: "None",
@@ -159,7 +160,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s011",
+    source: "seed", sourceId: "s011", status: "active",
     address: "1514 Azalea Dr", city: "Nashville", state: "TN", zip: "37206", neighborhood: "East Nashville",
     price: 625_000, listingType: "sale", propertyType: "house",
     bedrooms: 3, bathrooms: 2, sqft: 1540, lotSqft: 5500, yearBuilt: 2021, parking: "Driveway",
@@ -174,7 +175,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s012",
+    source: "seed", sourceId: "s012", status: "active",
     address: "22 Beacon Hill Pl #4", city: "Boston", state: "MA", zip: "02108", neighborhood: "Beacon Hill",
     price: 6_500, listingType: "rent", propertyType: "condo",
     bedrooms: 2, bathrooms: 2, sqft: 1300, yearBuilt: 1840, parking: "None",
@@ -189,7 +190,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s013",
+    source: "seed", sourceId: "s013", status: "active",
     address: "3300 Lakeview Terrace", city: "Seattle", state: "WA", zip: "98102", neighborhood: "Capitol Hill",
     price: 1_100_000, listingType: "sale", propertyType: "townhouse",
     bedrooms: 3, bathrooms: 2.5, sqft: 1990, yearBuilt: 2017, parking: "1-car attached",
@@ -204,7 +205,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s014",
+    source: "seed", sourceId: "s014", status: "sold",
     address: "901 Frenchmen St #2", city: "New Orleans", state: "LA", zip: "70116", neighborhood: "Marigny",
     price: 2_200, listingType: "rent", propertyType: "apartment",
     bedrooms: 1, bathrooms: 1, sqft: 680, yearBuilt: 1925, parking: "None",
@@ -219,7 +220,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s015",
+    source: "seed", sourceId: "s015", status: "active",
     address: "5500 Desert Rose Dr", city: "Scottsdale", state: "AZ", zip: "85251", neighborhood: "Old Town",
     price: 1_425_000, listingType: "sale", propertyType: "house",
     bedrooms: 4, bathrooms: 3.5, sqft: 3100, lotSqft: 15000, yearBuilt: 2006, parking: "3-car garage",
@@ -234,7 +235,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s016",
+    source: "seed", sourceId: "s016", status: "active",
     address: "1240 Michigan Ave #803", city: "Chicago", state: "IL", zip: "60605", neighborhood: "South Loop",
     price: 3_100, listingType: "rent", propertyType: "condo",
     bedrooms: 2, bathrooms: 2, sqft: 1150, yearBuilt: 2011, parking: "1 spot",
@@ -249,7 +250,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s017",
+    source: "seed", sourceId: "s017", status: "active",
     address: "78 Magnolia Ct", city: "Savannah", state: "GA", zip: "31401", neighborhood: "Victorian District",
     price: 548_000, listingType: "sale", propertyType: "house",
     bedrooms: 3, bathrooms: 2, sqft: 1780, lotSqft: 4200, yearBuilt: 1902, parking: "None",
@@ -264,7 +265,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s018",
+    source: "seed", sourceId: "s018", status: "active",
     address: "4401 Cedar Springs Rd #110", city: "Dallas", state: "TX", zip: "75219", neighborhood: "Oak Lawn",
     price: 2_400, listingType: "rent", propertyType: "apartment",
     bedrooms: 1, bathrooms: 1, sqft: 850, yearBuilt: 2020, parking: "1 covered spot",
@@ -279,7 +280,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s019",
+    source: "seed", sourceId: "s019", status: "active",
     address: "332 Vineyard Ave", city: "Napa", state: "CA", zip: "94559", neighborhood: "Downtown Napa",
     price: 1_850_000, listingType: "sale", propertyType: "house",
     bedrooms: 4, bathrooms: 3, sqft: 2600, lotSqft: 22000, yearBuilt: 1991, parking: "2-car garage",
@@ -294,7 +295,7 @@ const LISTINGS = [
     listingUrl: "https://www.zillow.com",
   },
   {
-    source: "seed", sourceId: "s020",
+    source: "seed", sourceId: "s020", status: "active",
     address: "12 Harbor Light Way", city: "Newport", state: "RI", zip: "02840", neighborhood: "Historic Hill",
     price: 2_250_000, listingType: "sale", propertyType: "house",
     bedrooms: 5, bathrooms: 4, sqft: 3800, lotSqft: 8400, yearBuilt: 1884, parking: "2-car carriage house",

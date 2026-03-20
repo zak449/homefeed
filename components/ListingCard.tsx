@@ -3,15 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 
-const COLORS = [
-  { bg: "bg-coral",     text: "text-white" },
-  { bg: "bg-goldenrod", text: "text-ink" },
-  { bg: "bg-sage",      text: "text-white" },
-  { bg: "bg-sky",       text: "text-white" },
-  { bg: "bg-lavender",  text: "text-white" },
-  { bg: "bg-pink",      text: "text-white" },
-];
-
 type Listing = {
   id: string;
   address: string;
@@ -21,92 +12,133 @@ type Listing = {
   price: number;
   listingType: string;
   propertyType: string;
+  status: string;
   bedrooms?: number | null;
   bathrooms?: number | null;
   sqft?: number | null;
   photos: string[];
   agentName?: string | null;
+  createdAt?: Date | string;
   _count?: { comments: number };
-  comments?: { _count: { reactions: number } }[];
 };
 
-export default function ListingCard({ listing, index }: { listing: Listing; index: number }) {
-  const color = COLORS[index % COLORS.length];
+export default function ListingCard({ listing }: { listing: Listing }) {
   const photo = listing.photos[0];
   const isRent = listing.listingType === "rent";
   const commentCount = listing._count?.comments ?? 0;
-  const reactionCount = listing.comments?.reduce((sum, c) => sum + c._count.reactions, 0) ?? 0;
+
   const price = isRent
     ? `$${listing.price.toLocaleString()}/mo`
-    : `$${(listing.price / 1000).toFixed(0)}k`;
+    : listing.price >= 1_000_000
+      ? `$${(listing.price / 1_000_000).toFixed(listing.price % 1_000_000 === 0 ? 0 : 1)}M`
+      : `$${(listing.price / 1_000).toFixed(0)}k`;
+
+  const isHot = commentCount >= 5;
+
+  // Time since listed
+  const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden border-3 border-ink bg-white shadow-brute transition-all duration-150 hover:shadow-brute-lg hover:-translate-x-0.5 hover:-translate-y-0.5"
+      className="group block bg-white rounded-2xl overflow-hidden border border-border shadow-card hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5"
     >
-      {/* Color block header */}
-      <div className={`${color.bg} ${color.text} px-5 pt-5 pb-4 border-b-3 border-ink`}>
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <p className="font-display text-base leading-tight uppercase truncate">{listing.address}</p>
-            <p className="text-xs mt-0.5 opacity-80 truncate font-medium">
-              {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}
-            </p>
-          </div>
-          <span className="shrink-0 font-display text-xs uppercase tracking-wide px-2.5 py-1 rounded-full border-2 border-ink bg-cream text-ink">
-            {isRent ? "Rent" : "Sale"}
-          </span>
-        </div>
-        <p className="font-display text-3xl mt-3">{price}</p>
-      </div>
-
       {/* Photo */}
-      {photo && (
-        <div className="relative h-44 overflow-hidden border-b-3 border-ink">
+      <div className="relative aspect-[4/3] overflow-hidden bg-tag">
+        {photo ? (
           <Image
             src={photo}
             alt={listing.address}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-[1.03] transition-transform duration-500"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl text-muted/30">
+            🏠
+          </div>
+        )}
 
-      {/* Stats row */}
-      <div className="px-5 py-4 bg-cream flex items-center justify-between">
-        <div className="flex gap-2 flex-wrap">
-          {listing.bedrooms  != null && <Pill>{listing.bedrooms} bd</Pill>}
-          {listing.bathrooms != null && <Pill>{listing.bathrooms} ba</Pill>}
-          {listing.sqft      != null && <Pill>{listing.sqft.toLocaleString()} sqft</Pill>}
-          <Pill>{capitalize(listing.propertyType)}</Pill>
+        {/* Price overlay */}
+        <div className="absolute bottom-3 left-3">
+          <span className="bg-white/95 backdrop-blur-sm text-ink font-display font-bold text-lg px-3 py-1 rounded-lg shadow-card">
+            {price}
+          </span>
         </div>
-        <div className="flex gap-1.5 ml-2 shrink-0">
-          {commentCount > 0 && (
-            <span className="font-display text-xs uppercase border-2 border-ink px-2 py-1 rounded-full bg-goldenrod text-ink shadow-brute-sm">
-              💬 {commentCount}
-            </span>
-          )}
-          {reactionCount > 0 && (
-            <span className="font-display text-xs uppercase border-2 border-ink px-2 py-1 rounded-full bg-coral text-white shadow-brute-sm">
-              🔥 {reactionCount}
-            </span>
-          )}
+
+        {/* Status badge */}
+        <div className="absolute top-3 left-3">
+          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${
+            isRent
+              ? "bg-cold/90 text-white"
+              : "bg-money/90 text-white"
+          }`}>
+            {isRent ? "For Rent" : "For Sale"}
+          </span>
         </div>
+
+        {/* Comment count — prominent */}
+        {commentCount > 0 && (
+          <div className="absolute top-3 right-3">
+            <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shadow-card ${
+              isHot
+                ? "bg-accent text-white hot-pulse"
+                : "bg-white/95 backdrop-blur-sm text-ink"
+            }`}>
+              {isHot ? "🔥" : "💬"} {commentCount}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="p-3.5">
+        {/* Address */}
+        <h3 className="font-display font-semibold text-sm text-ink leading-snug truncate">
+          {listing.address}
+        </h3>
+        <p className="text-xs text-muted mt-0.5 truncate">
+          {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}
+        </p>
+
+        {/* Stats row */}
+        <div className="flex items-center gap-3 mt-2.5 text-xs text-muted">
+          {listing.bedrooms != null && (
+            <span className="font-medium">{listing.bedrooms} <span className="text-muted/60">bd</span></span>
+          )}
+          {listing.bathrooms != null && (
+            <span className="font-medium">{listing.bathrooms} <span className="text-muted/60">ba</span></span>
+          )}
+          {listing.sqft != null && (
+            <span className="font-medium">{listing.sqft.toLocaleString()} <span className="text-muted/60">sqft</span></span>
+          )}
+          <span className="ml-auto text-muted/50 font-medium">
+            {capitalize(listing.propertyType)}
+          </span>
+        </div>
+
+        {/* Hot take preview */}
+        {isHot && (
+          <div className="mt-2.5 pt-2.5 border-t border-border">
+            <p className="text-xs text-accent font-semibold">
+              🔥 {commentCount} people are talking about this listing
+            </p>
+          </div>
+        )}
       </div>
     </Link>
   );
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-xs font-bold uppercase tracking-wide px-2.5 py-1 rounded-full border-2 border-ink bg-white text-ink">
-      {children}
-    </span>
-  );
-}
-
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function timeAgo(dateStr: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return "just now";
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+  return `${Math.floor(seconds / 604800)}w`;
 }

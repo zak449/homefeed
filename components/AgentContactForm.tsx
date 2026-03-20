@@ -26,81 +26,90 @@ export default function AgentContactForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("sending");
-    const res = await fetch("/api/contact-agent", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ listingId, senderName: name, senderEmail: email, message }),
-    });
-    setStatus(res.ok ? "sent" : "error");
+    try {
+      const res = await fetch("/api/contact-agent", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId, senderName: name, senderEmail: email, message }),
+      });
+      setStatus(res.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
   }
 
-  const inputClass = "w-full rounded-xl border-2 border-ink px-4 py-2.5 text-sm font-medium bg-cream focus:outline-none focus:border-goldenrod focus:ring-2 focus:ring-goldenrod/30";
+  const inputClass = "w-full rounded-lg border border-border px-3 py-2.5 text-sm bg-bg focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors";
 
   return (
-    <div className="rounded-2xl overflow-hidden border-3 border-ink shadow-brute bg-white">
+    <div className="bg-white rounded-xl border border-border overflow-hidden">
       {/* Agent info */}
-      <div className="bg-goldenrod px-6 py-5 border-b-3 border-ink flex items-center gap-4">
+      <div className="px-5 py-4 flex items-center gap-3 border-b border-border">
         {agent.photo ? (
-          <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-ink shadow-brute-sm">
-            <Image src={agent.photo} alt={agent.name ?? "Agent"} fill className="object-cover" sizes="56px" />
+          <div className="relative w-11 h-11 rounded-full overflow-hidden shrink-0">
+            <Image src={agent.photo} alt={agent.name ?? "Agent"} fill className="object-cover" sizes="44px" />
           </div>
         ) : (
-          <div className="w-14 h-14 rounded-full bg-ink/10 border-2 border-ink flex items-center justify-center text-2xl shrink-0">
+          <div className="w-11 h-11 rounded-full bg-tag flex items-center justify-center text-lg shrink-0">
             🏠
           </div>
         )}
         <div className="min-w-0">
-          <p className="font-display text-xl text-ink uppercase leading-tight">{agent.name ?? "Listing Agent"}</p>
-          {agent.brokerage && <p className="text-sm text-ink/60 mt-0.5 truncate font-medium">{agent.brokerage}</p>}
-          <div className="flex gap-3 mt-2 flex-wrap">
-            {agent.phone && (
-              <a href={`tel:${agent.phone}`} className="text-sm font-bold text-ink hover:text-coral transition-colors">
-                📞 {agent.phone}
-              </a>
-            )}
-            {agent.email && (
-              <a href={`mailto:${agent.email}`} className="text-sm font-bold text-ink hover:text-coral transition-colors">
-                ✉️ {agent.email}
-              </a>
-            )}
-          </div>
+          <p className="font-display font-semibold text-sm text-ink">{agent.name ?? "Listing Agent"}</p>
+          {agent.brokerage && (
+            <p className="text-xs text-muted truncate">{agent.brokerage}</p>
+          )}
         </div>
       </div>
 
-      {/* Contact form */}
-      <div className="px-6 py-5">
+      {/* Contact details */}
+      {(agent.phone || agent.email) && (
+        <div className="px-5 py-3 border-b border-border flex gap-4 flex-wrap">
+          {agent.phone && (
+            <a href={`tel:${agent.phone}`} className="text-xs font-medium text-cold hover:underline">
+              {agent.phone}
+            </a>
+          )}
+          {agent.email && (
+            <a href={`mailto:${agent.email}`} className="text-xs font-medium text-cold hover:underline truncate">
+              {agent.email}
+            </a>
+          )}
+        </div>
+      )}
+
+      {/* Form */}
+      <div className="px-5 py-4">
         {status === "sent" ? (
-          <div className="text-center py-8">
-            <div className="text-5xl mb-3">🎉</div>
-            <p className="font-display text-xl text-ink uppercase">Message sent!</p>
-            <p className="text-sm text-gray-500 mt-1 font-medium">Check your inbox for a confirmation.</p>
+          <div className="text-center py-6">
+            <p className="text-2xl mb-2">✉️</p>
+            <p className="font-display font-semibold text-sm text-ink">Message sent</p>
+            <p className="text-xs text-muted mt-1">Expect a reply soon</p>
             <button
               onClick={() => setStatus("idle")}
-              className="mt-4 font-display text-xs uppercase border-2 border-ink px-4 py-1.5 rounded-full hover:bg-coral hover:text-white hover:border-coral transition-all shadow-brute-sm"
+              className="mt-3 text-xs font-medium text-cold hover:underline"
             >
               Send another
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <p className="font-display text-sm uppercase tracking-wider text-ink mb-1">Send a message</p>
+          <form onSubmit={handleSubmit} className="space-y-2.5">
             <input type="text" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
             <input type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
             <textarea
-              placeholder="Hi, I'm interested in this property…"
+              placeholder="I have a question about this property..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               required
-              rows={4}
+              rows={3}
               className={`${inputClass} resize-none`}
             />
-            {status === "error" && <p className="text-sm text-coral font-bold">Something went wrong. Please try again.</p>}
+            {status === "error" && <p className="text-xs text-accent font-medium">Something went wrong. Try again.</p>}
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full font-display text-sm uppercase bg-ink text-white border-2 border-ink py-3 rounded-xl hover:bg-coral hover:border-coral transition-colors disabled:opacity-50 shadow-brute-sm"
+              className="w-full py-2.5 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
             >
-              {status === "sending" ? "Sending…" : "Send Message →"}
+              {status === "sending" ? "Sending..." : "Send Message"}
             </button>
           </form>
         )}

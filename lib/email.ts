@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = process.env.EMAIL_FROM ?? "HomeFeed <hello@homefeed.app>";
+const FROM = process.env.EMAIL_FROM ?? "home.feed <hello@homefeed.app>";
 
 export async function sendAgentMessage({
   agentEmail,
@@ -31,7 +31,7 @@ export async function sendAgentMessage({
     html: `
       <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #FAFAF7; padding: 40px; border-radius: 16px;">
         <div style="background: #FF6B6B; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-          <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">New Inquiry — HomeFeed</h1>
+          <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">New Inquiry — home.feed</h1>
         </div>
         <p style="font-size: 16px; color: #1A1A2E;">Hi ${agentName},</p>
         <p style="font-size: 16px; color: #1A1A2E;">You have a new message about <strong>${listingAddress}</strong>.</p>
@@ -39,7 +39,7 @@ export async function sendAgentMessage({
           <p style="margin: 0; font-size: 15px; color: #1A1A2E;">${message}</p>
         </div>
         <p style="font-size: 14px; color: #666;">From: <strong>${senderName}</strong> (${senderEmail})</p>
-        <p style="font-size: 12px; color: #999; margin-top: 32px;">Sent via <a href="#" style="color: #FF6B6B;">HomeFeed</a></p>
+        <p style="font-size: 12px; color: #999; margin-top: 32px;">Sent via <a href="#" style="color: #FF6B6B;">home.feed</a></p>
       </div>
     `,
   });
@@ -83,11 +83,11 @@ export async function sendReactionAlert({
   await resend.emails.send({
     from: FROM,
     to: recipientEmail,
-    subject: `${reactorName} reacted to your comment on HomeFeed`,
+    subject: `${reactorName} reacted to your comment on home.feed`,
     html: `
       <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #FAFAF7; padding: 40px; border-radius: 16px;">
         <div style="background: #FFD93D; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-          <h1 style="color: #1A1A2E; font-size: 24px; margin: 0; font-family: Georgia, serif;">${reactionType} New reaction on HomeFeed</h1>
+          <h1 style="color: #1A1A2E; font-size: 24px; margin: 0; font-family: Georgia, serif;">${reactionType} New reaction on home.feed</h1>
         </div>
         <p style="font-size: 16px; color: #1A1A2E;">Hi ${recipientName},</p>
         <p style="font-size: 16px; color: #1A1A2E;"><strong>${reactorName}</strong> reacted ${reactionType} to your comment on <strong>${listingAddress}</strong>:</p>
@@ -129,7 +129,7 @@ export async function sendNewCommentAlert({
         html: `
           <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #FAFAF7; padding: 40px; border-radius: 16px;">
             <div style="background: #4D96FF; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-              <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">New comment on HomeFeed</h1>
+              <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">New comment on home.feed</h1>
             </div>
             <p style="font-size: 16px; color: #1A1A2E;"><strong>${commenterName}</strong> just commented on <strong>${listingAddress}</strong>:</p>
             <div style="background: white; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #4D96FF; font-style: italic; color: #555;">

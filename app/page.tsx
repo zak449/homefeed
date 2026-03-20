@@ -18,10 +18,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const minPrice    = sp.minPrice ? Number(sp.minPrice) : undefined;
   const maxPrice    = sp.maxPrice ? Number(sp.maxPrice) : undefined;
   const minBeds     = sp.minBeds  ? Number(sp.minBeds)  : undefined;
+  const sort        = str(sp.sort) ?? "newest";
   const page        = Math.max(1, Number(sp.page ?? 1));
   const perPage     = 12;
 
   const where: Prisma.ListingWhereInput = {
+    status: "active",
     ...(city && {
       OR: [
         { city: { contains: city, mode: "insensitive" } },
@@ -38,107 +40,179 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     ...(minBeds !== undefined && { bedrooms: { gte: minBeds } }),
   };
 
+  // Determine sort order
+  let orderBy: Prisma.ListingOrderByWithRelationInput = { createdAt: "desc" };
+  if (sort === "price-low")  orderBy = { price: "asc" };
+  if (sort === "price-high") orderBy = { price: "desc" };
+  // "comments" sort handled post-query for simplicity
+
   const [listings, total] = await Promise.all([
     prisma.listing.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy: sort === "comments" ? { createdAt: "desc" } : orderBy,
       skip: (page - 1) * perPage,
-      take: perPage,
+      take: sort === "comments" ? 100 : perPage, // Fetch more for comment sort
       select: {
         id: true, address: true, city: true, state: true, neighborhood: true,
-        price: true, listingType: true, propertyType: true,
-        bedrooms: true, bathrooms: true, sqft: true, photos: true, agentName: true,
+        price: true, listingType: true, propertyType: true, status: true,
+        bedrooms: true, bathrooms: true, sqft: true, photos: true,
+        agentName: true, createdAt: true,
         _count: { select: { comments: true } },
-        comments: { select: { _count: { select: { reactions: true } } } },
       },
     }),
     prisma.listing.count({ where }),
   ]);
 
+  // If sorting by comments, sort and paginate in memory
+  let sortedListings = listings;
+  if (sort === "comments") {
+    sortedListings = [...listings]
+      .sort((a, b) => (b._count?.comments ?? 0) - (a._count?.comments ?? 0))
+      .slice(0, perPage);
+  }
+
   const totalPages = Math.ceil(total / perPage);
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
 
-      {/* Hero */}
-      <div className="mb-12">
-        <div className="inline-flex items-center gap-2 bg-goldenrod border-2 border-ink px-4 py-1.5 rounded-full font-display text-xs uppercase tracking-widest text-ink mb-6 shadow-brute-sm">
-          ★ The Social Home Search ★
-        </div>
-        <h1 className="font-display text-5xl sm:text-7xl text-ink leading-none mb-5 uppercase">
-          Find your next<br />
-          <span className="text-coral">favorite place.</span>
-        </h1>
-        <p className="text-gray-600 text-lg max-w-xl font-medium leading-relaxed">
-          Browse homes for sale and rent, see what the community thinks, and connect directly with listing agents.
+      {/* Header area */}
+      <div className="mb-6 sm:mb-8">
+        <p className="text-sm font-medium text-muted mb-1">
+          {hasFilters
+            ? `${total} listing${total !== 1 ? "s" : ""} found`
+            : "what's happening on your block"}
         </p>
+        <div className="flex items-end justify-between gap-4 flex-wrap">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">
+            {city
+              ? `${city}`
+              : listingType === "rent"
+                ? "Rentals"
+                : listingType === "sale"
+                  ? "For Sale"
+                  : sort === "comments"
+                    ? "🔥 Hot Takes"
+                    : "The Feed"
+            }
+          </h1>
+          {/* Sort */}
+          <div className="flex items-center gap-1.5 text-sm">
+            {[
+              { key: "newest", label: "New" },
+              { key: "comments", label: "🔥 Hot" },
+              { key: "price-low", label: "$ Low" },
+              { key: "price-high", label: "$ High" },
+            ].map((s) => {
+              const params = new URLSearchParams(
+                Object.fromEntries(
+                  Object.entries(sp)
+                    .filter(([, v]) => typeof v === "string") as [string, string][]
+                )
+              );
+              params.set("sort", s.key);
+              params.delete("page");
+              const isActive = sort === s.key;
+              return (
+                <a
+                  key={s.key}
+                  href={`/?${params.toString()}`}
+                  className={`px-3 py-1.5 rounded-full transition-colors font-medium ${
+                    isActive
+                      ? "bg-ink text-white"
+                      : "text-muted hover:bg-tag hover:text-ink"
+                  }`}
+                >
+                  {s.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      {/* Search bar */}
+      {/* Search + filters */}
       <Suspense>
         <SearchBar />
       </Suspense>
 
-      {/* Results header */}
-      <div className="flex items-center justify-between mt-10 mb-6">
-        <h2 className="font-display text-2xl text-ink uppercase">
-          {hasFilters
-            ? `${total} ${total === 1 ? "result" : "results"}`
-            : "All listings"}
-        </h2>
-        {total > 0 && (
-          <p className="text-sm font-bold text-ink/50 uppercase tracking-wide">
-            Page {page} of {totalPages}
-          </p>
-        )}
-      </div>
-
       {/* Grid */}
-      {listings.length === 0 ? (
-        <div className="text-center py-24 rounded-2xl border-3 border-dashed border-ink/30">
-          <p className="text-5xl mb-4">🔍</p>
-          <p className="font-display text-2xl text-ink uppercase mb-2">No listings found</p>
-          <p className="text-gray-500 font-medium">Try adjusting your filters or searching a different city.</p>
-          <a href="/" className="inline-block mt-6 font-display text-sm uppercase bg-coral text-white border-2 border-ink px-6 py-3 rounded-xl hover:bg-goldenrod hover:text-ink transition-colors shadow-brute-sm">
-            Clear filters
+      {sortedListings.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-4xl mb-3">🏚️</p>
+          <p className="font-display text-lg font-bold text-ink mb-1">Nothing here yet</p>
+          <p className="text-sm text-muted max-w-sm mx-auto">
+            Try a different city or remove some filters. Or just browse everything.
+          </p>
+          <a href="/" className="inline-block mt-5 text-sm font-semibold text-accent hover:text-accent-hover transition-colors">
+            ← Back to all listings
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {listings.map((listing, i) => (
-            <ListingCard key={listing.id} listing={listing} index={(page - 1) * perPage + i} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5">
+          {sortedListings.map((listing) => (
+            <ListingCard key={listing.id} listing={listing} />
           ))}
         </div>
       )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2 mt-12">
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
-            const params = new URLSearchParams(
-              Object.fromEntries(
-                Object.entries(sp)
-                  .filter(([, v]) => typeof v === "string") as [string, string][]
-              )
-            );
-            params.set("page", String(p));
-            return (
-              <a
-                key={p}
-                href={`/?${params.toString()}`}
-                className={`w-10 h-10 flex items-center justify-center rounded-xl font-display text-sm uppercase border-2 border-ink transition-all shadow-brute-sm ${
-                  p === page
-                    ? "bg-coral text-white"
-                    : "bg-white text-ink hover:bg-goldenrod hover:text-ink"
-                }`}
-              >
-                {p}
-              </a>
-            );
+      {totalPages > 1 && sort !== "comments" && (
+        <div className="flex justify-center gap-1.5 mt-10">
+          {page > 1 && (
+            <PageLink sp={sp} page={page - 1} label="←" />
+          )}
+          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+            let p: number;
+            if (totalPages <= 7) {
+              p = i + 1;
+            } else if (page <= 4) {
+              p = i + 1;
+            } else if (page >= totalPages - 3) {
+              p = totalPages - 6 + i;
+            } else {
+              p = page - 3 + i;
+            }
+            return <PageLink key={p} sp={sp} page={p} label={String(p)} active={p === page} />;
           })}
+          {page < totalPages && (
+            <PageLink sp={sp} page={page + 1} label="→" />
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function PageLink({
+  sp,
+  page,
+  label,
+  active = false,
+}: {
+  sp: SearchParams;
+  page: number;
+  label: string;
+  active?: boolean;
+}) {
+  const params = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(sp)
+        .filter(([, v]) => typeof v === "string") as [string, string][]
+    )
+  );
+  params.set("page", String(page));
+  return (
+    <a
+      href={`/?${params.toString()}`}
+      className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+        active
+          ? "bg-ink text-white"
+          : "text-muted hover:bg-tag hover:text-ink"
+      }`}
+    >
+      {label}
+    </a>
   );
 }

@@ -1,12 +1,13 @@
 /**
  * Data adapter entry point.
  *
- * When USE_LIVE_DATA=true and the relevant API keys are set,
- * this module calls real Zillow / MLS APIs and upserts results
- * into the local Postgres cache.
+ * Two real API adapters:
+ *   - RentCast (via RapidAPI): rental listings
+ *   - Realtor Data API (via RapidAPI): homes for sale
  *
- * Otherwise, listings are served entirely from the Postgres cache
- * which was pre-seeded with demo data.
+ * Both share a single RAPIDAPI_KEY env var.
+ * When RAPIDAPI_KEY is not set, listings are served
+ * entirely from the Postgres cache / seed data.
  */
 
 export type ListingFilters = {
@@ -19,6 +20,5 @@ export type ListingFilters = {
   q?: string;
 };
 
-// Re-export adapters for use in admin/sync routes
-export { fetchZillowListings } from "./zillow";
-export { fetchMlsListings } from "./mls";
+export { fetchRentCastListings } from "./rentcast";
+export { fetchRealtorListings } from "./realtor";
