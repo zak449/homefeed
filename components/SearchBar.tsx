@@ -53,6 +53,9 @@ export default function SearchBar() {
   const [minPrice, setMinPrice] = useState(sp.get("minPrice") ?? "");
   const [maxPrice, setMaxPrice] = useState(sp.get("maxPrice") ?? "");
   const [minBeds, setMinBeds] = useState(sp.get("minBeds") ?? "");
+  const [minBaths, setMinBaths] = useState(sp.get("minBaths") ?? "");
+  const [minSqft, setMinSqft] = useState(sp.get("minSqft") ?? "");
+  const [maxSqft, setMaxSqft] = useState(sp.get("maxSqft") ?? "");
   const [showFilters, setShowFilters] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locating, setLocating] = useState(false);
@@ -60,7 +63,7 @@ export default function SearchBar() {
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds);
+  const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
 
   // Load recent searches on mount
   useEffect(() => {
@@ -105,6 +108,9 @@ export default function SearchBar() {
     if (minPrice) params.set("minPrice", minPrice);
     if (maxPrice) params.set("maxPrice", maxPrice);
     if (minBeds) params.set("minBeds", minBeds);
+    if (minBaths) params.set("minBaths", minBaths);
+    if (minSqft) params.set("minSqft", minSqft);
+    if (maxSqft) params.set("maxSqft", maxSqft);
     trackEvent("search", { city: searchQuery, type, propertyType });
     router.push(`/?${params.toString()}`);
   }
@@ -115,7 +121,7 @@ export default function SearchBar() {
   }
 
   function handleReset() {
-    setCity(""); setType(""); setPropertyType(""); setMinPrice(""); setMaxPrice(""); setMinBeds("");
+    setCity(""); setType(""); setPropertyType(""); setMinPrice(""); setMaxPrice(""); setMinBeds(""); setMinBaths(""); setMinSqft(""); setMaxSqft("");
     setShowSuggestions(false);
     router.push("/");
   }
@@ -149,12 +155,15 @@ export default function SearchBar() {
         if (minPrice) params.set("minPrice", minPrice);
         if (maxPrice) params.set("maxPrice", maxPrice);
         if (minBeds) params.set("minBeds", minBeds);
+        if (minBaths) params.set("minBaths", minBaths);
+        if (minSqft) params.set("minSqft", minSqft);
+        if (maxSqft) params.set("maxSqft", maxSqft);
         router.push(`/?${params.toString()}`);
       }
     } finally {
       setLocating(false);
     }
-  }, [type, propertyType, minPrice, maxPrice, minBeds, router]);
+  }, [type, propertyType, minPrice, maxPrice, minBeds, minBaths, minSqft, maxSqft, router]);
 
   const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors";
 
@@ -272,7 +281,7 @@ export default function SearchBar() {
           onClick={() => setShowFilters(!showFilters)}
           className={`px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors shrink-0 flex items-center gap-1.5 ${
             hasActiveFilters
-              ? "border-accent text-accent bg-red-50"
+              ? "border-ink text-ink bg-ink/5"
               : "border-border text-muted hover:text-ink hover:border-ink/30"
           }`}
         >
@@ -281,7 +290,7 @@ export default function SearchBar() {
           </svg>
           <span className="hidden sm:inline">Filters</span>
           {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-accent"></span>
+            <span className="w-2 h-2 rounded-full bg-ink"></span>
           )}
         </button>
       </div>
@@ -289,9 +298,9 @@ export default function SearchBar() {
       {/* Expandable filters */}
       {showFilters && (
         <div className="mt-3 p-4 bg-white rounded-xl border border-border shadow-card animate-fade-in">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Type</label>
+              <label className="block text-xs font-medium text-muted mb-1">Listing Type</label>
               <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
                 <option value="">Sale & Rent</option>
                 <option value="sale">For Sale</option>
@@ -309,18 +318,74 @@ export default function SearchBar() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Min Price</label>
-              <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="$0" className={inputClass} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-muted mb-1">Max Price</label>
-              <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Any" className={inputClass} />
-            </div>
-            <div>
               <label className="block text-xs font-medium text-muted mb-1">Beds</label>
               <select value={minBeds} onChange={(e) => setMinBeds(e.target.value)} className={inputClass}>
                 <option value="">Any</option>
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}+</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">Baths</label>
+              <select value={minBaths} onChange={(e) => setMinBaths(e.target.value)} className={inputClass}>
+                <option value="">Any</option>
+                {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}+</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">Min Price</label>
+              <select value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={inputClass}>
+                <option value="">No Min</option>
+                <option value="50000">$50k</option>
+                <option value="100000">$100k</option>
+                <option value="200000">$200k</option>
+                <option value="300000">$300k</option>
+                <option value="500000">$500k</option>
+                <option value="750000">$750k</option>
+                <option value="1000000">$1M</option>
+                <option value="1500000">$1.5M</option>
+                <option value="2000000">$2M</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">Max Price</label>
+              <select value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={inputClass}>
+                <option value="">No Max</option>
+                <option value="100000">$100k</option>
+                <option value="200000">$200k</option>
+                <option value="300000">$300k</option>
+                <option value="500000">$500k</option>
+                <option value="750000">$750k</option>
+                <option value="1000000">$1M</option>
+                <option value="1500000">$1.5M</option>
+                <option value="2000000">$2M</option>
+                <option value="5000000">$5M</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">Min Sqft</label>
+              <select value={minSqft} onChange={(e) => setMinSqft(e.target.value)} className={inputClass}>
+                <option value="">Any</option>
+                <option value="500">500+</option>
+                <option value="750">750+</option>
+                <option value="1000">1,000+</option>
+                <option value="1500">1,500+</option>
+                <option value="2000">2,000+</option>
+                <option value="3000">3,000+</option>
+                <option value="5000">5,000+</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-muted mb-1">Max Sqft</label>
+              <select value={maxSqft} onChange={(e) => setMaxSqft(e.target.value)} className={inputClass}>
+                <option value="">Any</option>
+                <option value="1000">1,000</option>
+                <option value="1500">1,500</option>
+                <option value="2000">2,000</option>
+                <option value="3000">3,000</option>
+                <option value="5000">5,000</option>
+                <option value="10000">10,000</option>
               </select>
             </div>
           </div>

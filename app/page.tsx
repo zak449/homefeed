@@ -20,6 +20,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const minPrice    = sp.minPrice ? Number(sp.minPrice) : undefined;
   const maxPrice    = sp.maxPrice ? Number(sp.maxPrice) : undefined;
   const minBeds     = sp.minBeds  ? Number(sp.minBeds)  : undefined;
+  const minBaths    = sp.minBaths ? Number(sp.minBaths) : undefined;
+  const minSqft     = sp.minSqft  ? Number(sp.minSqft)  : undefined;
+  const maxSqft     = sp.maxSqft  ? Number(sp.maxSqft)  : undefined;
   const sort        = str(sp.sort) ?? "newest";
   const page        = Math.max(1, Number(sp.page ?? 1));
   const perPage     = 12;
@@ -60,6 +63,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     conditions.push({ price: { gte: minPrice, lte: maxPrice } });
   }
   if (minBeds !== undefined) conditions.push({ bedrooms: { gte: minBeds } });
+  if (minBaths !== undefined) conditions.push({ bathrooms: { gte: minBaths } });
+  if (minSqft !== undefined || maxSqft !== undefined) {
+    conditions.push({ sqft: { gte: minSqft, lte: maxSqft } });
+  }
 
   const where: Prisma.ListingWhereInput = { AND: conditions };
 
@@ -122,7 +129,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   }
 
   const totalPages = Math.ceil(total / perPage);
-  const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds);
+  const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
