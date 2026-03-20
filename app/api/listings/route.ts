@@ -46,6 +46,7 @@ export async function GET(req: NextRequest) {
         { state: { contains: city, mode: "insensitive" } },
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
+        { address: { contains: city, mode: "insensitive" } },
       ],
     });
   }
@@ -79,36 +80,101 @@ export async function GET(req: NextRequest) {
   if (sort === "price-low") orderBy = { price: "asc" };
   if (sort === "price-high") orderBy = { price: "desc" };
 
-  let [listings, total] = await Promise.all([
-    prisma.listing.findMany({
-      where,
-      orderBy: sort === "comments" ? { createdAt: "desc" } : orderBy,
-      skip: (page - 1) * perPage,
-      take: sort === "comments" ? 200 : (lat && lng ? 200 : perPage),
-      select: {
-        id: true,
-        address: true,
-        city: true,
-        state: true,
-        neighborhood: true,
-        price: true,
-        listingType: true,
-        propertyType: true,
-        status: true,
-        bedrooms: true,
-        bathrooms: true,
-        sqft: true,
-        photos: true,
-        agentName: true,
-        agentPhone: true,
-        createdAt: true,
-        latitude: true,
-        longitude: true,
-        _count: { select: { comments: true } },
-      },
-    }),
-    prisma.listing.count({ where }),
-  ]);
+  const selectFields = {
+    id: true,
+    address: true,
+    city: true,
+    state: true,
+    neighborhood: true,
+    price: true,
+    listingType: true,
+    propertyType: true,
+    status: true,
+    bedrooms: true,
+    bathrooms: true,
+    sqft: true,
+    photos: true,
+    agentName: true,
+    agentPhone: true,
+    createdAt: true,
+    latitude: true,
+    longitude: true,
+    _count: { select: { comments: true } },
+  } as const;
+
+  let listings: Awaited<ReturnType<typeof prisma.listing.findMany<{ select: typeof selectFields }>>>;
+  let total: number;
+
+  if (sort === "comments") {
+    // "Hot Takes" / Outrageous: most expensive + worst price-per-sqft, interleaved
+    const takeCount = page * perPage;
+    const [expensive, worstDeal, count] = await Promise.all([
+      prisma.listing.findMany({
+        where,
+        orderBy: { price: "desc" },
+        skip: 0,
+        take: takeCount,
+        select: selectFields,
+      }),
+      prisma.$queryRaw`
+        SELECT id FROM "Listing"
+        WHERE sqft IS NOT NULL AND sqft > 0 AND status = 'active'
+        ORDER BY (price::float / sqft::float) DESC
+        LIMIT ${takeCount}
+      `.then(async (rows: unknown) => {
+        const typedRows = rows as any[];
+        const ids = typedRows.map((r: any) => r.id);
+        if (ids.length === 0) return [];
+        return prisma.listing.findMany({
+          where: { id: { in: ids } },
+          select: selectFields,
+        }).then(results => {
+          return results.sort((a, b) => {
+            const ratioA = a.sqft ? a.price / a.sqft : 0;
+            const ratioB = b.sqft ? b.price / b.sqft : 0;
+            return ratioB - ratioA;
+          });
+        });
+      }),
+      prisma.listing.count({ where }),
+    ]);
+
+    // Interleave expensive and worst-deal, dedup by ID
+    const seen = new Set<string>();
+    const interleaved: typeof expensive = [];
+    let ei = 0, wi = 0;
+    while (interleaved.length < takeCount && (ei < expensive.length || wi < worstDeal.length)) {
+      if (ei < expensive.length) {
+        if (!seen.has(expensive[ei].id)) {
+          seen.add(expensive[ei].id);
+          interleaved.push(expensive[ei]);
+        }
+        ei++;
+      }
+      if (interleaved.length >= takeCount) break;
+      if (wi < worstDeal.length) {
+        if (!seen.has(worstDeal[wi].id)) {
+          seen.add(worstDeal[wi].id);
+          interleaved.push(worstDeal[wi]);
+        }
+        wi++;
+      }
+    }
+
+    listings = interleaved.slice((page - 1) * perPage, page * perPage);
+    total = count;
+  } else {
+    [listings, total] = await Promise.all([
+      prisma.listing.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * perPage,
+        take: lat && lng ? 200 : perPage,
+        select: selectFields,
+      }),
+      prisma.listing.count({ where }),
+    ]);
+  }
 
   // If lat/lng provided, sort by distance and filter to radius
   if (lat && lng) {
@@ -135,14 +201,6 @@ export async function GET(req: NextRequest) {
     const all = [...withDistance, ...noCoords];
     total = all.length;
     listings = all.slice((page - 1) * perPage, page * perPage);
-  }
-
-  // If sorting by comments, sort and paginate in memory
-  if (sort === "comments") {
-    const sorted = [...listings].sort(
-      (a, b) => (b._count?.comments ?? 0) - (a._count?.comments ?? 0)
-    );
-    listings = sorted.slice((page - 1) * perPage, page * perPage);
   }
 
   const hasMore = page * perPage < total;

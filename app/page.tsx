@@ -52,6 +52,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         { state: { contains: city, mode: "insensitive" } },
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
+        { address: { contains: city, mode: "insensitive" } },
       ],
     });
   }
@@ -74,22 +75,87 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (sort === "price-low")  orderBy = { price: "asc" };
   if (sort === "price-high") orderBy = { price: "desc" };
 
-  let [listings, total] = await Promise.all([
-    prisma.listing.findMany({
-      where,
-      orderBy: sort === "comments" ? { createdAt: "desc" } : orderBy,
-      skip: 0,
-      take: sort === "comments" ? 100 : (lat && lng ? 200 : perPage),
-      select: {
-        id: true, address: true, city: true, state: true, neighborhood: true,
-        price: true, listingType: true, propertyType: true, status: true,
-        bedrooms: true, bathrooms: true, sqft: true, photos: true,
-        agentName: true, createdAt: true, latitude: true, longitude: true,
-        _count: { select: { comments: true } },
-      },
-    }),
-    prisma.listing.count({ where }),
-  ]);
+  const selectFields = {
+    id: true, address: true, city: true, state: true, neighborhood: true,
+    price: true, listingType: true, propertyType: true, status: true,
+    bedrooms: true, bathrooms: true, sqft: true, photos: true,
+    agentName: true, createdAt: true, latitude: true, longitude: true,
+    _count: { select: { comments: true } },
+  } as const;
+
+  let listings: Awaited<ReturnType<typeof prisma.listing.findMany<{ select: typeof selectFields }>>>;
+  let total: number;
+
+  if (sort === "comments") {
+    // "Hot Takes" / Outrageous: most expensive + worst price-per-sqft
+    const [expensive, worstDeal, count] = await Promise.all([
+      prisma.listing.findMany({
+        where,
+        orderBy: { price: "desc" },
+        skip: 0,
+        take: perPage,
+        select: selectFields,
+      }),
+      prisma.$queryRaw`
+        SELECT id FROM "Listing"
+        WHERE sqft IS NOT NULL AND sqft > 0 AND status = 'active'
+        ORDER BY (price::float / sqft::float) DESC
+        LIMIT ${perPage}
+      `.then(async (rows: unknown) => {
+        const typedRows = rows as any[];
+        const ids = typedRows.map((r: any) => r.id);
+        if (ids.length === 0) return [];
+        return prisma.listing.findMany({
+          where: { id: { in: ids } },
+          select: selectFields,
+        }).then(results => {
+          // Re-sort by price/sqft desc
+          return results.sort((a, b) => {
+            const ratioA = a.sqft ? a.price / a.sqft : 0;
+            const ratioB = b.sqft ? b.price / b.sqft : 0;
+            return ratioB - ratioA;
+          });
+        });
+      }),
+      prisma.listing.count({ where }),
+    ]);
+
+    // Interleave expensive and worst-deal, dedup by ID
+    const seen = new Set<string>();
+    const interleaved: typeof expensive = [];
+    let ei = 0, wi = 0;
+    while (interleaved.length < perPage && (ei < expensive.length || wi < worstDeal.length)) {
+      if (ei < expensive.length) {
+        if (!seen.has(expensive[ei].id)) {
+          seen.add(expensive[ei].id);
+          interleaved.push(expensive[ei]);
+        }
+        ei++;
+      }
+      if (interleaved.length >= perPage) break;
+      if (wi < worstDeal.length) {
+        if (!seen.has(worstDeal[wi].id)) {
+          seen.add(worstDeal[wi].id);
+          interleaved.push(worstDeal[wi]);
+        }
+        wi++;
+      }
+    }
+
+    listings = interleaved;
+    total = count;
+  } else {
+    [listings, total] = await Promise.all([
+      prisma.listing.findMany({
+        where,
+        orderBy,
+        skip: 0,
+        take: lat && lng ? 200 : perPage,
+        select: selectFields,
+      }),
+      prisma.listing.count({ where }),
+    ]);
+  }
 
   // If lat/lng provided, sort by distance and filter to radius
   if (lat && lng) {
@@ -118,13 +184,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     listings = all.slice(0, perPage);
   }
 
-  // If sorting by comments, sort and paginate in memory
   let sortedListings = listings;
-  if (sort === "comments") {
-    sortedListings = [...listings]
-      .sort((a, b) => (b._count?.comments ?? 0) - (a._count?.comments ?? 0))
-      .slice(0, perPage);
-  }
 
   const hasMore = perPage < total;
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
@@ -166,7 +226,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               {city
                 ? `${city}`
                 : sort === "comments"
-                  ? "🔥 Hot Takes"
+                  ? "🔥 Outrageous"
                   : "The Feed"
               }
             </h1>
@@ -206,7 +266,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="flex items-center gap-1.5 text-sm">
             {[
               { key: "newest", label: "New" },
-              { key: "comments", label: "🔥 Hot" },
+              { key: "comments", label: "🔥 Hot Takes" },
               { key: "price-low", label: "$ Low" },
               { key: "price-high", label: "$ High" },
             ].map((s) => {

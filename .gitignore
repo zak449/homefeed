@@ -21,3 +21,4 @@ prisma/migrations/
 .vercel
 .git 2/
 .next 2/
+tsconfig.tsbuildinfo

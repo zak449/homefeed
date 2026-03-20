@@ -136,15 +136,14 @@ export default function SearchBar() {
     setLocating(true);
     setShowSuggestions(false);
     try {
-      let loc = getStoredLocation();
-      if (!loc) {
-        loc = await requestGeolocation();
-      }
+      // Always request fresh geolocation when user explicitly clicks "Current Location"
+      const loc = await requestGeolocation();
       if (loc?.city) {
         setCity(loc.city);
         addRecentSearch(loc.city);
         setRecentSearches(getRecentSearches());
         trackEvent("search", { type: "current_location", city: loc.city });
+        // Navigate with city param so autoSyncCity runs on the server
         const params = new URLSearchParams();
         params.set("city", loc.city);
         params.set("lat", String(loc.latitude));
@@ -159,7 +158,31 @@ export default function SearchBar() {
         if (minSqft) params.set("minSqft", minSqft);
         if (maxSqft) params.set("maxSqft", maxSqft);
         router.push(`/?${params.toString()}`);
+      } else if (loc && !loc.city) {
+        // Got coordinates but no city name — search by coordinates only
+        console.warn("[SearchBar] Got location but no city name, searching by coordinates");
+        trackEvent("search", { type: "current_location_no_city", lat: loc.latitude, lng: loc.longitude });
+        const params = new URLSearchParams();
+        params.set("lat", String(loc.latitude));
+        params.set("lng", String(loc.longitude));
+        params.set("radius", "30");
+        if (type) params.set("type", type);
+        if (propertyType) params.set("propertyType", propertyType);
+        if (minPrice) params.set("minPrice", minPrice);
+        if (maxPrice) params.set("maxPrice", maxPrice);
+        if (minBeds) params.set("minBeds", minBeds);
+        if (minBaths) params.set("minBaths", minBaths);
+        if (minSqft) params.set("minSqft", minSqft);
+        if (maxSqft) params.set("maxSqft", maxSqft);
+        router.push(`/?${params.toString()}`);
+      } else {
+        // Geolocation completely failed — inform user
+        console.error("[SearchBar] Geolocation failed: no location returned");
+        alert("Could not determine your location. Please allow location access in your browser settings, or search by city name.");
       }
+    } catch (err) {
+      console.error("[SearchBar] handleCurrentLocation error:", err);
+      alert("Something went wrong finding your location. Please try searching by city name.");
     } finally {
       setLocating(false);
     }

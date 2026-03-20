@@ -71,6 +71,7 @@ export async function requestGeolocation(): Promise<{
 
   return new Promise((resolve) => {
     if (!navigator.geolocation) {
+      console.warn("[Geo] Geolocation API not available in this browser");
       resolve(null);
       return;
     }
@@ -79,6 +80,7 @@ export async function requestGeolocation(): Promise<{
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         const anonId = getAnonId();
+        console.log("[Geo] Got browser position:", latitude.toFixed(4), longitude.toFixed(4));
 
         try {
           const res = await fetch("/api/geo", {
@@ -89,6 +91,7 @@ export async function requestGeolocation(): Promise<{
 
           if (res.ok) {
             const data = await res.json();
+            console.log("[Geo] Reverse geocode result:", data.city, data.state);
             const loc = {
               latitude,
               longitude,
@@ -99,17 +102,20 @@ export async function requestGeolocation(): Promise<{
             localStorage.setItem("hf_location_time", String(Date.now()));
             resolve(loc);
           } else {
+            const errText = await res.text().catch(() => "");
+            console.error("[Geo] /api/geo returned", res.status, errText);
             resolve(null);
           }
-        } catch {
+        } catch (err) {
+          console.error("[Geo] Failed to call /api/geo:", err);
           resolve(null);
         }
       },
-      () => {
-        // User denied or error
+      (err) => {
+        console.warn("[Geo] Browser geolocation error:", err.code, err.message);
         resolve(null);
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 300_000 }
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300_000 }
     );
   });
 }
