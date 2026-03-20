@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendReactionAlert } from "@/lib/email";
 
-const VALID_REACTIONS = ["❤️", "🔥", "😂", "😮", "💭"];
+const VALID_REACTIONS = ["❤️", "🔥", "😂", "😮", "💀"];
 
 export async function POST(
   req: NextRequest,

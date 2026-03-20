@@ -111,6 +111,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           {listing.sqft != null && (
             <span className="font-medium">{listing.sqft.toLocaleString()} <span className="text-muted/60">sqft</span></span>
           )}
+          {listedAgo && (
+            <span className="text-muted/50 font-medium">{listedAgo} ago</span>
+          )}
           <span className="ml-auto text-muted/50 font-medium">
             {capitalize(listing.propertyType)}
           </span>

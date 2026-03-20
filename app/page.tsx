@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
-import ListingCard from "@/components/ListingCard";
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
+import ListingFeed from "@/components/ListingFeed";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
 
@@ -24,7 +24,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const minSqft     = sp.minSqft  ? Number(sp.minSqft)  : undefined;
   const maxSqft     = sp.maxSqft  ? Number(sp.maxSqft)  : undefined;
   const sort        = str(sp.sort) ?? "newest";
-  const page        = Math.max(1, Number(sp.page ?? 1));
   const perPage     = 12;
 
   // Lat/lng for radius search
@@ -79,7 +78,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     prisma.listing.findMany({
       where,
       orderBy: sort === "comments" ? { createdAt: "desc" } : orderBy,
-      skip: (page - 1) * perPage,
+      skip: 0,
       take: sort === "comments" ? 100 : (lat && lng ? 200 : perPage),
       select: {
         id: true, address: true, city: true, state: true, neighborhood: true,
@@ -103,7 +102,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     };
 
-    // Add distance and filter by radius
     const withDistance = listings
       .filter((l) => l.latitude != null && l.longitude != null)
       .map((l) => ({
@@ -113,11 +111,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       .filter((l) => l.distance <= radiusMiles)
       .sort((a, b) => a.distance - b.distance);
 
-    // Also include listings without coordinates (city-matched)
     const noCoords = listings.filter((l) => l.latitude == null || l.longitude == null);
 
-    listings = [...withDistance, ...noCoords].slice(0, perPage);
-    total = withDistance.length + noCoords.length;
+    const all = [...withDistance, ...noCoords];
+    total = all.length;
+    listings = all.slice(0, perPage);
   }
 
   // If sorting by comments, sort and paginate in memory
@@ -128,8 +126,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       .slice(0, perPage);
   }
 
-  const totalPages = Math.ceil(total / perPage);
+  const hasMore = perPage < total;
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
+
+  // Build search params record for the client component
+  const feedParams: Record<string, string> = {};
+  if (city) feedParams.city = city;
+  if (listingType) feedParams.type = listingType;
+  if (propertyType) feedParams.propertyType = propertyType;
+  if (minPrice !== undefined) feedParams.minPrice = String(minPrice);
+  if (maxPrice !== undefined) feedParams.maxPrice = String(maxPrice);
+  if (minBeds !== undefined) feedParams.minBeds = String(minBeds);
+  if (minBaths !== undefined) feedParams.minBaths = String(minBaths);
+  if (minSqft !== undefined) feedParams.minSqft = String(minSqft);
+  if (maxSqft !== undefined) feedParams.maxSqft = String(maxSqft);
+  if (sort !== "newest") feedParams.sort = sort;
+  if (lat !== undefined) feedParams.lat = String(lat);
+  if (lng !== undefined) feedParams.lng = String(lng);
+  if (radiusMiles !== 25) feedParams.radius = String(radiusMiles);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
@@ -228,7 +242,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <SearchBar />
       </Suspense>
 
-      {/* Grid */}
+      {/* Grid with infinite scroll */}
       {sortedListings.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-4xl mb-3">🏚️</p>
@@ -241,69 +255,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5">
-          {sortedListings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && sort !== "comments" && (
-        <div className="flex justify-center gap-1.5 mt-10">
-          {page > 1 && (
-            <PageLink sp={sp} page={page - 1} label="←" />
-          )}
-          {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-            let p: number;
-            if (totalPages <= 7) {
-              p = i + 1;
-            } else if (page <= 4) {
-              p = i + 1;
-            } else if (page >= totalPages - 3) {
-              p = totalPages - 6 + i;
-            } else {
-              p = page - 3 + i;
-            }
-            return <PageLink key={p} sp={sp} page={p} label={String(p)} active={p === page} />;
-          })}
-          {page < totalPages && (
-            <PageLink sp={sp} page={page + 1} label="→" />
-          )}
-        </div>
+        <ListingFeed
+          initialListings={sortedListings}
+          initialHasMore={hasMore}
+          searchParams={feedParams}
+        />
       )}
     </div>
-  );
-}
-
-function PageLink({
-  sp,
-  page,
-  label,
-  active = false,
-}: {
-  sp: SearchParams;
-  page: number;
-  label: string;
-  active?: boolean;
-}) {
-  const params = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(sp)
-        .filter(([, v]) => typeof v === "string") as [string, string][]
-    )
-  );
-  params.set("page", String(page));
-  return (
-    <a
-      href={`/?${params.toString()}`}
-      className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
-        active
-          ? "bg-ink text-white"
-          : "text-muted hover:bg-tag hover:text-ink"
-      }`}
-    >
-      {label}
-    </a>
   );
 }

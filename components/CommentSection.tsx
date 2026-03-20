@@ -38,6 +38,23 @@ export default function CommentSection({
   const [reactingEmail, setReactingEmail] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Restore saved commenter identity from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("hf_commenter");
+      if (saved) {
+        const { name: savedName, email: savedEmail } = JSON.parse(saved);
+        if (savedName) setName(savedName);
+        if (savedEmail) {
+          setEmail(savedEmail);
+          setReactingEmail(savedEmail);
+        }
+      }
+    } catch {
+      // ignore malformed data
+    }
+  }, []);
+
   useEffect(() => {
     fetch(`/api/comments?listingId=${listingId}`)
       .then((r) => r.json())
@@ -63,6 +80,11 @@ export default function CommentSection({
         setComments((prev) => [...prev, newComment]);
         setContent("");
         setReactingEmail(email);
+        try {
+          localStorage.setItem("hf_commenter", JSON.stringify({ name, email }));
+        } catch {
+          // localStorage may be unavailable
+        }
       } else {
         const err = await res.json();
         setPostError(err.error ?? "Failed to post");

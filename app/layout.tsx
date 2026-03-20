@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import MobileNav from "@/components/MobileNav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -49,12 +50,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               </a>
             </nav>
 
-            {/* Mobile menu button */}
-            <button className="sm:hidden p-2 text-muted hover:text-ink rounded-lg" aria-label="Menu">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 5h14M3 10h14M3 15h14" />
-              </svg>
-            </button>
+            {/* Mobile menu button + slide-down nav */}
+            <MobileNav />
           </div>
         </header>
 
