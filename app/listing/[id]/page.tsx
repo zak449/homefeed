@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import AgentContactForm from "@/components/AgentContactForm";
 import CommentSection from "@/components/CommentSection";
 import ListingViewTracker from "@/components/ListingViewTracker";
+import { enrichListingDetail } from "@/lib/data-adapters/detail";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -25,6 +26,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // Enrich API listings with full photos + description on first view
+  try {
+    await enrichListingDetail(id);
+  } catch (e) {
+    console.error("[Detail] Enrich error:", e);
+  }
+
   const [listing, commentCount, reactionCount] = await Promise.all([
     prisma.listing.findUnique({ where: { id } }),
     prisma.comment.count({ where: { listingId: id } }),

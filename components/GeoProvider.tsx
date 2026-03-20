@@ -6,7 +6,7 @@ import { requestGeolocation, getStoredLocation, trackEvent, getAnonId } from "@/
 
 /**
  * GeoProvider — on first visit, requests geolocation and auto-navigates
- * to show listings near the user. Also tracks page views.
+ * to show listings near the user. Triggers API sync for their city.
  */
 export default function GeoProvider() {
   const router = useRouter();
@@ -15,28 +15,29 @@ export default function GeoProvider() {
 
   // Track page view on mount
   useEffect(() => {
-    getAnonId(); // Ensure anon ID exists
+    getAnonId();
     trackEvent("page_view", {
       path: window.location.pathname,
       query: window.location.search,
     });
   }, []);
 
-  // Request geolocation on first visit (no city filter active)
+  // Request geolocation on first visit (no city/search active)
   useEffect(() => {
-    // Only auto-locate if user hasn't searched for anything
     const hasCity = sp.get("city");
     const hasLat = sp.get("lat");
-    if (hasCity || hasLat || prompted) return;
+    const hasType = sp.get("type");
+    const hasSort = sp.get("sort");
 
-    // Check if we already have a stored location
+    // Don't auto-locate if user has any active search/filter
+    if (hasCity || hasLat || hasType || hasSort || prompted) return;
+
+    // Check stored location
     const stored = getStoredLocation();
     if (stored?.city) {
-      // Already have location — auto-navigate if on homepage with no filters
-      const hasAnyFilter = sp.get("type") || sp.get("sort") || sp.get("propertyType");
-      if (!hasAnyFilter) {
-        router.replace(`/?lat=${stored.latitude}&lng=${stored.longitude}&city=${encodeURIComponent(stored.city)}&radius=25`);
-      }
+      // Trigger sync for their city in background, then navigate
+      triggerSyncAndNavigate(stored.city, stored.latitude, stored.longitude, router);
+      setPrompted(true);
       return;
     }
 
@@ -44,10 +45,20 @@ export default function GeoProvider() {
     setPrompted(true);
     requestGeolocation().then((loc) => {
       if (loc?.city) {
-        router.replace(`/?lat=${loc.latitude}&lng=${loc.longitude}&city=${encodeURIComponent(loc.city)}&radius=25`);
+        triggerSyncAndNavigate(loc.city, loc.latitude, loc.longitude, router);
       }
     });
   }, [sp, prompted, router]);
 
-  return null; // Invisible component
+  return null;
+}
+
+async function triggerSyncAndNavigate(
+  city: string,
+  lat: number,
+  lng: number,
+  router: ReturnType<typeof useRouter>
+) {
+  // Navigate immediately so the user sees something
+  router.replace(`/?city=${encodeURIComponent(city)}&lat=${lat}&lng=${lng}&radius=30`);
 }

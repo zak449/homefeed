@@ -157,14 +157,18 @@ export async function fetchRealtorListings(params: {
       const agentPhone = brand?.phone ?? null;
       const agentBrokerage = brand?.name ?? advertiser?.office?.name ?? item.source?.agents?.[0]?.office_name ?? null;
 
-      // Collect photos
+      // Collect photos — convert small thumbnails to large
       const photos: string[] = [];
       if (item.primary_photo?.href) {
-        photos.push(item.primary_photo.href);
+        // Replace small 's.jpg' suffix with large 'od.jpg'
+        photos.push(item.primary_photo.href.replace(/s\.jpg$/, "od.jpg"));
       }
       if (item.photos) {
         for (const p of item.photos) {
-          if (p.href && !photos.includes(p.href)) photos.push(p.href);
+          if (p.href) {
+            const url = p.href.replace(/s\.jpg$/, "od.jpg");
+            if (!photos.includes(url)) photos.push(url);
+          }
           if (photos.length >= 10) break;
         }
       }

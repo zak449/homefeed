@@ -35,10 +35,10 @@ export async function autoSyncCity(city: string, state?: string): Promise<void> 
 
   console.log(`[AutoSync] Fetching fresh data for ${normalizedCity}...`);
 
-  // Fetch both sales and rentals from Realty in US API
+  // Fetch both sales and rentals from Realty in US API (40 each for good coverage)
   const [saleCount, rentCount] = await Promise.all([
-    fetchRealtorListings({ city: normalizedCity, stateCode: state, listingType: "sale", limit: 20 }).catch(() => 0),
-    fetchRealtorListings({ city: normalizedCity, stateCode: state, listingType: "rent", limit: 20 }).catch(() => 0),
+    fetchRealtorListings({ city: normalizedCity, stateCode: state, listingType: "sale", limit: 40 }).catch(() => 0),
+    fetchRealtorListings({ city: normalizedCity, stateCode: state, listingType: "rent", limit: 40 }).catch(() => 0),
   ]);
 
   // Record the sync
