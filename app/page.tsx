@@ -215,18 +215,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* Header area */}
       <div className="mb-6 sm:mb-8">
-        <p className="text-sm font-medium text-muted mb-1">
+        <p className="text-sm text-muted mb-1">
           {hasFilters
             ? `${total} listing${total !== 1 ? "s" : ""} found`
             : "what's happening on your block"}
         </p>
         <div className="flex items-end justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">
+            <h1 className="font-editorial text-3xl sm:text-4xl text-ink leading-tight">
               {city
-                ? `${city}`
+                ? city
                 : sort === "comments"
-                  ? "🔥 Outrageous"
+                  ? "Hot Takes"
                   : "The Feed"
               }
             </h1>
@@ -283,9 +283,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <a
                   key={s.key}
                   href={`/?${params.toString()}`}
-                  className={`px-3 py-1.5 rounded-full transition-colors font-medium ${
+                  className={`px-3.5 py-1.5 rounded-full transition-all font-medium ${
                     isActive
-                      ? "bg-ink text-white"
+                      ? "bg-ink text-white shadow-sm"
                       : "text-muted hover:bg-tag hover:text-ink"
                   }`}
                 >

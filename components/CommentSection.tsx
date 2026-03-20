@@ -265,9 +265,9 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={posting}
-                className="px-5 py-2 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+                className="px-5 py-2 bg-ink text-white text-sm font-semibold rounded-full hover:bg-ink/85 hover:shadow-md transition-all disabled:opacity-50"
               >
-                {posting ? "Posting..." : "Post →"}
+                {posting ? "Posting..." : "Post"}
               </button>
             </div>
           </form>
@@ -295,22 +295,24 @@ function CommentItem({
     .toUpperCase()
     .slice(0, 2);
 
-  // Deterministic color from name
-  const colors = [
-    "bg-blue-100 text-blue-700",
-    "bg-green-100 text-green-700",
-    "bg-purple-100 text-purple-700",
-    "bg-orange-100 text-orange-700",
-    "bg-pink-100 text-pink-700",
-    "bg-yellow-100 text-yellow-700",
+  // Deterministic gradient from name — more personality
+  const gradients = [
+    "from-blue-400 to-purple-500",
+    "from-green-400 to-emerald-500",
+    "from-purple-400 to-pink-500",
+    "from-orange-400 to-red-500",
+    "from-pink-400 to-rose-500",
+    "from-amber-400 to-orange-500",
+    "from-teal-400 to-cyan-500",
+    "from-indigo-400 to-blue-500",
   ];
-  const colorIndex = comment.name.charCodeAt(0) % colors.length;
+  const gradientIndex = comment.name.charCodeAt(0) % gradients.length;
 
   return (
     <div className={`relative flex gap-3 py-3 comment-thread ${isLocked ? "opacity-60" : ""}`}>
-      {/* Avatar */}
+      {/* Avatar — gradient */}
       <div
-        className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${colors[colorIndex]}`}
+        className={`w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 text-white bg-gradient-to-br ${gradients[gradientIndex]} shadow-sm`}
       >
         {initials}
       </div>

@@ -96,7 +96,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <div className="mb-3">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink leading-tight">
+            <h1 className="font-editorial text-3xl sm:text-4xl text-ink leading-tight">
               {price}
               {isSold && (
                 <span className="ml-2 text-sm font-semibold text-muted bg-tag px-2 py-0.5 rounded-md align-middle">

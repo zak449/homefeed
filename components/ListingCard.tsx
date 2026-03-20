@@ -33,14 +33,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       : `$${(listing.price / 1_000).toFixed(0)}k`;
 
   const isHot = commentCount >= 5;
-
-  // Time since listed
   const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block bg-white rounded-2xl overflow-hidden border border-border shadow-card hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5"
+      className="group block bg-white rounded-2xl overflow-hidden border border-border hover:border-border/0 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
     >
       {/* Photo */}
       <div className="relative aspect-[4/3] overflow-hidden bg-tag">
@@ -49,42 +47,54 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           <img
             src={photo}
             alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover ken-burns"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-4xl text-muted/30">
-            🏠
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-tag to-cream">
+            <span className="text-5xl opacity-30">🏠</span>
           </div>
         )}
 
-        {/* Price overlay */}
+        {/* Gradient overlay at bottom for readability */}
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/30 to-transparent" />
+
+        {/* Price overlay — on dark gradient */}
         <div className="absolute bottom-3 left-3">
-          <span className="bg-white/95 backdrop-blur-sm text-ink font-display font-bold text-lg px-3 py-1 rounded-lg shadow-card">
+          <span className="text-white font-display font-bold text-xl drop-shadow-lg">
             {price}
           </span>
         </div>
 
-        {/* Status badge */}
+        {/* Status badge — pill style */}
         <div className="absolute top-3 left-3">
-          <span className={`text-xs font-semibold px-2 py-1 rounded-md ${
+          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
             isRent
-              ? "bg-cold/90 text-white"
-              : "bg-money/90 text-white"
+              ? "bg-cold/80 text-white"
+              : "bg-money/80 text-white"
           }`}>
-            {isRent ? "For Rent" : "For Sale"}
+            {isRent ? "Rent" : "Sale"}
           </span>
         </div>
 
-        {/* Comment count — prominent */}
+        {/* Comment count */}
         {commentCount > 0 && (
           <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full shadow-card ${
+            <span className={`flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${
               isHot
                 ? "bg-accent text-white hot-pulse"
-                : "bg-white/95 backdrop-blur-sm text-ink"
+                : "bg-white/80 text-ink"
             }`}>
               {isHot ? "🔥" : "💬"} {commentCount}
+            </span>
+          </div>
+        )}
+
+        {/* Listed time — subtle bottom right */}
+        {listedAgo && (
+          <div className="absolute bottom-3 right-3">
+            <span className="text-[11px] font-medium text-white/80 drop-shadow">
+              {listedAgo}
             </span>
           </div>
         )}
@@ -92,38 +102,34 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
       {/* Info */}
       <div className="p-3.5">
-        {/* Address */}
-        <h3 className="font-display font-semibold text-sm text-ink leading-snug truncate">
+        <h3 className="font-display font-semibold text-sm text-ink leading-snug truncate group-hover:text-accent transition-colors">
           {listing.address}
         </h3>
         <p className="text-xs text-muted mt-0.5 truncate">
           {listing.neighborhood ? `${listing.neighborhood} · ` : ""}{listing.city}, {listing.state}
         </p>
 
-        {/* Stats row */}
-        <div className="flex items-center gap-3 mt-2.5 text-xs text-muted">
+        {/* Stats */}
+        <div className="flex items-center gap-2.5 mt-2.5 text-xs text-muted">
           {listing.bedrooms != null && (
-            <span className="font-medium">{listing.bedrooms} <span className="text-muted/60">bd</span></span>
+            <span className="font-medium text-ink/70">{listing.bedrooms} <span className="text-muted/50">bd</span></span>
           )}
           {listing.bathrooms != null && (
-            <span className="font-medium">{listing.bathrooms} <span className="text-muted/60">ba</span></span>
+            <span className="font-medium text-ink/70">{listing.bathrooms} <span className="text-muted/50">ba</span></span>
           )}
           {listing.sqft != null && (
-            <span className="font-medium">{listing.sqft.toLocaleString()} <span className="text-muted/60">sqft</span></span>
+            <span className="font-medium text-ink/70">{listing.sqft.toLocaleString()} <span className="text-muted/50">sqft</span></span>
           )}
-          {listedAgo && (
-            <span className="text-muted/50 font-medium">{listedAgo} ago</span>
-          )}
-          <span className="ml-auto text-muted/50 font-medium">
+          <span className="ml-auto text-muted/40 text-[11px]">
             {capitalize(listing.propertyType)}
           </span>
         </div>
 
-        {/* Hot take preview */}
+        {/* Hot indicator */}
         {isHot && (
           <div className="mt-2.5 pt-2.5 border-t border-border">
-            <p className="text-xs text-accent font-semibold">
-              🔥 {commentCount} people are talking about this listing
+            <p className="text-xs font-medium gradient-text">
+              {commentCount} people are talking about this
             </p>
           </div>
         )}
