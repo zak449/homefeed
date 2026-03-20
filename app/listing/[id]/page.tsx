@@ -10,6 +10,9 @@ import ShareButton from "@/components/ShareButton";
 import EmailCapture from "@/components/EmailCapture";
 import FallbackImage from "@/components/FallbackImage";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import MortgageCalculator from "@/components/MortgageCalculator";
+import PriceInsight from "@/components/PriceInsight";
+import EngagementPrompts from "@/components/EngagementPrompts";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -164,7 +167,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <Breadcrumbs
         items={[
           { label: "homefeed", href: "/" },
-          { label: listing.city, href: `/?city=${encodeURIComponent(listing.city)}` },
+          { label: listing.city, href: `/neighborhood/${encodeURIComponent(listing.city)}` },
           { label: listing.address },
         ]}
       />
@@ -177,14 +180,27 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         &larr; Back
       </Link>
 
-      {/* 2. Sold banner */}
-      {isSold && (
-        <div className="bg-tag rounded-xl px-4 py-3 mb-5 flex items-center gap-2">
-          <span className="text-lg">&#x1f512;</span>
+      {/* 2. Status banner */}
+      {listing.status === "off_market" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center text-lg shrink-0">🏠</div>
           <div>
-            <p className="text-sm font-semibold text-ink">
-              This listing is {listing.status === "sold" ? "sold" : "off market"}
+            <p className="text-sm font-bold text-amber-800">
+              This property is not currently on the market
             </p>
+            <p className="text-xs text-amber-600">
+              Showing the latest available property information.
+              {listing.price > 0 && " Last known value shown below."}
+              {" "}Comments open when listed for sale or rent.
+            </p>
+          </div>
+        </div>
+      )}
+      {listing.status === "sold" && (
+        <div className="bg-tag rounded-xl px-4 py-3 mb-5 flex items-center gap-2">
+          <span className="text-lg">🔒</span>
+          <div>
+            <p className="text-sm font-semibold text-ink">This listing has been sold</p>
             <p className="text-xs text-muted">
               Comments are locked.{commentCount > 0 ? ` ${commentCount} comments preserved below.` : ""}
             </p>
@@ -266,17 +282,42 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      {/* 7. Description — About this property */}
+      {/* 7. Mortgage Calculator + Price Insight — for sale listings */}
+      {!isRent && (
+        <div className="mb-5 space-y-3 stagger-in" style={{ animationDelay: "100ms" }}>
+          <MortgageCalculator price={listing.price} />
+          <PriceInsight price={listing.price} sqft={listing.sqft} city={listing.city} />
+        </div>
+      )}
+
+      {/* 8. Description — About this property */}
       {listing.description && (
-        <div className="mb-6">
+        <div className="mb-6 stagger-in" style={{ animationDelay: "200ms" }}>
           <h2 className="font-display font-semibold text-sm text-ink mb-2">About this property</h2>
           <p className="text-sm text-muted leading-relaxed">{listing.description}</p>
         </div>
       )}
 
-      {/* 8. Comments section — THE MAIN EVENT */}
-      <div className="mb-6 border-t border-border pt-5">
-        <CommentSection listingId={listing.id} isLocked={isLocked} />
+      {/* 9. Engagement prompt — drives comments */}
+      {!isLocked && (
+        <div className="mb-4">
+          <EngagementPrompts
+            price={listing.price}
+            listingType={listing.listingType}
+            commentCount={commentCount}
+            priceHistory={priceHistory}
+          />
+        </div>
+      )}
+
+      {/* 10. Comments section — THE MAIN EVENT */}
+      <div className="mb-6 border-t border-border pt-5 stagger-in" style={{ animationDelay: "300ms" }}>
+        <CommentSection
+          listingId={listing.id}
+          isLocked={isLocked}
+          listingAddress={listing.address}
+          listingPrice={price}
+        />
       </div>
 
       {/* 9. Email capture after comments */}
@@ -409,7 +450,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               More in {listing.city}
             </h2>
             <a
-              href={`/?city=${encodeURIComponent(listing.city)}`}
+              href={`/neighborhood/${encodeURIComponent(listing.city)}`}
               className="text-xs font-semibold text-social hover:text-social/80 transition-colors"
             >
               See all &rarr;

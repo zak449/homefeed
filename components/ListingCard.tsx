@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import FallbackImage from "@/components/FallbackImage";
 
 type Listing = {
   id: string;
@@ -32,6 +33,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     : `$${listing.price.toLocaleString()}`;
 
   const isHot = commentCount >= 5;
+  const isOnFire = commentCount >= 10;
   const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
   return (
@@ -42,22 +44,12 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       {/* Photo */}
       <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-tag">
         {photo ? (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={photo}
-              alt={listing.address}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
-              loading="lazy"
-              onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextElementSibling?.classList.remove('hidden'); }}
-            />
-            <div className="hidden w-full h-full flex items-center justify-center text-muted/20">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg>
-            </div>
-          </>
+          <FallbackImage
+            src={photo}
+            alt={listing.address}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700 ease-out"
+            loading="lazy"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted/20">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
@@ -70,27 +62,41 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {/* Listing type badge — always visible */}
         <div className="absolute top-2.5 left-2.5">
           <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md shadow-sm ${
-            isRent
-              ? "bg-blue-500 text-white"
-              : "bg-emerald-500 text-white"
+            listing.status === "off_market"
+              ? "bg-amber-500 text-white"
+              : isRent
+                ? "bg-blue-500 text-white"
+                : "bg-emerald-500 text-white"
           }`}>
-            {isRent ? "🔑 For Rent" : "🏡 For Sale"}
+            {listing.status === "off_market"
+              ? "🏠 Off Market"
+              : isRent ? "🔑 For Rent" : "🏡 For Sale"}
           </span>
         </div>
 
         {/* Comment count badge — THE social signal */}
         <div className="absolute top-2.5 right-2.5">
           {commentCount > 0 ? (
-            <span className={`flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md shadow-sm ${
-              isHot
-                ? "bg-[#FF6B2C] text-white"
-                : "bg-white/95 backdrop-blur-sm text-ink"
+            <span className={`flex items-center gap-1 font-bold px-2.5 py-1 rounded-lg shadow-sm ${
+              isOnFire
+                ? "bg-[#FF6B2C] text-white text-[12px]"
+                : isHot
+                  ? "bg-[#FF6B2C] text-white text-[11px]"
+                  : "bg-white/95 backdrop-blur-sm text-ink text-[11px]"
             }`}>
-              {isHot ? "🔥" : "💬"} {commentCount}
+              {isOnFire ? (
+                <span className="fire-animate">&#x1F525;</span>
+              ) : isHot ? (
+                "&#x1F525;"
+              ) : (
+                "&#x1F4AC;"
+              )}
+              {" "}{commentCount}
+              {isOnFire && <span className="text-[10px] font-semibold ml-0.5 opacity-80">HOT</span>}
             </span>
           ) : (
             <span className="flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-white/80 backdrop-blur-sm text-muted/60">
-              💬 Be first
+              &#x1F4AC; Be first
             </span>
           )}
         </div>
@@ -145,12 +151,26 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         {/* Top comment preview — what makes this different from Zillow */}
         {listing.topComment ? (
-          <div className="mt-2.5 bg-tag rounded-lg px-3 py-2">
-            <p className="text-[12px] text-muted line-clamp-2">
-              <span className="font-semibold text-ink">{listing.topComment.name}</span>{" "}
-              {listing.topComment.content}
-            </p>
-          </div>
+          <>
+            {/* Always visible: compact social signal */}
+            <div className="mt-2 flex items-center gap-1.5">
+              <span className="w-4 h-4 rounded-full bg-social/15 text-social text-[9px] font-bold flex items-center justify-center shrink-0">
+                {listing.topComment.name.charAt(0).toUpperCase()}
+              </span>
+              <p className="text-[11px] text-muted truncate">
+                <span className="font-semibold text-ink">{listing.topComment.name}</span>{" "}
+                left a take
+              </p>
+            </div>
+            {/* Hover reveal: full comment */}
+            <div className="listing-card-comment-reveal">
+              <div className="mt-1.5 bg-tag rounded-lg px-3 py-2">
+                <p className="text-[12px] text-muted line-clamp-2">
+                  &ldquo;{listing.topComment.content}&rdquo;
+                </p>
+              </div>
+            </div>
+          </>
         ) : (
           <div className="mt-2.5 border border-dashed border-border rounded-lg px-3 py-2">
             <p className="text-[11px] text-muted/50 text-center">

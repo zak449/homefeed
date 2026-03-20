@@ -7,6 +7,9 @@ import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
 import FallbackImage from "@/components/FallbackImage";
 import RecentlyViewed from "@/components/RecentlyViewed";
+import HotTakeOfTheDay from "@/components/HotTakeOfTheDay";
+import CommunityPulse from "@/components/CommunityPulse";
+import BrowseByNeighborhood from "@/components/NeighborhoodCard";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -79,13 +82,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     })();
   }
 
-  // Build where clause
+  // Detect if this looks like an address search (has numbers + street words)
+  const looksLikeAddress = city ? /\d+\s+\w+/.test(city) : false;
+
+  // Build where clause — include off_market listings in search results
   const conditions: Prisma.ListingWhereInput[] = [
-    { status: "active" },
+    { status: { in: ["active", "off_market"] } },
   ];
 
   // Skip city text filter when doing geo search — haversine handles proximity
   if (city && !isGeoSearch) {
+    // Split search into individual words for better matching
+    const words = city.split(/[\s,]+/).filter(w => w.length > 1);
     conditions.push({
       OR: [
         { city: { contains: city, mode: "insensitive" } },
@@ -93,6 +101,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
         { address: { contains: city, mode: "insensitive" } },
+        // Also try matching all individual words against address
+        ...(words.length >= 2 ? [{
+          AND: words.map(word => ({
+            address: { contains: word, mode: "insensitive" as const },
+          })),
+        }] : []),
       ],
     });
   }
@@ -228,13 +242,47 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     listings = all.slice(0, perPage);
   }
 
+  // If address search returned 0 results, try the address lookup API
+  let addressLookupResult: { id: string; address: string; city: string; state: string; status: string } | null = null;
+  if (listings.length === 0 && city && looksLikeAddress) {
+    try {
+      const baseUrl = process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+      const lookupRes = await fetch(
+        `${baseUrl}/api/address-lookup?q=${encodeURIComponent(city)}`,
+        { cache: "no-store" }
+      );
+      if (lookupRes.ok) {
+        const lookupData = await lookupRes.json();
+        if (lookupData.results?.length > 0) {
+          // Re-query from DB now that it's been upserted
+          const freshResults = await prisma.listing.findMany({
+            where: {
+              id: { in: lookupData.results.map((r: any) => r.id) },
+            },
+            take: perPage,
+            select: selectFields,
+          });
+          if (freshResults.length > 0) {
+            listings = freshResults;
+            total = freshResults.length;
+            addressLookupResult = lookupData.results[0];
+          }
+        }
+      }
+    } catch (e) {
+      console.error("[AddressLookup] Fallback error:", e);
+    }
+  }
+
   // Map listings to include topComment
   const withComments = listings.map((l) => ({
     ...l,
     topComment: l.comments?.[0] ?? null,
   }));
 
-  let sortedListings = withComments;
+  const sortedListings = withComments;
 
   const hasMore = perPage < total;
 
@@ -290,7 +338,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               )}
               {reactionCount > 0 && (
                 <span className="text-sm text-muted">
-                  🔥 <span className="font-semibold text-ink">{reactionCount.toLocaleString()}</span> reactions
+                  {"🔥"} <span className="font-semibold text-ink">{reactionCount.toLocaleString()}</span> reactions
                 </span>
               )}
               {listingCount > 0 && (
@@ -333,166 +381,35 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
-      {/* ====== MODE TOGGLE — always prominent ====== */}
-      {(() => {
-        const makeHref = (typeVal: string) => {
-          const p = new URLSearchParams(
-            Object.fromEntries(
-              Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
-            )
-          );
-          if (typeVal) p.set("type", typeVal); else p.delete("type");
-          p.delete("page");
-          return `/?${p.toString()}`;
-        };
-        const current = listingType ?? "";
-        return (
-          <div className="mb-6 sm:mb-8">
-            {/* Mode toggle bar */}
-            <div className="flex items-center gap-1 bg-ink/[0.04] rounded-2xl p-1.5 mb-4 w-fit">
-              {[
-                { key: "", label: "All Listings", icon: "🏘️" },
-                { key: "sale", label: "Buy", icon: "🏡" },
-                { key: "rent", label: "Rent", icon: "🔑" },
-              ].map((t) => {
-                const isActive = current === t.key;
-                const activeClasses = t.key === "sale"
-                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
-                  : t.key === "rent"
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                    : "bg-white text-ink shadow-lg";
-                return (
-                  <a
-                    key={t.key}
-                    href={makeHref(t.key)}
-                    className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[13px] sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                      isActive ? activeClasses : "text-muted hover:text-ink hover:bg-white/60"
-                    }`}
-                  >
-                    <span className="text-base">{t.icon}</span>
-                    {t.label}
-                  </a>
-                );
-              })}
-            </div>
+      {/* ====== HOT TAKE OF THE DAY — the viral hook (default landing only) ====== */}
+      {isDefaultLanding && (
+        <Suspense fallback={<div className="h-48 skeleton rounded-2xl my-8" />}>
+          <HotTakeOfTheDay />
+        </Suspense>
+      )}
 
-            {/* Context banner — what you're viewing */}
-            {listingType && (
-              <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
-                listingType === "sale"
-                  ? "bg-gradient-to-r from-emerald-50 to-emerald-50/30 border border-emerald-200/60"
-                  : "bg-gradient-to-r from-blue-50 to-blue-50/30 border border-blue-200/60"
-              }`}>
-                <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
-                    listingType === "sale" ? "bg-emerald-100" : "bg-blue-100"
-                  }`}>
-                    {listingType === "sale" ? "🏡" : "🔑"}
-                  </div>
-                  <div>
-                    <p className={`text-sm font-bold ${
-                      listingType === "sale" ? "text-emerald-800" : "text-blue-800"
-                    }`}>
-                      {listingType === "sale" ? "Homes for Sale" : "Rentals"}
-                      {city && <span className="font-normal text-xs ml-1.5 opacity-70">in {city}</span>}
-                    </p>
-                    <p className={`text-[11px] ${
-                      listingType === "sale" ? "text-emerald-600" : "text-blue-600"
-                    }`}>
-                      {total} listing{total !== 1 ? "s" : ""} · See what people are saying
-                    </p>
-                  </div>
-                </div>
-                <a
-                  href={makeHref(listingType === "sale" ? "rent" : "sale")}
-                  className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
-                    listingType === "sale"
-                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/50"
-                      : "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50"
-                  }`}
-                >
-                  Switch to {listingType === "sale" ? "Rent 🔑" : "Buy 🏡"}
-                </a>
-              </div>
-            )}
-
-            {/* Title + sort row */}
-            <div className="flex items-end justify-between gap-4 flex-wrap mt-4">
-              <div>
-                {hasFilters && !listingType && (
-                  <p className="text-[13px] text-muted mb-1">
-                    {total} result{total !== 1 ? "s" : ""}
-                  </p>
-                )}
-                <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tighter">
-                  {city
-                    ? city
-                    : sort === "comments"
-                      ? "🔥 Hot Takes"
-                      : "Explore"
-                  }
-                </h1>
-              </div>
-              {/* Sort */}
-              <div className="flex items-center gap-0.5 text-[13px]">
-                {[
-                  { key: "newest", label: "New" },
-                  { key: "comments", label: "🔥 Hot Takes" },
-                  { key: "price-low", label: "$ Low" },
-                  { key: "price-high", label: "$ High" },
-                ].map((s) => {
-                  const params = new URLSearchParams(
-                    Object.fromEntries(
-                      Object.entries(sp)
-                        .filter(([, v]) => typeof v === "string") as [string, string][]
-                    )
-                  );
-                  params.set("sort", s.key);
-                  params.delete("page");
-                  const isActive = sort === s.key;
-                  return (
-                    <a
-                      key={s.key}
-                      href={`/?${params.toString()}`}
-                      className={`px-3 py-1.5 rounded-lg transition-all font-medium ${
-                        isActive
-                          ? s.key === "comments" ? "bg-social text-white" : "bg-ink text-white"
-                          : "text-muted hover:text-ink"
-                      }`}
-                    >
-                      {s.label}
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Search + filters */}
-      <Suspense>
-        <SearchBar />
-      </Suspense>
-
-      {/* Recently Viewed */}
-      <div className="mt-6">
-        <RecentlyViewed />
-      </div>
+      {/* ====== COMMUNITY PULSE — live stats (default landing only) ====== */}
+      {isDefaultLanding && (
+        <Suspense fallback={<div className="h-32 skeleton rounded-xl my-8" />}>
+          <CommunityPulse />
+        </Suspense>
+      )}
 
       {/* ====== TRENDING CONVERSATIONS — only on default landing ====== */}
       {isDefaultLanding && trendingWithComments.length > 0 && (
         <div className="mt-8 mb-4">
           <div className="flex items-center gap-2 mb-4">
-            <h2 className="font-display text-base font-bold text-ink">
+            <span className="text-lg">{"💬"}</span>
+            <h2 className="font-display text-base font-bold text-ink uppercase tracking-widest">
               Trending Conversations
             </h2>
             <span className="text-[11px] font-semibold text-social bg-social-light px-2 py-0.5 rounded-full">
               Most discussed
             </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-border to-transparent" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {trendingWithComments.slice(0, 3).map((t) => {
+            {trendingWithComments.slice(0, 6).map((t) => {
               const photo = t.photos[0];
               const isRent = t.listingType === "rent";
               const price = isRent
@@ -530,7 +447,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       <p className="text-[12px] text-muted truncate">{t.address}</p>
                       <p className="text-[11px] text-muted truncate">{t.city}, {t.state}</p>
                       <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
-                        💬 {t._count.comments} comment{t._count.comments !== 1 ? "s" : ""}
+                        {"💬"} {t._count.comments} comment{t._count.comments !== 1 ? "s" : ""}
                       </span>
                     </div>
                   </div>
@@ -552,10 +469,164 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       )}
 
+      {/* ====== BROWSE BY NEIGHBORHOOD — only on default landing ====== */}
+      {isDefaultLanding && (
+        <Suspense fallback={<div className="h-40 skeleton rounded-xl my-8" />}>
+          <BrowseByNeighborhood />
+        </Suspense>
+      )}
+
+      {/* ====== RECENTLY VIEWED ====== */}
+      <div className="mt-6">
+        <RecentlyViewed />
+      </div>
+
+      {/* ====== MODE TOGGLE — always prominent ====== */}
+      {(() => {
+        const makeHref = (typeVal: string) => {
+          const p = new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(sp).filter(([, v]) => typeof v === "string") as [string, string][]
+            )
+          );
+          if (typeVal) p.set("type", typeVal); else p.delete("type");
+          p.delete("page");
+          return `/?${p.toString()}`;
+        };
+        const current = listingType ?? "";
+        return (
+          <div className="mb-6 sm:mb-8">
+            {/* Mode toggle bar */}
+            <div className="flex items-center gap-1 bg-ink/[0.04] rounded-2xl p-1.5 mb-4 w-fit">
+              {[
+                { key: "", label: "All Listings", icon: "\uD83C\uDFD8\uFE0F" },
+                { key: "sale", label: "Buy", icon: "\uD83C\uDFE1" },
+                { key: "rent", label: "Rent", icon: "\uD83D\uDD11" },
+              ].map((t) => {
+                const isActive = current === t.key;
+                const activeClasses = t.key === "sale"
+                  ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                  : t.key === "rent"
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
+                    : "bg-white text-ink shadow-lg";
+                return (
+                  <a
+                    key={t.key}
+                    href={makeHref(t.key)}
+                    className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-[13px] sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                      isActive ? activeClasses : "text-muted hover:text-ink hover:bg-white/60"
+                    }`}
+                  >
+                    <span className="text-base">{t.icon}</span>
+                    {t.label}
+                  </a>
+                );
+              })}
+            </div>
+
+            {/* Context banner — what you're viewing */}
+            {listingType && (
+              <div className={`rounded-xl px-4 py-3 flex items-center justify-between ${
+                listingType === "sale"
+                  ? "bg-gradient-to-r from-emerald-50 to-emerald-50/30 border border-emerald-200/60"
+                  : "bg-gradient-to-r from-blue-50 to-blue-50/30 border border-blue-200/60"
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-lg ${
+                    listingType === "sale" ? "bg-emerald-100" : "bg-blue-100"
+                  }`}>
+                    {listingType === "sale" ? "\uD83C\uDFE1" : "\uD83D\uDD11"}
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${
+                      listingType === "sale" ? "text-emerald-800" : "text-blue-800"
+                    }`}>
+                      {listingType === "sale" ? "Homes for Sale" : "Rentals"}
+                      {city && <span className="font-normal text-xs ml-1.5 opacity-70">in {city}</span>}
+                    </p>
+                    <p className={`text-[11px] ${
+                      listingType === "sale" ? "text-emerald-600" : "text-blue-600"
+                    }`}>
+                      {total} listing{total !== 1 ? "s" : ""} · See what people are saying
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={makeHref(listingType === "sale" ? "rent" : "sale")}
+                  className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-all ${
+                    listingType === "sale"
+                      ? "text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200/50"
+                      : "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50"
+                  }`}
+                >
+                  Switch to {listingType === "sale" ? "Rent \uD83D\uDD11" : "Buy \uD83C\uDFE1"}
+                </a>
+              </div>
+            )}
+
+            {/* Title + sort row */}
+            <div className="flex items-end justify-between gap-4 flex-wrap mt-4">
+              <div>
+                {hasFilters && !listingType && (
+                  <p className="text-[13px] text-muted mb-1">
+                    {total} result{total !== 1 ? "s" : ""}
+                  </p>
+                )}
+                <h1 className="font-display text-2xl sm:text-3xl font-semibold text-ink tracking-tighter">
+                  {city
+                    ? city
+                    : sort === "comments"
+                      ? "\uD83D\uDD25 Hot Takes"
+                      : "Explore"
+                  }
+                </h1>
+              </div>
+              {/* Sort */}
+              <div className="flex items-center gap-0.5 text-[13px]">
+                {[
+                  { key: "newest", label: "New" },
+                  { key: "comments", label: "\uD83D\uDD25 Hot Takes" },
+                  { key: "price-low", label: "$ Low" },
+                  { key: "price-high", label: "$ High" },
+                ].map((s) => {
+                  const params = new URLSearchParams(
+                    Object.fromEntries(
+                      Object.entries(sp)
+                        .filter(([, v]) => typeof v === "string") as [string, string][]
+                    )
+                  );
+                  params.set("sort", s.key);
+                  params.delete("page");
+                  const isActive = sort === s.key;
+                  return (
+                    <a
+                      key={s.key}
+                      href={`/?${params.toString()}`}
+                      className={`px-3 py-1.5 rounded-lg transition-all font-medium ${
+                        isActive
+                          ? s.key === "comments" ? "bg-social text-white" : "bg-ink text-white"
+                          : "text-muted hover:text-ink"
+                      }`}
+                    >
+                      {s.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Search + filters */}
+      <Suspense>
+        <SearchBar />
+      </Suspense>
+
       {/* ====== LISTING GRID ====== */}
       {sortedListings.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-4xl mb-3">🏚️</p>
+          <p className="text-4xl mb-3">{"\uD83C\uDFDA\uFE0F"}</p>
           <p className="font-display text-lg font-semibold text-ink mb-1">No listings here yet</p>
           <p className="text-sm text-muted max-w-sm mx-auto">
             Try searching a city to see what people are saying about homes in that area.

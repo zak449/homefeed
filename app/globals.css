@@ -126,3 +126,117 @@ input[type=number]::-webkit-outer-spin-button {
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+/* Staggered fade-in for listing detail sections */
+@keyframes staggerIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stagger-in {
+  opacity: 0;
+  animation: staggerIn 0.5s ease-out forwards;
+}
+.stagger-in:nth-child(1) { animation-delay: 0ms; }
+.stagger-in:nth-child(2) { animation-delay: 80ms; }
+.stagger-in:nth-child(3) { animation-delay: 160ms; }
+.stagger-in:nth-child(4) { animation-delay: 240ms; }
+.stagger-in:nth-child(5) { animation-delay: 320ms; }
+.stagger-in:nth-child(6) { animation-delay: 400ms; }
+
+/* Scale in for engagement elements */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+/* Mortgage calculator slider */
+.mortgage-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #0F0F0F, #FF6B2C);
+  outline: none;
+  cursor: pointer;
+}
+.mortgage-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0F0F0F;
+  border: 3px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  cursor: grab;
+  transition: transform 0.15s ease;
+}
+.mortgage-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+.mortgage-slider::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.05);
+}
+.mortgage-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0F0F0F;
+  border: 3px solid white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  cursor: grab;
+}
+
+/* Conversation entrance — pulse glow on comment section */
+@keyframes conversationGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(255, 107, 44, 0.08); }
+}
+.conversation-entrance {
+  animation: conversationGlow 3s ease-in-out 1;
+}
+
+/* Subtle float for engagement hooks */
+@keyframes subtleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-3px); }
+}
+.subtle-float {
+  animation: subtleFloat 4s ease-in-out infinite;
+}
+
+/* Hot Take card shimmer border */
+.hot-take-card {
+  border: 1px solid rgba(255, 107, 44, 0.2);
+  box-shadow: 0 0 40px rgba(255, 107, 44, 0.08), 0 24px 48px rgba(0, 0, 0, 0.12);
+}
+.hot-take-card:hover {
+  box-shadow: 0 0 60px rgba(255, 107, 44, 0.15), 0 24px 48px rgba(0, 0, 0, 0.16);
+}
+
+/* Fire animation for hot listings */
+@keyframes fireFlicker {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  25%      { transform: scale(1.15) rotate(-2deg); opacity: 0.9; }
+  50%      { transform: scale(1.05) rotate(1deg); opacity: 1; }
+  75%      { transform: scale(1.2) rotate(-1deg); opacity: 0.85; }
+}
+.fire-animate {
+  animation: fireFlicker 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+/* Listing card top comment reveal on hover */
+.listing-card-comment-reveal {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, opacity 0.25s ease-out;
+}
+.group:hover .listing-card-comment-reveal {
+  max-height: 80px;
+  opacity: 1;
+}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo } from "react";
+import ShareableComment from "@/components/ShareableComment";
+import UserBadge from "@/components/UserBadge";
 
 const REACTIONS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDC80"];
 
@@ -41,9 +43,13 @@ function timeAgo(dateStr: string): string {
 export default function CommentSection({
   listingId,
   isLocked = false,
+  listingAddress = "",
+  listingPrice = "",
 }: {
   listingId: string;
   isLocked?: boolean;
+  listingAddress?: string;
+  listingPrice?: string;
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -235,6 +241,16 @@ export default function CommentSection({
     sum + Object.values(c.reactions).reduce((a, b) => a + b, 0), 0
   );
 
+  // Count comments per name for UserBadge
+  const commentCountByName = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const c of comments) {
+      const key = c.name.toLowerCase();
+      map[key] = (map[key] ?? 0) + 1;
+    }
+    return map;
+  }, [comments]);
+
   const milestoneMessage = getMilestoneMessage(comments.length);
 
   const SORT_OPTIONS: { key: SortMode; label: string }[] = [
@@ -246,10 +262,10 @@ export default function CommentSection({
   return (
     <div>
       {/* Section header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 conversation-entrance rounded-xl px-1 -mx-1">
         <div className="flex items-center gap-3">
           <h2 className="font-display text-lg font-bold text-ink">
-            {isLocked ? "Comments (Locked)" : "Comments"}
+            {isLocked ? "Comments (Locked)" : "The Conversation"}
           </h2>
           {comments.length > 0 && (
             <span className="text-xs font-semibold text-muted bg-tag px-2.5 py-1 rounded-full">
@@ -343,6 +359,9 @@ export default function CommentSection({
             canReact={!isLocked && !!(name && (email || reactingEmail))}
             onReact={(type) => handleReact(pinnedComment.id, type)}
             isLocked={isLocked}
+            listingAddress={listingAddress}
+            listingPrice={listingPrice}
+            userCommentCount={commentCountByName[pinnedComment.name.toLowerCase()] ?? 0}
           />
         </div>
       )}
@@ -357,6 +376,9 @@ export default function CommentSection({
               canReact={!isLocked && !!(name && (email || reactingEmail))}
               onReact={(type) => handleReact(comment.id, type)}
               isLocked={isLocked}
+              listingAddress={listingAddress}
+              listingPrice={listingPrice}
+              userCommentCount={commentCountByName[comment.name.toLowerCase()] ?? 0}
             />
           ))}
 
@@ -387,8 +409,11 @@ export default function CommentSection({
       {/* Post form — only if not locked */}
       {!isLocked && (
         <div className="bg-white rounded-xl border border-border p-5">
-          <p className="font-display font-semibold text-sm text-ink mb-4">
-            Leave a comment
+          <p className="font-display font-semibold text-sm text-ink mb-1">
+            Join the conversation
+          </p>
+          <p className="text-xs text-muted mb-4">
+            What&apos;s your take on this place?
           </p>
           <form onSubmit={handlePost} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -526,11 +551,17 @@ function CommentItem({
   canReact,
   onReact,
   isLocked,
+  listingAddress = "",
+  listingPrice = "",
+  userCommentCount = 0,
 }: {
   comment: Comment;
   canReact: boolean;
   onReact: (type: string) => void;
   isLocked: boolean;
+  listingAddress?: string;
+  listingPrice?: string;
+  userCommentCount?: number;
 }) {
   const initials = comment.name
     .split(" ")
@@ -563,8 +594,9 @@ function CommentItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-sm text-ink">{comment.name}</span>
+          {userCommentCount > 0 && <UserBadge commentCount={userCommentCount} />}
           <span className="text-xs text-muted/50">{timeAgo(comment.createdAt)}</span>
         </div>
         <p className="text-sm text-ink/80 mt-0.5 leading-relaxed whitespace-pre-wrap">
@@ -572,7 +604,7 @@ function CommentItem({
         </p>
 
         {/* Reactions */}
-        <div className="flex gap-1 mt-2 flex-wrap">
+        <div className="flex gap-1 mt-2 flex-wrap items-center">
           {REACTIONS.map((r) => {
             const count = comment.reactions[r] ?? 0;
             return (
@@ -591,6 +623,16 @@ function CommentItem({
               </button>
             );
           })}
+          {listingAddress && (
+            <ShareableComment
+              name={comment.name}
+              content={comment.content}
+              createdAt={comment.createdAt}
+              address={listingAddress}
+              price={listingPrice}
+              reactions={comment.reactions}
+            />
+          )}
         </div>
       </div>
     </div>

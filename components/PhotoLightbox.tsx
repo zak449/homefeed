@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import FallbackImage from "@/components/FallbackImage";
 
 export default function PhotoLightbox({
   photos,
@@ -52,12 +53,10 @@ export default function PhotoLightbox({
           onClick={() => openAt(0)}
           className="w-full relative aspect-[16/9] rounded-xl overflow-hidden bg-tag cursor-pointer"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <FallbackImage
             src={photos[0]}
             alt={address}
             className="absolute inset-0 w-full h-full object-cover"
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </button>
       ) : (
@@ -66,12 +65,10 @@ export default function PhotoLightbox({
             onClick={() => openAt(0)}
             className="col-span-4 sm:col-span-2 sm:row-span-2 relative aspect-[4/3] sm:aspect-auto min-h-[200px] bg-tag cursor-pointer"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <FallbackImage
               src={photos[0]}
               alt={address}
               className="absolute inset-0 w-full h-full object-cover"
-              onError={(e) => { e.currentTarget.style.display = 'none'; }}
             />
           </button>
           {photos.slice(1, 5).map((p, i) => (
@@ -80,12 +77,10 @@ export default function PhotoLightbox({
               onClick={() => openAt(i + 1)}
               className="relative aspect-[4/3] bg-tag hidden sm:block cursor-pointer"
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <FallbackImage
                 src={p}
                 alt={`${address} photo ${i + 2}`}
                 className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
               {i === 3 && photos.length > 5 && (
                 <div className="absolute inset-0 bg-ink/50 flex items-center justify-center">
@@ -148,13 +143,11 @@ export default function PhotoLightbox({
           )}
 
           {/* Photo */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <FallbackImage
             src={photos[index]}
             alt={`${address} photo ${index + 1}`}
             className="max-h-[90vh] max-w-[90vw] object-contain select-none"
             onClick={(e) => e.stopPropagation()}
-            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </div>
       )}
