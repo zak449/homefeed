@@ -23,7 +23,6 @@ const POPULAR_CITIES = [
   "Savannah, GA",
 ];
 
-// Recent searches stored in localStorage
 function getRecentSearches(): string[] {
   if (typeof window === "undefined") return [];
   try {
@@ -68,20 +67,17 @@ export default function SearchBar() {
 
   const hasActiveFilters = !!(type || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
 
-  // Load recent & saved searches on mount
   useEffect(() => {
     setRecentSearches(getRecentSearches());
     setSavedSearches(getSavedSearches());
   }, []);
 
-  // Refresh saved searches when suggestions open
   useEffect(() => {
     if (showSuggestions) {
       setSavedSearches(getSavedSearches());
     }
   }, [showSuggestions]);
 
-  // Close suggestions when clicking outside
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (
@@ -97,7 +93,6 @@ export default function SearchBar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // Filter cities based on input
   const query = city.trim().toLowerCase();
   const filteredCities = query
     ? POPULAR_CITIES.filter((c) => c.toLowerCase().includes(query))
@@ -178,7 +173,6 @@ export default function SearchBar() {
     setLocating(true);
     setShowSuggestions(false);
     try {
-      // Always request fresh geolocation when user explicitly clicks "Current Location"
       const loc = await requestGeolocation();
       if (loc?.city) {
         setCity(loc.city);
@@ -186,7 +180,6 @@ export default function SearchBar() {
         addRecentSearch(loc.city);
         setRecentSearches(getRecentSearches());
         trackEvent("search", { type: "current_location", city: loc.city });
-        // Navigate with city param so autoSyncCity runs on the server
         const params = new URLSearchParams();
         params.set("city", loc.city);
         params.set("lat", String(loc.latitude));
@@ -202,7 +195,6 @@ export default function SearchBar() {
         if (maxSqft) params.set("maxSqft", maxSqft);
         router.push(`/?${params.toString()}`);
       } else if (loc && !loc.city) {
-        // Got coordinates but no city name — search by coordinates only
         console.warn("[SearchBar] Got location but no city name, searching by coordinates");
         trackEvent("search", { type: "current_location_no_city", lat: loc.latitude, lng: loc.longitude });
         const params = new URLSearchParams();
@@ -219,7 +211,6 @@ export default function SearchBar() {
         if (maxSqft) params.set("maxSqft", maxSqft);
         router.push(`/?${params.toString()}`);
       } else {
-        // Geolocation completely failed — inform user
         console.error("[SearchBar] Geolocation failed: no location returned");
         alert("Could not determine your location. Please allow location access in your browser settings, or search by city name.");
       }
@@ -231,210 +222,184 @@ export default function SearchBar() {
     }
   }, [type, propertyType, minPrice, maxPrice, minBeds, minBaths, minSqft, maxSqft, router]);
 
-  const inputClass = "w-full rounded-lg border border-border px-3 py-2 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors";
+  const selectClass = "w-full rounded-button bg-surface px-3 py-2 text-body text-ink focus:outline-none focus:shadow-soft transition-shadow";
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* Main search row */}
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          {locating ? (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <div className="w-4 h-4 border-2 border-social/30 border-t-social rounded-full animate-spin" />
-            </div>
-          ) : geoResolved ? (
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-social" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
-            </svg>
-          ) : (
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-          )}
-          <input
-            ref={inputRef}
-            type="text"
-            value={city}
-            onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); setGeoResolved(false); }}
-            onFocus={() => setShowSuggestions(true)}
-            placeholder={locating ? "Finding your location..." : "City, zip, neighborhood, or address..."}
-            className={`w-full rounded-lg border border-border pl-9 pr-4 py-2.5 text-sm bg-white focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors ${
-              geoResolved ? "text-ink font-medium" : ""
-            }`}
-            autoComplete="off"
-          />
-
-          {/* Dropdown suggestions */}
-          {showSuggestions && (
-            <div
-              ref={suggestionsRef}
-              className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-border shadow-modal z-50 max-h-[400px] overflow-y-auto animate-fade-in"
-            >
-              {/* Current Location — always first */}
-              <button
-                type="button"
-                onClick={handleCurrentLocation}
-                disabled={locating}
-                className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-left hover:bg-tag transition-colors border-b border-border disabled:opacity-50"
-              >
-                {locating ? (
-                  <div className="w-4 h-4 border-2 border-social/30 border-t-social rounded-full animate-spin shrink-0" />
-                ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-social shrink-0">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-                    <circle cx="12" cy="12" r="8" />
-                  </svg>
-                )}
-                <span className={`font-semibold ${locating ? "text-muted" : "text-ink"}`}>
-                  {locating ? "Finding your location..." : "Use Current Location"}
-                </span>
-                {locating && (
-                  <span className="ml-auto text-[11px] text-muted animate-pulse">locating</span>
-                )}
-              </button>
-
-              {/* Recent searches */}
-              {filteredRecent.length > 0 && (
-                <>
-                  <div className="px-4 pt-2.5 pb-1">
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">Recent</p>
-                  </div>
-                  {filteredRecent.map((s) => (
-                    <button
-                      key={`recent-${s}`}
-                      type="button"
-                      onClick={() => { setCity(s); doSearch(s); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors group"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted shrink-0">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 6v6l4 2" />
-                      </svg>
-                      <span className="text-ink flex-1">{s}</span>
-                      <span
-                        onClick={(e) => handleDeleteRecent(s, e)}
-                        className="text-muted/40 hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                        role="button"
-                        tabIndex={-1}
-                      >
-                        ✕
-                      </span>
-                    </button>
-                  ))}
-                </>
-              )}
-
-              {/* Saved searches */}
-              {savedSearches.length > 0 && (
-                <>
-                  <div className="px-4 pt-2.5 pb-1 border-t border-border">
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">Saved Searches</p>
-                  </div>
-                  {savedSearches.map((s) => (
-                    <button
-                      key={`saved-${s.id}`}
-                      type="button"
-                      onClick={() => runSavedSearch(s)}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors group"
-                    >
-                      <span className="text-amber-500 shrink-0 text-sm leading-none">🔔</span>
-                      <span className="text-ink flex-1 truncate">{s.label}</span>
-                      <span
-                        onClick={(e) => handleDeleteSavedSearch(s.id, e)}
-                        className="text-muted/40 hover:text-accent opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                        role="button"
-                        tabIndex={-1}
-                      >
-                        ✕
-                      </span>
-                    </button>
-                  ))}
-                </>
-              )}
-
-              {/* Popular cities */}
-              <div className="px-4 pt-2.5 pb-1 border-t border-border">
-                <p className="text-[10px] font-semibold text-muted uppercase tracking-widest">
-                  {query ? "Matching Cities" : "Popular Cities"}
-                </p>
-              </div>
-              {filteredCities.slice(0, 8).map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => { const name = c.split(",")[0].trim(); setCity(name); doSearch(name); }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-left hover:bg-tag transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-muted shrink-0">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  <span className="text-ink">{c}</span>
-                </button>
-              ))}
-
-              {query && filteredCities.length === 0 && (
-                <div className="px-4 py-3 text-sm text-muted border-t border-border">
-                  Press Enter to search &ldquo;{city}&rdquo;
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors shrink-0"
-        >
-          Search
-        </button>
-        <SaveSearchButton
-          city={city}
-          type={type}
-          propertyType={propertyType}
-          minPrice={minPrice}
-          maxPrice={maxPrice}
-          minBeds={minBeds}
-          minBaths={minBaths}
-          minSqft={minSqft}
-          maxSqft={maxSqft}
+      {/* Main search input */}
+      <div className="relative">
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-tertiary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="8" />
+          <path d="M21 21l-4.35-4.35" />
+        </svg>
+        <input
+          ref={inputRef}
+          type="text"
+          value={city}
+          onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); setGeoResolved(false); }}
+          onFocus={() => setShowSuggestions(true)}
+          placeholder={locating ? "Finding your location..." : "Search any address, city, or zip..."}
+          className="w-full rounded-full bg-surface pl-11 pr-4 py-3 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
+          autoComplete="off"
         />
+
+        {/* Dropdown suggestions */}
+        {showSuggestions && (
+          <div
+            ref={suggestionsRef}
+            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-card shadow-hover z-50 max-h-[400px] overflow-y-auto animate-fade-in"
+          >
+            {/* Current Location */}
+            <button
+              type="button"
+              onClick={handleCurrentLocation}
+              disabled={locating}
+              className="w-full flex items-center gap-2.5 px-4 py-3 text-body text-left hover:bg-surface transition-colors disabled:opacity-50"
+            >
+              {locating ? (
+                <div className="w-4 h-4 border-2 border-tertiary/30 border-t-ink rounded-full animate-spin shrink-0" />
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-secondary shrink-0">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+                  <circle cx="12" cy="12" r="8" />
+                </svg>
+              )}
+              <span className={`font-medium ${locating ? "text-tertiary" : "text-ink"}`}>
+                {locating ? "Finding your location..." : "Use Current Location"}
+              </span>
+            </button>
+
+            {/* Recent searches */}
+            {filteredRecent.length > 0 && (
+              <>
+                <div className="px-4 pt-2.5 pb-1 border-t border-divider">
+                  <p className="text-caption text-tertiary">Recent</p>
+                </div>
+                {filteredRecent.map((s) => (
+                  <button
+                    key={`recent-${s}`}
+                    type="button"
+                    onClick={() => { setCity(s); doSearch(s); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-body text-left hover:bg-surface transition-colors group"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tertiary shrink-0">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 6v6l4 2" />
+                    </svg>
+                    <span className="text-ink flex-1">{s}</span>
+                    <span
+                      onClick={(e) => handleDeleteRecent(s, e)}
+                      className="text-tertiary hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                      role="button"
+                      tabIndex={-1}
+                    >
+                      &times;
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Saved searches */}
+            {savedSearches.length > 0 && (
+              <>
+                <div className="px-4 pt-2.5 pb-1 border-t border-divider">
+                  <p className="text-caption text-tertiary">Saved Searches</p>
+                </div>
+                {savedSearches.map((s) => (
+                  <button
+                    key={`saved-${s.id}`}
+                    type="button"
+                    onClick={() => runSavedSearch(s)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-body text-left hover:bg-surface transition-colors group"
+                  >
+                    <span className="text-tertiary shrink-0 text-caption">saved</span>
+                    <span className="text-ink flex-1 truncate">{s.label}</span>
+                    <span
+                      onClick={(e) => handleDeleteSavedSearch(s.id, e)}
+                      className="text-tertiary hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                      role="button"
+                      tabIndex={-1}
+                    >
+                      &times;
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {/* Popular cities */}
+            <div className="px-4 pt-2.5 pb-1 border-t border-divider">
+              <p className="text-caption text-tertiary">
+                {query ? "Matching Cities" : "Popular Cities"}
+              </p>
+            </div>
+            {filteredCities.slice(0, 8).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => { const name = c.split(",")[0].trim(); setCity(name); doSearch(name); }}
+                className="w-full flex items-center gap-2.5 px-4 py-2 text-body text-left hover:bg-surface transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tertiary shrink-0">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <span className="text-ink">{c}</span>
+              </button>
+            ))}
+
+            {query && filteredCities.length === 0 && (
+              <div className="px-4 py-3 text-body text-tertiary border-t border-divider">
+                Press Enter to search &ldquo;{city}&rdquo;
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Filters link */}
+      <div className="flex items-center gap-3 mt-2">
+        {/* Filter chips for Buy/Rent/All */}
+        <div className="flex items-center gap-1.5">
+          {[
+            { key: "", label: "All" },
+            { key: "sale", label: "Buy" },
+            { key: "rent", label: "Rent" },
+          ].map((t) => (
+            <button
+              key={t.key}
+              type="button"
+              onClick={() => setType(t.key)}
+              className={`px-3 py-1 rounded-full text-caption transition-colors ${
+                type === t.key
+                  ? "bg-ink text-white"
+                  : "bg-surface text-ink hover:bg-active"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
         <button
           type="button"
           onClick={() => setShowFilters(!showFilters)}
-          className={`px-3 py-2.5 text-sm font-medium rounded-lg border transition-colors shrink-0 flex items-center gap-1.5 ${
-            hasActiveFilters
-              ? "border-ink text-ink bg-ink/5"
-              : "border-border text-muted hover:text-ink hover:border-ink/30"
-          }`}
+          className="text-caption text-tertiary hover:text-ink transition-colors ml-auto"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
-          </svg>
-          <span className="hidden sm:inline">Filters</span>
-          {hasActiveFilters && (
-            <span className="w-2 h-2 rounded-full bg-ink"></span>
-          )}
+          {showFilters ? "Hide filters" : "Filters"}
+          {hasActiveFilters && " \u00b7"}
         </button>
       </div>
 
       {/* Expandable filters */}
       {showFilters && (
-        <div className="mt-3 p-4 bg-white rounded-xl border border-border shadow-card animate-fade-in">
+        <div className="mt-3 p-4 bg-surface rounded-card animate-fade-in">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Listing Type</label>
-              <select value={type} onChange={(e) => setType(e.target.value)} className={inputClass}>
-                <option value="">Sale & Rent</option>
-                <option value="sale">For Sale</option>
-                <option value="rent">For Rent</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-muted mb-1">Home Type</label>
-              <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Home Type</label>
+              <select value={propertyType} onChange={(e) => setPropertyType(e.target.value)} className={selectClass}>
                 <option value="">Any</option>
                 <option value="house">House</option>
                 <option value="condo">Condo</option>
@@ -443,24 +408,22 @@ export default function SearchBar() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Beds</label>
-              <select value={minBeds} onChange={(e) => setMinBeds(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Beds</label>
+              <select value={minBeds} onChange={(e) => setMinBeds(e.target.value)} className={selectClass}>
                 <option value="">Any</option>
                 {[1, 2, 3, 4, 5].map((n) => <option key={n} value={n}>{n}+</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Baths</label>
-              <select value={minBaths} onChange={(e) => setMinBaths(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Baths</label>
+              <select value={minBaths} onChange={(e) => setMinBaths(e.target.value)} className={selectClass}>
                 <option value="">Any</option>
                 {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}+</option>)}
               </select>
             </div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Min Price</label>
-              <select value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Min Price</label>
+              <select value={minPrice} onChange={(e) => setMinPrice(e.target.value)} className={selectClass}>
                 <option value="">No Min</option>
                 <option value="50000">$50k</option>
                 <option value="100000">$100k</option>
@@ -473,9 +436,11 @@ export default function SearchBar() {
                 <option value="2000000">$2M</option>
               </select>
             </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Max Price</label>
-              <select value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Max Price</label>
+              <select value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} className={selectClass}>
                 <option value="">No Max</option>
                 <option value="100000">$100k</option>
                 <option value="200000">$200k</option>
@@ -489,8 +454,8 @@ export default function SearchBar() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Min Sqft</label>
-              <select value={minSqft} onChange={(e) => setMinSqft(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Min Sqft</label>
+              <select value={minSqft} onChange={(e) => setMinSqft(e.target.value)} className={selectClass}>
                 <option value="">Any</option>
                 <option value="500">500+</option>
                 <option value="750">750+</option>
@@ -502,8 +467,8 @@ export default function SearchBar() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-muted mb-1">Max Sqft</label>
-              <select value={maxSqft} onChange={(e) => setMaxSqft(e.target.value)} className={inputClass}>
+              <label className="block text-caption text-secondary mb-1">Max Sqft</label>
+              <select value={maxSqft} onChange={(e) => setMaxSqft(e.target.value)} className={selectClass}>
                 <option value="">Any</option>
                 <option value="1000">1,000</option>
                 <option value="1500">1,500</option>
@@ -514,19 +479,19 @@ export default function SearchBar() {
               </select>
             </div>
           </div>
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-divider">
             <button
               type="button"
               onClick={handleReset}
-              className="text-xs text-muted hover:text-ink font-medium transition-colors"
+              className="text-caption text-tertiary hover:text-ink transition-colors"
             >
               Clear all
             </button>
             <button
               type="submit"
-              className="text-xs font-semibold text-ink hover:text-accent transition-colors"
+              className="text-caption font-medium text-ink hover:text-secondary transition-colors"
             >
-              Apply filters →
+              Apply filters
             </button>
           </div>
         </div>

@@ -1,15 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-  --bg: #FFFFFF;
-  --ink: #0F0F0F;
-  --accent: #000000;
-  --social: #FF6B2C;
-}
 
 * { box-sizing: border-box; margin: 0; }
 
@@ -19,9 +12,9 @@ html {
 }
 
 body {
-  background-color: var(--bg);
-  color: var(--ink);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background-color: #FFFFFF;
+  color: #1A1A1A;
+  font-family: 'SF Pro Display', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -34,21 +27,15 @@ input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
 
-/* Minimal scrollbar */
-::-webkit-scrollbar { width: 0px; }
-
-/* Comment thread connector */
-.comment-thread::before {
-  content: '';
-  position: absolute;
-  left: 18px;
-  top: 44px;
-  bottom: 0;
-  width: 1px;
-  background: #E5E7EB;
+/* Selection */
+::selection {
+  background: #E8E0D8;
 }
-.comment-thread:last-child::before {
-  display: none;
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #1A1A1A;
+  outline-offset: 2px;
 }
 
 /* Fade in */
@@ -60,96 +47,25 @@ input[type=number]::-webkit-outer-spin-button {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
-/* Skeleton */
+/* Skeleton shimmer */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
-/* Hot pulse — subtle */
-@keyframes hotPulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.7; }
-}
-.hot-pulse {
-  animation: hotPulse 2s ease-in-out infinite;
-}
-
-/* Live dot */
-@keyframes livePulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.5); opacity: 0.4; }
-}
-.live-dot {
-  animation: livePulse 2s ease-in-out infinite;
-}
-
-/* Slide up */
-@keyframes slideUp {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
-}
-.slide-up {
-  animation: slideUp 0.3s ease-out forwards;
-}
-
-/* Activity ticker scroll */
-@keyframes tickerScroll {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.ticker-scroll {
-  animation: tickerScroll 30s linear infinite;
-}
-
-/* Selection */
-::selection {
-  background: rgba(255, 107, 44, 0.12);
-}
-
-/* Focus ring */
-:focus-visible {
-  outline: 2px solid #0F0F0F;
-  outline-offset: 2px;
-}
-
-/* Social accent gradient text */
-.social-gradient {
-  background: linear-gradient(135deg, #FF6B2C, #FF8F5E);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Staggered fade-in for listing detail sections */
-@keyframes staggerIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.stagger-in {
+/* Image reveal transition */
+.img-reveal {
   opacity: 0;
-  animation: staggerIn 0.5s ease-out forwards;
+  transition: opacity 0.4s ease;
 }
-.stagger-in:nth-child(1) { animation-delay: 0ms; }
-.stagger-in:nth-child(2) { animation-delay: 80ms; }
-.stagger-in:nth-child(3) { animation-delay: 160ms; }
-.stagger-in:nth-child(4) { animation-delay: 240ms; }
-.stagger-in:nth-child(5) { animation-delay: 320ms; }
-.stagger-in:nth-child(6) { animation-delay: 400ms; }
-
-/* Scale in for engagement elements */
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to   { opacity: 1; transform: scale(1); }
-}
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out forwards;
+.img-reveal.loaded {
+  opacity: 1;
 }
 
 /* Mortgage calculator slider */
@@ -158,7 +74,7 @@ input[type=number]::-webkit-outer-spin-button {
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(to right, #0F0F0F, #FF6B2C);
+  background: #E8E0D8;
   outline: none;
   cursor: pointer;
 }
@@ -167,162 +83,20 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #0F0F0F;
+  background: #1A1A1A;
   border: 3px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   cursor: grab;
-  transition: transform 0.15s ease;
-}
-.mortgage-slider::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
 }
 .mortgage-slider::-webkit-slider-thumb:active {
   cursor: grabbing;
-  transform: scale(1.05);
 }
 .mortgage-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #0F0F0F;
+  background: #1A1A1A;
   border: 3px solid white;
   box-shadow: 0 1px 4px rgba(0,0,0,0.2);
   cursor: grab;
-}
-
-/* Conversation entrance — pulse glow on comment section */
-@keyframes conversationGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
-  50%      { box-shadow: 0 0 0 4px rgba(255, 107, 44, 0.08); }
-}
-.conversation-entrance {
-  animation: conversationGlow 3s ease-in-out 1;
-}
-
-/* Subtle float for engagement hooks */
-@keyframes subtleFloat {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-3px); }
-}
-.subtle-float {
-  animation: subtleFloat 4s ease-in-out infinite;
-}
-
-/* Hot Take card shimmer border */
-.hot-take-card {
-  border: 1px solid rgba(255, 107, 44, 0.2);
-  box-shadow: 0 0 40px rgba(255, 107, 44, 0.08), 0 24px 48px rgba(0, 0, 0, 0.12);
-}
-.hot-take-card:hover {
-  box-shadow: 0 0 60px rgba(255, 107, 44, 0.15), 0 24px 48px rgba(0, 0, 0, 0.16);
-}
-
-/* Fire animation for hot listings */
-@keyframes fireFlicker {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  25%      { transform: scale(1.15) rotate(-2deg); opacity: 0.9; }
-  50%      { transform: scale(1.05) rotate(1deg); opacity: 1; }
-  75%      { transform: scale(1.2) rotate(-1deg); opacity: 0.85; }
-}
-.fire-animate {
-  animation: fireFlicker 1.5s ease-in-out infinite;
-  display: inline-block;
-}
-
-/* Listing card top comment reveal on hover */
-.listing-card-comment-reveal {
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out, opacity 0.25s ease-out;
-}
-.group:hover .listing-card-comment-reveal {
-  max-height: 80px;
-  opacity: 1;
-}
-
-/* Image blur-up fade-in */
-.img-blur-up {
-  filter: blur(8px);
-  opacity: 0;
-  transition: filter 0.4s ease-out, opacity 0.4s ease-out;
-}
-.img-blur-up.loaded {
-  filter: blur(0);
-  opacity: 1;
-}
-
-/* Glassmorphic surface */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Smooth banner entrance */
-@keyframes bannerSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.banner-enter {
-  animation: bannerSlideIn 0.4s ease-out forwards;
-}
-
-/* Map hover zoom */
-.map-preview:hover img {
-  transform: scale(1.02);
-  transition: transform 0.3s ease-out;
-}
-
-/* Location pin bounce */
-@keyframes pinBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-.pin-bounce {
-  animation: pinBounce 1.5s ease-in-out infinite;
-}
-
-/* Comment feed card entrance — slide in from left */
-@keyframes commentSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-.comment-feed-card {
-  animation: commentSlideIn 0.35s ease-out forwards;
-}
-.comment-feed-card:nth-child(1) { animation-delay: 0ms; }
-.comment-feed-card:nth-child(2) { animation-delay: 40ms; }
-.comment-feed-card:nth-child(3) { animation-delay: 80ms; }
-.comment-feed-card:nth-child(4) { animation-delay: 120ms; }
-.comment-feed-card:nth-child(5) { animation-delay: 160ms; }
-.comment-feed-card:nth-child(6) { animation-delay: 200ms; }
-.comment-feed-card:nth-child(7) { animation-delay: 240ms; }
-.comment-feed-card:nth-child(8) { animation-delay: 280ms; }
-.comment-feed-card:nth-child(n+9) { animation-delay: 300ms; }
-
-/* Top Take glow effect */
-@keyframes topTakeGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 44, 0); }
-  50% { box-shadow: 0 0 20px 4px rgba(255, 107, 44, 0.1); }
-}
-.top-take-glow {
-  animation: topTakeGlow 3s ease-in-out infinite;
-}
-
-/* Comment card hover lift */
-.comment-feed-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }

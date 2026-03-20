@@ -2,20 +2,8 @@
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import ShareableComment from "@/components/ShareableComment";
-import UserBadge from "@/components/UserBadge";
 
 const REACTIONS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDC80"];
-
-const MILESTONES = [5, 10, 25, 50, 100];
-
-function getMilestoneMessage(count: number): string | null {
-  if (count >= 100) return `\uD83C\uDF1F This listing is legendary \u2014 ${count} opinions and counting`;
-  if (count >= 50) return `\uD83D\uDCA5 This listing went viral \u2014 ${count} opinions and counting`;
-  if (count >= 25) return `\uD83D\uDE80 This listing is blowing up \u2014 ${count} opinions and counting`;
-  if (count >= 10) return `\uD83D\uDD25 This listing is heating up \u2014 ${count} opinions and counting`;
-  if (count >= 5) return `\uD83D\uDCAC People are talking \u2014 ${count} opinions and counting`;
-  return null;
-}
 
 type Comment = {
   id: string;
@@ -67,7 +55,7 @@ export default function CommentSection({
   const [visibleCount, setVisibleCount] = useState(5);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Restore saved commenter identity from localStorage
+  // Restore saved commenter identity
   useEffect(() => {
     try {
       const saved = localStorage.getItem("hf_commenter");
@@ -80,7 +68,7 @@ export default function CommentSection({
         }
       }
     } catch {
-      // ignore malformed data
+      // ignore
     }
   }, []);
 
@@ -94,7 +82,6 @@ export default function CommentSection({
       .catch(() => setLoading(false));
   }, [listingId]);
 
-  // Sorted comments (client-side)
   const sortedComments = useMemo(() => {
     const sorted = [...comments];
     switch (sortMode) {
@@ -111,50 +98,18 @@ export default function CommentSection({
     return sorted;
   }, [comments, sortMode]);
 
-  // "Top Take" pinned comment — the comment with the most reactions (3+ required)
-  const pinnedComment = useMemo(() => {
-    if (comments.length === 0) return null;
-    let best: Comment | null = null;
-    let bestCount = 0;
-    for (const c of comments) {
-      const total = getReactionTotal(c);
-      if (total > bestCount) {
-        bestCount = total;
-        best = c;
-      }
-    }
-    return bestCount >= 3 ? best : null;
-  }, [comments]);
-
   // Pagination logic
   const commentsToShow = useMemo(() => {
-    // Filter out pinned comment from the main list to avoid duplication
-    const filtered = pinnedComment
-      ? sortedComments.filter((c) => c.id !== pinnedComment.id)
-      : sortedComments;
-
-    if (comments.length <= 5) {
-      // 5 or fewer: show all, no pagination
-      return filtered;
-    }
-
+    if (comments.length <= 5) return sortedComments;
     if (comments.length < 20) {
-      // 6-19 comments: show first 5, then "Show all X comments" expands
-      return expanded ? filtered : filtered.slice(0, 5);
+      return expanded ? sortedComments : sortedComments.slice(0, 5);
     }
-
-    // 20+ comments: paginate 10 at a time with "Load more"
-    return filtered.slice(0, visibleCount);
-  }, [sortedComments, pinnedComment, comments.length, expanded, visibleCount]);
+    return sortedComments.slice(0, visibleCount);
+  }, [sortedComments, comments.length, expanded, visibleCount]);
 
   const showExpandButton = !expanded && comments.length > 5 && comments.length < 20;
-  const remainingAfterExpand = pinnedComment
-    ? comments.length - 1 - 5
-    : comments.length - 5;
-
-  const showLoadMore =
-    comments.length >= 20 &&
-    visibleCount < (pinnedComment ? comments.length - 1 : comments.length);
+  const remainingAfterExpand = comments.length - 5;
+  const showLoadMore = comments.length >= 20 && visibleCount < comments.length;
 
   async function handlePost(e: React.FormEvent) {
     e.preventDefault();
@@ -242,66 +197,30 @@ export default function CommentSection({
     navigator.clipboard.writeText(url).catch(() => {});
   }, [listingId]);
 
-  const totalReactions = comments.reduce((sum, c) =>
-    sum + Object.values(c.reactions).reduce((a, b) => a + b, 0), 0
-  );
-
-  // Count comments per name for UserBadge
-  const commentCountByName = useMemo(() => {
-    const map: Record<string, number> = {};
-    for (const c of comments) {
-      const key = c.name.toLowerCase();
-      map[key] = (map[key] ?? 0) + 1;
-    }
-    return map;
-  }, [comments]);
-
-  const milestoneMessage = getMilestoneMessage(comments.length);
-
   const SORT_OPTIONS: { key: SortMode; label: string }[] = [
     { key: "newest", label: "Newest" },
+    { key: "reactions", label: "Top" },
     { key: "oldest", label: "Oldest" },
-    { key: "reactions", label: "Most Reactions" },
   ];
 
   return (
     <div>
-      {/* Section header — prominent */}
-      <div className="flex items-center justify-between mb-6 conversation-entrance rounded-xl px-1 -mx-1">
-        <div className="flex items-center gap-3">
-          <h2 className="font-display text-xl font-bold text-ink">
-            {isLocked ? "Comments (Locked)" : "The Conversation"}
-          </h2>
-          {comments.length > 0 && (
-            <span className="text-sm font-bold text-white bg-ink px-3 py-1 rounded-full">
-              {comments.length}
-            </span>
-          )}
-          {totalReactions > 0 && (
-            <span className="text-xs font-semibold text-accent bg-red-50 px-2.5 py-1 rounded-full">
-              {"🔥"} {totalReactions}
-            </span>
-          )}
-        </div>
-        {isLocked && (
-          <span className="text-xs font-medium text-muted flex items-center gap-1">
-            {"🔒"} This listing sold &mdash; comments are locked
-          </span>
+      {/* Section header */}
+      <div className="mb-6">
+        <h2 className="text-headline text-ink">
+          {isLocked ? "Comments (Locked)" : "The Conversation"}
+        </h2>
+        {comments.length > 0 && (
+          <p className="text-caption text-tertiary mt-1">
+            {comments.length} take{comments.length !== 1 ? "s" : ""}
+          </p>
         )}
       </div>
 
-      {/* Comment count milestone celebration */}
-      {!loading && milestoneMessage && (
-        <div className="mb-5 px-4 py-3 rounded-xl bg-gradient-to-r from-[#FFF7ED] to-[#FFF1E6] border border-[#FF6B2C]/15 flex items-center gap-3">
-          <span className="text-sm font-semibold text-ink">{milestoneMessage}</span>
-        </div>
-      )}
-
       {/* Locked banner */}
       {isLocked && comments.length > 0 && (
-        <div className="bg-tag rounded-xl px-4 py-3 mb-6 flex items-center gap-2">
-          <span className="text-sm">{"🔒"}</span>
-          <p className="text-sm text-muted">
+        <div className="bg-surface rounded-card px-4 py-3 mb-6">
+          <p className="text-body text-secondary">
             This property is no longer active. Comments are preserved but new comments are disabled.
           </p>
         </div>
@@ -312,10 +231,10 @@ export default function CommentSection({
         <div className="space-y-4 mb-6">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3">
-              <div className="w-10 h-10 rounded-full skeleton shrink-0" />
+              <div className="w-10 h-10 rounded-avatar skeleton shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-3 w-24 skeleton" />
-                <div className="h-14 skeleton rounded-lg" />
+                <div className="h-14 skeleton rounded-card" />
               </div>
             </div>
           ))}
@@ -324,25 +243,24 @@ export default function CommentSection({
 
       {/* Empty state */}
       {!loading && comments.length === 0 && !isLocked && (
-        <div className="text-center py-10 rounded-xl border border-dashed border-[#FF6B2C]/20 bg-[#FFF7ED] mb-6">
-          <p className="text-3xl mb-2">{"👀"}</p>
-          <p className="font-display font-semibold text-ink text-base">No one&apos;s weighed in yet</p>
-          <p className="text-sm text-muted mt-1">Be the first to share what you think about this listing.</p>
+        <div className="text-center py-10 rounded-card bg-surface mb-6">
+          <p className="text-headline text-ink mb-1">No one&apos;s weighed in yet</p>
+          <p className="text-body text-secondary">Be the first to share what you think about this listing.</p>
         </div>
       )}
 
-      {/* Sort toggle — only show when there are 2+ comments */}
+      {/* Sort toggle */}
       {!loading && comments.length >= 2 && (
-        <div className="flex items-center gap-1.5 mb-4">
+        <div className="flex items-center gap-4 mb-4">
           {SORT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
               type="button"
               onClick={() => setSortMode(opt.key)}
-              className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+              className={`text-caption transition-colors ${
                 sortMode === opt.key
-                  ? "bg-ink text-white"
-                  : "bg-tag text-muted hover:text-ink hover:bg-tag/80"
+                  ? "text-ink font-medium border-b border-ink pb-0.5"
+                  : "text-tertiary hover:text-ink"
               }`}
             >
               {opt.label}
@@ -351,31 +269,9 @@ export default function CommentSection({
         </div>
       )}
 
-      {/* "Top Take" pinned comment — with glow treatment */}
-      {!loading && pinnedComment && (
-        <div className="mb-4 rounded-xl border border-social/20 bg-gradient-to-r from-social-light to-white px-1 top-take-glow">
-          <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-0.5">
-            <span className="text-xs font-bold text-social bg-social/10 px-2.5 py-0.5 rounded-full">
-              {"🏆"} Top Take
-            </span>
-          </div>
-          <CommentItem
-            comment={pinnedComment}
-            canReact={!isLocked && !!(name && (email || reactingEmail))}
-            onReact={(type) => handleReact(pinnedComment.id, type)}
-            onShare={() => handleShareTake(pinnedComment.id)}
-            isLocked={isLocked}
-            listingAddress={listingAddress}
-            listingPrice={listingPrice}
-            userCommentCount={commentCountByName[pinnedComment.name.toLowerCase()] ?? 0}
-            isTopTake
-          />
-        </div>
-      )}
-
       {/* Comments list */}
       {!loading && comments.length > 0 && (
-        <div className="space-y-1 mb-8">
+        <div className="mb-8">
           {commentsToShow.map((comment) => (
             <CommentItem
               key={comment.id}
@@ -386,27 +282,24 @@ export default function CommentSection({
               isLocked={isLocked}
               listingAddress={listingAddress}
               listingPrice={listingPrice}
-              userCommentCount={commentCountByName[comment.name.toLowerCase()] ?? 0}
             />
           ))}
 
-          {/* "Show all X comments" button (6-19 comments) */}
           {showExpandButton && remainingAfterExpand > 0 && (
             <button
               type="button"
               onClick={() => setExpanded(true)}
-              className="w-full text-center py-3 text-sm font-semibold text-ink hover:text-accent transition-colors rounded-lg hover:bg-tag/50"
+              className="w-full text-center py-3 text-caption font-medium text-ink hover:text-secondary transition-colors"
             >
               Show all {comments.length} comments
             </button>
           )}
 
-          {/* "Load more" button (20+ comments) */}
           {showLoadMore && (
             <button
               type="button"
               onClick={() => setVisibleCount((prev) => prev + 10)}
-              className="w-full text-center py-3 text-sm font-semibold text-ink hover:text-accent transition-colors rounded-lg hover:bg-tag/50"
+              className="w-full text-center py-3 text-caption font-medium text-ink hover:text-secondary transition-colors"
             >
               Load more comments
             </button>
@@ -414,13 +307,13 @@ export default function CommentSection({
         </div>
       )}
 
-      {/* Post form — only if not locked */}
+      {/* Post form */}
       {!isLocked && (
-        <div className="bg-white rounded-xl border border-border p-5">
-          <p className="font-display font-semibold text-base text-ink mb-1">
+        <div className="rounded-card border border-divider p-5">
+          <p className="text-title text-ink mb-1">
             Join the conversation
           </p>
-          <p className="text-sm text-muted mb-4">
+          <p className="text-body text-secondary mb-4">
             What&apos;s your take on this place?
           </p>
           <form onSubmit={handlePost} className="space-y-3">
@@ -431,7 +324,7 @@ export default function CommentSection({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="rounded-lg border border-border px-3 py-2.5 text-sm bg-bg focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10"
+                className="rounded-button bg-surface px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
               />
               <input
                 type="email"
@@ -439,7 +332,7 @@ export default function CommentSection({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="rounded-lg border border-border px-3 py-2.5 text-sm bg-bg focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10"
+                className="rounded-button bg-surface px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
               />
             </div>
             <div className="relative">
@@ -451,43 +344,43 @@ export default function CommentSection({
                 required
                 rows={3}
                 maxLength={1000}
-                className="w-full rounded-lg border border-border px-3 py-2.5 text-sm bg-bg focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 resize-none"
+                className="w-full rounded-card border border-divider px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow resize-none"
               />
-              <span className="absolute bottom-2 right-3 text-xs text-muted/40">
+              <span className="absolute bottom-2 right-3 text-caption text-tertiary">
                 {content.length}/1000
               </span>
             </div>
-            {/* Quick suggestion chips — provocative and fun */}
+            {/* Quick suggestion chips */}
             <div className="flex flex-wrap gap-1.5">
               {[
-                "Overpriced \uD83D\uDCB0",
-                "Steal of the century \uD83C\uDFC3",
-                "That kitchen though \uD83D\uDE0D",
-                "Hard pass \uD83D\uDE45",
-                "Would make an offer \uD83E\uDD1D",
-                "Someone explain this price \uD83E\uDD2F",
-                "The neighborhood tho \uD83D\uDC40",
-                "Needs work but potential \uD83D\uDD28",
+                "Overpriced",
+                "Steal of the century",
+                "That kitchen though",
+                "Hard pass",
+                "Would make an offer",
+                "Someone explain this price",
+                "The neighborhood tho",
+                "Needs work but potential",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
                   onClick={() => setContent((prev) => prev ? `${prev} ${suggestion}` : suggestion)}
-                  className="text-xs px-2.5 py-1.5 rounded-full border border-border text-muted hover:text-ink hover:border-social/40 hover:bg-social-light transition-colors font-medium"
+                  className="text-caption px-3 py-1.5 rounded-full bg-surface text-ink hover:bg-active transition-colors"
                 >
                   {suggestion}
                 </button>
               ))}
             </div>
             {postError && (
-              <p className="text-xs text-accent font-medium">{postError}</p>
+              <p className="text-caption text-ink font-medium">{postError}</p>
             )}
             <div className="flex items-center justify-between">
-              <p className="text-xs text-muted/50">email stays private</p>
+              <p className="text-caption text-tertiary">email stays private</p>
               <button
                 type="submit"
                 disabled={posting}
-                className="px-6 py-2.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+                className="px-6 py-2.5 bg-ink text-white text-body font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
               >
                 {posting ? "Posting..." : "Post your take"}
               </button>
@@ -496,30 +389,24 @@ export default function CommentSection({
         </div>
       )}
 
-      {/* Reply notification prompt — appears after posting a comment */}
+      {/* Reply notification prompt */}
       {showReplyPrompt && !isLocked && (
-        <div className="mt-4 bg-[#FFF7ED] border border-[#FF6B2C]/10 rounded-xl p-4 animate-fade-in">
+        <div className="mt-4 bg-highlight rounded-card p-4 animate-fade-in">
           {replyStatus === "success" ? (
             <div className="flex items-center gap-2">
-              <svg
-                className="w-4 h-4 text-money shrink-0"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2.5}
-              >
+              <svg className="w-4 h-4 text-ink shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-sm font-medium text-ink">
+              <span className="text-body text-ink">
                 You&apos;ll be notified when someone replies!
               </span>
             </div>
           ) : (
             <>
-              <p className="text-sm font-semibold text-ink mb-1">
+              <p className="text-body text-ink font-medium mb-1">
                 Want to get notified when someone replies?
               </p>
-              <p className="text-xs text-muted mb-3">
+              <p className="text-caption text-secondary mb-3">
                 We&apos;ll let you know when new opinions drop on this listing.
               </p>
               <form onSubmit={handleReplySubscribe} className="flex items-center gap-2">
@@ -529,20 +416,19 @@ export default function CommentSection({
                   placeholder="your@email.com"
                   value={replyEmail}
                   onChange={(e) => setReplyEmail(e.target.value)}
-                  className="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-xl border border-border bg-white text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+                  className="flex-1 min-w-0 px-3.5 py-2 text-body rounded-button bg-white text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
                 />
                 <button
                   type="submit"
                   disabled={replyStatus === "loading"}
-                  className="shrink-0 px-4 py-2 text-sm font-semibold rounded-xl text-white shadow-button transition-all duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ backgroundColor: "#FF6B2C" }}
+                  className="shrink-0 px-4 py-2 text-body font-medium rounded-button bg-ink text-white hover:bg-ink/90 transition-colors disabled:opacity-50"
                 >
                   {replyStatus === "loading" ? "..." : "Notify me"}
                 </button>
               </form>
               <button
                 onClick={() => setShowReplyPrompt(false)}
-                className="mt-2 text-xs text-muted hover:text-ink transition-colors"
+                className="mt-2 text-caption text-tertiary hover:text-ink transition-colors"
               >
                 No thanks
               </button>
@@ -562,8 +448,6 @@ function CommentItem({
   isLocked,
   listingAddress = "",
   listingPrice = "",
-  userCommentCount = 0,
-  isTopTake = false,
 }: {
   comment: Comment;
   canReact: boolean;
@@ -572,8 +456,6 @@ function CommentItem({
   isLocked: boolean;
   listingAddress?: string;
   listingPrice?: string;
-  userCommentCount?: number;
-  isTopTake?: boolean;
 }) {
   const [showCopied, setShowCopied] = useState(false);
 
@@ -584,19 +466,6 @@ function CommentItem({
     .toUpperCase()
     .slice(0, 2);
 
-  // Deterministic color from name — clean, professional
-  const bgColors = [
-    "bg-neutral-900 text-white",
-    "bg-blue-600 text-white",
-    "bg-emerald-600 text-white",
-    "bg-violet-600 text-white",
-    "bg-amber-600 text-white",
-    "bg-rose-600 text-white",
-    "bg-cyan-600 text-white",
-    "bg-neutral-700 text-white",
-  ];
-  const colorIndex = comment.name.charCodeAt(0) % bgColors.length;
-
   const handleShare = () => {
     onShare();
     setShowCopied(true);
@@ -606,28 +475,25 @@ function CommentItem({
   return (
     <div
       id={`comment-${comment.id}`}
-      className={`relative flex gap-3.5 py-4 comment-thread ${isLocked ? "opacity-50" : ""}`}
+      className={`flex gap-3.5 py-5 border-b border-divider last:border-0 ${isLocked ? "opacity-50" : ""}`}
     >
-      {/* Avatar — larger */}
-      <div
-        className={`w-10 h-10 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0 ${bgColors[colorIndex]}`}
-      >
+      {/* Avatar */}
+      <div className="w-10 h-10 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
         {initials}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-bold text-[15px] text-ink">{comment.name}</span>
-          {userCommentCount > 0 && <UserBadge commentCount={userCommentCount} />}
-          <span className="text-xs text-muted/50">{timeAgo(comment.createdAt)}</span>
+          <span className="text-title text-ink">{comment.name}</span>
+          <span className="text-caption text-tertiary">{timeAgo(comment.createdAt)}</span>
         </div>
-        <p className="text-base text-ink/90 mt-1 leading-relaxed whitespace-pre-wrap font-medium">
+        <p className="text-body text-ink mt-1 leading-relaxed whitespace-pre-wrap">
           {comment.content}
         </p>
 
-        {/* Reactions — more prominent */}
-        <div className="flex gap-1.5 mt-2.5 flex-wrap items-center">
+        {/* Reactions */}
+        <div className="flex gap-2 mt-2.5 flex-wrap items-center">
           {REACTIONS.map((r) => {
             const count = comment.reactions[r] ?? 0;
             return (
@@ -635,35 +501,32 @@ function CommentItem({
                 key={r}
                 onClick={() => canReact && onReact(r)}
                 disabled={!canReact}
-                className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-full transition-all ${
+                className={`flex items-center gap-1 text-caption transition-colors ${
                   count > 0
-                    ? "bg-tag text-ink font-bold border border-border"
-                    : "text-muted/40 hover:bg-tag hover:text-muted border border-transparent"
-                } ${canReact ? "cursor-pointer hover:scale-105" : "cursor-default"}`}
+                    ? "text-ink"
+                    : "text-tertiary/40 hover:text-tertiary"
+                } ${canReact ? "cursor-pointer" : "cursor-default"}`}
               >
-                <span className="text-sm">{r}</span>
+                <span>{r}</span>
                 {count > 0 && <span>{count}</span>}
               </button>
             );
           })}
 
-          {/* Share this take button */}
+          {/* Share button -- shows on hover via group */}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full text-muted/50 hover:text-social hover:bg-social-light transition-all border border-transparent"
+            className="text-caption text-tertiary hover:text-ink transition-colors ml-1"
             title="Share this take"
           >
             {showCopied ? (
-              <span className="text-social font-semibold">Link copied!</span>
+              <span className="text-ink">Copied!</span>
             ) : (
-              <>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-                  <polyline points="16 6 12 2 8 6" />
-                  <line x1="12" y1="2" x2="12" y2="15" />
-                </svg>
-                <span>Share</span>
-              </>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                <polyline points="16 6 12 2 8 6" />
+                <line x1="12" y1="2" x2="12" y2="15" />
+              </svg>
             )}
           </button>
 

@@ -40,25 +40,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-screen flex flex-col bg-white">
         {/* Nav */}
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg border-b border-border">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            {/* Logo + social tagline */}
-            <a href="/" className="shrink-0 flex items-center gap-2">
-              <span className="font-display text-[18px] font-bold text-ink tracking-display">
-                gwak<span className="social-gradient">gwak</span>
-              </span>
-              <span className="hidden sm:inline-block text-[10px] font-medium text-muted bg-tag px-2 py-0.5 rounded-full">
-                real talk on real estate
+        <header className="sticky top-0 z-50 bg-white">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            {/* Logo */}
+            <a href="/" className="shrink-0">
+              <span className="text-lg font-semibold text-ink tracking-tight">
+                gwakgwak
               </span>
             </a>
 
-            {/* Desktop nav — context-aware active states */}
+            {/* Desktop nav */}
             <Suspense fallback={
-              <nav className="hidden sm:flex items-center gap-0.5">
-                <a href="/?type=sale" className="px-3.5 py-1.5 text-[13px] font-semibold text-muted hover:text-ink rounded-lg transition-colors flex items-center gap-1.5"><span className="text-sm">🏡</span> Buy</a>
-                <a href="/?type=rent" className="px-3.5 py-1.5 text-[13px] font-semibold text-muted hover:text-ink rounded-lg transition-colors flex items-center gap-1.5"><span className="text-sm">🔑</span> Rent</a>
-                <a href="/?sort=comments" className="px-3.5 py-1.5 text-[13px] font-semibold text-social rounded-lg transition-colors flex items-center gap-1">🔥 Hot Takes</a>
-                <a href="/saved" className="px-3.5 py-1.5 text-[13px] font-semibold text-muted rounded-lg transition-colors">Saved</a>
+              <nav className="hidden sm:flex items-center gap-6">
+                <span className="text-caption text-tertiary">explore</span>
+                <span className="text-caption text-tertiary">trending</span>
+                <span className="text-caption text-tertiary">saved</span>
               </nav>
             }>
               <NavLinks />
@@ -71,7 +67,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
 
-        <main className="flex-1 bg-subtle">{children}</main>
+        <main className="flex-1">{children}</main>
 
         <Footer />
         <KlaviyoScript />
