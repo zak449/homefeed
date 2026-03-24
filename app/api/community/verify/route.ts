@@ -1,20 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
-// Simple zip code to city/state lookup (covers common cases, defaults to "Unknown")
-const ZIP_LOOKUP: Record<string, { city: string; state: string }> = {
-  "10001": { city: "New York", state: "NY" },
-  "90210": { city: "Beverly Hills", state: "CA" },
-  "60601": { city: "Chicago", state: "IL" },
-  "77001": { city: "Houston", state: "TX" },
-  "85001": { city: "Phoenix", state: "AZ" },
-};
+// Validate US zip code format: 5 digits, optionally followed by -4 digits
+const US_ZIP_REGEX = /^\d{5}(-\d{4})?$/;
 
-function lookupZip(zipCode: string) {
-  return ZIP_LOOKUP[zipCode] || { city: "Unknown", state: "Unknown" };
+function normalizeZip(zipCode: string): string {
+  // Use the 5-digit prefix as the community identifier
+  return zipCode.slice(0, 5);
 }
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const { success } = rateLimit(ip, { interval: 60_000, maxRequests: 3 });
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { zipCode, name, email, address } = body;
@@ -26,12 +32,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { city, state } = lookupZip(zipCode);
+    if (!US_ZIP_REGEX.test(zipCode)) {
+      return NextResponse.json(
+        { error: "Invalid zip code format. Must be 5 digits (e.g. 10001) or 5+4 (e.g. 10001-1234)" },
+        { status: 400 }
+      );
+    }
+
+    const communityZip = normalizeZip(zipCode);
 
     // Upsert the community for this zip code
     await prisma.zipCommunity.upsert({
-      where: { zipCode },
-      create: { zipCode, city, state, memberCount: 1 },
+      where: { zipCode: communityZip },
+      create: { zipCode: communityZip, city: communityZip, state: "", memberCount: 1 },
       update: { memberCount: { increment: 1 } },
     });
 
@@ -40,7 +53,7 @@ export async function POST(request: NextRequest) {
       data: {
         email,
         name,
-        zipCode,
+        zipCode: communityZip,
         address,
       },
     });

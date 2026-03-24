@@ -14,6 +14,7 @@ import MapPreview from "@/components/MapPreview";
 import AIReimagineTool from "@/components/AIReimagineTool";
 import DecisionComparison from "@/components/DecisionComparison";
 import NeighborQA from "@/components/NeighborQA";
+import ExpandableText from "@/components/ExpandableText";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -72,8 +73,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     prisma.comment.findMany({
       where: { listingId: id },
       orderBy: { createdAt: "desc" },
-      take: 3,
-      select: { name: true, content: true },
+      take: 10,
+      select: { name: true, content: true, createdAt: true },
     }),
   ]);
   if (!listing) notFound();
@@ -87,12 +88,23 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   const pricePerSqft =
     listing.sqft && listing.sqft > 0
-      ? `$${Math.round(listing.price / listing.sqft).toLocaleString()}`
+      ? `$${Math.round(listing.price / listing.sqft).toLocaleString()}/sqft`
       : null;
 
   const priceHistory = listing.priceHistory as
     | { date: string; price: number; event?: string }[]
     | null;
+
+  // Property type color map
+  const typeColorMap: Record<string, string> = {
+    apartment: "bg-blue-50 text-blue-700 border-blue-200",
+    house: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    condo: "bg-violet-50 text-violet-700 border-violet-200",
+    townhouse: "bg-orange-50 text-orange-700 border-orange-200",
+    multi_family: "bg-rose-50 text-rose-700 border-rose-200",
+    land: "bg-amber-50 text-amber-700 border-amber-200",
+  };
+  const typeColor = typeColorMap[listing.propertyType] ?? "bg-highlight text-secondary border-divider";
 
   // Fetch "More listings in [city]"
   const moreSameCity = await prisma.listing.findMany({
@@ -148,8 +160,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
 
         {/* Breadcrumbs */}
-        <nav className="flex items-center gap-2 text-caption text-tertiary pt-6 pb-4">
-          <Link href="/" className="hover:text-amber transition-colors font-medium">
+        <nav className="flex items-center gap-1.5 text-caption text-tertiary pt-5 pb-3">
+          <Link href="/" className="hover:text-amber transition-colors font-medium flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
+              <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
+            </svg>
             gwak gwak
           </Link>
           <span className="text-divider">/</span>
@@ -163,20 +178,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <span className="text-secondary truncate max-w-[200px]">{listing.address}</span>
         </nav>
 
-        {/* Back link — styled pill */}
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-caption text-secondary hover:text-ink bg-surface border border-divider hover:border-ink/10 rounded-full px-3.5 py-1.5 transition-all hover:shadow-soft mb-6"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
-          </svg>
-          Back to feed
-        </Link>
-
         {/* Status banner */}
         {listing.status === "off_market" && (
-          <div className="bg-surface border border-divider rounded-card px-5 py-4 mb-6 shadow-soft">
+          <div className="bg-surface border border-divider rounded-card px-5 py-3.5 mb-5 shadow-soft">
             <p className="text-body text-ink font-medium">
               This property is not currently on the market
             </p>
@@ -187,7 +191,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         )}
         {listing.status === "sold" && (
-          <div className="bg-surface border border-divider rounded-card px-5 py-4 mb-6 shadow-soft">
+          <div className="bg-surface border border-divider rounded-card px-5 py-3.5 mb-5 shadow-soft">
             <p className="text-body text-ink font-medium">This listing has been sold</p>
             <p className="text-caption text-secondary mt-0.5">
               Comments are locked.{commentCount > 0 ? ` ${commentCount} comments preserved below.` : ""}
@@ -195,52 +199,61 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         )}
 
-        {/* ── Price + Address + Key Facts ── */}
-        <div className="mb-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h1 className="font-display text-[2.75rem] sm:text-[3.25rem] text-ink leading-[1.05] tracking-[-0.035em]">
-                {price}
-              </h1>
-              <p className="text-body text-secondary mt-2">
-                {listing.address} &middot; {listing.city}, {listing.state} {listing.zip}
-              </p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
-                {listing.bedrooms != null && (
-                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
-                    {listing.bedrooms} bd
-                  </span>
-                )}
-                {listing.bathrooms != null && (
-                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
-                    {listing.bathrooms} ba
-                  </span>
-                )}
-                {listing.sqft != null && (
-                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
-                    {listing.sqft.toLocaleString()} sqft
-                  </span>
-                )}
-                {listing.yearBuilt != null && (
-                  <span className="text-caption text-tertiary">
-                    Built {listing.yearBuilt}
-                  </span>
-                )}
-                {listing.propertyType && (
-                  <span className="text-caption text-tertiary">
-                    {capitalize(listing.propertyType)}
-                  </span>
-                )}
-              </div>
-            </div>
-            <span className="text-caption text-secondary bg-highlight px-3 py-1.5 rounded-full shrink-0 mt-2 font-medium">
+        {/* ── Price + Address + Specs ── */}
+        <div className="mb-4">
+          {/* Price row */}
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <h1 className="font-display text-[3rem] sm:text-[3.75rem] text-ink leading-none tracking-[-0.04em] font-extrabold">
+              {price}
+            </h1>
+            {pricePerSqft && (
+              <span className="text-caption text-tertiary font-medium">{pricePerSqft}</span>
+            )}
+          </div>
+
+          {/* Address */}
+          <p className="text-body text-secondary mt-1.5">
+            {listing.address} &middot; {listing.city}, {listing.state} {listing.zip}
+          </p>
+
+          {/* Spec pills bar */}
+          <div className="flex flex-wrap items-center gap-2 mt-3">
+            {listing.propertyType && (
+              <span className={`text-caption font-semibold px-3 py-1 rounded-full border ${typeColor}`}>
+                {capitalize(listing.propertyType)}
+              </span>
+            )}
+            {listing.bedrooms != null && (
+              <span className="text-caption text-ink font-medium bg-highlight px-3 py-1 rounded-full flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v11"/><path d="M21 7v11"/><path d="M3 18h18"/><path d="M3 11h18"/><rect x="5" y="7" width="5" height="4" rx="1"/><rect x="14" y="7" width="5" height="4" rx="1"/></svg>
+                {listing.bedrooms} bd
+              </span>
+            )}
+            {listing.bathrooms != null && (
+              <span className="text-caption text-ink font-medium bg-highlight px-3 py-1 rounded-full flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12h16a1 1 0 0 1 1 1v3a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4v-3a1 1 0 0 1 1-1z"/><path d="M6 12V5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v1"/></svg>
+                {listing.bathrooms} ba
+              </span>
+            )}
+            {listing.sqft != null && (
+              <span className="text-caption text-ink font-medium bg-highlight px-3 py-1 rounded-full flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+                {listing.sqft.toLocaleString()} sqft
+              </span>
+            )}
+            {listing.yearBuilt != null && (
+              <span className="text-caption text-tertiary font-medium">
+                Built {listing.yearBuilt}
+              </span>
+            )}
+            <span className="text-caption text-secondary bg-highlight px-3 py-1 rounded-full font-medium">
               {isRent ? "For Rent" : "For Sale"}
             </span>
           </div>
         </div>
 
-        {/* ── Save + Share — prominent action bar ── */}
-        <div className="flex items-center justify-between mb-8 pb-6 border-b border-divider">
+        {/* ── Save + Share ── */}
+        <div className="flex items-center justify-between mb-6 pb-5 border-b border-divider">
           <div className="flex items-center gap-3">
             <div className="[&_button]:bg-surface [&_button]:border [&_button]:border-divider [&_button]:rounded-full [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-ink/20 [&_button]:hover:shadow-soft [&_button]:transition-all">
               <SaveButton listingId={listing.id} />
@@ -270,74 +283,49 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* ── THE CONVERSATION — "What neighbors say" ── */}
-        <div className="mb-10">
-          {/* Section header with count badge */}
-          <div className="flex items-center gap-3 mb-5">
-            <h2 className="text-headline text-ink">What neighbors say</h2>
-            {commentCount > 0 && (
-              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-full bg-amber/10 text-amber text-caption font-semibold">
-                {commentCount}
-              </span>
-            )}
-          </div>
-
-          {/* Prominent comment prompt */}
-          <div className="bg-gradient-to-br from-glow via-[#FAFAF8] to-highlight border border-amber/15 rounded-card p-5 mb-6">
-            <p className="text-title text-ink leading-snug">
-              What do you know about this block that the listing doesn&apos;t say?
-            </p>
-            <p className="text-caption text-secondary mt-1">
-              Your neighbors are listening. Share something real.
-            </p>
-          </div>
-
+        {/* ── THE CONVERSATION ── */}
+        <div className="mb-8">
           <CommentSection
             listingId={listing.id}
             isLocked={isLocked}
             listingAddress={listing.address}
             listingPrice={price}
+            photos={listing.photos as string[]}
           />
         </div>
 
         {/* ── Email capture ── */}
-        <div className="mb-10 bg-surface border border-divider rounded-card p-6 shadow-soft">
+        <div className="mb-8 bg-surface border border-divider rounded-card p-5 shadow-soft">
           <p className="text-title text-ink mb-1">
             Want to know when people react to this listing?
           </p>
-          <p className="text-caption text-secondary mb-4">
+          <p className="text-caption text-secondary mb-3">
             Get notified when new comments drop.
           </p>
           <EmailCapture variant="inline" source={`listing-${listing.id}`} />
         </div>
 
-        {/* ── AI TOOLS — premium card treatment ── */}
-        <div className="space-y-6 mb-10">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-px flex-1 bg-divider" />
-            <span className="text-caption text-tertiary uppercase tracking-widest font-medium px-2">AI Tools</span>
-            <div className="h-px flex-1 bg-divider" />
-          </div>
-
+        {/* ── AI Tools ── */}
+        <div className="space-y-4 mb-8">
           {/* Decision Comparison */}
           <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-            {/* Subtle amber gradient accent */}
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber/60 via-amber/30 to-transparent" />
-            <div className="p-6">
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber/60 via-amber/30 to-transparent" />
+            <div className="p-5">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 </div>
                 <h2 className="text-title text-ink">The real picture</h2>
               </div>
               <DecisionComparison
-                listing={{
-                  description: listing.description ?? undefined,
-                  price: listing.price,
-                  address: listing.address,
-                }}
+                comments={topComments.map(c => ({
+                  name: c.name,
+                  content: c.content,
+                  createdAt: c.createdAt.toISOString(),
+                }))}
+                description={listing.description}
+                address={listing.address}
                 commentCount={commentCount}
-                topComments={topComments}
               />
             </div>
           </div>
@@ -345,16 +333,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* AI Reimagine */}
           {listing.photos.length > 0 && (
             <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber/30 to-amber/60" />
-              <div className="p-6">
+              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-amber/30 to-amber/60" />
+              <div className="p-5">
                 <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                  <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                   </div>
                   <h2 className="text-title text-ink">Reimagine this property</h2>
                 </div>
-                <p className="text-caption text-secondary mb-4 pl-[42px]">
-                  See what this place could look like with a different style. AI-powered visualization.
+                <p className="text-caption text-secondary mb-3 pl-[38px]">
+                  See what this place could look like with a different style.
                 </p>
                 <AIReimagineTool photos={listing.photos} address={listing.address} />
               </div>
@@ -363,15 +351,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
           {/* Neighbor Q&A */}
           <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber/40 via-amber/50 to-amber/20" />
-            <div className="p-6">
+            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber/40 via-amber/50 to-amber/20" />
+            <div className="p-5">
               <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
                 <h2 className="text-title text-ink">Ask the neighborhood</h2>
               </div>
-              <p className="text-caption text-secondary mb-4 pl-[42px]">
+              <p className="text-caption text-secondary mb-3 pl-[38px]">
                 Have a question about this block? Ask verified locals who actually live here.
               </p>
               <NeighborQA zipCode={listing.zip} listingId={listing.id} />
@@ -381,16 +369,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
         {/* ── Description ── */}
         {listing.description && (
-          <div className="mb-10">
-            <h2 className="text-title text-ink mb-3">About this property</h2>
-            <p className="text-body text-secondary leading-relaxed">{listing.description}</p>
+          <div className="mb-8">
+            <h2 className="text-title text-ink mb-2">About this property</h2>
+            <ExpandableText text={listing.description} maxLength={200} />
           </div>
         )}
 
         {/* ── Map ── */}
         {listing.latitude != null && listing.longitude != null && (
-          <div className="mb-10">
-            <h2 className="text-title text-ink mb-3">Location</h2>
+          <div className="mb-8">
+            <h2 className="text-title text-ink mb-2">Location</h2>
             <div className="rounded-card overflow-hidden border border-divider">
               <MapPreview
                 latitude={listing.latitude}
@@ -399,7 +387,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 className="mb-0"
               />
             </div>
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-2.5">
               {listing.neighborhood && (
                 <a
                   href={`/?city=${encodeURIComponent(listing.neighborhood)}`}
@@ -426,39 +414,84 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         )}
 
         {/* ── Detailed Property Information ── */}
-        <div className="mb-10 border-t border-divider pt-8 space-y-8">
-          <DetailSection title="Property Details">
-            <DetailRow label="Status" value={isSold ? "Sold" : isRent ? "For Rent" : "For Sale"} />
-            <DetailRow label="Type" value={capitalize(listing.propertyType)} />
-            {listing.bedrooms != null && <DetailRow label="Beds" value={String(listing.bedrooms)} />}
-            {listing.bathrooms != null && <DetailRow label="Baths" value={String(listing.bathrooms)} />}
-            {listing.sqft != null && <DetailRow label="Sqft" value={listing.sqft.toLocaleString()} />}
-            {listing.lotSqft != null && (
-              <DetailRow label="Lot Size" value={`${listing.lotSqft.toLocaleString()} sqft`} />
-            )}
-            {listing.yearBuilt != null && <DetailRow label="Year Built" value={String(listing.yearBuilt)} />}
-            {listing.parking != null && <DetailRow label="Parking" value={listing.parking} />}
-          </DetailSection>
+        <div className="mb-8 border-t border-divider pt-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Property Details */}
+            <DetailCard title="Property Details">
+              <DetailRow label="Status" value={isSold ? "Sold" : isRent ? "For Rent" : "For Sale"} />
+              <DetailRow label="Type" value={capitalize(listing.propertyType)} />
+              {listing.bedrooms != null && <DetailRow label="Beds" value={String(listing.bedrooms)} />}
+              {listing.bathrooms != null && <DetailRow label="Baths" value={String(listing.bathrooms)} />}
+              {listing.sqft != null && <DetailRow label="Sqft" value={listing.sqft.toLocaleString()} />}
+              {listing.lotSqft != null && (
+                <DetailRow label="Lot Size" value={`${listing.lotSqft.toLocaleString()} sqft`} />
+              )}
+              {listing.yearBuilt != null && <DetailRow label="Year Built" value={String(listing.yearBuilt)} />}
+              {listing.parking != null && <DetailRow label="Parking" value={listing.parking} />}
+            </DetailCard>
 
-          <DetailSection title="Price & Tax Info">
-            <DetailRow label="List Price" value={price} />
-            {pricePerSqft && <DetailRow label="Price / Sqft" value={pricePerSqft} />}
-            <DetailRow
-              label="Listed"
-              value={listing.createdAt.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            />
-            {priceHistory && priceHistory.length > 0 && (
-              <div className="col-span-2 mt-2">
-                <p className="text-caption text-secondary mb-1.5">Price History</p>
-                <div className="space-y-1">
+            {/* Price & Tax */}
+            <DetailCard title="Price & Tax Info">
+              <DetailRow label="List Price" value={price} />
+              {pricePerSqft && <DetailRow label="Price / Sqft" value={pricePerSqft} />}
+              <DetailRow
+                label="Listed"
+                value={listing.createdAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              />
+            </DetailCard>
+
+            {/* Location */}
+            <DetailCard title="Location">
+              <DetailRow label="Address" value={listing.address} />
+              <DetailRow label="City" value={listing.city} />
+              <DetailRow label="State" value={listing.state} />
+              <DetailRow label="Zip" value={listing.zip} />
+              {listing.neighborhood && <DetailRow label="Neighborhood" value={listing.neighborhood} />}
+            </DetailCard>
+
+            {/* Listing Info */}
+            <DetailCard title="Listing Info">
+              <DetailRow label="Source" value={capitalize(listing.source)} />
+              {listing.listingUrl && (
+                <div className="flex items-center justify-between py-2 border-b border-divider/60 last:border-0">
+                  <span className="text-caption text-secondary">Listing URL</span>
+                  <a
+                    href={listing.listingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-caption text-amber hover:text-amber/80 font-medium transition-colors"
+                  >
+                    View original &rarr;
+                  </a>
+                </div>
+              )}
+              {listing.agentName && <DetailRow label="Agent" value={listing.agentName} />}
+              {listing.agentBrokerage && <DetailRow label="Brokerage" value={listing.agentBrokerage} />}
+              <DetailRow
+                label="Cached"
+                value={listing.cachedAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              />
+            </DetailCard>
+          </div>
+
+          {/* Price History — full width below grid */}
+          {priceHistory && priceHistory.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-caption text-amber uppercase tracking-wider mb-2 font-semibold">Price History</h3>
+              <div className="bg-surface rounded-card border border-divider p-4">
+                <div className="space-y-0">
                   {priceHistory.map((entry, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between text-caption py-1.5 border-b border-divider last:border-0"
+                      className="flex items-center justify-between text-caption py-2 border-b border-divider/60 last:border-0"
                     >
                       <span className="text-secondary">{entry.date}</span>
                       <span className="text-ink font-medium">
@@ -471,51 +504,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                   ))}
                 </div>
               </div>
-            )}
-          </DetailSection>
-
-          <DetailSection title="Location">
-            <DetailRow label="Address" value={listing.address} />
-            <DetailRow label="City" value={listing.city} />
-            <DetailRow label="State" value={listing.state} />
-            <DetailRow label="Zip" value={listing.zip} />
-            {listing.neighborhood && <DetailRow label="Neighborhood" value={listing.neighborhood} />}
-          </DetailSection>
-
-          <DetailSection title="Listing Info">
-            <DetailRow label="Source" value={capitalize(listing.source)} />
-            {listing.listingUrl && (
-              <div className="grid grid-cols-2 gap-x-4 py-2.5 border-b border-divider">
-                <dt className="text-caption text-secondary">Listing URL</dt>
-                <dd className="text-body text-right">
-                  <a
-                    href={listing.listingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-amber hover:text-amber/80 font-medium truncate block transition-colors"
-                  >
-                    View original &rarr;
-                  </a>
-                </dd>
-              </div>
-            )}
-            {listing.agentName && <DetailRow label="Agent" value={listing.agentName} />}
-            {listing.agentBrokerage && <DetailRow label="Brokerage" value={listing.agentBrokerage} />}
-            <DetailRow
-              label="Cached"
-              value={listing.cachedAt.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })}
-            />
-          </DetailSection>
+            </div>
+          )}
         </div>
 
         {/* ── More listings in [city] ── */}
         {moreSameCity.length > 0 && (
-          <div className="mb-10 border-t border-divider pt-8">
-            <div className="flex items-center justify-between mb-5">
+          <div className="mb-8 border-t border-divider pt-6">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-headline text-ink">
                 More in {listing.city}
               </h2>
@@ -592,32 +588,32 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
 function CollapsibleSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <details className="mb-10 border-t border-divider pt-6 group">
+    <details className="mb-8 border-t border-divider pt-5 group">
       <summary className="text-title text-ink cursor-pointer list-none flex items-center justify-between">
         {title}
         <span className="text-tertiary text-caption group-open:rotate-90 transition-transform">&rsaquo;</span>
       </summary>
-      <div className="mt-4">
+      <div className="mt-3">
         {children}
       </div>
     </details>
   );
 }
 
-function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+function DetailCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <h3 className="text-caption text-amber uppercase tracking-wider mb-3 font-semibold">{title}</h3>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">{children}</dl>
+    <div className="bg-surface rounded-card border border-divider p-4">
+      <h3 className="text-caption text-amber uppercase tracking-wider mb-2.5 font-semibold">{title}</h3>
+      <div>{children}</div>
     </div>
   );
 }
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 py-2.5 border-b border-divider">
-      <dt className="text-caption text-secondary">{label}</dt>
-      <dd className="text-body font-medium text-ink text-right truncate">{value}</dd>
+    <div className="flex items-center justify-between py-2 border-b border-divider/60 last:border-0">
+      <span className="text-caption text-secondary">{label}</span>
+      <span className="text-caption font-medium text-ink text-right truncate ml-4">{value}</span>
     </div>
   );
 }

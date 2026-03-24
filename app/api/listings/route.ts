@@ -25,6 +25,29 @@ export async function GET(req: NextRequest) {
   const radiusMiles = searchParams.get("radius") ? Number(searchParams.get("radius")) : 25;
   const isGeoSearch = lat !== undefined && lng !== undefined;
 
+  // Numeric validation
+  if (minPrice !== undefined && (isNaN(minPrice) || minPrice < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: minPrice" }, { status: 400 });
+  }
+  if (maxPrice !== undefined && (isNaN(maxPrice) || maxPrice < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: maxPrice" }, { status: 400 });
+  }
+  if (minBeds !== undefined && (isNaN(minBeds) || minBeds < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: minBeds" }, { status: 400 });
+  }
+  if (minBaths !== undefined && (isNaN(minBaths) || minBaths < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: minBaths" }, { status: 400 });
+  }
+  if (minSqft !== undefined && (isNaN(minSqft) || minSqft < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: minSqft" }, { status: 400 });
+  }
+  if (maxSqft !== undefined && (isNaN(maxSqft) || maxSqft < 0)) {
+    return NextResponse.json({ error: "Invalid parameter: maxSqft" }, { status: 400 });
+  }
+  if (isGeoSearch && (isNaN(radiusMiles) || radiusMiles <= 0 || radiusMiles > 100)) {
+    return NextResponse.json({ error: "Invalid parameter: radiusMiles" }, { status: 400 });
+  }
+
   // Build filters — always filter to active listings only
   const conditions: Prisma.ListingWhereInput[] = [
     { status: "active" },
@@ -32,6 +55,7 @@ export async function GET(req: NextRequest) {
 
   // Skip city text filter when doing geo search — haversine handles proximity
   if (city && !isGeoSearch) {
+    const words = city.split(/[\s,]+/).filter(w => w.length > 1);
     conditions.push({
       OR: [
         { city: { contains: city, mode: "insensitive" } },
@@ -39,6 +63,20 @@ export async function GET(req: NextRequest) {
         { zip: { contains: city } },
         { neighborhood: { contains: city, mode: "insensitive" } },
         { address: { contains: city, mode: "insensitive" } },
+        // Word-by-word matching for multi-word queries
+        ...(words.length >= 2 ? [{
+          AND: words.map(word => ({
+            OR: [
+              { city: { contains: word, mode: "insensitive" as const } },
+              { neighborhood: { contains: word, mode: "insensitive" as const } },
+              { address: { contains: word, mode: "insensitive" as const } },
+            ],
+          })),
+        }] : []),
+        // Individual word matches on city
+        ...words.filter(w => w.length > 2).map(word => ({
+          city: { contains: word, mode: "insensitive" as const },
+        })),
       ],
     });
   }
@@ -161,13 +199,22 @@ export async function GET(req: NextRequest) {
 
     listings = interleaved.slice((page - 1) * perPage, page * perPage);
     total = count;
+  } else if (isGeoSearch) {
+    // For geo search, fetch all matching listings (no skip/take) so haversine
+    // filtering sees every candidate. Pagination happens after filtering.
+    listings = await prisma.listing.findMany({
+      where,
+      orderBy,
+      select: selectFields,
+    });
+    total = 0; // will be set after geo filtering below
   } else {
     [listings, total] = await Promise.all([
       prisma.listing.findMany({
         where,
         orderBy,
         skip: (page - 1) * perPage,
-        take: lat && lng ? 200 : perPage,
+        take: perPage,
         select: selectFields,
       }),
       prisma.listing.count({ where }),
@@ -175,7 +222,7 @@ export async function GET(req: NextRequest) {
   }
 
   // If lat/lng provided, sort by distance and filter to radius
-  if (lat && lng) {
+  if (isGeoSearch) {
     const toRad = (deg: number) => (deg * Math.PI) / 180;
     const haversine = (lat1: number, lng1: number, lat2: number, lng2: number) => {
       const R = 3959; // miles

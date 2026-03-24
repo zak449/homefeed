@@ -1,14 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 interface AIReimagineToolProps {
   photos: string[];
   address: string;
 }
-
-const TABS = ["Exterior", "Interior", "Backyard", "Before & After"] as const;
-type Tab = (typeof TABS)[number];
 
 const STYLES = ["Modern", "Mediterranean", "Farmhouse", "Industrial", "Minimalist"] as const;
 type Style = (typeof STYLES)[number];
@@ -29,76 +26,80 @@ const STYLE_OVERLAYS: Record<Style, string> = {
   Minimalist: "from-white/10 to-transparent",
 };
 
+const STYLE_DESCRIPTIONS: Record<Style, string> = {
+  Modern: "Clean lines, neutral tones, open spaces",
+  Mediterranean: "Warm terracotta, arched details, earthy palette",
+  Farmhouse: "Rustic charm, soft whites, natural wood",
+  Industrial: "Raw materials, muted tones, urban edge",
+  Minimalist: "Bright, airy, stripped-back simplicity",
+};
+
 export default function AIReimagineTool({ photos, address }: AIReimagineToolProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("Exterior");
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [revealed, setRevealed] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [prompt, setPrompt] = useState("");
+  const [copied, setCopied] = useState(false);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
-  const currentPhoto = photos[TABS.indexOf(activeTab) % photos.length] || photos[0];
-
-  // Simulated generation
-  useEffect(() => {
-    if (!isGenerating) return;
-    setProgress(0);
-    setRevealed(false);
-
-    const duration = 2400;
-    const interval = 40;
-    let elapsed = 0;
-
-    const timer = setInterval(() => {
-      elapsed += interval;
-      const p = Math.min((elapsed / duration) * 100, 100);
-      // Ease-out curve for more natural feel
-      setProgress(100 * (1 - Math.pow(1 - p / 100, 3)));
-
-      if (elapsed >= duration) {
-        clearInterval(timer);
-        setIsGenerating(false);
-        setRevealed(true);
-        setSliderPos(50);
-      }
-    }, interval);
-
-    return () => clearInterval(timer);
-  }, [isGenerating]);
+  const currentPhoto = photos[selectedPhotoIndex] || photos[0];
 
   function handleStyleSelect(style: Style) {
-    if (selectedStyle === style && revealed) {
-      // Deselect
+    if (selectedStyle === style) {
       setSelectedStyle(null);
-      setRevealed(false);
+      setShowComparison(false);
       return;
     }
     setSelectedStyle(style);
-    setIsGenerating(true);
+    setShowComparison(false);
+    setSliderPos(50);
   }
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!isDragging) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
+  function toggleComparison() {
+    setShowComparison((prev) => !prev);
+    setSliderPos(50);
+  }
+
+  const updateSlider = useCallback(
+    (clientX: number) => {
+      if (!isDragging || !sliderRef.current) return;
+      const rect = sliderRef.current.getBoundingClientRect();
+      const x = ((clientX - rect.left) / rect.width) * 100;
       setSliderPos(Math.max(2, Math.min(98, x)));
     },
     [isDragging]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => updateSlider(e.clientX),
+    [updateSlider]
   );
 
   const handleTouchMove = useCallback(
-    (e: React.TouchEvent<HTMLDivElement>) => {
-      if (!isDragging) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = ((e.touches[0].clientX - rect.left) / rect.width) * 100;
-      setSliderPos(Math.max(2, Math.min(98, x)));
-    },
-    [isDragging]
+    (e: React.TouchEvent<HTMLDivElement>) => updateSlider(e.touches[0].clientX),
+    [updateSlider]
   );
 
-  const isBeforeAfter = activeTab === "Before & After";
+  async function handleShare() {
+    if (!currentPhoto) return;
+    try {
+      await navigator.clipboard.writeText(currentPhoto);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback: create a temporary input
+      const input = document.createElement("input");
+      input.value = currentPhoto;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }
 
   return (
     <div className="bg-surface rounded-card border border-divider shadow-soft overflow-hidden">
@@ -107,47 +108,57 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
         <div className="flex items-center gap-2 mb-1">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber to-amber/60 flex items-center justify-center">
             <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
             </svg>
           </div>
-          <h3 className="font-display text-title text-ink tracking-tight">AI Reimagine</h3>
+          <h3 className="font-display text-title text-ink tracking-tight">Style Visualizer</h3>
           <span className="ml-auto text-[10px] font-semibold tracking-wider uppercase text-amber bg-amber/8 px-2 py-0.5 rounded-full">
-            Beta
+            Preview
           </span>
         </div>
         <p className="text-caption text-secondary ml-8">
-          See this property in a completely different style
+          Preview this property with different style filters applied
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="px-5 flex gap-1 border-b border-divider">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setActiveTab(tab);
-              setRevealed(false);
-              setSelectedStyle(null);
-              setIsGenerating(false);
-            }}
-            className={`px-3 py-2.5 text-caption font-medium transition-colors relative ${
-              activeTab === tab
-                ? "text-ink"
-                : "text-tertiary hover:text-secondary"
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <span className="absolute bottom-0 left-1 right-1 h-[2px] bg-ink rounded-full" />
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Photo Selector Thumbnails */}
+      {photos.length > 1 && (
+        <div className="px-5 pb-3">
+          <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2">
+            Select a photo
+          </p>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {photos.map((photo, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setSelectedPhotoIndex(index);
+                  setShowComparison(false);
+                }}
+                className={`relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                  selectedPhotoIndex === index
+                    ? "border-amber shadow-soft ring-1 ring-amber/20"
+                    : "border-divider hover:border-ink/30 opacity-70 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={photo}
+                  alt={`Photo ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                {selectedPhotoIndex === index && (
+                  <div className="absolute inset-0 ring-1 ring-inset ring-amber/30 rounded-[6px]" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Image Area */}
       <div className="relative">
         <div
+          ref={sliderRef}
           className="relative w-full aspect-[16/10] bg-highlight overflow-hidden select-none"
           onMouseMove={handleMouseMove}
           onTouchMove={handleTouchMove}
@@ -155,12 +166,12 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
           onMouseLeave={() => setIsDragging(false)}
           onTouchEnd={() => setIsDragging(false)}
         >
-          {/* Base / "Before" image */}
+          {/* Base / Original image */}
           <div className="absolute inset-0">
             {currentPhoto ? (
               <img
                 src={currentPhoto}
-                alt={`${address} - ${activeTab}`}
+                alt={`${address} - Photo ${selectedPhotoIndex + 1}`}
                 className="w-full h-full object-cover"
               />
             ) : (
@@ -175,37 +186,39 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             )}
           </div>
 
-          {/* "After" / Reimagined overlay */}
-          {revealed && selectedStyle && currentPhoto && (
+          {/* Styled overlay */}
+          {selectedStyle && currentPhoto && (
             <div
               className="absolute inset-0"
               style={{
-                clipPath: isBeforeAfter
+                clipPath: showComparison
                   ? `inset(0 ${100 - sliderPos}% 0 0)`
                   : "inset(0)",
               }}
             >
               <img
                 src={currentPhoto}
-                alt={`${address} - ${selectedStyle} style`}
+                alt={`${address} - ${selectedStyle} style preview`}
                 className="w-full h-full object-cover"
                 style={{ filter: STYLE_FILTERS[selectedStyle] }}
               />
-              {/* Style tint overlay */}
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${STYLE_OVERLAYS[selectedStyle]}`}
               />
               {/* Style label */}
-              {!isBeforeAfter && (
-                <div className="absolute top-3 right-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">
-                  {selectedStyle} Vision
+              {!showComparison && (
+                <div className="absolute top-3 right-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <svg className="w-3 h-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                  </svg>
+                  {selectedStyle} Filter
                 </div>
               )}
             </div>
           )}
 
-          {/* Before/After slider handle */}
-          {revealed && isBeforeAfter && (
+          {/* Before/After comparison slider */}
+          {showComparison && selectedStyle && (
             <>
               <div
                 className="absolute top-0 bottom-0 w-[3px] bg-white shadow-lg cursor-ew-resize z-10"
@@ -213,73 +226,99 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                 onMouseDown={() => setIsDragging(true)}
                 onTouchStart={() => setIsDragging(true)}
               >
-                {/* Handle knob */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 bg-white rounded-full shadow-hover flex items-center justify-center cursor-ew-resize">
                   <svg className="w-4 h-4 text-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
                   </svg>
                 </div>
               </div>
-              {/* Labels */}
               <div className="absolute top-3 left-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full z-[5]">
                 Original
               </div>
               <div className="absolute top-3 right-3 bg-amber/90 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full z-[5]">
-                {selectedStyle}
+                {selectedStyle} Filter
               </div>
             </>
           )}
 
-          {/* Generation overlay */}
-          {isGenerating && (
-            <div className="absolute inset-0 bg-ink/60 backdrop-blur-sm flex flex-col items-center justify-center z-20">
-              <div className="relative w-12 h-12 mb-4">
-                <div className="absolute inset-0 rounded-full border-2 border-white/20" />
-                <div
-                  className="absolute inset-0 rounded-full border-2 border-t-amber border-r-transparent border-b-transparent border-l-transparent animate-spin"
-                />
-                <svg className="absolute inset-0 m-auto w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-                </svg>
-              </div>
-              <p className="text-white text-sm font-semibold mb-3">AI is reimagining...</p>
-              <div className="w-48 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-amber to-amber/80 rounded-full transition-all duration-100"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <p className="text-white/60 text-[11px] mt-2">
-                Applying {selectedStyle} style to {activeTab.toLowerCase()}
-              </p>
-            </div>
-          )}
-
           {/* Empty state prompt */}
-          {!isGenerating && !revealed && currentPhoto && (
+          {!selectedStyle && currentPhoto && (
             <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent flex items-end justify-center pb-6 pointer-events-none">
               <p className="text-white/90 text-sm font-medium bg-ink/40 backdrop-blur-sm px-4 py-2 rounded-full">
-                Select a style below to reimagine this space
+                Select a style below to preview a new look
               </p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Style Pills */}
+      {/* Style description + compare toggle */}
+      {selectedStyle && (
+        <div className="px-5 py-3 border-t border-divider bg-highlight/50 flex items-center justify-between">
+          <div>
+            <p className="text-caption font-medium text-ink">
+              Style Preview (visual filter)
+            </p>
+            <p className="text-[11px] text-tertiary">
+              {STYLE_DESCRIPTIONS[selectedStyle]}
+            </p>
+          </div>
+          <button
+            onClick={toggleComparison}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-full border transition-all duration-200 ${
+              showComparison
+                ? "bg-ink text-white border-ink"
+                : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+            </svg>
+            {showComparison ? "Hide Compare" : "Compare"}
+          </button>
+        </div>
+      )}
+
+      {/* Text Prompt Input */}
       <div className="px-5 py-4 border-t border-divider">
+        <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2">
+          Describe your vision
+        </p>
+        <div className="relative">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder='e.g. "paint it blue", "add a garden", "modern kitchen"'
+            className="w-full px-4 py-2.5 text-caption text-ink bg-highlight border border-divider rounded-button placeholder:text-tertiary focus:outline-none focus:border-amber/50 focus:ring-1 focus:ring-amber/20 transition-all"
+          />
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber bg-amber/8 px-2 py-0.5 rounded-full">
+              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Coming Soon
+            </span>
+          </div>
+        </div>
+        <p className="text-[10px] text-tertiary mt-1.5 ml-1">
+          Text-based generation is in development. Use the style presets below for instant previews.
+        </p>
+      </div>
+
+      {/* Style Preset Pills */}
+      <div className="px-5 pb-4">
         <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-3">
-          Choose a style
+          Quick style presets
         </p>
         <div className="flex flex-wrap gap-2">
           {STYLES.map((style) => {
-            const isActive = selectedStyle === style && (revealed || isGenerating);
+            const isActive = selectedStyle === style;
             return (
               <button
                 key={style}
                 onClick={() => handleStyleSelect(style)}
-                disabled={isGenerating}
-                className={`px-4 py-2 text-caption font-medium rounded-full border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                className={`px-4 py-2 text-caption font-medium rounded-full border transition-all duration-200 ${
                   isActive
                     ? "bg-ink text-white border-ink shadow-soft"
                     : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
@@ -292,22 +331,51 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
         </div>
       </div>
 
+      {/* Coming Soon Note */}
+      <div className="mx-5 mb-4 px-4 py-3 bg-amber/5 border border-amber/15 rounded-button">
+        <div className="flex items-start gap-2.5">
+          <div className="w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg className="w-3 h-3 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-caption font-semibold text-ink">
+              Full AI Generation — Coming Soon
+            </p>
+            <p className="text-[11px] text-secondary mt-0.5">
+              We are building real AI-powered reimagining that will generate new images from text prompts.
+              The current presets apply visual filters for a quick style preview.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Footer actions */}
-      <div className="px-5 pb-5 flex items-center justify-between">
-        <p className="text-[11px] text-tertiary">
+      <div className="px-5 pb-5 flex items-center justify-between border-t border-divider pt-4">
+        <p className="text-[11px] text-tertiary truncate mr-3">
           {address}
         </p>
         <button
-          className="flex items-center gap-1.5 px-4 py-2 text-caption font-semibold text-white rounded-button transition-all hover:opacity-90 active:scale-[0.98]"
+          className="flex items-center gap-1.5 px-4 py-2 text-caption font-semibold text-white rounded-button transition-all hover:opacity-90 active:scale-[0.98] flex-shrink-0"
           style={{ backgroundColor: "#D4763C" }}
-          onClick={() => {
-            /* Share stub */
-          }}
+          onClick={handleShare}
         >
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-          </svg>
-          Share your vision
+          {copied ? (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              Copied!
+            </>
+          ) : (
+            <>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
+              </svg>
+              Share Photo
+            </>
+          )}
         </button>
       </div>
     </div>

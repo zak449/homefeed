@@ -90,6 +90,7 @@ export async function fetchRealtorListings(params: {
   stateCode?: string;
   listingType?: "sale" | "rent";
   limit?: number;
+  useSearchLocation?: boolean;
 }): Promise<number> {
   if (!API_KEY) {
     console.warn("[Realtor] RAPIDAPI_KEY not set — skipping fetch");
@@ -107,8 +108,10 @@ export async function fetchRealtorListings(params: {
     sort: { direction: "desc", field: "list_date" },
   };
 
-  // Use city + state_code if we have both, otherwise just city
-  if (params.stateCode) {
+  // Use search_location for freeform queries (fallback mode)
+  if (params.useSearchLocation) {
+    body.search_location = { name: params.city };
+  } else if (params.stateCode) {
     body.city = params.city;
     body.state_code = params.stateCode;
   } else {

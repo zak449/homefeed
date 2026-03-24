@@ -112,7 +112,6 @@ export default async function TrendingPage() {
       };
     }
     cityAgg[key].commentCount += row._count.id;
-    // Collect up to 4 unique photos for the collage
     if (cityAgg[key].photos.length < 4) {
       for (const p of listing.photos) {
         if (cityAgg[key].photos.length < 4 && !cityAgg[key].photos.includes(p)) {
@@ -122,7 +121,6 @@ export default async function TrendingPage() {
     }
   }
 
-  // Also get listing count per city
   const cityListingCounts = await prisma.listing.groupBy({
     by: ["city", "state"],
     where: { status: "active" },
@@ -139,6 +137,10 @@ export default async function TrendingPage() {
       ...c,
       listingCount: cityListingMap.get(`${c.city}|${c.state}`) ?? 0,
     }));
+
+  // ── Aggregate stats for hero ──
+  const totalComments = await prisma.comment.count();
+  const activeListingCount = mostDiscussed.length;
 
   // ── Normalize for client ──
   const discussedTab = mostDiscussed.map((l) => ({
@@ -188,6 +190,11 @@ export default async function TrendingPage() {
 
   const neighborhoodsTab = sortedCities;
 
+  const isEmpty =
+    discussedTab.length === 0 &&
+    hottestTab.length === 0 &&
+    neighborhoodsTab.length === 0;
+
   return (
     <div className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
@@ -212,32 +219,117 @@ export default async function TrendingPage() {
           Back to gwakgwak
         </Link>
 
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-            </span>
-            <p className="text-[11px] font-bold tracking-widest uppercase text-green-600">
-              Live
+        {/* Hero header */}
+        <div className="relative mb-10 overflow-hidden rounded-2xl bg-ink px-6 py-8 sm:px-8 sm:py-10">
+          {/* Background glow orbs */}
+          <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-amber/20 blur-3xl amber-shimmer pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber/10 blur-3xl glow-pulse pointer-events-none" />
+
+          <div className="relative z-10">
+            {/* Live indicator */}
+            <div className="flex items-center gap-2 mb-4">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400" />
+              </span>
+              <p className="text-[11px] font-bold tracking-widest uppercase text-green-400">
+                Live now
+              </p>
+            </div>
+
+            <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tighter leading-[1.08] mb-2">
+              The hottest takes
+            </h1>
+            <p className="text-[15px] text-white/60 leading-relaxed max-w-md">
+              Real people, real opinions. See what everyone&rsquo;s arguing about right now.
             </p>
+
+            {/* Animated stats */}
+            {!isEmpty && (
+              <div className="flex items-center gap-6 mt-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xl font-extrabold text-white font-display tracking-tight leading-none">
+                      {totalComments.toLocaleString()}
+                    </p>
+                    <p className="text-[11px] text-white/40 font-medium">takes dropped</p>
+                  </div>
+                </div>
+
+                <div className="w-px h-8 bg-white/10" />
+
+                <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber">
+                      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                      <path d="M2 17l10 5 10-5" />
+                      <path d="M2 12l10 5 10-5" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xl font-extrabold text-white font-display tracking-tight leading-none">
+                      {activeListingCount}
+                    </p>
+                    <p className="text-[11px] text-white/40 font-medium">active listings</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-ink tracking-tighter leading-[1.08]">
-            Trending{" "}
-            <span className="text-amber">Conversations</span>
-          </h1>
-          <p className="text-base text-secondary mt-3 leading-relaxed max-w-lg">
-            The listings people can&rsquo;t stop talking about. Real-time
-            leaderboard of the hottest discussions on gwak gwak.
-          </p>
         </div>
 
-        <TrendingTabs
-          discussed={discussedTab}
-          hottest={hottestTab}
-          neighborhoods={neighborhoodsTab}
-        />
+        {isEmpty ? (
+          <EmptyStateHero />
+        ) : (
+          <TrendingTabs
+            discussed={discussedTab}
+            hottest={hottestTab}
+            neighborhoods={neighborhoodsTab}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EmptyStateHero() {
+  return (
+    <div className="relative bg-surface rounded-2xl border border-divider overflow-hidden">
+      {/* Subtle pattern */}
+      <div className="absolute inset-0 opacity-[0.03]" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, #1A1A1A 1px, transparent 0)`,
+        backgroundSize: '24px 24px',
+      }} />
+
+      <div className="relative px-8 py-16 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-amber/10 flex items-center justify-center mx-auto mb-6">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+        </div>
+
+        <h2 className="font-display text-2xl font-extrabold text-ink tracking-tight mb-3">
+          Be the first voice
+        </h2>
+        <p className="text-[15px] text-secondary leading-relaxed max-w-sm mx-auto mb-8">
+          No one&rsquo;s started talking yet. Search any listing and drop your take to kick things off.
+        </p>
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2.5 bg-ink text-white text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          Search listings
+        </Link>
       </div>
     </div>
   );

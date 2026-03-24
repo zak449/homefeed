@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import FallbackImage from "@/components/FallbackImage";
@@ -34,7 +35,11 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function ListingCard({ listing }: { listing: Listing }) {
-  const photo = listing.photos[0];
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
+
+  const photos = listing.photos;
+  const hasMultiple = photos.length > 1;
   const isRent = listing.listingType === "rent";
   const commentCount = listing._count?.comments ?? 0;
 
@@ -49,7 +54,59 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   if (listing.bedrooms != null) specParts.push(`${listing.bedrooms} bd`);
   if (listing.bathrooms != null) specParts.push(`${listing.bathrooms} ba`);
   if (listing.sqft != null) specParts.push(`${listing.sqft.toLocaleString()} sf`);
-  const specs = specParts.join("  ·  ");
+  const specs = specParts.join("  \u00B7  ");
+
+  const goTo = useCallback(
+    (index: number, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentIndex(index);
+    },
+    []
+  );
+
+  const goPrev = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+    },
+    [photos.length]
+  );
+
+  const goNext = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+    },
+    [photos.length]
+  );
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (touchStartX.current === null) return;
+      const diff = touchStartX.current - e.changedTouches[0].clientX;
+      const SWIPE_THRESHOLD = 50;
+      if (Math.abs(diff) > SWIPE_THRESHOLD) {
+        if (diff > 0) {
+          // Swiped left — go next
+          setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
+        } else {
+          // Swiped right — go prev
+          setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
+        }
+      }
+      touchStartX.current = null;
+    },
+    [photos.length]
+  );
+
+  const currentPhoto = photos[currentIndex] ?? null;
 
   return (
     <Link
@@ -58,10 +115,15 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       style={{ willChange: "transform" }}
     >
       {/* Full-bleed image — photo dominates at ~65% of card */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface">
-        {photo ? (
+      <div
+        className="relative aspect-[4/3] overflow-hidden bg-surface"
+        onTouchStart={hasMultiple ? handleTouchStart : undefined}
+        onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
+      >
+        {/* Photo carousel */}
+        {currentPhoto ? (
           <FallbackImage
-            src={photo}
+            src={currentPhoto}
             alt={listing.address}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
             loading="lazy"
@@ -74,6 +136,63 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             className="absolute inset-0 object-cover opacity-60 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
+        )}
+
+        {/* Arrow buttons — only on hover, only when multiple photos */}
+        {hasMultiple && (
+          <>
+            {/* Left arrow */}
+            <button
+              type="button"
+              onClick={goPrev}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 hover:text-white cursor-pointer"
+              aria-label="Previous photo"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+
+            {/* Right arrow */}
+            <button
+              type="button"
+              onClick={goNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 hover:text-white cursor-pointer"
+              aria-label="Next photo"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Photo count badge — top right, below specs pill row */}
+        {hasMultiple && (
+          <div className="absolute top-10 right-3 z-10">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/70 text-white backdrop-blur-md border border-white/10">
+              {currentIndex + 1}/{photos.length}
+            </span>
+          </div>
+        )}
+
+        {/* Dot indicators — cap at 7 visible */}
+        {hasMultiple && (
+          <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
+            {(photos.length <= 7 ? photos : photos.slice(0, 7)).map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={(e) => goTo(i, e)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
+                  (photos.length <= 7 ? i === currentIndex : (i < 6 ? i === currentIndex : currentIndex >= 6))
+                    ? "bg-white w-2.5"
+                    : "bg-white/50 hover:bg-white/70"
+                }`}
+                aria-label={`Go to photo ${i + 1}`}
+              />
+            ))}
+          </div>
         )}
 
         {/* Gradient overlay */}

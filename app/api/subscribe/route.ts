@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addSubscriber, trackKlaviyoEvent } from "@/lib/klaviyo";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 // ── Validation ─────────────────────────────────────────────
 
@@ -12,6 +14,15 @@ const VALID_SOURCES = ["hero", "inline", "footer", "sticky", "api"] as const;
 // ── POST /api/subscribe ────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { success } = rateLimit(ip, { interval: 60_000, maxRequests: 5 });
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { email, phone, source } = body as {

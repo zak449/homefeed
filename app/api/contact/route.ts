@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
+
+/** Escape user input for safe insertion into HTML */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -7,6 +19,15 @@ const resend = process.env.RESEND_API_KEY
 const FROM = process.env.EMAIL_FROM ?? "gwakgwak <hello@gwakgwak.app>";
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const { success } = rateLimit(ip, { interval: 60_000, maxRequests: 5 });
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { name, email, subject, message } = body;
@@ -61,13 +82,19 @@ export async function POST(request: NextRequest) {
     const trimmedSubject = subject.trim();
     const trimmedMessage = message.trim();
 
+    // Escape user inputs before inserting into HTML templates
+    const safeName = escapeHtml(trimmedName);
+    const safeEmail = escapeHtml(trimmedEmail);
+    const safeSubject = escapeHtml(trimmedSubject);
+    const safeMessage = escapeHtml(trimmedMessage);
+
     if (resend) {
       // Send the contact form to support
       await resend.emails.send({
         from: FROM,
         to: "support@gwakgwak.app",
         reply_to: trimmedEmail,
-        subject: `[Contact] ${trimmedSubject} — from ${trimmedName}`,
+        subject: `[Contact] ${safeSubject} — from ${safeName}`,
         html: `
           <div style="font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 16px; overflow: hidden;">
             <div style="background: #0F0F0F; padding: 24px 32px;">
@@ -79,21 +106,21 @@ export async function POST(request: NextRequest) {
               <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
                 <tr>
                   <td style="padding: 8px 0; font-size: 13px; color: #6B7280; font-weight: 600; width: 80px; vertical-align: top;">Name</td>
-                  <td style="padding: 8px 0; font-size: 15px; color: #0F0F0F;">${trimmedName}</td>
+                  <td style="padding: 8px 0; font-size: 15px; color: #0F0F0F;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-size: 13px; color: #6B7280; font-weight: 600; vertical-align: top;">Email</td>
                   <td style="padding: 8px 0; font-size: 15px; color: #0F0F0F;">
-                    <a href="mailto:${trimmedEmail}" style="color: #FF6B2C; text-decoration: none;">${trimmedEmail}</a>
+                    <a href="mailto:${safeEmail}" style="color: #FF6B2C; text-decoration: none;">${safeEmail}</a>
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 8px 0; font-size: 13px; color: #6B7280; font-weight: 600; vertical-align: top;">Subject</td>
-                  <td style="padding: 8px 0; font-size: 15px; color: #0F0F0F;">${trimmedSubject}</td>
+                  <td style="padding: 8px 0; font-size: 15px; color: #0F0F0F;">${safeSubject}</td>
                 </tr>
               </table>
               <div style="background: #F3F4F6; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
-                <p style="margin: 0; font-size: 15px; color: #0F0F0F; line-height: 1.6; white-space: pre-wrap;">${trimmedMessage}</p>
+                <p style="margin: 0; font-size: 15px; color: #0F0F0F; line-height: 1.6; white-space: pre-wrap;">${safeMessage}</p>
               </div>
               <p style="font-size: 12px; color: #9CA3AF; margin: 0;">
                 Sent via gwakgwak contact form &middot; ${new Date().toISOString()}
@@ -117,10 +144,10 @@ export async function POST(request: NextRequest) {
             </div>
             <div style="padding: 32px;">
               <p style="font-size: 16px; color: #0F0F0F; line-height: 1.6; margin: 0 0 16px;">
-                Hi ${trimmedName},
+                Hi ${safeName},
               </p>
               <p style="font-size: 16px; color: #0F0F0F; line-height: 1.6; margin: 0 0 16px;">
-                Thanks for reaching out! We received your message about <strong>${trimmedSubject}</strong> and will get back to you as soon as we can.
+                Thanks for reaching out! We received your message about <strong>${safeSubject}</strong> and will get back to you as soon as we can.
               </p>
               <p style="font-size: 16px; color: #0F0F0F; line-height: 1.6; margin: 0 0 24px;">
                 In the meantime, feel free to browse the latest listings and join the conversation.

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendNewCommentAlert } from "@/lib/email";
+import { rateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-ip";
 
 export async function GET(req: NextRequest) {
   const listingId = req.nextUrl.searchParams.get("listingId");
@@ -43,6 +45,15 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { success } = rateLimit(ip, { interval: 60_000, maxRequests: 10 });
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const { listingId, name, email, content } = body ?? {};
 
@@ -70,6 +81,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Comments are locked — this listing is no longer active" },
       { status: 403 }
+    );
+  }
+
+  // Check for duplicate comment (same listing, same content, within the last hour)
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  const duplicate = await prisma.comment.findFirst({
+    where: {
+      listingId,
+      content: { equals: content.trim(), mode: "insensitive" },
+      createdAt: { gte: oneHourAgo },
+    },
+  });
+  if (duplicate) {
+    return NextResponse.json(
+      { error: "You already posted this comment" },
+      { status: 409 }
     );
   }
 

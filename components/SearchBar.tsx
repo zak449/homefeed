@@ -23,6 +23,13 @@ const POPULAR_CITIES = [
   "Savannah, GA",
 ];
 
+type AutocompleteSuggestion = {
+  label: string;
+  city: string;
+  state: string;
+  type: string;
+};
+
 function getRecentSearches(): string[] {
   if (typeof window === "undefined") return [];
   try {
@@ -62,6 +69,9 @@ export default function SearchBar() {
   const [geoResolved, setGeoResolved] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
+  const [apiSuggestions, setApiSuggestions] = useState<AutocompleteSuggestion[]>([]);
+  const [loadingAutocomplete, setLoadingAutocomplete] = useState(false);
+  const autocompleteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
@@ -105,6 +115,35 @@ export default function SearchBar() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // Live autocomplete from API — debounced 300ms
+  useEffect(() => {
+    const q = city.trim();
+    if (q.length < 2) {
+      setApiSuggestions([]);
+      return;
+    }
+
+    if (autocompleteTimerRef.current) clearTimeout(autocompleteTimerRef.current);
+    autocompleteTimerRef.current = setTimeout(async () => {
+      setLoadingAutocomplete(true);
+      try {
+        const res = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setApiSuggestions(data.suggestions ?? []);
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setLoadingAutocomplete(false);
+      }
+    }, 300);
+
+    return () => {
+      if (autocompleteTimerRef.current) clearTimeout(autocompleteTimerRef.current);
+    };
+  }, [city]);
 
   const query = city.trim().toLowerCase();
   const filteredCities = query
@@ -349,28 +388,68 @@ export default function SearchBar() {
               </>
             )}
 
-            {/* Popular cities */}
-            <div className="px-4 pt-2.5 pb-1 border-t border-divider">
-              <p className="text-caption text-tertiary">
-                {query ? "Matching Cities" : "Popular Cities"}
-              </p>
-            </div>
-            {filteredCities.slice(0, 8).map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => { const name = c.split(",")[0].trim(); setCity(name); doSearch(name); }}
-                className="w-full flex items-center gap-2.5 px-4 py-2 text-body text-left hover:bg-surface transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tertiary shrink-0">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="text-ink">{c}</span>
-              </button>
-            ))}
+            {/* Live API suggestions */}
+            {apiSuggestions.length > 0 && (
+              <>
+                <div className="px-4 pt-2.5 pb-1 border-t border-divider">
+                  <p className="text-caption text-tertiary">Locations</p>
+                </div>
+                {apiSuggestions.map((s, i) => (
+                  <button
+                    key={`api-${i}-${s.label}`}
+                    type="button"
+                    onClick={() => {
+                      const searchStr = s.city || s.label;
+                      setCity(searchStr);
+                      doSearch(searchStr);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-body text-left hover:bg-surface transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-amber shrink-0">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span className="text-ink flex-1">{s.label}</span>
+                    <span className="text-[10px] text-tertiary capitalize">{s.type === "postal_code" ? "zip" : s.type}</span>
+                  </button>
+                ))}
+              </>
+            )}
 
-            {query && filteredCities.length === 0 && (
+            {/* Loading indicator */}
+            {loadingAutocomplete && query && apiSuggestions.length === 0 && (
+              <div className="px-4 py-3 border-t border-divider flex items-center gap-2">
+                <div className="w-3 h-3 border-2 border-tertiary/30 border-t-ink rounded-full animate-spin" />
+                <span className="text-caption text-tertiary">Searching locations...</span>
+              </div>
+            )}
+
+            {/* Popular cities — show when no query or no API results */}
+            {(apiSuggestions.length === 0 || !query) && (
+              <>
+                <div className="px-4 pt-2.5 pb-1 border-t border-divider">
+                  <p className="text-caption text-tertiary">
+                    {query ? "Matching Cities" : "Popular Cities"}
+                  </p>
+                </div>
+                {filteredCities.slice(0, 8).map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => { const name = c.split(",")[0].trim(); setCity(name); doSearch(name); }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-body text-left hover:bg-surface transition-colors"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-tertiary shrink-0">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <span className="text-ink">{c}</span>
+                  </button>
+                ))}
+              </>
+            )}
+
+            {query && filteredCities.length === 0 && apiSuggestions.length === 0 && !loadingAutocomplete && (
               <div className="px-4 py-3 text-body text-tertiary border-t border-divider">
                 Press Enter to search &ldquo;{city}&rdquo;
               </div>

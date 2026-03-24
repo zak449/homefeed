@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import FallbackImage from "@/components/FallbackImage";
 
 export default function PhotoLightbox({
@@ -12,6 +12,10 @@ export default function PhotoLightbox({
 }) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  const [mobileIndex, setMobileIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchDelta = useRef(0);
 
   const openAt = useCallback((i: number) => {
     setIndex(i);
@@ -28,6 +32,7 @@ export default function PhotoLightbox({
     setIndex((i) => (i === photos.length - 1 ? 0 : i + 1));
   }, [photos.length]);
 
+  // Keyboard navigation for lightbox
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -43,27 +48,103 @@ export default function PhotoLightbox({
     };
   }, [open, close, prev, next]);
 
+  // Track mobile carousel scroll position for dot indicators
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let ticking = false;
+    function onScroll() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          if (el) {
+            const scrollLeft = el.scrollLeft;
+            const width = el.clientWidth;
+            const newIndex = Math.round(scrollLeft / width);
+            setMobileIndex(newIndex);
+          }
+          ticking = false;
+        });
+      }
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [photos.length]);
+
+  // Touch swipe for lightbox
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStart.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+    touchDelta.current = 0;
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!touchStart.current) return;
+    touchDelta.current = e.touches[0].clientX - touchStart.current.x;
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!touchStart.current) return;
+    const threshold = 50;
+    if (touchDelta.current < -threshold) {
+      next();
+    } else if (touchDelta.current > threshold) {
+      prev();
+    }
+    touchStart.current = null;
+    touchDelta.current = 0;
+  }, [next, prev]);
+
   if (photos.length === 0) return null;
 
   return (
     <>
-      {/* Thumbnail grid */}
-      {photos.length === 1 ? (
-        <button
-          onClick={() => openAt(0)}
-          className="w-full relative aspect-[16/9] rounded-xl overflow-hidden bg-tag cursor-pointer"
+      {/* === Mobile: horizontal snap-scroll carousel === */}
+      <div className="sm:hidden">
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide rounded-xl"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
         >
-          <FallbackImage
-            src={photos[0]}
-            alt={address}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </button>
-      ) : (
-        <div className="grid grid-cols-4 gap-1.5 rounded-xl overflow-hidden">
+          {photos.map((p, i) => (
+            <button
+              key={i}
+              onClick={() => openAt(i)}
+              className="flex-none w-full relative aspect-[4/3] bg-tag cursor-pointer snap-center"
+            >
+              <FallbackImage
+                src={p}
+                alt={`${address} photo ${i + 1}`}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+        {/* Dot indicators */}
+        {photos.length > 1 && (
+          <div className="flex justify-center gap-1.5 mt-2">
+            {photos.map((_, i) => (
+              <span
+                key={i}
+                className={`block rounded-full transition-all duration-200 ${
+                  i === mobileIndex
+                    ? "w-2 h-2 bg-ink"
+                    : "w-1.5 h-1.5 bg-tertiary/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* === Desktop: full masonry-like grid === */}
+      <div className="hidden sm:block">
+        {photos.length === 1 ? (
           <button
             onClick={() => openAt(0)}
-            className="col-span-4 sm:col-span-2 sm:row-span-2 relative aspect-[4/3] sm:aspect-auto min-h-[200px] bg-tag cursor-pointer"
+            className="w-full relative aspect-[16/9] rounded-xl overflow-hidden bg-tag cursor-pointer"
           >
             <FallbackImage
               src={photos[0]}
@@ -71,34 +152,45 @@ export default function PhotoLightbox({
               className="absolute inset-0 w-full h-full object-cover"
             />
           </button>
-          {photos.slice(1, 5).map((p, i) => (
+        ) : (
+          <div className="grid grid-cols-4 gap-1.5 rounded-xl overflow-hidden">
+            {/* Hero photo: 2 cols x 2 rows */}
             <button
-              key={i}
-              onClick={() => openAt(i + 1)}
-              className="relative aspect-[4/3] bg-tag hidden sm:block cursor-pointer"
+              onClick={() => openAt(0)}
+              className="col-span-2 row-span-2 relative aspect-auto min-h-[260px] bg-tag cursor-pointer"
             >
               <FallbackImage
-                src={p}
-                alt={`${address} photo ${i + 2}`}
+                src={photos[0]}
+                alt={address}
                 className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity"
               />
-              {i === 3 && photos.length > 5 && (
-                <div className="absolute inset-0 bg-ink/50 flex items-center justify-center">
-                  <span className="text-white font-semibold text-sm">
-                    +{photos.length - 5}
-                  </span>
-                </div>
-              )}
             </button>
-          ))}
-        </div>
-      )}
+            {/* Remaining photos fill the 4-col grid */}
+            {photos.slice(1).map((p, i) => (
+              <button
+                key={i}
+                onClick={() => openAt(i + 1)}
+                className="relative aspect-[4/3] bg-tag cursor-pointer"
+              >
+                <FallbackImage
+                  src={p}
+                  alt={`${address} photo ${i + 2}`}
+                  className="absolute inset-0 w-full h-full object-cover hover:opacity-90 transition-opacity"
+                />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {/* Lightbox overlay */}
+      {/* === Lightbox overlay === */}
       {open && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
           onClick={close}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           {/* Close button */}
           <button

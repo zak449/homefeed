@@ -235,14 +235,14 @@ export default async function AboutPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {[
               {
-                title: "AI Property Reimagination",
-                text: "See what a home could become. Our AI generates renovation visions based on the property, the neighborhood, and what local markets value most.",
+                title: "Style Visualizer",
+                text: "See what a home could look like in different styles — Modern, Mediterranean, Farmhouse, and more. Full AI generation coming soon.",
                 badge: "Live",
               },
               {
-                title: "Community Intelligence Engine",
-                text: "Patterns emerge from thousands of neighbor comments. AI surfaces the insights that matter — from hidden flood zones to the best block for dog walks.",
-                badge: "Building",
+                title: "Community Intelligence",
+                text: "Real sentiment analysis from actual neighbor comments. See warnings, endorsements, and insider intel — all from verified locals.",
+                badge: "Live",
               },
               {
                 title: "Neighborhood Knowledge Graph",
