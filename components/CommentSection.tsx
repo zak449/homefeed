@@ -38,6 +38,7 @@ export default function CommentSection({
   isLocked?: boolean;
   listingAddress?: string;
   listingPrice?: string;
+  verified?: boolean;
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,6 +218,15 @@ export default function CommentSection({
         )}
       </div>
 
+      {/* "Drop Your Take" divider — only shown when not locked */}
+      {!isLocked && (
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-px bg-divider" />
+          <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-tertiary whitespace-nowrap">Drop Your Take</span>
+          <div className="flex-1 h-px bg-divider" />
+        </div>
+      )}
+
       {/* Locked banner */}
       {isLocked && comments.length > 0 && (
         <div className="bg-surface rounded-card px-4 py-3 mb-6">
@@ -243,7 +253,7 @@ export default function CommentSection({
 
       {/* Empty state */}
       {!loading && comments.length === 0 && !isLocked && (
-        <div className="text-center py-10 rounded-card bg-surface mb-6">
+        <div className="text-center py-10 rounded-card bg-surface border border-divider mb-6">
           <p className="text-headline text-ink mb-1">No one&apos;s weighed in yet</p>
           <p className="text-body text-secondary">Be the first to share what you think about this listing.</p>
         </div>
@@ -282,6 +292,7 @@ export default function CommentSection({
               isLocked={isLocked}
               listingAddress={listingAddress}
               listingPrice={listingPrice}
+              verified={false}
             />
           ))}
 
@@ -309,13 +320,7 @@ export default function CommentSection({
 
       {/* Post form */}
       {!isLocked && (
-        <div className="rounded-card border border-divider p-5">
-          <p className="text-title text-ink mb-1">
-            Join the conversation
-          </p>
-          <p className="text-body text-secondary mb-4">
-            What&apos;s your take on this place?
-          </p>
+        <div className="rounded-card border border-divider bg-surface p-5">
           <form onSubmit={handlePost} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input
@@ -324,7 +329,7 @@ export default function CommentSection({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="rounded-button bg-surface px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
+                className="rounded-button bg-bg border border-divider px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:border-[rgba(232,168,124,0.4)] transition-colors"
               />
               <input
                 type="email"
@@ -332,19 +337,20 @@ export default function CommentSection({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="rounded-button bg-surface px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
+                className="rounded-button bg-bg border border-divider px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:border-[rgba(232,168,124,0.4)] transition-colors"
               />
             </div>
             <div className="relative">
               <textarea
                 ref={textareaRef}
-                placeholder="Overpriced? Underrated? Spill your take..."
+                placeholder="What do you know about this block that the listing doesn't say?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 required
-                rows={3}
+                rows={4}
                 maxLength={1000}
-                className="w-full rounded-card border border-divider px-3 py-2.5 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow resize-none"
+                className="comment-textarea w-full rounded-card border border-divider bg-bg px-3 py-2.5 text-body text-ink placeholder:text-tertiary transition-colors resize-none"
+                style={{ minHeight: "100px" }}
               />
               <span className="absolute bottom-2 right-3 text-caption text-tertiary">
                 {content.length}/1000
@@ -366,7 +372,7 @@ export default function CommentSection({
                   key={suggestion}
                   type="button"
                   onClick={() => setContent((prev) => prev ? `${prev} ${suggestion}` : suggestion)}
-                  className="text-caption px-3 py-1.5 rounded-full bg-surface text-ink hover:bg-active transition-colors"
+                  className="text-caption px-3 py-1.5 rounded-full bg-bg border border-divider text-secondary hover:text-ink hover:border-tertiary/40 transition-colors"
                 >
                   {suggestion}
                 </button>
@@ -391,7 +397,7 @@ export default function CommentSection({
 
       {/* Reply notification prompt */}
       {showReplyPrompt && !isLocked && (
-        <div className="mt-4 bg-highlight rounded-card p-4 animate-fade-in">
+        <div className="mt-4 bg-highlight border border-divider rounded-card p-4 animate-fade-in">
           {replyStatus === "success" ? (
             <div className="flex items-center gap-2">
               <svg className="w-4 h-4 text-ink shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -416,7 +422,7 @@ export default function CommentSection({
                   placeholder="your@email.com"
                   value={replyEmail}
                   onChange={(e) => setReplyEmail(e.target.value)}
-                  className="flex-1 min-w-0 px-3.5 py-2 text-body rounded-button bg-white text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
+                  className="flex-1 min-w-0 px-3.5 py-2 text-body rounded-button bg-bg border border-divider text-ink placeholder:text-tertiary focus:outline-none focus:border-tertiary/60 transition-colors"
                 />
                 <button
                   type="submit"
@@ -448,6 +454,7 @@ function CommentItem({
   isLocked,
   listingAddress = "",
   listingPrice = "",
+  verified = false,
 }: {
   comment: Comment;
   canReact: boolean;
@@ -456,8 +463,14 @@ function CommentItem({
   isLocked: boolean;
   listingAddress?: string;
   listingPrice?: string;
+  verified?: boolean;
 }) {
   const [showCopied, setShowCopied] = useState(false);
+  const [helpful, setHelpful] = useState(0);
+  const [helpfulVoted, setHelpfulVoted] = useState(false);
+
+  const reactionTotal = getReactionTotal(comment);
+  const isHot = reactionTotal >= 5;
 
   const initials = comment.name
     .split(" ")
@@ -472,10 +485,16 @@ function CommentItem({
     setTimeout(() => setShowCopied(false), 2000);
   };
 
+  const handleHelpful = () => {
+    if (helpfulVoted) return;
+    setHelpful((n) => n + 1);
+    setHelpfulVoted(true);
+  };
+
   return (
     <div
       id={`comment-${comment.id}`}
-      className={`flex gap-3.5 py-5 border-b border-divider last:border-0 ${isLocked ? "opacity-50" : ""}`}
+      className={`fade-up flex gap-3.5 py-5 border-b border-divider last:border-0 ${isLocked ? "opacity-50" : ""} ${isHot ? "pl-3 border-l-[3px] border-l-[#E8A87C]/50 rounded-sm" : ""}`}
     >
       {/* Avatar */}
       <div className="w-10 h-10 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
@@ -486,14 +505,35 @@ function CommentItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-title text-ink">{comment.name}</span>
+          {verified && (
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[rgba(232,168,124,0.12)] text-[#E8A87C] border border-[rgba(232,168,124,0.2)]">
+              ZIP ✓
+            </span>
+          )}
           <span className="text-caption text-tertiary">{timeAgo(comment.createdAt)}</span>
         </div>
         <p className="text-body text-ink mt-1 leading-relaxed whitespace-pre-wrap">
           {comment.content}
         </p>
 
-        {/* Reactions */}
+        {/* Reactions + helpful */}
         <div className="flex gap-2 mt-2.5 flex-wrap items-center">
+          {/* Helpful thumbs-up */}
+          <button
+            onClick={handleHelpful}
+            disabled={helpfulVoted}
+            className={`flex items-center gap-1 text-caption transition-colors mr-1 ${
+              helpfulVoted ? "text-[#E8A87C]" : "text-tertiary/50 hover:text-secondary"
+            } ${helpfulVoted ? "cursor-default" : "cursor-pointer"}`}
+            title="Mark as helpful"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill={helpfulVoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" />
+              <path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+            </svg>
+            {helpful > 0 && <span>{helpful}</span>}
+          </button>
+
           {REACTIONS.map((r) => {
             const count = comment.reactions[r] ?? 0;
             return (

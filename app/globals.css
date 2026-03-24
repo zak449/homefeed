@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,13 +12,23 @@ html {
 }
 
 body {
-  background-color: #FFFFFF;
-  color: #1A1A1A;
-  font-family: 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  background-color: #0A0A0A;
+  color: #F2F0ED;
+  font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.011em;
+  font-feature-settings: 'ss01', 'cv01', 'cv11';
+}
+
+/* Display class for hero headlines */
+.font-display {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  font-feature-settings: 'ss01', 'cv01', 'cv11';
 }
 
 /* Number input spinners */
@@ -29,16 +39,19 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Selection */
 ::selection {
-  background: #E8E0D8;
+  background: #3A3630;
+  color: #F2F0ED;
 }
 
 /* Focus ring */
 :focus-visible {
-  outline: 2px solid #1A1A1A;
+  outline: 2px solid rgba(232, 168, 124, 0.5);
   outline-offset: 2px;
 }
 
-/* Fade in */
+/* ─── Animations ─────────────────────────────────────── */
+
+/* Fade in (legacy) */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -47,13 +60,34 @@ input[type=number]::-webkit-outer-spin-button {
   animation: fadeIn 0.25s ease-out forwards;
 }
 
+/* Gwak pulse — for glow orbs */
+@keyframes gwak-pulse {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.2; }
+}
+.glow-pulse { animation: gwak-pulse 4s ease-in-out infinite; }
+
+/* Fade up — premium load feel for cards/comments */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fade-up 0.4s ease-out forwards; }
+
+/* Amber shimmer — for hero gradient glow */
+@keyframes amber-shimmer {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50% { opacity: 0.18; transform: scale(1.06); }
+}
+.amber-shimmer { animation: amber-shimmer 6s ease-in-out infinite; }
+
 /* Skeleton shimmer */
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+  background: linear-gradient(90deg, #1C1A17 25%, #252320 50%, #1C1A17 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -68,13 +102,31 @@ input[type=number]::-webkit-outer-spin-button {
   opacity: 1;
 }
 
+/* Search bar amber glow on focus */
+.search-input-wrapper:focus-within .search-icon {
+  color: #E8A87C;
+}
+.search-input-wrapper:focus-within input {
+  box-shadow: 0 0 0 2px rgba(232, 168, 124, 0.25);
+}
+
+/* Comment textarea pulsing border on focus */
+@keyframes border-pulse {
+  0%, 100% { border-color: rgba(232, 168, 124, 0.3); }
+  50% { border-color: rgba(232, 168, 124, 0.6); }
+}
+.comment-textarea:focus {
+  animation: border-pulse 2s ease-in-out infinite;
+  outline: none;
+}
+
 /* Mortgage calculator slider */
 .mortgage-slider {
   -webkit-appearance: none;
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: #E8E0D8;
+  background: #252320;
   outline: none;
   cursor: pointer;
 }
@@ -83,9 +135,9 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #1A1A1A;
-  border: 3px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  background: #F2F0ED;
+  border: 3px solid #0A0A0A;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
   cursor: grab;
 }
 .mortgage-slider::-webkit-slider-thumb:active {
@@ -95,8 +147,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #1A1A1A;
-  border: 3px solid white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  background: #F2F0ED;
+  border: 3px solid #0A0A0A;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
   cursor: grab;
 }

@@ -193,7 +193,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
 
       {/* Community Sentiment */}
       {commentCount > 0 && (
-        <div className="mb-8 bg-white border border-border rounded-xl p-5 sm:p-6">
+        <div className="mb-8 bg-surface border border-border rounded-xl p-5 sm:p-6">
           <h2 className="font-display text-base font-bold text-ink mb-4">Community Sentiment</h2>
 
           {/* Vibe indicator */}
@@ -248,7 +248,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                 <Link
                   key={t.id}
                   href={`/listing/${t.id}`}
-                  className="bg-white border border-border rounded-xl overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+                  className="bg-surface border border-border rounded-xl overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
                 >
                   <div className="flex gap-3 p-4">
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-tag shrink-0">
@@ -307,7 +307,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                 <Link
                   key={c.id}
                   href={`/listing/${c.listing.id}`}
-                  className="block bg-white border border-border rounded-xl px-4 py-3 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+                  className="block bg-surface border border-border rounded-xl px-4 py-3 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center text-[10px] font-semibold text-white shrink-0">

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import FallbackImage from "@/components/FallbackImage";
 
 type Listing = {
@@ -43,99 +44,120 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
+  // Build specs pill text
+  const specParts: string[] = [];
+  if (listing.bedrooms != null) specParts.push(`${listing.bedrooms} bd`);
+  if (listing.bathrooms != null) specParts.push(`${listing.bathrooms} ba`);
+  if (listing.sqft != null) specParts.push(`${listing.sqft.toLocaleString()} sf`);
+  const specs = specParts.join("  ·  ");
+
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden bg-white transition-all duration-200 hover:shadow-hover"
+      className="group block rounded-2xl overflow-hidden fade-up transition-all duration-300 hover:scale-[1.015] hover:shadow-glow-amber hover:border-[rgba(232,168,124,0.3)] border border-transparent"
+      style={{ willChange: "transform" }}
     >
-      {/* Photo — full width, visual hook */}
+      {/* Full-bleed image — the whole card IS the image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-surface">
         {photo ? (
           <FallbackImage
             src={photo}
             alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-tertiary/20">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-              <polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-          </div>
+          <Image
+            src="/images/listing-exterior.png"
+            alt={listing.address}
+            fill
+            className="absolute inset-0 object-cover opacity-60 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
         )}
 
-        {/* Type badge — small, on photo */}
-        <div className="absolute top-3 left-3">
-          <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
+        {/* Gradient overlay — content floats over image at bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
+
+        {/* TOP ROW — status badge (left) + specs pill (center-right) */}
+        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
+          {/* Status badge */}
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md ${
             listing.status === "off_market"
               ? "bg-amber-500/90 text-white"
               : isRent
-                ? "bg-blue-600/90 text-white"
-                : "bg-white/90 text-ink"
+                ? "bg-blue-500/90 text-white"
+                : "bg-black/70 text-white border border-white/10"
           }`}>
             {listing.status === "off_market" ? "Off Market" : isRent ? "For Rent" : "For Sale"}
           </span>
-        </div>
 
-        {/* Comment count — social signal on photo */}
-        {commentCount > 0 && (
-          <div className="absolute top-3 right-3">
-            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm ${
-              commentCount >= 5
-                ? "bg-ink/80 text-white"
-                : "bg-white/90 text-ink"
-            }`}>
-              💬 {commentCount}
+          {/* Specs pill */}
+          {specs && (
+            <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-black/70 text-white backdrop-blur-md border border-white/10 whitespace-nowrap">
+              {specs}
             </span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Price row */}
-        <div className="flex items-baseline justify-between gap-2">
-          <h3 className="text-lg font-bold text-ink tracking-tight">{price}</h3>
-          {listedAgo && (
-            <span className="text-xs text-tertiary">{listedAgo}</span>
           )}
         </div>
 
-        {/* Address */}
-        <p className="text-sm text-secondary mt-0.5 truncate">
-          {listing.address}
-        </p>
-        <p className="text-xs text-tertiary truncate">
-          {listing.city}, {listing.state}
-          {listing.bedrooms != null && ` · ${listing.bedrooms} bd`}
-          {listing.bathrooms != null && ` · ${listing.bathrooms} ba`}
-          {listing.sqft != null && ` · ${listing.sqft.toLocaleString()} sqft`}
-        </p>
-
-        {/* Comment preview — THE social layer */}
-        {listing.topComment ? (
-          <div className="mt-3 pt-3 border-t border-divider">
-            <p className="text-sm text-ink leading-relaxed line-clamp-2">
-              &ldquo;{listing.topComment.content}&rdquo;
-            </p>
-            <p className="text-xs text-tertiary mt-1">
-              — {listing.topComment.name}
-              {commentCount > 1 && (
-                <span className="ml-2 text-secondary font-medium">
-                  +{commentCount - 1} more
-                </span>
-              )}
-            </p>
-          </div>
-        ) : (
-          <div className="mt-3 pt-3 border-t border-divider">
-            <p className="text-xs text-tertiary group-hover:text-secondary transition-colors">
-              Be the first to share your take →
-            </p>
+        {/* HOT TAKE badge — bottom right, only when comments exist */}
+        {commentCount > 0 && (
+          <div className="absolute bottom-[72px] right-3">
+            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md ${
+              commentCount >= 5
+                ? "bg-black/80 text-[#E8A87C] border border-[rgba(232,168,124,0.3)]"
+                : "bg-black/60 text-white border border-white/10"
+            }`}>
+              🔥 {commentCount} {commentCount === 1 ? "take" : "takes"}
+            </span>
           </div>
         )}
+
+        {/* BOTTOM OVERLAY — price, address, time */}
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className="flex items-end justify-between gap-2">
+            <div className="min-w-0">
+              {/* Price — large amber */}
+              <p className="text-[1.15rem] font-bold tracking-tight text-[#E8A87C] leading-none mb-1">
+                {price}
+              </p>
+              {/* Address — smaller white */}
+              <p className="text-[13px] font-medium text-white/90 truncate leading-tight">
+                {listing.address}
+              </p>
+              <p className="text-[11px] text-white/50 truncate">
+                {listing.city}, {listing.state}
+              </p>
+            </div>
+            {/* Listed time */}
+            {listedAgo && (
+              <span className="text-[11px] text-white/40 shrink-0 pb-0.5">{listedAgo}</span>
+            )}
+          </div>
+
+          {/* Top comment preview — shown at bottom below address */}
+          {listing.topComment && (
+            <div className="mt-2 pt-2 border-t border-white/10">
+              <p className="text-[12px] text-white/70 leading-snug line-clamp-1 italic">
+                &ldquo;{listing.topComment.content}&rdquo;
+              </p>
+              <p className="text-[10px] text-white/40 mt-0.5">
+                — {listing.topComment.name}
+                {commentCount > 1 && (
+                  <span className="ml-1.5 text-[#E8A87C]/70 font-medium not-italic">
+                    +{commentCount - 1} more
+                  </span>
+                )}
+              </p>
+            </div>
+          )}
+
+          {!listing.topComment && (
+            <p className="mt-2 text-[11px] text-white/30 group-hover:text-[#E8A87C]/50 transition-colors pt-2 border-t border-white/10">
+              Be the first to drop a take →
+            </p>
+          )}
+        </div>
       </div>
     </Link>
   );

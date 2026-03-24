@@ -41,7 +41,7 @@ export default function CommentsFeed({ comments }: { comments: CommentFeedItem[]
   if (comments.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {comments.map((comment) => {
         const initials = comment.name
           .split(" ")
@@ -62,7 +62,7 @@ export default function CommentsFeed({ comments }: { comments: CommentFeedItem[]
           <Link
             key={comment.id}
             href={`/listing/${comment.listing.id}`}
-            className="group flex gap-3 p-3 rounded-2xl hover:bg-surface transition-colors"
+            className="group flex gap-3 p-4 rounded-2xl bg-surface border border-divider hover:border-tertiary/40 transition-all duration-200"
           >
             {/* Listing photo thumbnail */}
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-surface shrink-0">

@@ -118,7 +118,7 @@ export default function FAQPage() {
             return (
               <div
                 key={index}
-                className={`bg-white border rounded-xl transition-all duration-200 ${
+                className={`bg-surface border rounded-xl transition-all duration-200 ${
                   isOpen
                     ? "border-social/20 shadow-glow"
                     : "border-border hover:border-border/80"

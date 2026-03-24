@@ -2,54 +2,34 @@ import Link from "next/link";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-divider mt-16">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="col-span-2 sm:col-span-1">
-            <p className="text-lg font-bold text-ink tracking-tight">
+    <footer className="border-t border-divider mt-16 bg-bg">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-8">
+          {/* Left: Brand + tagline */}
+          <div className="flex items-center gap-3 shrink-0">
+            <p className="text-sm font-bold text-ink tracking-tight">
               gwak <span className="text-secondary">gwak</span>
             </p>
-            <p className="text-xs text-tertiary mt-2 leading-relaxed">
-              Honest opinions on every listing. From people with nothing to sell.
+            <span className="hidden sm:block text-divider">·</span>
+            <p className="hidden sm:block text-xs text-tertiary">
+              Honest opinions on every listing.
             </p>
           </div>
 
-          {/* Explore */}
-          <div>
-            <p className="text-xs font-semibold text-ink uppercase tracking-wider mb-3">Explore</p>
-            <div className="flex flex-col gap-2">
-              <Link href="/" className="text-sm text-secondary hover:text-ink transition-colors">Browse</Link>
-              <Link href="/?sort=comments" className="text-sm text-secondary hover:text-ink transition-colors">Trending</Link>
-              <Link href="/saved" className="text-sm text-secondary hover:text-ink transition-colors">Saved</Link>
-            </div>
-          </div>
+          {/* Center: Nav links inline */}
+          <nav className="flex items-center gap-5 sm:gap-6">
+            <Link href="/" className="text-xs text-tertiary hover:text-ink transition-colors">Browse</Link>
+            <Link href="/?sort=comments" className="text-xs text-tertiary hover:text-ink transition-colors">Trending</Link>
+            <Link href="/saved" className="text-xs text-tertiary hover:text-ink transition-colors">Saved</Link>
+            <Link href="/about" className="text-xs text-tertiary hover:text-ink transition-colors">About</Link>
+            <Link href="/privacy" className="text-xs text-tertiary hover:text-ink transition-colors">Privacy</Link>
+            <Link href="/terms" className="text-xs text-tertiary hover:text-ink transition-colors">Terms</Link>
+          </nav>
 
-          {/* Company */}
-          <div>
-            <p className="text-xs font-semibold text-ink uppercase tracking-wider mb-3">Company</p>
-            <div className="flex flex-col gap-2">
-              <Link href="/about" className="text-sm text-secondary hover:text-ink transition-colors">About</Link>
-              <Link href="/contact" className="text-sm text-secondary hover:text-ink transition-colors">Contact</Link>
-              <Link href="/careers" className="text-sm text-secondary hover:text-ink transition-colors">Careers</Link>
-            </div>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <p className="text-xs font-semibold text-ink uppercase tracking-wider mb-3">Legal</p>
-            <div className="flex flex-col gap-2">
-              <Link href="/privacy" className="text-sm text-secondary hover:text-ink transition-colors">Privacy</Link>
-              <Link href="/terms" className="text-sm text-secondary hover:text-ink transition-colors">Terms</Link>
-              <Link href="/faq" className="text-sm text-secondary hover:text-ink transition-colors">FAQ</Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="mt-8 pt-6 border-t border-divider flex items-center justify-between flex-wrap gap-2">
-          <p className="text-xs text-tertiary">&copy; 2026 gwak gwak. All rights reserved.</p>
-          <p className="text-xs text-tertiary">Get inside.</p>
+          {/* Right: Copyright */}
+          <p className="text-xs text-tertiary shrink-0">
+            &copy; 2026 gwak gwak
+          </p>
         </div>
       </div>
     </footer>

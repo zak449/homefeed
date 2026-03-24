@@ -136,7 +136,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       {/* Status banner */}
       {listing.status === "off_market" && (
-        <div className="bg-surface rounded-card px-4 py-3 mb-5">
+        <div className="bg-surface border border-divider rounded-card px-4 py-3 mb-5">
           <p className="text-body text-ink font-medium">
             This property is not currently on the market
           </p>
@@ -147,7 +147,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </div>
       )}
       {listing.status === "sold" && (
-        <div className="bg-surface rounded-card px-4 py-3 mb-5">
+        <div className="bg-surface border border-divider rounded-card px-4 py-3 mb-5">
           <p className="text-body text-ink font-medium">This listing has been sold</p>
           <p className="text-caption text-secondary mt-0.5">
             Comments are locked.{commentCount > 0 ? ` ${commentCount} comments preserved below.` : ""}
@@ -218,7 +218,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       </div>
 
       {/* Email capture */}
-      <div className="mb-8 bg-highlight rounded-card p-5">
+      <div className="mb-8 bg-highlight border border-divider rounded-card p-5">
         <p className="text-title text-ink mb-1">
           Want to know when people react to this listing?
         </p>

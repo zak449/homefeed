@@ -235,13 +235,13 @@ export default function SearchBar() {
     }
   }, [type, propertyType, minPrice, maxPrice, minBeds, minBaths, minSqft, maxSqft, router]);
 
-  const selectClass = "w-full rounded-button bg-surface px-3 py-2 text-body text-ink focus:outline-none focus:shadow-soft transition-shadow";
+  const selectClass = "w-full rounded-button bg-bg border border-divider px-3 py-2 text-body text-ink focus:outline-none focus:border-tertiary/60 transition-colors";
 
   return (
     <form onSubmit={handleSubmit}>
       {/* Main search input */}
-      <div className="relative">
-        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-tertiary" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div className="relative search-input-wrapper">
+        <svg className="search-icon absolute left-4 top-1/2 -translate-y-1/2 text-tertiary transition-colors duration-200" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" />
         </svg>
@@ -251,16 +251,23 @@ export default function SearchBar() {
           value={city}
           onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); setGeoResolved(false); }}
           onFocus={() => setShowSuggestions(true)}
-          placeholder={locating ? "Finding your location..." : "Search any address, city, or zip..."}
-          className="w-full rounded-full bg-surface pl-11 pr-4 py-3 text-body text-ink placeholder:text-tertiary focus:outline-none focus:shadow-soft transition-shadow"
+          placeholder={locating ? "Finding your location..." : "Drop an address, neighborhood, or zip..."}
+          className="w-full rounded-full bg-surface pl-11 pr-16 py-3 text-body text-ink placeholder:text-tertiary focus:outline-none transition-all duration-200"
+          style={{ borderWidth: 0 }}
           autoComplete="off"
         />
+        {/* ⌘K shortcut hint — hidden when focused/has value */}
+        {!city && (
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-medium text-tertiary/50 pointer-events-none select-none hidden sm:block">
+            ⌘K
+          </span>
+        )}
 
         {/* Dropdown suggestions */}
         {showSuggestions && (
           <div
             ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white rounded-card shadow-hover z-50 max-h-[400px] overflow-y-auto animate-fade-in"
+            className="absolute top-full left-0 right-0 mt-2 bg-surface border border-divider rounded-card shadow-hover z-50 max-h-[400px] overflow-y-auto animate-fade-in"
           >
             {/* Current Location */}
             <button
@@ -425,7 +432,7 @@ export default function SearchBar() {
 
       {/* Expandable filters */}
       {showFilters && (
-        <div className="mt-3 p-4 bg-surface rounded-card animate-fade-in">
+        <div className="mt-3 p-4 bg-surface border border-divider rounded-card animate-fade-in">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div>
               <label className="block text-caption text-secondary mb-1">Home Type</label>

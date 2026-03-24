@@ -129,7 +129,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, name: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
                     placeholder="Your name"
                   />
                 </div>
@@ -150,7 +150,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, email: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
                     placeholder="you@example.com"
                   />
                 </div>
@@ -170,7 +170,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, subject: e.target.value })
                     }
-                    className={`w-full px-4 py-2.5 border border-border rounded-lg text-[15px] bg-white focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors ${
+                    className={`w-full px-4 py-2.5 border border-border rounded-lg text-[15px] bg-surface focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors ${
                       form.subject ? "text-ink" : "text-muted/50"
                     }`}
                   >
@@ -201,7 +201,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, message: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors resize-none"
+                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors resize-none"
                     placeholder="Tell us what's on your mind..."
                   />
                 </div>
@@ -270,7 +270,7 @@ export default function ContactPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
                     <svg
                       width="14"
                       height="14"
@@ -288,7 +288,7 @@ export default function ContactPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
                     <svg
                       width="14"
                       height="14"
@@ -312,7 +312,7 @@ export default function ContactPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-white border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
                     <svg
                       width="14"
                       height="14"

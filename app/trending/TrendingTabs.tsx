@@ -38,7 +38,7 @@ export default function TrendingTabs({ tabs }: { tabs: Tab[] }) {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 text-[13px] font-semibold py-2.5 px-3 rounded-lg transition-all duration-200 ${
               activeTab === tab.id
-                ? "bg-white text-ink shadow-card"
+                ? "bg-surface text-ink shadow-card border border-divider"
                 : "text-muted hover:text-ink"
             }`}
           >
@@ -77,8 +77,8 @@ export default function TrendingTabs({ tabs }: { tabs: Tab[] }) {
               <Link
                 key={listing.id}
                 href={`/listing/${listing.id}`}
-                className={`block bg-white border rounded-xl overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group ${
-                  isTop3 ? "border-social/20" : "border-border"
+                className={`block bg-surface border rounded-xl overflow-hidden hover:shadow-card-hover hover:border-tertiary/40 transition-all duration-200 group ${
+                  isTop3 ? "border-hot/30" : "border-divider"
                 }`}
               >
                 <div className="flex gap-4 p-4">

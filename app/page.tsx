@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
@@ -315,19 +316,75 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== HERO — only on default landing ====== */}
       {isDefaultLanding && (
-        <div className="mb-8 max-w-xl">
-          <h1 className="text-3xl sm:text-4xl font-bold text-ink tracking-tight leading-[1.15]">
-            get inside.<br />
-            <span className="text-secondary">real talk on every listing.</span>
-          </h1>
-          <p className="text-sm text-secondary mt-3 leading-relaxed">
-            No agents. No spin. Just honest opinions from real people who know the neighborhood — insiders with nothing to sell.
-            {commentCount > 0 && (
-              <span className="text-tertiary">
-                {" "}· {commentCount.toLocaleString()} insider takes
-              </span>
-            )}
-          </p>
+        <div className="mb-10">
+          <div className="relative overflow-hidden rounded-2xl bg-surface border border-divider px-6 sm:px-10 py-12 sm:py-20 mb-8 min-h-[480px] flex flex-col justify-center">
+            {/* Hero lifestyle image */}
+            <Image
+              src="/images/hero-exterior-gwagon.png"
+              alt="Luxury home"
+              fill
+              priority
+              className="absolute inset-0 object-cover opacity-40"
+              sizes="100vw"
+            />
+            {/* Dark gradient overlay — preserves readability over bg image */}
+            <div className="absolute inset-0 bg-gradient-to-br from-bg via-bg/80 to-surface/50 pointer-events-none" />
+            {/* Accent glow — animated shimmer */}
+            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-hot/10 blur-3xl pointer-events-none amber-shimmer" />
+            <div className="absolute -bottom-8 -left-8 w-56 h-56 rounded-full bg-hot/5 blur-3xl pointer-events-none glow-pulse" />
+
+            <div className="relative">
+              {/* Byline — NYT kicker style */}
+              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-tertiary mb-4 flex items-center gap-2">
+                <span className="inline-block w-1 h-1 rounded-full bg-hot/60" />
+                your favorite local real estate
+                <span className="inline-block w-1 h-1 rounded-full bg-tertiary/40" />
+                Est. 2024
+              </p>
+
+              <h1 className="font-display text-4xl sm:text-6xl text-ink mb-5">
+                get inside.<br />
+                <span className="text-secondary font-normal" style={{ fontWeight: 300, letterSpacing: "-0.02em" }}>real talk on every listing.</span>
+              </h1>
+
+              <p className="text-secondary leading-relaxed max-w-lg mb-8">
+                No agents. No spin. Just honest opinions from real people who know the neighborhood — insiders with nothing to sell.
+              </p>
+
+              {/* Hot takes examples */}
+              <div className="space-y-2 mb-8 max-w-xl">
+                {[
+                  { take: "2847 Micheltorena — overpriced by $200K. Been watching this sit for 90 days.", author: "local_insider_la" },
+                  { take: "That Silver Lake duplex asking $1.8M? Tenant has 4 years left on lease. Nobody mentions that.", author: "renter_rights_la" },
+                  { take: "The flood zone disclosure is buried on page 14. Read before you offer.", author: "former_agent_310" },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3 pl-3 border-l-2 border-hot/40">
+                    <p className="text-[13px] text-secondary leading-snug">
+                      🔥 <span className="text-ink/80 italic">&lsquo;{item.take}&rsquo;</span>{" "}
+                      <span className="text-tertiary not-italic">— {item.author}</span>
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {(commentCount > 0 || listingCount > 0) && (
+                <div className="flex items-center gap-6 pt-6 border-t border-divider">
+                  {listingCount > 0 && (
+                    <div>
+                      <p className="text-2xl font-bold text-ink tracking-tight">{listingCount.toLocaleString()}</p>
+                      <p className="text-[11px] text-tertiary uppercase tracking-wider mt-0.5">Active listings</p>
+                    </div>
+                  )}
+                  {commentCount > 0 && (
+                    <div>
+                      <p className="text-2xl font-bold text-ink tracking-tight">{commentCount.toLocaleString()}</p>
+                      <p className="text-[11px] text-tertiary uppercase tracking-wider mt-0.5">Insider takes</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
@@ -340,9 +397,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== WHAT PEOPLE ARE SAYING — landing page only ====== */}
       {isDefaultLanding && commentsFeedData.length > 0 && (
-        <div className="mb-10">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-ink">🔥 What insiders are saying</h2>
+        <div className="mb-12">
+          <div className="flex items-end justify-between mb-5">
+            <div>
+              <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-tertiary mb-1">Live takes</p>
+              <h2 className="text-xl font-bold text-ink tracking-tight">What insiders are saying</h2>
+            </div>
             <a href="/?sort=comments" className="text-sm text-secondary hover:text-ink transition-colors">
               See all →
             </a>
@@ -388,8 +448,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     href={`/?${params.toString()}`}
                     className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                       isActive
-                        ? "bg-ink text-white font-medium"
-                        : "text-secondary hover:bg-surface"
+                        ? "bg-ink text-bg font-medium"
+                        : "text-secondary hover:bg-surface hover:text-ink"
                     }`}
                   >
                     {s.label}
@@ -403,8 +463,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== LISTINGS GRID ====== */}
       {isDefaultLanding && sortedListings.length > 0 && (
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-ink">Latest listings</h2>
+        <div className="flex items-end justify-between mb-5">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-tertiary mb-1">Just listed</p>
+            <h2 className="text-xl font-bold text-ink tracking-tight">Latest listings</h2>
+          </div>
         </div>
       )}
 
@@ -418,10 +481,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             Try a different search or check out what&apos;s trending.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
-            <a href="/" className="px-4 py-2 rounded-full bg-ink text-white text-sm font-medium hover:bg-secondary transition-colors">
+            <a href="/" className="px-4 py-2 rounded-full bg-ink text-bg text-sm font-medium hover:opacity-90 transition-opacity">
               Browse all
             </a>
-            <a href="/?sort=comments" className="px-4 py-2 rounded-full border border-divider text-sm text-secondary hover:text-ink transition-colors">
+            <a href="/?sort=comments" className="px-4 py-2 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">
               See trending
             </a>
           </div>

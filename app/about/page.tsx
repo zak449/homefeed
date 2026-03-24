@@ -59,7 +59,7 @@ export default async function AboutPage() {
 
       {/* The Problem — storytelling section */}
       <section className="mb-16">
-        <div className="relative bg-white border border-border rounded-2xl p-6 sm:p-8 overflow-hidden">
+        <div className="relative bg-surface border border-border rounded-2xl p-6 sm:p-8 overflow-hidden">
           <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-social to-social/20 rounded-l-2xl" />
           <h2 className="font-display text-xl font-bold text-ink tracking-tight mb-4">
             Why we built this
@@ -160,7 +160,7 @@ export default async function AboutPage() {
           ].map((item) => (
             <div
               key={item.step}
-              className="bg-white border border-border rounded-xl p-5 text-center hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+              className="bg-surface border border-border rounded-xl p-5 text-center hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-social-light flex items-center justify-center">
                 {item.icon}
@@ -228,7 +228,7 @@ export default async function AboutPage() {
           ].map((value) => (
             <div
               key={value.letter}
-              className="bg-white border border-border rounded-xl p-5 flex gap-4 items-start"
+              className="bg-surface border border-border rounded-xl p-5 flex gap-4 items-start"
             >
               <div className="shrink-0 w-10 h-10 rounded-full bg-social-light flex items-center justify-center text-social font-bold text-sm">
                 {value.letter}
@@ -251,7 +251,7 @@ export default async function AboutPage() {
         <h2 className="font-display text-xl font-bold text-ink tracking-tight mb-6">
           The Team
         </h2>
-        <div className="bg-white border border-border rounded-2xl p-6 sm:p-8">
+        <div className="bg-surface border border-border rounded-2xl p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
             <div className="shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br from-social to-social/70 flex items-center justify-center">
               <span className="text-white font-display text-2xl font-bold">
@@ -297,7 +297,7 @@ export default async function AboutPage() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-white text-ink text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-white/90 transition-colors"
+          className="inline-flex items-center gap-2 bg-surface text-ink text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-surface/90 transition-colors"
         >
           Start browsing
           <svg

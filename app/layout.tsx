@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#0A0A0A",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -37,15 +37,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <meta name="theme-color" content="#0A0A0A" />
       </head>
-      <body className="min-h-screen flex flex-col bg-white pb-14 sm:pb-0">
+      <body className="min-h-screen flex flex-col bg-bg pb-14 sm:pb-0">
         {/* Top nav */}
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-divider">
+        <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-divider">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
             {/* Logo */}
             <a href="/" className="shrink-0">
               <span className="text-xl font-bold text-ink tracking-tight">
-                gwak<span className="text-secondary">gwak</span>
+                gwak<span className="text-secondary"> gwak</span>
               </span>
             </a>
 
@@ -61,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </Suspense>
 
             {/* Mobile: show tagline instead of hamburger */}
-            <span className="sm:hidden text-[11px] text-tertiary tracking-wide uppercase">
+            <span className="sm:hidden text-[11px] text-tertiary tracking-wide uppercase letter-spacing-widest">
               get inside.
             </span>
           </div>

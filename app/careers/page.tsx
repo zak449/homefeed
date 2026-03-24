@@ -129,7 +129,7 @@ export default function CareersPage() {
           {values.map((value) => (
             <div
               key={value.title}
-              className="bg-white border border-border rounded-xl p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+              className="bg-surface border border-border rounded-xl p-5 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
             >
               <div className="w-10 h-10 rounded-xl bg-social-light flex items-center justify-center mb-3">
                 {value.icon}
@@ -154,7 +154,7 @@ export default function CareersPage() {
           {perks.map((perk) => (
             <div
               key={perk.title}
-              className="bg-white border border-border rounded-xl p-4 flex gap-3 items-start"
+              className="bg-surface border border-border rounded-xl p-4 flex gap-3 items-start"
             >
               <div className="shrink-0 w-8 h-8 rounded-lg bg-social-light flex items-center justify-center">
                 <svg
@@ -188,7 +188,7 @@ export default function CareersPage() {
         <h2 className="font-display text-xl font-bold text-ink tracking-tight mb-4">
           Open Positions
         </h2>
-        <div className="bg-white border border-border rounded-xl p-6 sm:p-8 text-center">
+        <div className="bg-surface border border-border rounded-xl p-6 sm:p-8 text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-social-light flex items-center justify-center">
             <svg
               width="24"
@@ -232,7 +232,7 @@ export default function CareersPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-white border border-border rounded-xl p-6 sm:p-8 text-center">
+      <section className="bg-surface border border-border rounded-xl p-6 sm:p-8 text-center">
         <p className="font-display text-xl font-bold text-ink tracking-tight mb-2">
           Can&rsquo;t wait for a role?
         </p>
