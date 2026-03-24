@@ -17,6 +17,7 @@ export default function MobileNav() {
       href: "/",
       label: "Browse",
       active: isHome,
+      accent: false,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -28,6 +29,7 @@ export default function MobileNav() {
       href: "/?sort=comments",
       label: "Trending",
       active: isTrending,
+      accent: false,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill={active ? "currentColor" : "none"} />
@@ -36,24 +38,25 @@ export default function MobileNav() {
       ),
     },
     {
-      href: "/saved",
-      label: "Saved",
-      active: isSaved,
-      icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
-          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      href: "#comment-form",
+      label: "+Take",
+      active: false,
+      accent: true,
+      icon: (_active: boolean) => (
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       ),
     },
     {
-      href: "#comment-form",
-      label: "+Take",
-      active: false,
-      icon: (_active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-          <circle cx="12" cy="12" r="9" />
-          <line x1="12" y1="8" x2="12" y2="16" />
-          <line x1="8" y1="12" x2="16" y2="12" />
+      href: "/saved",
+      label: "Saved",
+      active: isSaved,
+      accent: false,
+      icon: (active: boolean) => (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
         </svg>
       ),
     },
@@ -69,21 +72,40 @@ export default function MobileNav() {
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
           {tabs.map((tab) => (
             <Link
-              key={tab.href}
+              key={tab.href + tab.label}
               href={tab.href}
-              className={`relative flex flex-col items-center gap-1 px-3 py-1.5 transition-colors rounded-xl ${
-                tab.active ? "text-[#E8A87C]" : "text-tertiary hover:text-secondary"
+              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors rounded-xl ${
+                tab.accent
+                  ? ""
+                  : tab.active
+                    ? "text-[#E8A87C]"
+                    : "text-tertiary hover:text-secondary"
               }`}
             >
               {/* Active amber dot indicator above icon */}
-              {tab.active && (
+              {tab.active && !tab.accent && (
                 <span
                   className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
                   aria-hidden="true"
                 />
               )}
-              {tab.icon(tab.active)}
-              <span className={`text-[10px] font-medium ${tab.active ? "text-[#E8A87C]" : "text-tertiary"}`}>
+
+              {/* Amber accent button for +Take */}
+              {tab.accent ? (
+                <span className="flex items-center justify-center w-11 h-11 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
+                  {tab.icon(false)}
+                </span>
+              ) : (
+                tab.icon(tab.active)
+              )}
+
+              <span className={`text-[10px] font-medium ${
+                tab.accent
+                  ? "text-amber font-bold"
+                  : tab.active
+                    ? "text-[#E8A87C]"
+                    : "text-tertiary"
+              }`}>
                 {tab.label}
               </span>
             </Link>

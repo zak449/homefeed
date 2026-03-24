@@ -57,7 +57,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       className="group block rounded-2xl overflow-hidden fade-up transition-all duration-300 hover:scale-[1.015] hover:shadow-glow-amber hover:border-[rgba(232,168,124,0.3)] border border-transparent"
       style={{ willChange: "transform" }}
     >
-      {/* Full-bleed image — the whole card IS the image */}
+      {/* Full-bleed image — photo dominates at ~65% of card */}
       <div className="relative aspect-[4/3] overflow-hidden bg-surface">
         {photo ? (
           <FallbackImage
@@ -76,10 +76,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           />
         )}
 
-        {/* Gradient overlay — content floats over image at bottom */}
+        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
 
-        {/* TOP ROW — status badge (left) + specs pill (center-right) */}
+        {/* TOP ROW — status badge + specs pill */}
         <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
           {/* Status badge */}
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md ${
@@ -100,16 +100,36 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           )}
         </div>
 
-        {/* HOT TAKE badge — bottom right, only when comments exist */}
+        {/* Community buzz badge — prominent when active */}
         {commentCount > 0 && (
           <div className="absolute bottom-[72px] right-3">
-            <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full backdrop-blur-md ${
+            <span className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md ${
               commentCount >= 5
-                ? "bg-black/80 text-[#E8A87C] border border-[rgba(232,168,124,0.3)]"
-                : "bg-black/60 text-white border border-white/10"
+                ? "bg-amber/90 text-white shadow-lg shadow-amber/20"
+                : commentCount >= 3
+                  ? "bg-black/80 text-[#E8A87C] border border-[rgba(232,168,124,0.3)]"
+                  : "bg-black/60 text-white border border-white/10"
             }`}>
-              🔥 {commentCount} {commentCount === 1 ? "take" : "takes"}
+              {commentCount >= 5 ? (
+                <>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  </span>
+                  {commentCount} people talking
+                </>
+              ) : (
+                <>
+                  {commentCount} {commentCount === 1 ? "take" : "takes"}
+                </>
+              )}
             </span>
+            {/* Verified badge for 3+ comments */}
+            {commentCount >= 3 && (
+              <span className="block mt-1 text-[9px] text-center text-white/50 font-medium">
+                Verified neighbors
+              </span>
+            )}
           </div>
         )}
 
@@ -121,7 +141,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
               <p className="text-[1.15rem] font-bold tracking-tight text-[#E8A87C] leading-none mb-1">
                 {price}
               </p>
-              {/* Address — smaller white */}
+              {/* Address */}
               <p className="text-[13px] font-medium text-white/90 truncate leading-tight">
                 {listing.address}
               </p>
@@ -135,7 +155,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             )}
           </div>
 
-          {/* Top comment preview — shown at bottom below address */}
+          {/* Top comment preview */}
           {listing.topComment && (
             <div className="mt-2 pt-2 border-t border-white/10">
               <p className="text-[12px] text-white/70 leading-snug line-clamp-1 italic">
@@ -153,8 +173,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           )}
 
           {!listing.topComment && (
-            <p className="mt-2 text-[11px] text-white/30 group-hover:text-[#E8A87C]/50 transition-colors pt-2 border-t border-white/10">
-              Be the first to drop a take →
+            <p className="mt-2 text-[11px] text-white/30 group-hover:text-[#E8A87C]/60 transition-colors pt-2 border-t border-white/10">
+              Be the first to speak up &rarr;
             </p>
           )}
         </div>

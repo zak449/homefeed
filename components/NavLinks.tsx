@@ -11,27 +11,38 @@ export default function NavLinks() {
   const isExplore = pathname === "/" && currentSort !== "comments" && !isSaved;
   const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending";
 
-  const links = [
-    { href: "/", label: "Explore", active: isExplore },
-    { href: "/?sort=comments", label: "Trending", active: isTrending },
-    { href: "/saved", label: "Saved", active: isSaved },
-  ];
-
   return (
     <nav className="hidden sm:flex items-center gap-1">
-      {links.map((link) => (
-        <Link
-          key={link.href}
-          href={link.href}
-          className={`px-4 py-1.5 rounded-full text-sm transition-all ${
-            link.active
-              ? "bg-ink text-white font-medium"
-              : "text-secondary hover:text-ink hover:bg-surface"
-          }`}
-        >
-          {link.label}
-        </Link>
-      ))}
+      <Link
+        href="/"
+        className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+          isExplore
+            ? "bg-ink text-white font-medium"
+            : "text-secondary hover:text-ink hover:bg-surface"
+        }`}
+      >
+        Your neighborhood
+      </Link>
+      <Link
+        href="/?sort=comments"
+        className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+          isTrending
+            ? "bg-ink text-white font-medium"
+            : "text-secondary hover:text-ink hover:bg-surface"
+        }`}
+      >
+        Trending
+      </Link>
+      <Link
+        href="/?sort=comments"
+        className="ml-1 p-2 rounded-full text-secondary hover:text-ink hover:bg-surface transition-all"
+        aria-label="Search"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+      </Link>
     </nav>
   );
 }

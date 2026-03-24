@@ -11,6 +11,9 @@ import FallbackImage from "@/components/FallbackImage";
 import MortgageCalculator from "@/components/MortgageCalculator";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 import MapPreview from "@/components/MapPreview";
+import AIReimagineTool from "@/components/AIReimagineTool";
+import DecisionComparison from "@/components/DecisionComparison";
+import NeighborQA from "@/components/NeighborQA";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -62,10 +65,16 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     }
   })();
 
-  const [listing, commentCount, reactionCount] = await Promise.all([
+  const [listing, commentCount, reactionCount, topComments] = await Promise.all([
     prisma.listing.findUnique({ where: { id } }),
     prisma.comment.count({ where: { listingId: id } }),
     prisma.reaction.count({ where: { comment: { listingId: id } } }),
+    prisma.comment.findMany({
+      where: { listingId: id },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { name: true, content: true },
+    }),
   ]);
   if (!listing) notFound();
 
@@ -226,6 +235,48 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           Get notified when new comments drop.
         </p>
         <EmailCapture variant="inline" source={`listing-${listing.id}`} />
+      </div>
+
+      {/* ── AI TOOLS — integrated into every listing ── */}
+
+      {/* Decision Comparison: What the listing says vs what the community says */}
+      <div className="mb-8">
+        <h2 className="text-title text-ink mb-3 flex items-center gap-2">
+          ⚖️ The real picture
+        </h2>
+        <DecisionComparison
+          listing={{
+            description: listing.description ?? undefined,
+            price: listing.price,
+            address: listing.address,
+          }}
+          commentCount={commentCount}
+          topComments={topComments}
+        />
+      </div>
+
+      {/* AI Reimagine — see the property your way */}
+      {listing.photos.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-title text-ink mb-3 flex items-center gap-2">
+            🎨 Reimagine this property
+          </h2>
+          <p className="text-caption text-secondary mb-3">
+            See what this place could look like with a different style. AI-powered visualization.
+          </p>
+          <AIReimagineTool photos={listing.photos} address={listing.address} />
+        </div>
+      )}
+
+      {/* Neighbor Q&A — ask the neighborhood */}
+      <div className="mb-8">
+        <h2 className="text-title text-ink mb-3 flex items-center gap-2">
+          🏘️ Ask the neighborhood
+        </h2>
+        <p className="text-caption text-secondary mb-3">
+          Have a question about this block? Ask verified locals who actually live here.
+        </p>
+        <NeighborQA zipCode={listing.zip} listingId={listing.id} />
       </div>
 
       {/* Description */}

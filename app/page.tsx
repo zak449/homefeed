@@ -314,89 +314,160 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         <GeoProvider />
       </Suspense>
 
-      {/* ====== HERO — only on default landing ====== */}
+      {/* ====== THE WORLD — you land and you're IN IT ====== */}
       {isDefaultLanding && (
-        <div className="mb-12">
-          {/* Clean, elegant hero — no background image, community-first */}
-          <div className="pt-4 sm:pt-8 pb-10 mb-8">
-            <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-tertiary mb-6">
-              real estate, real opinions
-            </p>
+        <>
+          {/* ── HERO — dark, bold, immediate ── */}
+          <div className="bg-ink rounded-2xl p-6 sm:p-10 mb-6 relative overflow-hidden">
+            {/* Subtle ambient glow */}
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-amber/5 rounded-full blur-3xl pointer-events-none" />
 
-            <h1 className="text-2xl sm:text-3xl font-medium text-ink mb-3 leading-snug tracking-tight">
-              Your neighbors know things<br className="hidden sm:block" />
-              <span className="text-secondary">your realtor won&apos;t tell you.</span>
-            </h1>
+            <div className="relative text-center max-w-xl mx-auto">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight leading-tight">
+                What are people saying about{" "}
+                <span className="text-[#E8A87C]">your neighborhood</span>?
+              </h1>
+              <p className="text-sm sm:text-base text-white/50 mb-6 max-w-md mx-auto">
+                Enter your zip code. See what your neighbors are really saying about the homes around you.
+              </p>
+              <Suspense>
+                <SearchBar />
+              </Suspense>
 
-            <p className="text-sm text-tertiary leading-relaxed max-w-md mb-8">
-              Browse listings. Read what the community actually thinks. Verified locals sharing honest opinions — no spin, no agenda.
-            </p>
-
-            {/* Community proof — warm, not aggressive */}
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-10">
-              {listingCount > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-hot/70" />
-                  <p className="text-xs text-secondary"><span className="text-ink font-medium">{listingCount.toLocaleString()}</span> active listings</p>
-                </div>
-              )}
+              {/* Live activity pulse */}
               {commentCount > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-hot/70" />
-                  <p className="text-xs text-secondary"><span className="text-ink font-medium">{commentCount.toLocaleString()}</span> community takes</p>
+                <div className="flex items-center justify-center gap-2 mt-5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  <span className="text-xs text-white/40">
+                    {commentCount.toLocaleString()} takes across {listingCount.toLocaleString()} listings
+                  </span>
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500/70" />
-                <p className="text-xs text-secondary"><span className="text-ink font-medium">zip-verified</span> neighbors only</p>
+            </div>
+          </div>
+
+          {/* ── LIVE TAKES — the heartbeat, pulls you in ── */}
+          {commentsFeedData.length > 0 && (
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+                  </span>
+                  <h2 className="text-base sm:text-lg font-bold text-ink">Live takes happening now</h2>
+                </div>
+                <a href="/?sort=comments" className="text-xs font-semibold text-amber hover:underline">
+                  See all &rarr;
+                </a>
+              </div>
+              <CommentsFeed comments={commentsFeedData.slice(0, 4)} />
+              <a
+                href="/?sort=comments"
+                className="block mt-4 text-center py-3 bg-ink text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
+              >
+                Read more takes from verified neighbors &rarr;
+              </a>
+            </div>
+          )}
+
+          {/* ── VALUE PROPS — why you stay ── */}
+          <div className="grid sm:grid-cols-2 gap-3 mb-8">
+            {/* Card 1: The pain */}
+            <div className="bg-surface border border-divider rounded-2xl p-6 relative overflow-hidden group hover:border-amber/20 hover:shadow-soft transition-all">
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber/5 rounded-full blur-2xl group-hover:bg-amber/10 transition-colors" />
+              <div className="relative">
+                <div className="text-3xl mb-3">😤</div>
+                <h3 className="text-base font-bold text-ink mb-1.5">Buying blind is over.</h3>
+                <p className="text-sm text-secondary leading-relaxed mb-4">
+                  87% of buyers say they wish they knew more before signing. Your realtor has an agenda. Your neighbors don&apos;t.
+                </p>
+                <a href="/?sort=comments" className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline">
+                  See what people are really saying
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
               </div>
             </div>
+            {/* Card 2: The solution */}
+            <div className="bg-surface border border-divider rounded-2xl p-6 relative overflow-hidden group hover:border-amber/20 hover:shadow-soft transition-all">
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber/5 rounded-full blur-2xl group-hover:bg-amber/10 transition-colors" />
+              <div className="relative">
+                <div className="text-3xl mb-3">🔑</div>
+                <h3 className="text-base font-bold text-ink mb-1.5">Your zip code is your credential.</h3>
+                <p className="text-sm text-secondary leading-relaxed mb-4">
+                  Verify your address. Join your neighborhood community. Drop takes on listings near you. Only real neighbors. No anonymous trolls.
+                </p>
+                <a href="/community/90026" className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline">
+                  See a community in action
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
 
-            {/* Sample takes — softer, conversation-like */}
-            <div className="grid sm:grid-cols-3 gap-3 max-w-3xl">
+          {/* ── FOUNDER STORY — feels like a social post ── */}
+          <div className="border border-divider rounded-2xl p-5 sm:p-6 mb-8 bg-gradient-to-br from-surface to-highlight relative overflow-hidden">
+            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-amber/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-ink text-white text-xs font-bold flex items-center justify-center shrink-0">ZK</div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-bold text-ink">Zachary Kaufman</p>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber/10 text-amber font-semibold">founder</span>
+                  </div>
+                  <p className="text-[11px] text-tertiary">Posted about why gwak gwak exists</p>
+                </div>
+              </div>
+              <p className="text-[14px] text-ink/80 leading-relaxed mb-2">
+                &ldquo;I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.&rdquo;
+              </p>
+              <p className="text-[14px] text-ink font-semibold leading-relaxed">
+                &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
+              </p>
+            </div>
+          </div>
+
+          {/* ── HOW IT WORKS — 3 clear steps ── */}
+          <div className="mb-8">
+            <h2 className="text-base sm:text-lg font-bold text-ink mb-4">How gwak gwak works</h2>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { take: "Flooded twice. Insurance won't cover it anymore.", zip: "90026", vibe: "warning" },
-                { take: "Best block in the neighborhood. Raised 3 kids here.", zip: "90039", vibe: "positive" },
-                { take: "Seller is divorcing. That's why the price dropped $80K.", zip: "90012", vibe: "info" },
-              ].map((item, i) => (
-                <div key={i} className="bg-surface border border-divider rounded-lg p-3.5">
-                  <p className="text-xs text-tertiary mb-1.5 font-medium">
-                    {item.vibe === "warning" ? "⚠️" : item.vibe === "positive" ? "💚" : "💬"}{" "}
-                    verified local · {item.zip}
-                  </p>
-                  <p className="text-[13px] text-ink/90 leading-snug">
-                    &ldquo;{item.take}&rdquo;
-                  </p>
+                { emoji: "🏠", title: "Browse listings", desc: "Search any neighborhood", color: "bg-blue-50 border-blue-100" },
+                { emoji: "💬", title: "Read the real talk", desc: "Comments from verified neighbors", color: "bg-amber-50 border-amber-100" },
+                { emoji: "🗣️", title: "Drop your take", desc: "Verify your zip. Be heard.", color: "bg-green-50 border-green-100" },
+              ].map((step, i) => (
+                <div key={i} className={`${step.color} border rounded-2xl p-4 sm:p-5 text-center transition-all hover:shadow-soft`}>
+                  <div className="text-3xl sm:text-4xl mb-2">{step.emoji}</div>
+                  <p className="text-xs sm:text-sm font-bold text-ink mb-0.5">{step.title}</p>
+                  <p className="text-[10px] sm:text-xs text-secondary leading-tight">{step.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="border-t border-divider" />
-        </div>
-      )}
-
-      {/* ====== SEARCH ====== */}
-      <div className="mb-8">
-        <Suspense>
-          <SearchBar />
-        </Suspense>
-      </div>
-
-      {/* ====== WHAT PEOPLE ARE SAYING — landing page only ====== */}
-      {isDefaultLanding && commentsFeedData.length > 0 && (
-        <div className="mb-12">
-          <div className="flex items-end justify-between mb-5">
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-tertiary mb-1">Live takes</p>
-              <h2 className="text-xl font-bold text-ink tracking-tight">What insiders are saying</h2>
-            </div>
-            <a href="/?sort=comments" className="text-sm text-secondary hover:text-ink transition-colors">
-              See all →
+          {/* ── EXPLORE CTAs — get them moving ── */}
+          <div className="flex items-center gap-3 mb-10">
+            <a href="/?sort=comments" className="flex-1 py-3.5 bg-ink text-white text-sm font-semibold rounded-xl text-center hover:opacity-90 transition-opacity">
+              🔥 See trending listings
+            </a>
+            <a href="/imagine" className="flex-1 py-3.5 bg-surface border border-divider text-sm font-semibold text-ink rounded-xl text-center hover:bg-highlight transition-colors">
+              🤖 AI Imagination
             </a>
           </div>
-          <CommentsFeed comments={commentsFeedData.slice(0, 6)} />
+        </>
+      )}
+
+      {/* ====== SEARCH — when not on landing (filtered views) ====== */}
+      {!isDefaultLanding && (
+        <div className="mb-8">
+          <Suspense>
+            <SearchBar />
+          </Suspense>
         </div>
       )}
 
