@@ -15,7 +15,6 @@ import { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
 import SplitMapLayout from "@/components/SplitMapLayout";
-import VoteButtons from "@/components/VoteButtons";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -570,14 +569,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             <span className="text-[12px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
                           </div>
                         </div>
-                        {/* Upvote/downvote */}
-                        <VoteButtons />
                       </div>
 
                       {/* THE TAKE — big, dominant quote */}
                       <div className="px-5 pb-4">
                         <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-medium">
-                          &ldquo;{comment.content}&rdquo;
+                          {comment.content}
                         </p>
                       </div>
 
@@ -686,7 +683,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                               <span className="text-[11px] text-tertiary">says:</span>
                             </div>
                             <p className="text-[16px] sm:text-[17px] text-ink leading-relaxed font-medium">
-                              &ldquo;{listing.topComment.content}&rdquo;
+                              {listing.topComment.content}
                             </p>
                           </div>
                         ) : (

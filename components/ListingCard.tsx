@@ -191,7 +191,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {listing.topComment ? (
           <div className="mt-3 pt-3 border-t border-divider">
             <p className="text-[13px] text-ink leading-snug line-clamp-2 font-medium">
-              &ldquo;{listing.topComment.content}&rdquo;
+              {listing.topComment.content}
             </p>
             <div className="flex items-center justify-between mt-2">
               <p className="text-[12px] text-secondary">

@@ -283,6 +283,25 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
+        {/* ── RAP SHEET CTA ── */}
+        <Link
+          href={`/rap-sheet/${listing.id}`}
+          className="group mb-6 flex items-center justify-between bg-gradient-to-r from-[#D4763C]/10 to-[#D4763C]/5 border border-[#D4763C]/25 rounded-card px-5 py-3.5 hover:border-[#D4763C]/50 hover:shadow-glow-amber transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-lg">{"\uD83D\uDCCB"}</span>
+            <div>
+              <span className="text-body text-ink font-bold block">View full rap sheet</span>
+              <span className="text-caption text-secondary">
+                {commentCount} take{commentCount !== 1 ? "s" : ""} &middot; Everything the community said
+              </span>
+            </div>
+          </div>
+          <span className="text-[#D4763C] font-semibold text-body group-hover:translate-x-0.5 transition-transform">
+            &rarr;
+          </span>
+        </Link>
+
         {/* ── REIMAGINE — right after price, before conversation ── */}
         {listing.photos.length > 0 && (
           <div className="mb-6 rounded-2xl border border-amber/20 bg-gradient-to-br from-amber/[0.03] to-surface overflow-hidden shadow-soft">

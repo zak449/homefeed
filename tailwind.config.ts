@@ -33,7 +33,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['"Space Grotesk"', '"Inter"', 'system-ui', 'sans-serif'],
-        display: ['"Space Grotesk"', 'system-ui', 'sans-serif'],
+        display: ['"Barlow Condensed"', '"Space Grotesk"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       fontSize: {

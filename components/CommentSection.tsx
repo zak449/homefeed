@@ -3,7 +3,14 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import ShareableComment from "@/components/ShareableComment";
 
-const REACTIONS = ["\u2764\uFE0F", "\uD83D\uDD25", "\uD83D\uDE02", "\uD83D\uDE2E", "\uD83D\uDC80"];
+const REACTIONS = ["\uD83D\uDEA9", "\uD83D\uDCB8", "\uD83D\uDC40", "\uD83C\uDFC6", "\uD83D\uDC80"];
+const REACTION_LABELS: Record<string, string> = {
+  "\uD83D\uDEA9": "Red Flag",
+  "\uD83D\uDCB8": "Overpriced",
+  "\uD83D\uDC40": "Sus",
+  "\uD83C\uDFC6": "Worth it",
+  "\uD83D\uDC80": "Run",
+};
 
 const STYLE_PRESETS: { label: string; filter: string }[] = [
   { label: "Modern", filter: "saturate(1.1) contrast(1.1) brightness(1.05)" },
@@ -928,6 +935,38 @@ function CommentItem({
           {comment.content}
         </p>
 
+        {/* Vibe Meter */}
+        {(() => {
+          const redFlags = comment.reactions["\uD83D\uDEA9"] ?? 0;
+          const fires = (comment.reactions["\uD83C\uDFC6"] ?? 0) + (comment.reactions["\uD83D\uDC40"] ?? 0);
+          const totalVibe = redFlags + fires;
+          const vibePercent = totalVibe > 0 ? (fires / totalVibe) * 100 : 50;
+          return (
+            <div className="mt-2.5 mb-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xs shrink-0">{"\uD83D\uDEA9"}</span>
+                <div className="flex-1 h-1 rounded-full bg-red-200/40 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${vibePercent}%`,
+                      background: `linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #f97316 100%)`,
+                    }}
+                  />
+                </div>
+                <span className="text-xs shrink-0">{"\uD83D\uDD25"}</span>
+              </div>
+              {(redFlags > 0 || fires > 0) && (
+                <p className="text-[11px] text-tertiary mt-1">
+                  {redFlags > 0 ? `${redFlags} red flag${redFlags !== 1 ? "s" : ""}` : ""}
+                  {redFlags > 0 && fires > 0 ? " \u00B7 " : ""}
+                  {fires > 0 ? `${fires} fire${fires !== 1 ? "s" : ""}` : ""}
+                </p>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Reactions + helpful */}
         <div className="flex gap-2 mt-2.5 flex-wrap items-center">
           {/* Helpful thumbs-up */}
@@ -953,14 +992,15 @@ function CommentItem({
                 key={r}
                 onClick={() => canReact && onReact(r)}
                 disabled={!canReact}
-                className={`flex items-center gap-1 text-caption transition-colors ${
+                title={REACTION_LABELS[r] ?? r}
+                className={`flex items-center gap-1 text-base transition-colors ${
                   count > 0
                     ? "text-ink"
                     : "text-tertiary/40 hover:text-tertiary"
                 } ${canReact ? "cursor-pointer" : "cursor-default"}`}
               >
                 <span>{r}</span>
-                {count > 0 && <span>{count}</span>}
+                {count > 0 && <span className="text-caption">{REACTION_LABELS[r]} {count}</span>}
               </button>
             );
           })}
