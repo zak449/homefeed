@@ -372,14 +372,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     return `${Math.floor(seconds / 604800)}w ago`;
   }
 
-  /* ── Category pills ── */
+  /* ── Category pills — each links to a real filtered view ── */
   const categories = [
-    { label: "Trending", emoji: "\uD83D\uDD25", href: "/?sort=comments" },
-    { label: "New Listings", emoji: "\uD83C\uDFE0", href: "/?sort=newest" },
-    { label: "Buyer Warnings", emoji: "\u26A0\uFE0F", href: "/?sort=comments" },
-    { label: "Best Blocks", emoji: "\uD83D\uDC9A", href: "/trending" },
-    { label: "Price Drops", emoji: "\uD83D\uDD11", href: "/?sort=price-low" },
-    { label: "Up & Coming", emoji: "\uD83C\uDFD7\uFE0F", href: "/trending" },
+    { label: "Trending", emoji: "🔥", href: "/?sort=comments" },
+    { label: "New Listings", emoji: "🏠", href: "/?sort=newest" },
+    { label: "Buyer Warnings", emoji: "⚠️", href: "/?sort=comments&type=sale" },
+    { label: "Best Blocks", emoji: "💚", href: "/?sort=price-high" },
+    { label: "Price Drops", emoji: "💰", href: "/?sort=price-low" },
+    { label: "For Rent", emoji: "🔑", href: "/?type=rent&sort=newest" },
   ];
 
   return (
@@ -594,7 +594,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                               <div key={init} className="w-7 h-7 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center border-2 border-surface">{init}</div>
                             ))}
                           </div>
-                          <span className="text-xs text-secondary">24 members active this week</span>
+                          <span className="text-xs text-secondary">{commentCount > 0 ? `${commentCount} takes shared` : "Join the conversation"}</span>
                         </div>
                         <a href="/community/90026" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-white text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
                           Join the conversation &rarr;
@@ -629,14 +629,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
                         </p>
                         <div className="flex items-center gap-3">
-                          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink">
-                            <span className="text-sm">{"\uD83D\uDD25"}</span>
-                            <span className="font-medium">42</span>
-                          </span>
-                          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink">
-                            <span className="text-sm">{"\uD83D\uDCAF"}</span>
-                            <span className="font-medium">18</span>
-                          </span>
+                          <span className="text-xs text-amber font-semibold">Read the full story →</span>
                         </div>
                       </div>
                     </div>
