@@ -64,17 +64,14 @@ export default function GeoProvider({ children }: { children?: ReactNode }) {
     }
   }, []);
 
-  // On mount, check for stored location first, then silently request if none
+  // On mount, only restore previously stored location — never auto-request
+  // The user must explicitly tap "Use Current Location" in the search bar
   useEffect(() => {
     const stored = getStoredLocation();
     if (stored && stored.city) {
       setLocation(stored);
-      return;
     }
-
-    // Request in background — just store it for "Near Me" button
-    requestLocation().catch(() => {});
-  }, [requestLocation]);
+  }, []);
 
   return (
     <GeoContext.Provider value={{ location, loading, requestLocation }}>

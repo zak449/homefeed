@@ -61,8 +61,10 @@ export default function MapView({ listings, selectedId, onSelect, className }: M
       attributionControl: false,
     });
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    // Stamen Toner Lite for a clean, stylish look — or CartoDB Voyager for warm tones
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
       maxZoom: 19,
+      subdomains: "abcd",
     }).addTo(map);
 
     // Compact attribution bottom-right
@@ -134,35 +136,55 @@ export default function MapView({ listings, selectedId, onSelect, className }: M
       }
       .gwak-marker-pill {
         display: inline-block;
-        padding: 4px 10px;
-        border-radius: 9999px;
+        padding: 5px 12px;
+        border-radius: 12px;
         font-size: 12px;
         font-weight: 700;
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        letter-spacing: -0.01em;
         white-space: nowrap;
         background: #1a1a1a;
         color: #fff;
-        border: 2px solid #1a1a1a;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        border: 2px solid rgba(255,255,255,0.1);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.05);
         cursor: pointer;
         transform: translate(-50%, -100%);
-        transition: all 0.15s ease;
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         line-height: 1.2;
+        position: relative;
+      }
+      .gwak-marker-pill::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid #1a1a1a;
       }
       .gwak-marker-pill:hover {
-        background: #333;
-        transform: translate(-50%, -100%) scale(1.1);
+        background: #2a2a2a;
+        border-color: rgba(212,118,60,0.4);
+        transform: translate(-50%, -100%) scale(1.12);
         z-index: 1000 !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 20px rgba(212,118,60,0.15);
       }
       .gwak-marker-selected {
-        background: #f59e0b !important;
-        color: #1a1a1a !important;
-        border-color: #f59e0b !important;
+        background: #D4763C !important;
+        color: #fff !important;
+        border-color: #D4763C !important;
         transform: translate(-50%, -100%) scale(1.15);
         z-index: 999 !important;
-        box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+        box-shadow: 0 4px 16px rgba(212,118,60,0.5), 0 0 24px rgba(212,118,60,0.2);
+      }
+      .gwak-marker-selected::after {
+        border-top-color: #D4763C !important;
       }
       .gwak-marker-selected:hover {
-        background: #fbbf24 !important;
+        background: #E8A87C !important;
         transform: translate(-50%, -100%) scale(1.2);
       }
       .leaflet-container {
