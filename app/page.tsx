@@ -1,13 +1,12 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
 import ListingFeed from "@/components/ListingFeed";
+import FallbackImage from "@/components/FallbackImage";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
-import CommentsFeed, { type CommentFeedItem } from "@/components/CommentsFeed";
-import HotTakeOfTheDay from "@/components/HotTakeOfTheDay";
+import { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
 
@@ -306,256 +305,485 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (lng !== undefined) feedParams.lng = String(lng);
   if (radiusMiles !== 25) feedParams.radius = String(radiusMiles);
 
-  return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+  /* ── Build the interleaved feed items for default landing ── */
+  type FeedItem =
+    | { type: "take"; data: CommentFeedItem }
+    | { type: "listing"; data: (typeof sortedListings)[number] }
+    | { type: "neighborhood"; data?: undefined }
+    | { type: "founder"; data?: undefined }
+    | { type: "how-it-works"; data?: undefined };
 
+  const feedItems: FeedItem[] = [];
+
+  if (isDefaultLanding) {
+    const takes = [...commentsFeedData];
+    const listings_pool = [...sortedListings];
+    // Pattern: take, take, neighborhood, listing, take, founder, listing, listing, how-it-works, then remaining
+    const pattern: FeedItem["type"][] = [
+      "take", "take", "neighborhood", "listing", "take", "founder",
+      "listing", "listing", "how-it-works",
+    ];
+
+    let takeIdx = 0;
+    let listIdx = 0;
+
+    for (const slot of pattern) {
+      if (slot === "take" && takeIdx < takes.length) {
+        feedItems.push({ type: "take", data: takes[takeIdx++] });
+      } else if (slot === "listing" && listIdx < listings_pool.length) {
+        feedItems.push({ type: "listing", data: listings_pool[listIdx++] });
+      } else if (slot === "neighborhood") {
+        feedItems.push({ type: "neighborhood" });
+      } else if (slot === "founder") {
+        feedItems.push({ type: "founder" });
+      } else if (slot === "how-it-works") {
+        feedItems.push({ type: "how-it-works" });
+      }
+    }
+
+    // Append remaining takes and listings interleaved
+    while (takeIdx < takes.length || listIdx < listings_pool.length) {
+      if (takeIdx < takes.length) {
+        feedItems.push({ type: "take", data: takes[takeIdx++] });
+      }
+      if (takeIdx < takes.length) {
+        feedItems.push({ type: "take", data: takes[takeIdx++] });
+      }
+      if (listIdx < listings_pool.length) {
+        feedItems.push({ type: "listing", data: listings_pool[listIdx++] });
+      }
+    }
+  }
+
+  /* ── Helper: format price ── */
+  function fmtPrice(price: number, listingType: string) {
+    return listingType === "rent"
+      ? `$${price.toLocaleString()}/mo`
+      : `$${price.toLocaleString()}`;
+  }
+
+  /* ── Helper: time ago ── */
+  function timeAgo(dateStr: string): string {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return `${Math.floor(seconds / 604800)}w ago`;
+  }
+
+  /* ── Category pills ── */
+  const categories = [
+    { label: "Trending", emoji: "\uD83D\uDD25", href: "/?sort=comments" },
+    { label: "New Listings", emoji: "\uD83C\uDFE0", href: "/?sort=newest" },
+    { label: "Buyer Warnings", emoji: "\u26A0\uFE0F", href: "/?sort=comments" },
+    { label: "Best Blocks", emoji: "\uD83D\uDC9A", href: "/trending" },
+    { label: "Price Drops", emoji: "\uD83D\uDD11", href: "/?sort=price-low" },
+    { label: "Up & Coming", emoji: "\uD83C\uDFD7\uFE0F", href: "/trending" },
+  ];
+
+  return (
+    <div className="min-h-screen bg-bg">
       {/* Geolocation (invisible) */}
       <Suspense>
         <GeoProvider />
       </Suspense>
 
-      {/* ====== THE WORLD — you land and you're IN IT ====== */}
-      {isDefaultLanding && (
-        <>
-          {/* ── HERO — dark, bold, immediate ── */}
-          <div className="bg-ink rounded-2xl p-6 sm:p-10 mb-6 relative overflow-hidden">
-            {/* Subtle ambient glow */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-amber/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-amber/5 rounded-full blur-3xl pointer-events-none" />
+      {/* ====== DEFAULT LANDING: THE FEED ====== */}
+      {isDefaultLanding ? (
+        <div className="max-w-xl mx-auto pb-24">
 
-            <div className="relative text-center max-w-xl mx-auto">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-3 tracking-tight leading-tight">
-                What are people saying about{" "}
-                <span className="text-[#E8A87C]">your neighborhood</span>?
-              </h1>
-              <p className="text-sm sm:text-base text-white/50 mb-6 max-w-md mx-auto">
-                Enter your zip code. See what your neighbors are really saying about the homes around you.
-              </p>
-              <Suspense>
-                <SearchBar />
-              </Suspense>
-
-              {/* Live activity pulse */}
-              {commentCount > 0 && (
-                <div className="flex items-center justify-center gap-2 mt-5">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                  </span>
-                  <span className="text-xs text-white/40">
-                    {commentCount.toLocaleString()} takes across {listingCount.toLocaleString()} listings
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── LIVE TAKES — the heartbeat, pulls you in ── */}
-          {commentsFeedData.length > 0 && (
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2.5">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
-                  </span>
-                  <h2 className="text-base sm:text-lg font-bold text-ink">Live takes happening now</h2>
-                </div>
-                <a href="/?sort=comments" className="text-xs font-semibold text-amber hover:underline">
-                  See all &rarr;
-                </a>
+          {/* ── TIGHT HEADER BAR ── */}
+          <div className="sticky top-0 z-40 bg-bg/95 backdrop-blur-md border-b border-divider">
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg font-extrabold text-ink tracking-tight">gwak gwak</h1>
+                <span className="text-xs text-tertiary font-medium hidden sm:inline">&mdash; real estate, real talk</span>
               </div>
-              <CommentsFeed comments={commentsFeedData.slice(0, 4)} />
               <a
-                href="/?sort=comments"
-                className="block mt-4 text-center py-3 bg-ink text-white rounded-xl text-sm font-semibold hover:opacity-90 transition-opacity"
+                href="/?sort=newest&city="
+                className="w-9 h-9 rounded-full bg-highlight border border-divider flex items-center justify-center hover:bg-surface hover:border-ink/20 transition-all active:scale-95"
+                aria-label="Search"
               >
-                Read more takes from verified neighbors &rarr;
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-ink">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
               </a>
             </div>
-          )}
 
-          {/* ── VALUE PROPS — why you stay ── */}
-          <div className="grid sm:grid-cols-2 gap-3 mb-8">
-            {/* Card 1: The pain */}
-            <div className="bg-surface border border-divider rounded-2xl p-6 relative overflow-hidden group hover:border-amber/20 hover:shadow-soft transition-all">
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber/5 rounded-full blur-2xl group-hover:bg-amber/10 transition-colors" />
-              <div className="relative">
-                <div className="text-3xl mb-3">😤</div>
-                <h3 className="text-base font-bold text-ink mb-1.5">Buying blind is over.</h3>
-                <p className="text-sm text-secondary leading-relaxed mb-4">
-                  87% of buyers say they wish they knew more before signing. Your realtor has an agenda. Your neighbors don&apos;t.
-                </p>
-                <a href="/?sort=comments" className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline">
-                  See what people are really saying
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            {/* ── CATEGORY PILLS ── */}
+            <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-none -mx-0">
+              {categories.map((cat) => (
+                <a
+                  key={cat.label}
+                  href={cat.href}
+                  className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface border border-divider text-sm font-medium text-ink hover:border-amber/40 hover:shadow-soft active:scale-[0.97] transition-all"
+                >
+                  <span className="text-base">{cat.emoji}</span>
+                  <span className="whitespace-nowrap">{cat.label}</span>
                 </a>
-              </div>
-            </div>
-            {/* Card 2: The solution */}
-            <div className="bg-surface border border-divider rounded-2xl p-6 relative overflow-hidden group hover:border-amber/20 hover:shadow-soft transition-all">
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-amber/5 rounded-full blur-2xl group-hover:bg-amber/10 transition-colors" />
-              <div className="relative">
-                <div className="text-3xl mb-3">🔑</div>
-                <h3 className="text-base font-bold text-ink mb-1.5">Your zip code is your credential.</h3>
-                <p className="text-sm text-secondary leading-relaxed mb-4">
-                  Verify your address. Join your neighborhood community. Drop takes on listings near you. Only real neighbors. No anonymous trolls.
-                </p>
-                <a href="/community/90026" className="inline-flex items-center gap-1 text-sm font-semibold text-amber hover:underline">
-                  See a community in action
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* ── FOUNDER STORY — feels like a social post ── */}
-          <div className="border border-divider rounded-2xl p-5 sm:p-6 mb-8 bg-gradient-to-br from-surface to-highlight relative overflow-hidden">
-            <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-amber/5 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-ink text-white text-xs font-bold flex items-center justify-center shrink-0">ZK</div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-ink">Zachary Kaufman</p>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber/10 text-amber font-semibold">founder</span>
-                  </div>
-                  <p className="text-[11px] text-tertiary">Posted about why gwak gwak exists</p>
-                </div>
-              </div>
-              <p className="text-[14px] text-ink/80 leading-relaxed mb-2">
-                &ldquo;I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.&rdquo;
-              </p>
-              <p className="text-[14px] text-ink font-semibold leading-relaxed">
-                &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
-              </p>
-            </div>
-          </div>
-
-          {/* ── HOW IT WORKS — 3 clear steps ── */}
-          <div className="mb-8">
-            <h2 className="text-base sm:text-lg font-bold text-ink mb-4">How gwak gwak works</h2>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              {[
-                { emoji: "🏠", title: "Browse listings", desc: "Search any neighborhood", color: "bg-blue-50 border-blue-100" },
-                { emoji: "💬", title: "Read the real talk", desc: "Comments from verified neighbors", color: "bg-amber-50 border-amber-100" },
-                { emoji: "🗣️", title: "Drop your take", desc: "Verify your zip. Be heard.", color: "bg-green-50 border-green-100" },
-              ].map((step, i) => (
-                <div key={i} className={`${step.color} border rounded-2xl p-4 sm:p-5 text-center transition-all hover:shadow-soft`}>
-                  <div className="text-3xl sm:text-4xl mb-2">{step.emoji}</div>
-                  <p className="text-xs sm:text-sm font-bold text-ink mb-0.5">{step.title}</p>
-                  <p className="text-[10px] sm:text-xs text-secondary leading-tight">{step.desc}</p>
-                </div>
               ))}
             </div>
           </div>
 
-          {/* ── EXPLORE CTAs — get them moving ── */}
-          <div className="flex items-center gap-3 mb-10">
-            <a href="/?sort=comments" className="flex-1 py-3.5 bg-ink text-white text-sm font-semibold rounded-xl text-center hover:opacity-90 transition-opacity">
-              🔥 See trending listings
-            </a>
-            <a href="/imagine" className="flex-1 py-3.5 bg-surface border border-divider text-sm font-semibold text-ink rounded-xl text-center hover:bg-highlight transition-colors">
-              🤖 AI Imagination
-            </a>
-          </div>
-        </>
-      )}
-
-      {/* ====== SEARCH — when not on landing (filtered views) ====== */}
-      {!isDefaultLanding && (
-        <div className="mb-8">
-          <Suspense>
-            <SearchBar />
-          </Suspense>
-        </div>
-      )}
-
-      {/* ====== SORT + FILTER BAR ====== */}
-      {(hasFilters || !isDefaultLanding) && (
-        <div className="mb-6">
-          <div className="flex items-end justify-between gap-4 flex-wrap">
-            <div>
-              {hasFilters && (
-                <p className="text-xs text-tertiary mb-1">
-                  {total} result{total !== 1 ? "s" : ""}
-                  {city && ` in ${city}`}
-                </p>
-              )}
-              <h2 className="text-xl font-semibold text-ink">
-                {city ? city : sort === "comments" ? "Trending" : "Explore"}
-              </h2>
+          {/* ── Live pulse bar ── */}
+          {commentCount > 0 && (
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-highlight/60 border-b border-divider">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              </span>
+              <span className="text-xs text-secondary">
+                {commentCount.toLocaleString()} takes across {listingCount.toLocaleString()} listings &mdash; <span className="text-amber font-semibold">Stop buying blind</span>
+              </span>
             </div>
-            <div className="flex items-center gap-1">
-              {[
-                { key: "newest", label: "New" },
-                { key: "comments", label: "🔥 Trending" },
-                { key: "price-low", label: "$ Low" },
-                { key: "price-high", label: "$ High" },
-              ].map((s) => {
-                const params = new URLSearchParams(
-                  Object.fromEntries(
-                    Object.entries(sp)
-                      .filter(([, v]) => typeof v === "string") as [string, string][]
-                  )
-                );
-                params.set("sort", s.key);
-                params.delete("page");
-                const isActive = sort === s.key;
+          )}
+
+          {/* ── THE FEED ── */}
+          <div className="divide-y divide-divider">
+            {feedItems.map((item, idx) => {
+              /* ── TAKE CARD ── */
+              if (item.type === "take" && item.data) {
+                const comment = item.data as CommentFeedItem;
+                const photo = comment.listing.photos[0];
+                const initials = comment.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
+                const reactionCounts: Record<string, number> = {};
+                for (const r of comment.reactions) {
+                  reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1;
+                }
+                const totalReactions = comment.reactions.length;
+
                 return (
-                  <a
-                    key={s.key}
-                    href={`/?${params.toString()}`}
-                    className={`px-3 py-1.5 rounded-full text-xs transition-all ${
-                      isActive
-                        ? "bg-ink text-bg font-medium"
-                        : "text-secondary hover:bg-surface hover:text-ink"
-                    }`}
-                  >
-                    {s.label}
+                  <a key={`take-${comment.id}`} href={`/listing/${comment.listing.id}`} className="block group">
+                    {/* Big property photo */}
+                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-highlight">
+                      {photo ? (
+                        <FallbackImage
+                          src={photo}
+                          alt={comment.listing.address}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          loading={idx < 3 ? "eager" : "lazy"}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                        </div>
+                      )}
+                      {/* Price + location overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-3 pt-10">
+                        <p className="text-xl font-extrabold text-white leading-none">{fmtPrice(comment.listing.price, comment.listing.listingType)}</p>
+                        <p className="text-sm text-white/80 mt-0.5 truncate">{comment.listing.address}, {comment.listing.city}</p>
+                      </div>
+                      {/* Badge */}
+                      <div className="absolute top-3 left-3">
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10">
+                          {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Comment hero text */}
+                    <div className="px-4 py-4">
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className="w-8 h-8 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-amber">{initials}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-ink">{comment.name}</span>
+                        <span className="text-[11px] text-tertiary">{timeAgo(comment.createdAt)}</span>
+                      </div>
+                      <p className="text-[16px] text-ink leading-relaxed line-clamp-3 mb-3 font-serif italic">
+                        &ldquo;{comment.content}&rdquo;
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {Object.entries(reactionCounts).length > 0 ? (
+                            Object.entries(reactionCounts).map(([emoji, count]) => (
+                              <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink">
+                                <span className="text-sm">{emoji}</span>
+                                <span className="font-medium">{count}</span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-tertiary">Be the first to react</span>
+                          )}
+                        </div>
+                        <span className="text-xs font-semibold text-amber group-hover:underline shrink-0">
+                          {totalReactions > 0 ? `See ${totalReactions} takes` : "Add your take"} &rarr;
+                        </span>
+                      </div>
+                    </div>
                   </a>
                 );
-              })}
+              }
+
+              /* ── LISTING CARD (in feed) ── */
+              if (item.type === "listing" && item.data) {
+                const listing = item.data as (typeof sortedListings)[number];
+                const photo = listing.photos[0];
+                const commentCount_l = listing._count?.comments ?? 0;
+
+                return (
+                  <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group">
+                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-highlight">
+                      {photo ? (
+                        <FallbackImage
+                          src={photo}
+                          alt={listing.address}
+                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
+                          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent px-4 pb-3 pt-10">
+                        <p className="text-xl font-extrabold text-white leading-none">{fmtPrice(listing.price, listing.listingType)}</p>
+                        <p className="text-sm text-white/80 mt-0.5 truncate">{listing.address}, {listing.city}</p>
+                      </div>
+                      <div className="absolute top-3 left-3 flex items-center gap-2">
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white border border-white/10">
+                          {listing.listingType === "rent" ? "Rental" : "For Sale"}
+                        </span>
+                        {listing.status === "active" && (
+                          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-green-500/80 backdrop-blur-sm text-white">
+                            Active
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="px-4 py-4">
+                      <div className="flex items-center gap-3 text-sm text-secondary mb-2">
+                        {listing.bedrooms != null && <span>{listing.bedrooms} bd</span>}
+                        {listing.bathrooms != null && <span>{listing.bathrooms} ba</span>}
+                        {listing.sqft != null && <span>{listing.sqft.toLocaleString()} sqft</span>}
+                        {listing.propertyType && <span className="text-tertiary">{listing.propertyType}</span>}
+                      </div>
+                      {listing.topComment ? (
+                        <p className="text-sm text-ink/80 line-clamp-2 mb-2 italic">
+                          &ldquo;{listing.topComment.content}&rdquo; &mdash; <span className="font-medium not-italic">{listing.topComment.name}</span>
+                        </p>
+                      ) : null}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-tertiary">
+                          {commentCount_l > 0 ? `${commentCount_l} take${commentCount_l !== 1 ? "s" : ""}` : "No takes yet"}
+                        </span>
+                        <span className="text-xs font-semibold text-amber group-hover:underline">
+                          {commentCount_l > 0 ? "Read takes" : "Be the first"} &rarr;
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              }
+
+              /* ── NEIGHBORHOOD SPOTLIGHT CARD ── */
+              if (item.type === "neighborhood") {
+                return (
+                  <div key="neighborhood" className="px-4 py-5">
+                    <div className="rounded-2xl bg-gradient-to-br from-amber/5 via-surface to-highlight border border-amber/15 p-5 relative overflow-hidden">
+                      <div className="absolute -top-8 -right-8 w-28 h-28 bg-amber/10 rounded-full blur-2xl pointer-events-none" />
+                      <div className="relative">
+                        <p className="text-[11px] font-bold tracking-widest uppercase text-amber mb-2">Neighborhood Spotlight</p>
+                        <h3 className="text-lg font-extrabold text-ink mb-1">What&apos;s happening in 90026</h3>
+                        <p className="text-sm text-secondary mb-3">See what verified neighbors are saying about Echo Park, Silver Lake, and surrounding areas.</p>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="flex -space-x-2">
+                            {["ZK", "ML", "JR", "AS"].map((init) => (
+                              <div key={init} className="w-7 h-7 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center border-2 border-surface">{init}</div>
+                            ))}
+                          </div>
+                          <span className="text-xs text-secondary">24 members active this week</span>
+                        </div>
+                        <a href="/community/90026" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-white text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
+                          Join the conversation &rarr;
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              /* ── FOUNDER STORY CARD ── */
+              if (item.type === "founder") {
+                return (
+                  <div key="founder" className="px-4 py-5">
+                    <div className="rounded-2xl border border-divider bg-gradient-to-br from-surface to-highlight p-5 relative overflow-hidden">
+                      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-amber/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="relative">
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-full bg-ink text-white text-xs font-bold flex items-center justify-center shrink-0">ZK</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-bold text-ink">Zachary Kaufman</p>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber/10 text-amber font-semibold">founder</span>
+                            </div>
+                            <p className="text-[11px] text-tertiary">3 weeks ago</p>
+                          </div>
+                        </div>
+                        <p className="text-[15px] text-ink/80 leading-relaxed mb-2">
+                          &ldquo;I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.&rdquo;
+                        </p>
+                        <p className="text-[15px] text-ink font-semibold leading-relaxed mb-3">
+                          &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink">
+                            <span className="text-sm">{"\uD83D\uDD25"}</span>
+                            <span className="font-medium">42</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink">
+                            <span className="text-sm">{"\uD83D\uDCAF"}</span>
+                            <span className="font-medium">18</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              /* ── HOW IT WORKS MINI CARD ── */
+              if (item.type === "how-it-works") {
+                return (
+                  <div key="how-it-works" className="px-4 py-5">
+                    <div className="rounded-2xl border border-divider bg-surface p-5">
+                      <p className="text-[11px] font-bold tracking-widest uppercase text-tertiary mb-3">How it works</p>
+                      <div className="flex items-start gap-4">
+                        {[
+                          { step: "1", emoji: "\uD83C\uDFE0", label: "Browse any neighborhood" },
+                          { step: "2", emoji: "\uD83D\uDCAC", label: "Read takes from real neighbors" },
+                          { step: "3", emoji: "\uD83D\uDDE3\uFE0F", label: "Verify your zip. Be heard." },
+                        ].map((s) => (
+                          <div key={s.step} className="flex-1 text-center">
+                            <div className="text-2xl mb-1.5">{s.emoji}</div>
+                            <p className="text-xs text-ink font-medium leading-tight">{s.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
+
+          {/* ── Load more / see all listings ── */}
+          {(sortedListings.length > 0 || commentsFeedData.length > 0) && (
+            <div className="px-4 py-6">
+              <a
+                href="/?sort=comments"
+                className="block text-center py-3.5 bg-ink text-white rounded-xl text-sm font-semibold hover:opacity-90 active:scale-[0.98] transition-all"
+              >
+                See all trending listings &rarr;
+              </a>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* ====== LISTINGS GRID ====== */}
-      {isDefaultLanding && sortedListings.length > 0 && (
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <p className="text-[11px] font-semibold tracking-[0.15em] uppercase text-tertiary mb-1">Just listed</p>
-            <h2 className="text-xl font-bold text-ink tracking-tight">Latest listings</h2>
-          </div>
-        </div>
-      )}
-
-      {sortedListings.length === 0 ? (
-        <div className="text-center py-16">
-          <div className="text-4xl mb-4">🏠</div>
-          <p className="text-xl font-semibold text-ink mb-2">
-            No listings found
-          </p>
-          <p className="text-sm text-secondary max-w-md mx-auto">
-            Try a different search or check out what&apos;s trending.
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <a href="/" className="px-4 py-2 rounded-full bg-ink text-bg text-sm font-medium hover:opacity-90 transition-opacity">
-              Browse all
-            </a>
-            <a href="/?sort=comments" className="px-4 py-2 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">
-              See trending
-            </a>
+          {/* ── STICKY BOTTOM CTA (mobile) ── */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden">
+            <div className="bg-surface/95 backdrop-blur-md border-t border-divider px-4 py-3 safe-area-pb">
+              <a
+                href="/?city="
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-highlight border border-divider text-left hover:border-amber/30 active:scale-[0.98] transition-all"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary shrink-0">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" />
+                </svg>
+                <span className="text-sm text-tertiary">What do you know about your neighborhood?</span>
+              </a>
+            </div>
           </div>
         </div>
       ) : (
-        <ListingFeed
-          initialListings={sortedListings}
-          initialHasMore={hasMore}
-          searchParams={feedParams}
-          communityMoments={[]}
-        />
+        /* ====== FILTERED / SEARCH VIEW ====== */
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+          <div className="mb-8">
+            <Suspense>
+              <SearchBar />
+            </Suspense>
+          </div>
+
+          {/* Sort + filter bar */}
+          <div className="mb-6">
+            <div className="flex items-end justify-between gap-4 flex-wrap">
+              <div>
+                {hasFilters && (
+                  <p className="text-xs text-tertiary mb-1">
+                    {total} result{total !== 1 ? "s" : ""}
+                    {city && ` in ${city}`}
+                  </p>
+                )}
+                <h2 className="text-xl font-semibold text-ink">
+                  {city ? city : sort === "comments" ? "Trending" : "Explore"}
+                </h2>
+              </div>
+              <div className="flex items-center gap-1">
+                {[
+                  { key: "newest", label: "New" },
+                  { key: "comments", label: "\uD83D\uDD25 Trending" },
+                  { key: "price-low", label: "$ Low" },
+                  { key: "price-high", label: "$ High" },
+                ].map((s) => {
+                  const params = new URLSearchParams(
+                    Object.fromEntries(
+                      Object.entries(sp)
+                        .filter(([, v]) => typeof v === "string") as [string, string][]
+                    )
+                  );
+                  params.set("sort", s.key);
+                  params.delete("page");
+                  const isActive = sort === s.key;
+                  return (
+                    <a
+                      key={s.key}
+                      href={`/?${params.toString()}`}
+                      className={`px-3 py-1.5 rounded-full text-xs transition-all ${
+                        isActive
+                          ? "bg-ink text-bg font-medium"
+                          : "text-secondary hover:bg-surface hover:text-ink"
+                      }`}
+                    >
+                      {s.label}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Listings */}
+          {sortedListings.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-4xl mb-4">{"\uD83C\uDFE0"}</div>
+              <p className="text-xl font-semibold text-ink mb-2">
+                No listings found
+              </p>
+              <p className="text-sm text-secondary max-w-md mx-auto">
+                Try a different search or check out what&apos;s trending.
+              </p>
+              <div className="flex items-center justify-center gap-4 mt-6">
+                <a href="/" className="px-4 py-2 rounded-full bg-ink text-bg text-sm font-medium hover:opacity-90 transition-opacity">
+                  Browse all
+                </a>
+                <a href="/?sort=comments" className="px-4 py-2 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">
+                  See trending
+                </a>
+              </div>
+            </div>
+          ) : (
+            <ListingFeed
+              initialListings={sortedListings}
+              initialHasMore={hasMore}
+              searchParams={feedParams}
+              communityMoments={[]}
+            />
+          )}
+        </div>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -14,7 +14,7 @@ html {
 body {
   background-color: #FAFAF8;
   color: #1A1A1A;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -24,7 +24,7 @@ body {
 
 /* Display class for hero headlines */
 .font-display {
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
@@ -152,3 +152,12 @@ input[type=number]::-webkit-outer-spin-button {
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: grab;
 }
+
+/* Hide scrollbar but allow scrolling */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area padding for bottom sticky on iOS */
+.safe-area-pb { padding-bottom: env(safe-area-inset-bottom, 0); }
