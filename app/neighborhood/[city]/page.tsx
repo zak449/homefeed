@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   const { city } = await params;
   const cityDecoded = decodeURIComponent(city);
   return {
-    title: `${cityDecoded} \u2014 What People Really Think \u00b7 gwakgwak`,
+    title: `${cityDecoded} \u2014 What People Really Think \u00b7 Gwaky`,
     description: `See what neighbors, agents, and locals are saying about homes in ${cityDecoded}. Real opinions, real reactions.`,
   };
 }
@@ -155,7 +155,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-1.5 text-[13px] text-muted mb-6">
-        <Link href="/" className="hover:text-ink transition-colors">gwakgwak</Link>
+        <Link href="/" className="hover:text-ink transition-colors">Gwaky</Link>
         <span>/</span>
         <span className="text-ink font-medium">{cityDecoded}</span>
       </nav>

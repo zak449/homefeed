@@ -52,10 +52,10 @@ export default function ContactPage() {
 
   return (
     <>
-      <title>Contact Us — gwakgwak</title>
+      <title>Contact Us — Gwaky</title>
       <meta
         name="description"
-        content="Get in touch with the gwakgwak team. We'd love to hear from you."
+        content="Get in touch with the Gwaky team. We'd love to hear from you."
       />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
@@ -77,7 +77,7 @@ export default function ContactPage() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Back to gwakgwak
+          Back to Gwaky
         </a>
 
         {/* Header */}
@@ -255,10 +255,10 @@ export default function ContactPage() {
                     Support
                   </p>
                   <a
-                    href="mailto:support@gwakgwak.app"
+                    href="mailto:support@gwaky.com"
                     className="text-[14px] text-amber hover:text-amber/80 font-semibold transition-colors"
                   >
-                    support@gwakgwak.app
+                    support@gwaky.com
                   </a>
                 </div>
                 <div>
@@ -266,10 +266,10 @@ export default function ContactPage() {
                     Privacy
                   </p>
                   <a
-                    href="mailto:privacy@gwakgwak.app"
+                    href="mailto:privacy@gwaky.com"
                     className="text-[14px] text-amber hover:text-amber/80 font-semibold transition-colors"
                   >
-                    privacy@gwakgwak.app
+                    privacy@gwaky.com
                   </a>
                 </div>
               </div>
@@ -282,7 +282,7 @@ export default function ContactPage() {
               </h3>
               <div className="space-y-2.5">
                 <a
-                  href="https://twitter.com/gwakgwakapp"
+                  href="https://twitter.com/gwakyapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"
@@ -300,7 +300,7 @@ export default function ContactPage() {
                   X (Twitter)
                 </a>
                 <a
-                  href="https://instagram.com/gwakgwakapp"
+                  href="https://instagram.com/gwakyapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"
@@ -324,7 +324,7 @@ export default function ContactPage() {
                   Instagram
                 </a>
                 <a
-                  href="https://tiktok.com/@gwakgwakapp"
+                  href="https://tiktok.com/@gwakyapp"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"

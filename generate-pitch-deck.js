@@ -4,7 +4,7 @@ const path = require("path");
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE"; // 13.33" x 7.5"
 pres.author = "Zachary Kaufman";
-pres.title = "gwak gwak — Investor Pitch Deck Q1 2026";
+pres.title = "Gwaky — Investor Pitch Deck Q1 2026";
 
 // ─── DESIGN SYSTEM ───
 const C = {
@@ -85,7 +85,7 @@ function darkSlide() {
   fullBleedImage(slide, "hero-couple.jpg");
   darkOverlay(slide, 65);
 
-  slide.addText("gwak gwak", {
+  slide.addText("Gwaky", {
     x: 0, y: 1.8, w: W, h: 1.5,
     fontSize: 72, fontFace: F.head, color: C.white,
     align: "center", bold: false, italic: true,
@@ -205,8 +205,8 @@ function darkSlide() {
     { text: "NAR settlement + AI = the agent model is being rewritten", sub: "Commission disruption accelerating" },
   ];
 
-  const startY = 2.9;
-  const itemH = 1.0;
+  const startY = 2.8;
+  const itemH = 0.9;
 
   items.forEach((item, i) => {
     const y = startY + i * itemH;
@@ -222,13 +222,13 @@ function darkSlide() {
   });
 
   slide.addText("Every one of these AI agents needs ground truth data that doesn't exist in MLS. We're building it.", {
-    x: 0.8, y: 6.3, w: 11, h: 0.6,
+    x: 0.8, y: 6.5, w: 11, h: 0.6,
     fontSize: 14, fontFace: F.head, color: C.amber, italic: true,
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 5: THIS IS gwak gwak — Full-bleed phone-app.jpg
+// SLIDE 5: THIS IS Gwaky — Full-bleed phone-app.jpg
 // ═══════════════════════════════════════════════════════════
 {
   const slide = pres.addSlide();
@@ -241,7 +241,7 @@ function darkSlide() {
     letterSpacing: 4, bold: true,
   });
 
-  slide.addText("gwak gwak", {
+  slide.addText("Gwaky", {
     x: 0.8, y: 1.7, w: 5, h: 1.2,
     fontSize: 48, fontFace: F.head, color: C.white, italic: true,
   });
@@ -521,21 +521,21 @@ function darkSlide() {
   ];
 
   moatProps.forEach((p, i) => {
-    const y = 2.9 + i * 0.8;
+    const y = 2.8 + i * 0.75;
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: 0.8, y, w: 11.5, h: 0.65,
+      x: 0.8, y, w: 11.5, h: 0.6,
       rectRadius: 0.06,
       fill: { color: C.darkCard },
     });
-    amberLeftBorder(slide, 0.8, y + 0.1, 0.45);
+    amberLeftBorder(slide, 0.8, y + 0.1, 0.4);
     slide.addText(p.label, {
-      x: 1.1, y, w: 2.2, h: 0.65,
-      fontSize: 16, fontFace: F.head, color: C.amberSoft, bold: true,
+      x: 1.1, y, w: 2.2, h: 0.6,
+      fontSize: 15, fontFace: F.head, color: C.amberSoft, bold: true,
       valign: "middle",
     });
     slide.addText(p.desc, {
-      x: 3.3, y, w: 8.8, h: 0.65,
-      fontSize: 13, fontFace: F.body, color: C.mutedLight,
+      x: 3.3, y, w: 8.8, h: 0.6,
+      fontSize: 12, fontFace: F.body, color: C.mutedLight,
       valign: "middle",
     });
   });
@@ -543,7 +543,7 @@ function darkSlide() {
   slide.addText(
     "Network effects compound the moat: more residents = more takes = more value = more residents.",
     {
-      x: 0.8, y: 6.5, w: 11, h: 0.5,
+      x: 0.8, y: 6.7, w: 11, h: 0.5,
       fontSize: 14, fontFace: F.head, color: C.amberSoft, italic: true,
     }
   );
@@ -606,8 +606,8 @@ function darkSlide() {
 
   const compRows = [
     { left: "Reddit licensed user posts to Google & OpenAI", right: "$203M in 2024 data licensing revenue" },
-    { left: "Reddit's data: unverified, general-purpose, noisy", right: "gwak gwak's data: verified, geo-locked, RE-specific" },
-    { left: "Reddit is the #1 cited domain by AI Overviews", right: "gwak gwak targets the #1 purchase decision in life" },
+    { left: "Reddit's data: unverified, general-purpose, noisy", right: "Gwaky's data: verified, geo-locked, RE-specific" },
+    { left: "Reddit is the #1 cited domain by AI Overviews", right: "Gwaky targets the #1 purchase decision in life" },
   ];
 
   compRows.forEach((row, i) => {
@@ -653,8 +653,8 @@ function darkSlide() {
   });
 
   slide.addText("Four revenue streams.\nData licensing is the engine.", {
-    x: 0.8, y: 1.1, w: 10, h: 1.2,
-    fontSize: 32, fontFace: F.head, color: C.text, bold: true,
+    x: 0.8, y: 0.9, w: 10, h: 1.0,
+    fontSize: 28, fontFace: F.head, color: C.text, bold: true,
     lineSpacingMultiple: 1.2,
   });
 
@@ -665,71 +665,73 @@ function darkSlide() {
     { name: "Agent Profiles", y1: "$40K", y3: "$520K", pct: 13, desc: "Verified agent presence on the platform" },
   ];
 
-  const barMaxW = 5.5;
+  const barMaxW = 4.5;
+  const streamStartY = 2.1;
+  const streamSpacing = 1.2;
 
   streams.forEach((s, i) => {
-    const y = 2.6 + i * 1.05;
+    const y = streamStartY + i * streamSpacing;
 
     slide.addText(s.name, {
-      x: 0.8, y, w: 3, h: 0.35,
-      fontSize: 15, fontFace: F.head, color: C.text, bold: true,
+      x: 0.8, y, w: 3.5, h: 0.35,
+      fontSize: 14, fontFace: F.head, color: C.text, bold: true,
     });
     slide.addText(s.desc, {
-      x: 0.8, y: y + 0.32, w: 4, h: 0.3,
+      x: 0.8, y: y + 0.32, w: 4.2, h: 0.3,
       fontSize: 10, fontFace: F.body, color: C.muted,
     });
 
     // Year 1 bar
     slide.addText("Y1", {
-      x: 5.0, y: y - 0.02, w: 0.5, h: 0.35,
+      x: 5.2, y: y - 0.02, w: 0.5, h: 0.35,
       fontSize: 10, fontFace: F.body, color: C.muted,
     });
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: 5.5, y: y + 0.02, w: barMaxW * (s.pct / 100) * 0.35, h: 0.25,
+      x: 5.7, y: y + 0.02, w: barMaxW * (s.pct / 100) * 0.35, h: 0.25,
       rectRadius: 0.04,
       fill: { color: C.amberSoft },
     });
     slide.addText(s.y1, {
-      x: 5.5 + barMaxW * (s.pct / 100) * 0.35 + 0.1, y: y - 0.02, w: 1.5, h: 0.35,
+      x: 5.7 + barMaxW * (s.pct / 100) * 0.35 + 0.15, y: y - 0.02, w: 1.5, h: 0.35,
       fontSize: 11, fontFace: F.body, color: C.muted,
     });
 
     // Year 3 bar
     slide.addText("Y3", {
-      x: 5.0, y: y + 0.35, w: 0.5, h: 0.35,
+      x: 5.2, y: y + 0.4, w: 0.5, h: 0.35,
       fontSize: 10, fontFace: F.body, color: C.muted,
     });
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: 5.5, y: y + 0.38, w: barMaxW * (s.pct / 100), h: 0.25,
+      x: 5.7, y: y + 0.43, w: barMaxW * (s.pct / 100), h: 0.25,
       rectRadius: 0.04,
       fill: { color: C.amber },
     });
     slide.addText(s.y3, {
-      x: 5.5 + barMaxW * (s.pct / 100) + 0.1, y: y + 0.33, w: 1.5, h: 0.35,
+      x: 5.7 + barMaxW * (s.pct / 100) + 0.15, y: y + 0.38, w: 1.5, h: 0.35,
       fontSize: 11, fontFace: F.body, color: C.text, bold: true,
     });
   });
 
-  // Bottom highlights
+  // Bottom highlights — moved down and spread apart
   slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.8, y: 6.2, w: 4, h: 0.7,
+    x: 0.8, y: 6.5, w: 4, h: 0.65,
     rectRadius: 0.06,
     fill: { color: "EEEDEA" },
   });
   slide.addText([
-    { text: "$5.72M ", options: { fontSize: 24, fontFace: F.head, color: C.amber, bold: true } },
-    { text: "ARR by Year 3", options: { fontSize: 14, fontFace: F.body, color: C.text } },
-  ], { x: 1.0, y: 6.25, w: 3.6, h: 0.6 });
+    { text: "$5.72M ", options: { fontSize: 22, fontFace: F.head, color: C.amber, bold: true } },
+    { text: "ARR by Year 3", options: { fontSize: 13, fontFace: F.body, color: C.text } },
+  ], { x: 1.0, y: 6.52, w: 3.6, h: 0.56 });
 
   slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 5.5, y: 6.2, w: 4.5, h: 0.7,
+    x: 5.8, y: 6.5, w: 4.8, h: 0.65,
     rectRadius: 0.06,
     fill: { color: "EEEDEA" },
   });
   slide.addText([
-    { text: "Cash-flow positive ", options: { fontSize: 16, fontFace: F.head, color: C.green, bold: true } },
-    { text: "by Month 18", options: { fontSize: 14, fontFace: F.body, color: C.text } },
-  ], { x: 5.7, y: 6.25, w: 4.1, h: 0.6 });
+    { text: "Cash-flow positive ", options: { fontSize: 15, fontFace: F.head, color: C.green, bold: true } },
+    { text: "by Month 18", options: { fontSize: 13, fontFace: F.body, color: C.text } },
+  ], { x: 6.0, y: 6.52, w: 4.4, h: 0.56 });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -827,7 +829,7 @@ function darkSlide() {
 
   const features = ["Community Intel", "Verified Locals", "AI Training Data", "Data Licensing", "Gen Z Design"];
   const competitors = [
-    { name: "gwak gwak", scores: [true, true, true, true, true] },
+    { name: "Gwaky", scores: [true, true, true, true, true] },
     { name: "Zillow", scores: [false, false, false, false, false] },
     { name: "Nextdoor", scores: [true, false, false, false, false] },
     { name: "Redfin", scores: [false, false, false, false, false] },
@@ -1012,8 +1014,8 @@ function darkSlide() {
     },
     {
       year: "2028-2029",
-      title: "Launch gwak gwak AI",
-      items: "Our own agent on our data\n\"Ask gwak gwak about any address\"\nFlywheel: community grows the model\nNo competitor can replicate",
+      title: "Launch Gwaky AI",
+      items: "Our own agent on our data\n\"Ask Gwaky about any address\"\nFlywheel: community grows the model\nNo competitor can replicate",
     },
     {
       year: "2029-2030",
@@ -1297,13 +1299,13 @@ function darkSlide() {
     align: "center", bold: true,
   });
 
-  slide.addText("gwak gwak", {
+  slide.addText("Gwaky", {
     x: 0, y: 4.2, w: W, h: 1.2,
     fontSize: 56, fontFace: F.head, color: C.white,
     align: "center", italic: true,
   });
 
-  slide.addText("Zachary Kaufman  ·  hello@gwakgwak.com  ·  gwakgwak.com", {
+  slide.addText("Zachary Kaufman  ·  hello@gwaky.com  ·  gwaky.com", {
     x: 0, y: 6.2, w: W, h: 0.5,
     fontSize: 14, fontFace: F.body, color: C.mutedLight,
     align: "center",
@@ -1311,7 +1313,7 @@ function darkSlide() {
 }
 
 // ─── EXPORT ───
-const outputPath = "/Users/zacharykaufman/Desktop/Pitch Decks/gwak gwak - Investor Pitch Q1 2026.pptx";
+const outputPath = "/Users/zacharykaufman/Desktop/Pitch Decks/Gwaky - Investor Pitch Q1 2026.pptx";
 pres.writeFile({ fileName: outputPath }).then(() => {
   console.log(`Deck saved to: ${outputPath}`);
   console.log(`   ${pres.slides.length} slides generated`);

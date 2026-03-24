@@ -4,9 +4,9 @@ import { prisma } from "@/lib/prisma";
 import JoinNeighborhood from "./JoinNeighborhood";
 
 export const metadata: Metadata = {
-  title: "About — gwak gwak",
+  title: "About — Gwaky",
   description:
-    "We built gwak gwak because buying blind shouldn't be normal. The community-powered real estate platform rebuilding neighborhood trust.",
+    "We built Gwaky because buying blind shouldn't be normal. The community-powered real estate platform rebuilding neighborhood trust.",
 };
 
 export default async function AboutPage() {
@@ -37,10 +37,10 @@ export default async function AboutPage() {
 
         <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-28 pb-14 sm:pb-20 relative z-10">
           <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
-            About gwak gwak
+            About Gwaky
           </p>
           <h1 className="font-display text-[2.25rem] sm:text-[3.25rem] md:text-[4rem] font-extrabold text-ink tracking-[-0.04em] leading-[1.04] max-w-3xl">
-            We built gwak gwak because buying blind shouldn&rsquo;t be{" "}
+            We built Gwaky because buying blind shouldn&rsquo;t be{" "}
             <span className="text-amber">normal</span>.
           </h1>
           <p className="text-lg sm:text-xl text-secondary mt-5 leading-relaxed max-w-2xl">
@@ -67,7 +67,7 @@ export default async function AboutPage() {
                 <path d="M3 21c3-3 4-6 4-9 0-2.5-2-4.5-4.5-4.5S-2 9.5-2 12c0 3.5 3 5.5 5 9zm13 0c3-3 4-6 4-9 0-2.5-2-4.5-4.5-4.5S11 9.5 11 12c0 3.5 3 5.5 5 9z" fill="currentColor" />
               </svg>
               <p className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight leading-snug">
-                If gwak gwak existed, that truth would have been there.
+                If Gwaky existed, that truth would have been there.
               </p>
               <p className="text-sm text-amber font-semibold mt-4">
                 Zachary Kaufman, Founder
@@ -112,7 +112,7 @@ export default async function AboutPage() {
               </p>
 
               <p className="text-ink font-semibold text-base sm:text-lg">
-                That&rsquo;s the moment gwak gwak was born. Not out of resentment
+                That&rsquo;s the moment Gwaky was born. Not out of resentment
                 toward the industry &mdash; but out of a simple belief: the people who
                 live on a street know more about it than anyone trying to sell you
                 something on it.
@@ -333,7 +333,7 @@ export default async function AboutPage() {
                 of neighbor love is the most powerful social proof money can&rsquo;t buy.
               </p>
               <p>
-                gwak gwak helps honest agents stand out. It builds buyer confidence. And
+                Gwaky helps honest agents stand out. It builds buyer confidence. And
                 it creates a direct line between the neighborhood and the people
                 considering joining it.
               </p>
@@ -430,7 +430,7 @@ export default async function AboutPage() {
             </p>
             <div className="flex items-center gap-3 mt-5">
               <a
-                href="https://x.com/gwakgwakapp"
+                href="https://x.com/gwakyapp"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl bg-ink flex items-center justify-center text-white hover:bg-ink/80 transition-colors"

@@ -98,7 +98,7 @@ export default function Footer() {
           {/* Brand column */}
           <div className="md:col-span-4 space-y-4">
             <p className="text-lg font-bold tracking-tight">
-              gwak <span className="text-[#E8A87C]">gwak</span>
+              Gwak<span className="text-[#E8A87C]">y</span>
             </p>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               the comment section real estate never had
@@ -183,7 +183,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-white/40">
-            &copy; 2026 gwak gwak. All rights reserved.
+            &copy; 2026 Gwaky. All rights reserved.
           </p>
           <p className="text-xs text-white/40">
             Made with honesty in California

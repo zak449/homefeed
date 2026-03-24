@@ -990,7 +990,7 @@ export default function ZipVerification({
       }
       // Store verification in localStorage
       localStorage.setItem(
-        "gwak-verified",
+        "gwaky-verified",
         JSON.stringify({
           zipCode,
           name,

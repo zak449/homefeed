@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — gwakgwak",
+  title: "Privacy Policy — Gwaky",
   description:
-    "How gwakgwak collects, uses, and protects your information. Learn about our data practices, your rights, and how to contact us.",
+    "How Gwaky collects, uses, and protects your information. Learn about our data practices, your rights, and how to contact us.",
 };
 
 export default function PrivacyPage() {
@@ -27,7 +27,7 @@ export default function PrivacyPage() {
           <path d="M19 12H5" />
           <path d="M12 19l-7-7 7-7" />
         </svg>
-        Back to gwakgwak
+        Back to Gwaky
       </a>
 
       {/* Header */}
@@ -39,7 +39,7 @@ export default function PrivacyPage() {
         <p className="text-base text-muted mt-4 leading-relaxed">
           At{" "}
           <span className="font-display font-semibold text-ink">
-            gwak<span className="social-gradient">gwak</span>
+            Gwak<span className="social-gradient">y</span>
           </span>
           , we take your privacy seriously. This policy explains what information
           we collect, how we use it, and your rights regarding your data.
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
                 Anonymous Identifiers
               </h3>
               <p>
-                When you visit gwakgwak, we generate an anonymous identifier to
+                When you visit Gwaky, we generate an anonymous identifier to
                 associate your comments, reactions, and preferences with your
                 session. We do not require account creation, and we do not
                 collect your real name, email address, or phone number unless you
@@ -118,7 +118,7 @@ export default function PrivacyPage() {
           </h2>
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
-              gwakgwak uses localStorage (a browser-based storage mechanism) to
+              Gwaky uses localStorage (a browser-based storage mechanism) to
               save your preferences, such as your display name for comments,
               recently viewed listings, and interface preferences. This data
               stays on your device and is not transmitted to our servers unless
@@ -141,7 +141,7 @@ export default function PrivacyPage() {
             <p className="mb-3">We use the information we collect to:</p>
             <ul className="list-disc pl-5 space-y-2">
               <li>
-                Provide, maintain, and improve gwakgwak&rsquo;s features and
+                Provide, maintain, and improve Gwaky&rsquo;s features and
                 services
               </li>
               <li>
@@ -178,7 +178,7 @@ export default function PrivacyPage() {
                 We do not sell, rent, or trade your personal information to third
                 parties.
               </span>{" "}
-              Your data is used solely to operate and improve gwakgwak. We may
+              Your data is used solely to operate and improve Gwaky. We may
               share anonymized, aggregated data (which cannot identify you) for
               analytics or business purposes.
             </p>
@@ -201,10 +201,10 @@ export default function PrivacyPage() {
               You can unsubscribe from email communications at any time by
               clicking the unsubscribe link in any email, or by contacting us at{" "}
               <a
-                href="mailto:privacy@gwakgwak.app"
+                href="mailto:privacy@gwaky.com"
                 className="text-social hover:text-social/80 font-medium transition-colors"
               >
-                privacy@gwakgwak.app
+                privacy@gwaky.com
               </a>
               . For SMS, reply STOP to any message to opt out.
             </p>
@@ -306,10 +306,10 @@ export default function PrivacyPage() {
             <p>
               To exercise any of these rights, please contact us at{" "}
               <a
-                href="mailto:privacy@gwakgwak.app"
+                href="mailto:privacy@gwaky.com"
                 className="text-social hover:text-social/80 font-medium transition-colors"
               >
-                privacy@gwakgwak.app
+                privacy@gwaky.com
               </a>
               . We will respond to your request within 30 days (or sooner as
               required by applicable law).
@@ -341,7 +341,7 @@ export default function PrivacyPage() {
           </h2>
           <div className="space-y-3 text-[15px] text-muted leading-relaxed">
             <p>
-              gwakgwak may contain links to third-party websites or integrate
+              Gwaky may contain links to third-party websites or integrate
               with third-party services. We are not responsible for the privacy
               practices of these third parties. We encourage you to read their
               privacy policies before providing any personal information.
@@ -362,7 +362,7 @@ export default function PrivacyPage() {
           </h2>
           <div className="text-[15px] text-muted leading-relaxed">
             <p>
-              gwakgwak is not directed to individuals under the age of 13 (or
+              Gwaky is not directed to individuals under the age of 13 (or
               the applicable age of digital consent in your jurisdiction). We do
               not knowingly collect personal information from children. If we
               become aware that we have collected personal data from a child
@@ -382,7 +382,7 @@ export default function PrivacyPage() {
               We may update this Privacy Policy from time to time. When we make
               changes, we will update the &ldquo;Last updated&rdquo; date at the
               top of this page. We encourage you to review this policy
-              periodically. Your continued use of gwakgwak after any changes
+              periodically. Your continued use of Gwaky after any changes
               constitutes your acceptance of the updated policy.
             </p>
           </div>
@@ -400,15 +400,15 @@ export default function PrivacyPage() {
             </p>
             <div className="mt-4 bg-tag rounded-xl p-5 space-y-2">
               <p className="font-display font-semibold text-ink">
-                gwak<span className="social-gradient">gwak</span> Privacy Team
+                Gwak<span className="social-gradient">y</span> Privacy Team
               </p>
               <p>
                 Email:{" "}
                 <a
-                  href="mailto:privacy@gwakgwak.app"
+                  href="mailto:privacy@gwaky.com"
                   className="text-social hover:text-social/80 font-medium transition-colors"
                 >
-                  privacy@gwakgwak.app
+                  privacy@gwaky.com
                 </a>
               </p>
             </div>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "AI Imagination — gwak gwak",
+  title: "AI Imagination — Gwaky",
   description: "See what could be. Reimagine any property with AI-powered visualization tools.",
 };
 

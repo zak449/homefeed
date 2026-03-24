@@ -441,7 +441,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <div className="relative max-w-2xl mx-auto px-5 pt-14 pb-12 sm:pt-20 sm:pb-16">
               {/* Wordmark */}
               <div className="flex items-center gap-3 mb-10 sm:mb-14">
-                <h1 className="text-xl font-extrabold text-white tracking-tight font-display">gwak gwak</h1>
+                <h1 className="text-xl font-extrabold text-white tracking-tight font-display">Gwak<span className="text-amber">y</span></h1>
                 <span className="h-px flex-1 bg-white/10" />
                 <span className="text-[11px] text-white/40 font-medium tracking-wide uppercase">Real estate, real talk</span>
               </div>
@@ -766,7 +766,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                               <span className="text-[15px] font-bold text-ink">Zachary Kaufman</span>
                               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber/15 text-amber font-bold">Founder</span>
                             </div>
-                            <span className="text-[12px] text-tertiary">@zach · Building gwak gwak</span>
+                            <span className="text-[12px] text-tertiary">@zach · Building Gwaky</span>
                           </div>
                         </div>
 
@@ -775,7 +775,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.
                         </p>
                         <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-semibold mb-5">
-                          If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.
+                          If Gwaky existed, I would have had second thoughts. That&apos;s why I built it.
                         </p>
 
                         {/* Engagement row */}

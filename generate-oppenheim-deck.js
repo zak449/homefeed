@@ -3,7 +3,7 @@ const pptxgen = require("pptxgenjs");
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE"; // 13.33" x 7.5"
 pres.author = "Zachary Kaufman";
-pres.title = "gwak gwak — Oppenheim Group Investment Pitch";
+pres.title = "Gwaky — Oppenheim Group Investment Pitch";
 
 // ─── DESIGN SYSTEM ───
 const C = {
@@ -59,7 +59,7 @@ function sectionLabel(slide, text) {
 let s1 = pres.addSlide();
 s1.background = { color: C.bg };
 
-s1.addText("gwak gwak", {
+s1.addText("Gwaky", {
   x: 0.5, y: 1.6, w: 12.33, h: 2,
   fontSize: 78, fontFace: F.head, color: C.amber,
   bold: true, align: "center", valign: "middle", charSpacing: 5,
@@ -90,7 +90,7 @@ s2.addShape(pres.shapes.RECTANGLE, {
 s2.addText([
   { text: "I bought my place.\n\n", options: { fontSize: 26, color: C.text, fontFace: F.head, italic: true } },
   { text: "My neighbors told me things my realtor never mentioned. Un-permitted additions. Flooding. Years of disputes.\n\n", options: { fontSize: 26, color: C.text, fontFace: F.head, italic: true } },
-  { text: "If gwak gwak existed, I would have had second thoughts.", options: { fontSize: 26, color: C.amber, fontFace: F.head, italic: true, bold: true } },
+  { text: "If Gwaky existed, I would have had second thoughts.", options: { fontSize: 26, color: C.amber, fontFace: F.head, italic: true, bold: true } },
 ], {
   x: 1.3, y: 1.0, w: 10.5, h: 4.8, valign: "middle", paraSpaceAfter: 6,
 });
@@ -152,11 +152,11 @@ s3.addText([
 addSlideNum(s3, 3);
 
 // ═══════════════════════════════════════════════════════
-// SLIDE 4: THIS IS gwak gwak (Product Demo)
+// SLIDE 4: THIS IS Gwaky (Product Demo)
 // ═══════════════════════════════════════════════════════
 let s4 = pres.addSlide();
 s4.background = { color: C.bg };
-sectionLabel(s4, "This Is gwak gwak");
+sectionLabel(s4, "This Is Gwaky");
 
 // Phone frame (center)
 cardRect(s4, 4.6, 1.0, 4.1, 6.0, C.card3);
@@ -317,7 +317,7 @@ whyNow.forEach((item, i) => {
   });
 });
 
-s6.addText("gwak gwak is the heir. Community-powered, not journalist-powered.", {
+s6.addText("Gwaky is the heir. Community-powered, not journalist-powered.", {
   x: 0.5, y: 6.3, w: 12.33, h: 0.5,
   fontSize: 17, fontFace: F.head, color: C.amber, italic: true, align: "center",
 });
@@ -492,7 +492,7 @@ let s9 = pres.addSlide();
 s9.background = { color: C.bg };
 sectionLabel(s9, "Competitive Positioning");
 
-const gridCols = ["gwak gwak", "Zillow", "Nextdoor", "1060"];
+const gridCols = ["Gwaky", "Zillow", "Nextdoor", "1060"];
 const gridRows = ["Community Intel", "Verified Locals", "AI-Native Tools", "Property Data", "Agent Tools", "Data Licensing"];
 const gridData = [
   [true, false, false, false],   // Community
@@ -514,9 +514,9 @@ gridCols.forEach((col, i) => {
   const x = gridX + labelW + i * colW;
   s9.addText(col, {
     x, y: gridY, w: colW, h: 0.5,
-    fontSize: col === "gwak gwak" ? 13 : 12, fontFace: F.body,
-    color: col === "gwak gwak" ? C.amber : C.muted,
-    bold: col === "gwak gwak", align: "center", valign: "middle",
+    fontSize: col === "Gwaky" ? 13 : 12, fontFace: F.body,
+    color: col === "Gwaky" ? C.amber : C.muted,
+    bold: col === "Gwaky", align: "center", valign: "middle",
   });
 });
 
@@ -554,7 +554,7 @@ gridRows.forEach((row, ri) => {
 // Bottom insight
 cardRect(s9, 0.8, 5.8, 11.7, 1.1, C.card);
 s9.addText([
-  { text: "gwak gwak ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
+  { text: "Gwaky ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
   { text: "and ", options: { color: C.text, fontSize: 14, fontFace: F.body } },
   { text: "1060 ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
   { text: "serve different sides of the same market. Together, they're the full picture.", options: { color: C.text, fontSize: 14, fontFace: F.body } },
@@ -775,7 +775,7 @@ s12.addText("This isn't just an investment.\nIt's a platform your agents would a
 
 // Benefits grid (2x2)
 const benefits = [
-  { title: "Community Verified Badges", desc: "Your listings get the gwak gwak seal — trusted by locals, visible to every buyer." },
+  { title: "Community Verified Badges", desc: "Your listings get the Gwaky seal — trusted by locals, visible to every buyer." },
   { title: "Gen Z Buyer Pipeline", desc: "68% of 25-34 year olds start home search on social. Meet them where they already are." },
   { title: "Co-Branded Reports", desc: "Neighborhood intelligence reports with Oppenheim branding. New lead magnet." },
   { title: "Revenue Share", desc: "Agent profile tier with revenue share. Your team earns while building reputation." },
@@ -808,7 +808,7 @@ cardRect(s12, 0.8, 6.0, 11.7, 0.9, C.card2);
 s12.addText([
   { text: "1060 ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
   { text: "gives your agents a voice.  ", options: { color: C.text, fontSize: 14, fontFace: F.body } },
-  { text: "gwak gwak ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
+  { text: "Gwaky ", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
   { text: "gives your buyers the truth.  Together: ", options: { color: C.text, fontSize: 14, fontFace: F.body } },
   { text: "the full stack.", options: { color: C.amber, bold: true, fontSize: 14, fontFace: F.body } },
 ], { x: 1.2, y: 6.0, w: 10.9, h: 0.9, valign: "middle", align: "center" });
@@ -832,7 +832,7 @@ s13.addText("We're building the infrastructure to surface it.", {
 
 amberLine(s13, 5.5, 3.5, 2.33);
 
-s13.addText("gwak gwak", {
+s13.addText("Gwaky", {
   x: 0.5, y: 3.9, w: 12.33, h: 1.2,
   fontSize: 52, fontFace: F.head, color: C.amber, bold: true, align: "center", charSpacing: 4,
 });
@@ -845,7 +845,7 @@ s13.addText("your favorite local real estate", {
 amberLine(s13, 4.0, 5.8, 5.33);
 s13.addText([
   { text: "Zachary Kaufman\n", options: { fontSize: 14, color: C.text, fontFace: F.body, bold: true } },
-  { text: "hello@gwakgwak.com  ·  gwakgwak.com", options: { fontSize: 12, color: C.muted, fontFace: F.body } },
+  { text: "hello@gwaky.com  ·  gwaky.com", options: { fontSize: 12, color: C.muted, fontFace: F.body } },
 ], {
   x: 0.5, y: 6.0, w: 12.33, h: 0.8, align: "center", valign: "middle",
 });
@@ -855,7 +855,7 @@ addSlideNum(s13, 13);
 // ═══════════════════════════════════════════════════════
 // EXPORT
 // ═══════════════════════════════════════════════════════
-const outPath = "/Users/zacharykaufman/Desktop/Pitch Decks/gwak gwak - Oppenheim Group Pitch.pptx";
+const outPath = "/Users/zacharykaufman/Desktop/Pitch Decks/Gwaky - Oppenheim Group Pitch.pptx";
 pres.writeFile({ fileName: outPath })
   .then(() => console.log("✅ Deck saved to: " + outPath))
   .catch((err) => console.error("❌ Error:", err));

@@ -18,7 +18,7 @@ export default function ShareButton({ listingId, address, city, price }: ShareBu
     ? `${window.location.origin}/listing/${listingId}`
     : `/listing/${listingId}`;
 
-  const shareText = `Check out what people are saying about this listing on gwakgwak — ${price} at ${address}, ${city}`;
+  const shareText = `Check out what people are saying about this listing on Gwaky — ${price} at ${address}, ${city}`;
 
   // Close dropdown when clicking outside
   useEffect(() => {

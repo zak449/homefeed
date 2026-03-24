@@ -3,9 +3,9 @@ import Link from "next/link";
 import CareersWaitlist from "./CareersWaitlist";
 
 export const metadata: Metadata = {
-  title: "Careers — gwakgwak",
+  title: "Careers — Gwaky",
   description:
-    "Join the team building the social layer for real estate. See open positions at gwakgwak.",
+    "Join the team building the social layer for real estate. See open positions at Gwaky.",
 };
 
 const values = [
@@ -86,12 +86,12 @@ export default function CareersPage() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Back to gwakgwak
+          Back to Gwaky
         </Link>
 
         <div className="mb-14">
           <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-3">
-            Careers at gwakgwak
+            Careers at Gwaky
           </p>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink tracking-[-0.04em] leading-[1.08]">
             Help us build the{" "}
@@ -255,11 +255,11 @@ export default function CareersPage() {
           </p>
           <p className="text-sm text-secondary mb-5 max-w-md mx-auto">
             Send us a note about who you are, what you&rsquo;ve built, and why
-            gwakgwak excites you. We read every email.
+            Gwaky excites you. We read every email.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
-              href="mailto:careers@gwakgwak.app"
+              href="mailto:careers@gwaky.com"
               className="inline-flex items-center gap-2 bg-amber text-white text-sm font-bold px-6 py-2.5 rounded-xl shadow-glow hover:shadow-glow-amber hover:-translate-y-0.5 transition-all duration-200"
             >
               <svg
@@ -275,7 +275,7 @@ export default function CareersPage() {
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
               </svg>
-              careers@gwakgwak.app
+              careers@gwaky.com
             </a>
             <Link
               href="/contact"

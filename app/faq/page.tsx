@@ -4,19 +4,19 @@ import { useState, useMemo } from "react";
 
 const faqs = [
   {
-    question: "What is gwakgwak?",
+    question: "What is Gwaky?",
     answer:
-      "gwakgwak is the social layer for real estate. Think of it like a comment section for every listing on the market. We aggregate real estate listings and let real people \u2014 neighbors, buyers, renters, agents, and curious locals \u2014 weigh in with opinions, reactions, and hot takes. It\u2019s browsing homes, but make it social.",
+      "Gwaky is the social layer for real estate. Think of it like a comment section for every listing on the market. We aggregate real estate listings and let real people \u2014 neighbors, buyers, renters, agents, and curious locals \u2014 weigh in with opinions, reactions, and hot takes. It\u2019s browsing homes, but make it social.",
   },
   {
     question: "How is this different from Zillow or Redfin?",
     answer:
-      "Zillow and Redfin are great for facts: price, square footage, how many bedrooms. But they don\u2019t tell you what people actually think. Is $800K overpriced for that neighborhood? Is that \u201ccozy\u201d kitchen actually a closet? gwakgwak adds the human layer \u2014 real reactions, real opinions, real talk. We\u2019re not replacing listing sites; we\u2019re adding the conversation they\u2019re missing.",
+      "Zillow and Redfin are great for facts: price, square footage, how many bedrooms. But they don\u2019t tell you what people actually think. Is $800K overpriced for that neighborhood? Is that \u201ccozy\u201d kitchen actually a closet? Gwaky adds the human layer \u2014 real reactions, real opinions, real talk. We\u2019re not replacing listing sites; we\u2019re adding the conversation they\u2019re missing.",
   },
   {
-    question: "Can I list my property on gwakgwak?",
+    question: "Can I list my property on Gwaky?",
     answer:
-      "Not directly \u2014 at least not yet. gwakgwak aggregates listings from public real estate data sources. We\u2019re focused on the social commentary experience right now, but we\u2019re exploring ways to let homeowners and agents engage with their listings in the future. Stay tuned!",
+      "Not directly \u2014 at least not yet. Gwaky aggregates listings from public real estate data sources. We\u2019re focused on the social commentary experience right now, but we\u2019re exploring ways to let homeowners and agents engage with their listings in the future. Stay tuned!",
   },
   {
     question: "Are comments anonymous?",
@@ -29,19 +29,19 @@ const faqs = [
       "Hot Takes is our curated feed of the most talked-about, most outrageous, and most polarizing listings. We surface properties with the highest price tags, the worst price-per-square-foot ratios, and the most active comment sections. It\u2019s where the wildest listings end up \u2014 think $5M studios, questionable renovations, and prices that make you do a double take.",
   },
   {
-    question: "Is gwakgwak free?",
+    question: "Is Gwaky free?",
     answer:
-      "Yes! gwakgwak is completely free to browse, comment, and react. No account required, no paywall, no premium tier. We believe real estate commentary should be accessible to everyone. We may introduce optional premium features in the future, but the core social experience will always be free.",
+      "Yes! Gwaky is completely free to browse, comment, and react. No account required, no paywall, no premium tier. We believe real estate commentary should be accessible to everyone. We may introduce optional premium features in the future, but the core social experience will always be free.",
   },
   {
     question: "How do I report inappropriate content?",
     answer:
-      "We take content moderation seriously. If you see a comment that contains hate speech, harassment, spam, or otherwise violates our Terms of Service, please email us at support@gwakgwak.app with the listing URL and a description of the issue. We review all reports and take action promptly. We\u2019re also working on in-app reporting tools.",
+      "We take content moderation seriously. If you see a comment that contains hate speech, harassment, spam, or otherwise violates our Terms of Service, please email us at support@gwaky.com with the listing URL and a description of the issue. We review all reports and take action promptly. We\u2019re also working on in-app reporting tools.",
   },
   {
     question: "Where do listings come from?",
     answer:
-      "Listings on gwakgwak are aggregated from publicly available real estate data sources. We pull listing details like address, price, photos, and property specs from these sources and display them alongside our social features. Listing data may not always be perfectly up-to-date \u2014 always verify details with the listing agent or source before making any decisions.",
+      "Listings on Gwaky are aggregated from publicly available real estate data sources. We pull listing details like address, price, photos, and property specs from these sources and display them alongside our social features. Listing data may not always be perfectly up-to-date \u2014 always verify details with the listing agent or source before making any decisions.",
   },
   {
     question: "Can I save listings?",
@@ -78,10 +78,10 @@ export default function FAQPage() {
   return (
     <>
       {/* Metadata via head — client component workaround */}
-      <title>FAQ — gwakgwak</title>
+      <title>FAQ — Gwaky</title>
       <meta
         name="description"
-        content="Frequently asked questions about gwakgwak, the social commentary platform for real estate."
+        content="Frequently asked questions about Gwaky, the social commentary platform for real estate."
       />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
@@ -103,7 +103,7 @@ export default function FAQPage() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Back to gwakgwak
+          Back to Gwaky
         </a>
 
         {/* Header */}
@@ -118,10 +118,10 @@ export default function FAQPage() {
             Got questions? We&rsquo;ve got answers. If you don&rsquo;t see what
             you&rsquo;re looking for, hit us up at{" "}
             <a
-              href="mailto:support@gwakgwak.app"
+              href="mailto:support@gwaky.com"
               className="text-amber hover:text-amber/80 font-semibold transition-colors"
             >
-              support@gwakgwak.app
+              support@gwaky.com
             </a>
             .
           </p>

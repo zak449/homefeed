@@ -7,17 +7,17 @@ import KlaviyoScript from "@/components/KlaviyoScript";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "gwak gwak — what your neighbors really think about the homes around you",
+  title: "Gwaky — what your neighbors really think about the homes around you",
   description: "The community-powered real estate platform where verified neighbors share honest takes on every listing. No agents. No spin. Just the truth about your neighborhood.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "gwak gwak",
+    title: "Gwaky",
   },
   openGraph: {
     type: "website",
-    siteName: "gwak gwak",
+    siteName: "Gwaky",
     locale: "en_US",
   },
   twitter: {
@@ -46,7 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* Logo — left */}
             <a href="/" className="shrink-0 flex items-center gap-1.5">
               <span className="text-xl font-bold text-ink tracking-tight">
-                gwak<span className="text-amber"> gwak</span>
+                Gwak<span className="text-amber">y</span>
               </span>
             </a>
 

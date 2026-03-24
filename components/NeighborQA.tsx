@@ -66,7 +66,7 @@ export default function NeighborQA({
   // Check verification status
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("gwak-verified");
+      const stored = localStorage.getItem("gwaky-verified");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed?.zipCode && parsed?.name) {

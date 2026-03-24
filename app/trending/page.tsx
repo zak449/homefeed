@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import TrendingTabs from "./TrendingTabs";
 
 export const metadata: Metadata = {
-  title: "Trending Conversations — gwakgwak",
+  title: "Trending Conversations — Gwaky",
   description:
     "See which listings people are talking about the most. Real opinions on real estate.",
 };
@@ -216,7 +216,7 @@ export default async function TrendingPage() {
             <path d="M19 12H5" />
             <path d="M12 19l-7-7 7-7" />
           </svg>
-          Back to gwakgwak
+          Back to Gwaky
         </Link>
 
         {/* Hero header */}

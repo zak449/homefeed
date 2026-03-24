@@ -11,7 +11,7 @@ export async function generateMetadata({
 }) {
   const { zipCode } = await params;
   return {
-    title: `${zipCode} Community — gwak gwak`,
+    title: `${zipCode} Community — Gwaky`,
     description: `Join the ${zipCode} community. Real takes, local Q&A, and neighborhood intel from verified residents.`,
   };
 }
@@ -149,7 +149,7 @@ export default async function CommunityPage({
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-caption text-secondary mb-8">
           <Link href="/" className="hover:text-ink transition-colors">
-            gwak gwak
+            Gwaky
           </Link>
           <span>/</span>
           <Link

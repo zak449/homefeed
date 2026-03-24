@@ -230,7 +230,7 @@ export default function CommentSection({
       });
       setReplyStatus("success");
       try {
-        localStorage.setItem("gwakgwak_subscribed_email", replyEmail);
+        localStorage.setItem("gwaky_subscribed_email", replyEmail);
       } catch {
         // ignore
       }
@@ -409,7 +409,7 @@ export default function CommentSection({
               </svg>
             </div>
             <div>
-              <h3 className="text-title text-ink">Join gwak gwak</h3>
+              <h3 className="text-title text-ink">Join Gwaky</h3>
               <p className="text-caption text-tertiary">Your identity stays private. Only your first name shows.</p>
             </div>
           </div>
@@ -1037,8 +1037,8 @@ function SocialShareRow({
   const truncated = commentText.length > 200 ? commentText.slice(0, 197) + "..." : commentText;
   const listingUrl = typeof window !== "undefined"
     ? `${window.location.origin}/listing/${listingId}`
-    : `https://gwakgwak.com/listing/${listingId}`;
-  const shareBody = `"${truncated}" \u{1F3E0} See what neighbors are saying about ${listingAddress} on gwak gwak`;
+    : `https://gwaky.com/listing/${listingId}`;
+  const shareBody = `"${truncated}" \u{1F3E0} See what neighbors are saying about ${listingAddress} on Gwaky`;
   const encodedText = encodeURIComponent(shareBody);
   const encodedUrl = encodeURIComponent(listingUrl);
 

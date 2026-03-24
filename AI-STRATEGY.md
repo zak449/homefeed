@@ -1,14 +1,14 @@
-# gwak gwak — AI Strategy & .ai Survival Plan
+# Gwaky — AI Strategy & .ai Survival Plan
 
 ## The Core Thesis
 
 AI can replace search. AI can replace agents. **AI cannot replace your neighbor's lived experience.**
 
-gwak gwak owns the only dataset of verified, geo-locked human sentiment about properties and blocks in America. That data is the moat.
+Gwaky owns the only dataset of verified, geo-locked human sentiment about properties and blocks in America. That data is the moat.
 
 ---
 
-## 1. Why gwak gwak Survives AI
+## 1. Why Gwaky Survives AI
 
 ### What AI CAN Do (and will do better every year)
 - Property valuations & comps (Zillow's Zestimate + ChatGPT integration, launched 2025)
@@ -28,7 +28,7 @@ gwak gwak owns the only dataset of verified, geo-locked human sentiment about pr
 ### The Gap
 AI processes **public data** — MLS listings, property records, census data. All of this is available to everyone.
 
-gwak gwak generates **private community data** that doesn't exist anywhere else. Verified, geo-locked human sentiment about every property and block. No AI model can generate this — it can only come from people who live there.
+Gwaky generates **private community data** that doesn't exist anywhere else. Verified, geo-locked human sentiment about every property and block. No AI model can generate this — it can only come from people who live there.
 
 ---
 
@@ -38,19 +38,19 @@ gwak gwak generates **private community data** that doesn't exist anywhere else.
 Every verified resident = a permanent data point. Every take = proprietary intelligence. This data compounds — more residents → more takes → more value → more residents.
 
 ### Year 2-3: Become the API (2027-2028)
-When any AI agent answers "should I buy this house?", it currently pulls MLS data + comps. With gwak gwak's API, it pulls **real community sentiment, neighbor warnings, block-level intelligence.**
+When any AI agent answers "should I buy this house?", it currently pulls MLS data + comps. With Gwaky's API, it pulls **real community sentiment, neighbor warnings, block-level intelligence.**
 
 Revenue: Data licensing at $85K per zip code (PropTech comp). API access fees for AI platforms.
 
-**Comp: Reddit's data deal with Google = $60M/year** for training data. gwak gwak's data is more valuable because it's verified, geo-locked, and real estate-specific.
+**Comp: Reddit's data deal with Google = $60M/year** for training data. Gwaky's data is more valuable because it's verified, geo-locked, and real estate-specific.
 
-### Year 3-4: Launch the gwak gwak AI Agent (2028-2029)
-Our own agentic AI sitting on top of community data. "Ask gwak gwak about any address." The agent gets smarter as the community grows — flywheel effect.
+### Year 3-4: Launch the Gwaky AI Agent (2028-2029)
+Our own agentic AI sitting on top of community data. "Ask Gwaky about any address." The agent gets smarter as the community grows — flywheel effect.
 
 No competitor can build this agent because they don't have the underlying community data.
 
 ### Year 4-5: The Platform Layer (2029-2030)
-gwak gwak becomes infrastructure — the "community truth layer" for every real estate transaction.
+Gwaky becomes infrastructure — the "community truth layer" for every real estate transaction.
 - Insurance companies: community-reported risk data by zip
 - City planners: neighborhood sentiment for development decisions
 - AI companies: human-generated real estate training data
@@ -61,7 +61,7 @@ gwak gwak becomes infrastructure — the "community truth layer" for every real 
 ## 3. AI-Native Operating Model
 
 ### Team Size (AI-Leveraged)
-| Phase | Traditional PropTech | gwak gwak |
+| Phase | Traditional PropTech | Gwaky |
 |-------|---------------------|-----------|
 | Launch | 12 people | 4 people |
 | Month 12 | 28 people | 7 people |
@@ -77,7 +77,7 @@ gwak gwak becomes infrastructure — the "community truth layer" for every real 
 
 ### Cost Comparison
 - Traditional PropTech: **$2M/year** (45 people)
-- gwak gwak: **$800K/year** (11 people + AI)
+- Gwaky: **$800K/year** (11 people + AI)
 - **60% cost reduction. Same output.**
 
 Every person we hire does the work of 4. Not a slogan — an operating model.
@@ -114,7 +114,7 @@ More verified residents → More takes → More value → More residents → Mor
 
 ## 5. Competitive Defense Against AI
 
-| Scenario | Impact on gwak gwak |
+| Scenario | Impact on Gwaky |
 |----------|-------------------|
 | Zillow launches AI chat | Still no community data. They need us. |
 | OpenAI builds property agent | Still needs our sentiment dataset. |
@@ -127,10 +127,10 @@ More verified residents → More takes → More value → More residents → Mor
 
 ## 6. Why Oppenheim Group Should Care
 
-1. **Their agents can USE gwak gwak AI** to provide better service — community intelligence as a selling tool
+1. **Their agents can USE Gwaky AI** to provide better service — community intelligence as a selling tool
 2. **Community-verified listings sell faster** — trust converts to speed
 3. **AI-powered neighborhood reports** with Oppenheim branding — premium intelligence competitors can't offer
-4. **Gen Z pipeline** — 41% research real estate on social media. gwak gwak is where they already live.
+4. **Gen Z pipeline** — 41% research real estate on social media. Gwaky is where they already live.
 5. **Brand positioning** — "Oppenheim doesn't hide from transparency — they lead it"
 
 ### The Investment Case
