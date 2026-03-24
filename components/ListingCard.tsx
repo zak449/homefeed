@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import FallbackImage from "@/components/FallbackImage";
 
 type Listing = {
@@ -49,21 +48,11 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
   const listedAgo = listing.createdAt ? timeAgo(String(listing.createdAt)) : null;
 
-  // Build specs pill text
   const specParts: string[] = [];
   if (listing.bedrooms != null) specParts.push(`${listing.bedrooms} bd`);
   if (listing.bathrooms != null) specParts.push(`${listing.bathrooms} ba`);
   if (listing.sqft != null) specParts.push(`${listing.sqft.toLocaleString()} sf`);
-  const specs = specParts.join("  \u00B7  ");
-
-  const goTo = useCallback(
-    (index: number, e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setCurrentIndex(index);
-    },
-    []
-  );
+  const specs = specParts.join(" \u00B7 ");
 
   const goPrev = useCallback(
     (e: React.MouseEvent) => {
@@ -91,13 +80,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     (e: React.TouchEvent) => {
       if (touchStartX.current === null) return;
       const diff = touchStartX.current - e.changedTouches[0].clientX;
-      const SWIPE_THRESHOLD = 50;
-      if (Math.abs(diff) > SWIPE_THRESHOLD) {
+      if (Math.abs(diff) > 50) {
         if (diff > 0) {
-          // Swiped left — go next
           setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
         } else {
-          // Swiped right — go prev
           setCurrentIndex((prev) => (prev === 0 ? photos.length - 1 : prev - 1));
         }
       }
@@ -111,192 +97,126 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden fade-up transition-all duration-300 hover:scale-[1.015] hover:shadow-glow-amber hover:border-[rgba(232,168,124,0.3)] border border-transparent"
-      style={{ willChange: "transform" }}
+      className="group block rounded-2xl overflow-hidden bg-surface border border-divider hover:shadow-card-hover hover:border-amber/20 transition-all duration-300"
     >
-      {/* Full-bleed image — photo dominates at ~65% of card */}
+      {/* ── CLEAN IMAGE — no text overlays except minimal badge ── */}
       <div
-        className="relative aspect-[4/3] overflow-hidden bg-surface"
+        className="relative aspect-[4/3] overflow-hidden bg-highlight"
         onTouchStart={hasMultiple ? handleTouchStart : undefined}
         onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
       >
-        {/* Photo carousel */}
         {currentPhoto ? (
           <FallbackImage
             src={currentPhoto}
             alt={listing.address}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
             loading="lazy"
           />
         ) : (
-          <Image
-            src="/images/listing-exterior.png"
-            alt={listing.address}
-            fill
-            className="absolute inset-0 object-cover opacity-60 group-hover:scale-[1.04] transition-transform duration-700 ease-out"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <div className="absolute inset-0 flex items-center justify-center bg-highlight">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-tertiary/30">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            </svg>
+          </div>
         )}
 
-        {/* Arrow buttons — only on hover, only when multiple photos */}
+        {/* Arrows — only on hover */}
         {hasMultiple && (
           <>
-            {/* Left arrow */}
             <button
               type="button"
               onClick={goPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 hover:text-white cursor-pointer"
-              aria-label="Previous photo"
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              aria-label="Previous"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
             </button>
-
-            {/* Right arrow */}
             <button
               type="button"
               onClick={goNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-black/50 text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70 hover:text-white cursor-pointer"
-              aria-label="Next photo"
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              aria-label="Next"
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
             </button>
           </>
         )}
 
-        {/* Photo count badge — top right, below specs pill row */}
+        {/* Dots — clean, bottom center */}
         {hasMultiple && (
-          <div className="absolute top-10 right-3 z-10">
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/70 text-white backdrop-blur-md border border-white/10">
-              {currentIndex + 1}/{photos.length}
-            </span>
-          </div>
-        )}
-
-        {/* Dot indicators — cap at 7 visible */}
-        {hasMultiple && (
-          <div className="absolute bottom-[72px] left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
-            {(photos.length <= 7 ? photos : photos.slice(0, 7)).map((_, i) => (
-              <button
+          <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1">
+            {(photos.length <= 5 ? photos : photos.slice(0, 5)).map((_, i) => (
+              <span
                 key={i}
-                type="button"
-                onClick={(e) => goTo(i, e)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-200 cursor-pointer ${
-                  (photos.length <= 7 ? i === currentIndex : (i < 6 ? i === currentIndex : currentIndex >= 6))
-                    ? "bg-white w-2.5"
-                    : "bg-white/50 hover:bg-white/70"
+                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                  (photos.length <= 5 ? i === currentIndex : (i < 4 ? i === currentIndex : currentIndex >= 4))
+                    ? "bg-white w-2 shadow-sm"
+                    : "bg-white/50"
                 }`}
-                aria-label={`Go to photo ${i + 1}`}
               />
             ))}
           </div>
         )}
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none" />
-
-        {/* TOP ROW — status badge + specs pill */}
-        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-          {/* Status badge */}
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-md ${
-            listing.status === "off_market"
-              ? "bg-amber-500/90 text-white"
-              : isRent
-                ? "bg-blue-500/90 text-white"
-                : "bg-black/70 text-white border border-white/10"
+        {/* Single small badge — top left only */}
+        <div className="absolute top-2.5 left-2.5">
+          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm ${
+            isRent ? "bg-blue-500/90 text-white" : "bg-white/90 text-ink shadow-sm"
           }`}>
-            {listing.status === "off_market" ? "Off Market" : isRent ? "For Rent" : "For Sale"}
+            {isRent ? "Rent" : "Sale"}
           </span>
+        </div>
+      </div>
 
-          {/* Specs pill */}
+      {/* ── DETAILS BELOW IMAGE — clean, readable ── */}
+      <div className="p-3.5">
+        {/* Price + specs row */}
+        <div className="flex items-baseline justify-between gap-2 mb-1">
+          <p className="text-[1.05rem] font-bold text-ink tracking-tight leading-none">
+            {price}
+          </p>
           {specs && (
-            <span className="text-[10px] font-medium px-2.5 py-1 rounded-full bg-black/70 text-white backdrop-blur-md border border-white/10 whitespace-nowrap">
+            <p className="text-[11px] text-tertiary font-medium shrink-0">
               {specs}
-            </span>
+            </p>
           )}
         </div>
 
-        {/* Community buzz badge — prominent when active */}
-        {commentCount > 0 && (
-          <div className="absolute bottom-[72px] right-3">
-            <span className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-1.5 rounded-full backdrop-blur-md ${
-              commentCount >= 5
-                ? "bg-amber/90 text-white shadow-lg shadow-amber/20"
-                : commentCount >= 3
-                  ? "bg-black/80 text-[#E8A87C] border border-[rgba(232,168,124,0.3)]"
-                  : "bg-black/60 text-white border border-white/10"
-            }`}>
-              {commentCount >= 5 ? (
-                <>
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-                  </span>
-                  {commentCount} people talking
-                </>
-              ) : (
-                <>
-                  {commentCount} {commentCount === 1 ? "take" : "takes"}
-                </>
-              )}
-            </span>
-            {/* Verified badge for 3+ comments */}
-            {commentCount >= 3 && (
-              <span className="block mt-1 text-[9px] text-center text-white/50 font-medium">
-                Verified neighbors
-              </span>
-            )}
-          </div>
-        )}
+        {/* Address */}
+        <p className="text-[13px] text-secondary truncate leading-tight">
+          {listing.address}, {listing.city}
+        </p>
 
-        {/* BOTTOM OVERLAY — price, address, time */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
-          <div className="flex items-end justify-between gap-2">
-            <div className="min-w-0">
-              {/* Price — large amber */}
-              <p className="text-[1.15rem] font-bold tracking-tight text-[#E8A87C] leading-none mb-1">
-                {price}
-              </p>
-              {/* Address */}
-              <p className="text-[13px] font-medium text-white/90 truncate leading-tight">
-                {listing.address}
-              </p>
-              <p className="text-[11px] text-white/50 truncate">
-                {listing.city}, {listing.state}
-              </p>
-            </div>
-            {/* Listed time */}
-            {listedAgo && (
-              <span className="text-[11px] text-white/40 shrink-0 pb-0.5">{listedAgo}</span>
-            )}
-          </div>
-
-          {/* Top comment preview */}
-          {listing.topComment && (
-            <div className="mt-2 pt-2 border-t border-white/10">
-              <p className="text-[12px] text-white/70 leading-snug line-clamp-1 italic">
-                &ldquo;{listing.topComment.content}&rdquo;
-              </p>
-              <p className="text-[10px] text-white/40 mt-0.5">
-                — {listing.topComment.name}
+        {/* Comment / social layer */}
+        {listing.topComment ? (
+          <div className="mt-2.5 pt-2.5 border-t border-divider">
+            <p className="text-[12px] text-ink leading-snug line-clamp-2">
+              &ldquo;{listing.topComment.content}&rdquo;
+            </p>
+            <div className="flex items-center justify-between mt-1.5">
+              <p className="text-[11px] text-tertiary">
+                {listing.topComment.name}
                 {commentCount > 1 && (
-                  <span className="ml-1.5 text-[#E8A87C]/70 font-medium not-italic">
+                  <span className="text-amber font-medium ml-1">
                     +{commentCount - 1} more
                   </span>
                 )}
               </p>
+              {listedAgo && (
+                <span className="text-[10px] text-tertiary">{listedAgo}</span>
+              )}
             </div>
-          )}
-
-          {!listing.topComment && (
-            <p className="mt-2 text-[11px] text-white/30 group-hover:text-[#E8A87C]/60 transition-colors pt-2 border-t border-white/10">
-              Be the first to speak up &rarr;
+          </div>
+        ) : (
+          <div className="mt-2.5 pt-2.5 border-t border-divider flex items-center justify-between">
+            <p className="text-[11px] text-tertiary group-hover:text-amber transition-colors">
+              Drop your take &rarr;
             </p>
-          )}
-        </div>
+            {listedAgo && (
+              <span className="text-[10px] text-tertiary">{listedAgo}</span>
+            )}
+          </div>
+        )}
       </div>
     </Link>
   );
