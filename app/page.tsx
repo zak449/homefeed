@@ -14,6 +14,7 @@ import { autoSyncCity } from "@/lib/auto-sync";
 import { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
+import SplitMapLayout from "@/components/SplitMapLayout";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -776,7 +777,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         </div>
       ) : (
         /* ====== FILTERED / SEARCH VIEW ====== */
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
           <div className="mb-8">
             <Suspense>
               <SearchBar />
@@ -832,6 +833,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </div>
 
           {/* Listings */}
+          <SplitMapLayout
+            listings={sortedListings.map((l) => ({
+              id: l.id,
+              address: l.address,
+              city: l.city,
+              latitude: l.latitude ?? null,
+              longitude: l.longitude ?? null,
+              price: l.price,
+              listingType: l.listingType,
+            }))}
+          >
           {sortedListings.length === 0 ? (
             <div className="text-center py-16">
               <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-highlight border border-divider flex items-center justify-center">
@@ -881,6 +893,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               communityMoments={[]}
             />
           )}
+          </SplitMapLayout>
         </div>
       )}
 
