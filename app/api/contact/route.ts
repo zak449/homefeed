@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { verifyTurnstile } from "@/lib/verify-turnstile";
 
 /** Escape user input for safe insertion into HTML */
 function escapeHtml(str: string): string {
@@ -30,7 +31,24 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, email, subject, message } = body;
+    const { name, email, subject, message, turnstileToken } = body;
+
+    // Turnstile verification (skipped if TURNSTILE_SECRET_KEY is not set)
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: "Verification required" },
+          { status: 400 }
+        );
+      }
+      const valid = await verifyTurnstile(turnstileToken);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "Verification failed" },
+          { status: 403 }
+        );
+      }
+    }
 
     // Validate required fields
     if (!name || typeof name !== "string" || name.trim().length === 0) {

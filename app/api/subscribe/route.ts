@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { addSubscriber, trackKlaviyoEvent } from "@/lib/klaviyo";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { verifyTurnstile } from "@/lib/verify-turnstile";
 
 // ── Validation ─────────────────────────────────────────────
 
@@ -25,11 +26,29 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { email, phone, source } = body as {
+    const { email, phone, source, turnstileToken } = body as {
       email?: string;
       phone?: string;
       source?: string;
+      turnstileToken?: string;
     };
+
+    // Turnstile verification (skipped if TURNSTILE_SECRET_KEY is not set)
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      if (!turnstileToken) {
+        return NextResponse.json(
+          { error: "Verification required" },
+          { status: 400 }
+        );
+      }
+      const valid = await verifyTurnstile(turnstileToken);
+      if (!valid) {
+        return NextResponse.json(
+          { error: "Verification failed" },
+          { status: 403 }
+        );
+      }
+    }
 
     // Validate email
     if (!email || !EMAIL_RE.test(email)) {

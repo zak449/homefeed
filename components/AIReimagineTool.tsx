@@ -7,6 +7,9 @@ interface AIReimagineToolProps {
   address: string;
 }
 
+// ---------------------------------------------------------------------------
+// Style filter presets (kept as secondary feature)
+// ---------------------------------------------------------------------------
 const STYLES = ["Modern", "Mediterranean", "Farmhouse", "Industrial", "Minimalist"] as const;
 type Style = (typeof STYLES)[number];
 
@@ -34,6 +37,165 @@ const STYLE_DESCRIPTIONS: Record<Style, string> = {
   Minimalist: "Bright, airy, stripped-back simplicity",
 };
 
+// ---------------------------------------------------------------------------
+// Renovation idea categories & cards
+// ---------------------------------------------------------------------------
+interface RenovationIdea {
+  emoji: string;
+  name: string;
+  cost: string;
+  valueAdd: string;
+  description: string;
+}
+
+interface IdeaCategory {
+  label: string;
+  emoji: string;
+  ideas: RenovationIdea[];
+}
+
+const IDEA_CATEGORIES: IdeaCategory[] = [
+  {
+    label: "Curb Appeal",
+    emoji: "\u{1F3E1}",
+    ideas: [
+      {
+        emoji: "\u{1F3A8}",
+        name: "Fresh paint",
+        cost: "$1K\u20134K",
+        valueAdd: "+$5K\u201315K value",
+        description: "New exterior paint with modern color palette to refresh the look instantly.",
+      },
+      {
+        emoji: "\u{1F333}",
+        name: "New landscaping",
+        cost: "$3K\u20138K",
+        valueAdd: "+$10K\u201320K value",
+        description: "Professional landscaping with native plants, stone paths, and curb-side trees.",
+      },
+      {
+        emoji: "\u{1F6AA}",
+        name: "Modern front door",
+        cost: "$500\u20132K",
+        valueAdd: "+$3K\u20138K value",
+        description: "Statement entry door with sidelights or smart lock hardware.",
+      },
+      {
+        emoji: "\u{1F4A1}",
+        name: "Outdoor lighting",
+        cost: "$800\u20133K",
+        valueAdd: "+$2K\u20136K value",
+        description: "Path lights, uplighting on trees, and a modern porch fixture.",
+      },
+    ],
+  },
+  {
+    label: "Backyard Dreams",
+    emoji: "\u{1F3D6}\uFE0F",
+    ideas: [
+      {
+        emoji: "\u{1F3CA}",
+        name: "Add a pool",
+        cost: "$25K\u201360K",
+        valueAdd: "+$30K\u201360K value",
+        description: "In-ground pool with patio surround\u2014the ultimate backyard upgrade.",
+      },
+      {
+        emoji: "\u{1F525}",
+        name: "Fire pit area",
+        cost: "$1K\u20135K",
+        valueAdd: "+$4K\u201310K value",
+        description: "Built-in fire pit with seating wall and gravel base for year-round entertaining.",
+      },
+      {
+        emoji: "\u{1F373}",
+        name: "Outdoor kitchen",
+        cost: "$8K\u201325K",
+        valueAdd: "+$15K\u201330K value",
+        description: "Grill station, countertops, and bar seating under a pergola.",
+      },
+      {
+        emoji: "\u{1F33F}",
+        name: "Garden oasis",
+        cost: "$2K\u20136K",
+        valueAdd: "+$5K\u201312K value",
+        description: "Raised garden beds, water feature, and zen-inspired plantings.",
+      },
+    ],
+  },
+  {
+    label: "Interior Refresh",
+    emoji: "\u2728",
+    ideas: [
+      {
+        emoji: "\u{1F374}",
+        name: "Modern kitchen",
+        cost: "$15K\u201340K",
+        valueAdd: "+$20K\u201350K value",
+        description: "Quartz counters, shaker cabinets, stainless appliances, and subway tile backsplash.",
+      },
+      {
+        emoji: "\u{1F3DB}\uFE0F",
+        name: "Open floor plan",
+        cost: "$10K\u201330K",
+        valueAdd: "+$15K\u201340K value",
+        description: "Remove walls between kitchen, dining, and living for a flowing modern layout.",
+      },
+      {
+        emoji: "\u{1FAB5}",
+        name: "Hardwood floors",
+        cost: "$6K\u201315K",
+        valueAdd: "+$10K\u201325K value",
+        description: "Engineered hardwood throughout main living areas for warmth and character.",
+      },
+      {
+        emoji: "\u{1F6C1}",
+        name: "Spa bathroom",
+        cost: "$10K\u201325K",
+        valueAdd: "+$15K\u201330K value",
+        description: "Walk-in rain shower, freestanding tub, double vanity, and heated floors.",
+      },
+    ],
+  },
+  {
+    label: "Smart Upgrades",
+    emoji: "\u{1F4B0}",
+    ideas: [
+      {
+        emoji: "\u{1F4C8}",
+        name: "Best ROI renovations",
+        cost: "$5K\u201315K",
+        valueAdd: "+$12K\u201330K value",
+        description: "Garage door, minor kitchen remodel, and siding replacement\u2014top ROI projects.",
+      },
+      {
+        emoji: "\u{1F4B5}",
+        name: "Cheapest upgrades, biggest impact",
+        cost: "$500\u20132K",
+        valueAdd: "+$3K\u201310K value",
+        description: "Paint, hardware swaps, light fixtures, and deep cleaning for a fresh feel.",
+      },
+      {
+        emoji: "\u{1F331}",
+        name: "Energy efficient",
+        cost: "$3K\u201312K",
+        valueAdd: "+$8K\u201320K value",
+        description: "New windows, insulation, smart thermostat, and LED lighting throughout.",
+      },
+      {
+        emoji: "\u{1F4F1}",
+        name: "Smart home",
+        cost: "$2K\u20138K",
+        valueAdd: "+$5K\u201315K value",
+        description: "Smart locks, cameras, automated blinds, voice assistants, and app-controlled lighting.",
+      },
+    ],
+  },
+];
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
 export default function AIReimagineTool({ photos, address }: AIReimagineToolProps) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [selectedStyle, setSelectedStyle] = useState<Style | null>(null);
@@ -42,10 +204,12 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
   const [isDragging, setIsDragging] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [copied, setCopied] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState<RenovationIdea | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   const currentPhoto = photos[selectedPhotoIndex] || photos[0];
 
+  // --- Style helpers --------------------------------------------------------
   function handleStyleSelect(style: Style) {
     if (selectedStyle === style) {
       setSelectedStyle(null);
@@ -82,6 +246,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
     [updateSlider]
   );
 
+  // --- Share ----------------------------------------------------------------
   async function handleShare() {
     if (!currentPhoto) return;
     try {
@@ -89,7 +254,6 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback: create a temporary input
       const input = document.createElement("input");
       input.value = currentPhoto;
       document.body.appendChild(input);
@@ -101,27 +265,149 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
     }
   }
 
+  // --- Render ---------------------------------------------------------------
   return (
     <div className="bg-surface rounded-card border border-divider shadow-soft overflow-hidden">
-      {/* Header */}
+      {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="px-5 pt-5 pb-3">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber to-amber/60 flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber to-amber/60 flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
           </div>
-          <h3 className="font-display text-title text-ink tracking-tight">Style Visualizer</h3>
+          <h3 className="font-display text-title text-ink tracking-tight">Imagine what it could be</h3>
           <span className="ml-auto text-[10px] font-semibold tracking-wider uppercase text-amber bg-amber/8 px-2 py-0.5 rounded-full">
-            Preview
+            Beta
           </span>
         </div>
-        <p className="text-caption text-secondary ml-8">
-          Preview this property with different style filters applied
+        <p className="text-caption text-secondary ml-9">
+          Explore renovation ideas, estimate costs, and preview styles for this property
         </p>
       </div>
 
-      {/* Photo Selector Thumbnails */}
+      {/* ── Coming soon: AI-generated visualization badge ────────────────── */}
+      <div className="mx-5 mb-3 px-3.5 py-2.5 bg-gradient-to-r from-amber/5 via-amber/8 to-purple-500/5 border border-amber/15 rounded-button">
+        <div className="flex items-center gap-2.5">
+          <div className="w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center flex-shrink-0">
+            <svg className="w-3 h-3 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold text-ink">
+              Coming soon: AI-generated visualization
+            </p>
+            <p className="text-[10px] text-secondary mt-0.5">
+              Full AI rendering is being developed. For now, browse renovation ideas and apply style filters to the listing photos.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Dream prompt input ───────────────────────────────────────────── */}
+      <div className="px-5 pb-4">
+        <label className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2 block">
+          Describe your dream renovation...
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. modern kitchen with white cabinets, add a pool, update the landscaping..."
+            className="w-full pl-10 pr-24 py-2.5 text-caption text-ink bg-highlight border border-divider rounded-button placeholder:text-tertiary focus:outline-none focus:border-amber/50 focus:ring-1 focus:ring-amber/20 transition-all"
+          />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-tertiary">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber bg-amber/8 px-2 py-0.5 rounded-full">
+              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              AI Coming Soon
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Idea Categories ──────────────────────────────────────────────── */}
+      <div className="pb-2">
+        {IDEA_CATEGORIES.map((category) => (
+          <div key={category.label} className="mb-4">
+            {/* Category header */}
+            <div className="px-5 mb-2 flex items-center gap-1.5">
+              <span className="text-sm">{category.emoji}</span>
+              <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary">
+                {category.label}
+              </p>
+            </div>
+
+            {/* Horizontal scrolling cards */}
+            <div className="flex gap-2.5 overflow-x-auto px-5 pb-2 scrollbar-hide">
+              {category.ideas.map((idea) => {
+                const isSelected = selectedIdea?.name === idea.name;
+                return (
+                  <button
+                    key={idea.name}
+                    onClick={() => setSelectedIdea(isSelected ? null : idea)}
+                    className={`flex-shrink-0 w-[120px] rounded-xl border p-3 text-left transition-all duration-200 ${
+                      isSelected
+                        ? "bg-amber/5 border-amber/40 shadow-soft ring-1 ring-amber/20"
+                        : "bg-highlight/60 border-divider hover:border-ink/20 hover:shadow-soft"
+                    }`}
+                  >
+                    <span className="text-xl block mb-1.5">{idea.emoji}</span>
+                    <p className="text-[12px] font-semibold text-ink leading-tight mb-1 line-clamp-2">
+                      {idea.name}
+                    </p>
+                    <p className="text-[10px] font-semibold text-amber mb-0.5">
+                      {idea.cost}
+                    </p>
+                    <p className="text-[10px] text-emerald-600 font-medium">
+                      {idea.valueAdd}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Selected idea detail panel ────────────────────────────────────── */}
+      {selectedIdea && (
+        <div className="mx-5 mb-4 p-4 bg-gradient-to-br from-amber/5 to-transparent border border-amber/15 rounded-xl">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">{selectedIdea.emoji}</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-caption font-semibold text-ink">{selectedIdea.name}</p>
+              <p className="text-[11px] text-secondary mt-1 leading-relaxed">
+                {selectedIdea.description}
+              </p>
+              <div className="flex items-center gap-3 mt-2">
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-ink bg-ink/5 px-2 py-0.5 rounded-full">
+                  <svg className="w-2.5 h-2.5 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Est. cost: {selectedIdea.cost}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-500/8 px-2 py-0.5 rounded-full">
+                  <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                  </svg>
+                  {selectedIdea.valueAdd}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Photo Selector Thumbnails ─────────────────────────────────────── */}
       {photos.length > 1 && (
         <div className="px-5 pb-3">
           <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2">
@@ -155,7 +441,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
         </div>
       )}
 
-      {/* Image Area */}
+      {/* ── Image Preview Area ────────────────────────────────────────────── */}
       <div className="relative">
         <div
           ref={sliderRef}
@@ -205,7 +491,6 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
               <div
                 className={`absolute inset-0 bg-gradient-to-br ${STYLE_OVERLAYS[selectedStyle]}`}
               />
-              {/* Style label */}
               {!showComparison && (
                 <div className="absolute top-3 right-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
                   <svg className="w-3 h-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -245,7 +530,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
           {!selectedStyle && currentPhoto && (
             <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent flex items-end justify-center pb-6 pointer-events-none">
               <p className="text-white/90 text-sm font-medium bg-ink/40 backdrop-blur-sm px-4 py-2 rounded-full">
-                Select a style below to preview a new look
+                Apply a style filter below to preview a new look
               </p>
             </div>
           )}
@@ -279,37 +564,10 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
         </div>
       )}
 
-      {/* Text Prompt Input */}
+      {/* ── Style Filter Section (secondary) ──────────────────────────────── */}
       <div className="px-5 py-4 border-t border-divider">
-        <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2">
-          Describe your vision
-        </p>
-        <div className="relative">
-          <input
-            type="text"
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder='e.g. "paint it blue", "add a garden", "modern kitchen"'
-            className="w-full px-4 py-2.5 text-caption text-ink bg-highlight border border-divider rounded-button placeholder:text-tertiary focus:outline-none focus:border-amber/50 focus:ring-1 focus:ring-amber/20 transition-all"
-          />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber bg-amber/8 px-2 py-0.5 rounded-full">
-              <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Coming Soon
-            </span>
-          </div>
-        </div>
-        <p className="text-[10px] text-tertiary mt-1.5 ml-1">
-          Text-based generation is in development. Use the style presets below for instant previews.
-        </p>
-      </div>
-
-      {/* Style Preset Pills */}
-      <div className="px-5 pb-4">
         <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-3">
-          Quick style presets
+          Style filters
         </p>
         <div className="flex flex-wrap gap-2">
           {STYLES.map((style) => {
@@ -331,27 +589,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
         </div>
       </div>
 
-      {/* Coming Soon Note */}
-      <div className="mx-5 mb-4 px-4 py-3 bg-amber/5 border border-amber/15 rounded-button">
-        <div className="flex items-start gap-2.5">
-          <div className="w-5 h-5 rounded-full bg-amber/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <svg className="w-3 h-3 text-amber" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-caption font-semibold text-ink">
-              Full AI Generation — Coming Soon
-            </p>
-            <p className="text-[11px] text-secondary mt-0.5">
-              We are building real AI-powered reimagining that will generate new images from text prompts.
-              The current presets apply visual filters for a quick style preview.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer actions */}
+      {/* ── Footer actions ────────────────────────────────────────────────── */}
       <div className="px-5 pb-5 flex items-center justify-between border-t border-divider pt-4">
         <p className="text-[11px] text-tertiary truncate mr-3">
           {address}

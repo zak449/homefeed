@@ -72,6 +72,7 @@ export default function CommentSection({
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState("");
   const [postingReply, setPostingReply] = useState(false);
+  const [lastPostedComment, setLastPostedComment] = useState<string | null>(null);
 
   // Gate states
   const [isJoined, setIsJoined] = useState(false);
@@ -190,6 +191,7 @@ export default function CommentSection({
       if (res.ok) {
         const newComment = await res.json();
         setComments((prev) => [...prev, newComment]);
+        setLastPostedComment(content);
         setContent("");
         setSelectedStyle(null);
         setVisionOpen(false);
@@ -197,7 +199,7 @@ export default function CommentSection({
         setShowReplyPrompt(true);
         setReplyEmail(email);
         setPostSuccess(true);
-        setTimeout(() => setPostSuccess(false), 3000);
+        setTimeout(() => setPostSuccess(false), 8000);
         try {
           localStorage.setItem("hf_commenter", JSON.stringify({ name, email, zip }));
         } catch {
@@ -502,6 +504,7 @@ export default function CommentSection({
               isLocked={isLocked}
               listingAddress={listingAddress}
               listingPrice={listingPrice}
+              listingId={listingId}
               verified={false}
               isReplyOpen={replyingTo === comment.id}
               onReplyToggle={() => {
@@ -696,11 +699,22 @@ export default function CommentSection({
               </div>
             )}
             {postSuccess && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 animate-fade-in">
-                <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
-                <p className="text-caption text-emerald-700 font-medium">Your take has been posted!</p>
+              <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 animate-fade-in">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <svg className="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-caption text-emerald-700 font-medium">Your take has been posted!</p>
+                </div>
+                <div className="flex items-center gap-3 pl-6">
+                  <span className="text-caption text-secondary whitespace-nowrap">Share your take</span>
+                  <SocialShareRow
+                    commentText={lastPostedComment ?? ""}
+                    listingAddress={listingAddress}
+                    listingId={listingId}
+                    compact
+                  />
+                </div>
               </div>
             )}
 
@@ -792,6 +806,7 @@ function CommentItem({
   isLocked,
   listingAddress = "",
   listingPrice = "",
+  listingId = "",
   verified = false,
   isReplyOpen = false,
   onReplyToggle,
@@ -808,6 +823,7 @@ function CommentItem({
   isLocked: boolean;
   listingAddress?: string;
   listingPrice?: string;
+  listingId?: string;
   verified?: boolean;
   isReplyOpen?: boolean;
   onReplyToggle?: () => void;
@@ -820,6 +836,20 @@ function CommentItem({
   const [showCopied, setShowCopied] = useState(false);
   const [helpful, setHelpful] = useState(0);
   const [helpfulVoted, setHelpfulVoted] = useState(false);
+  const [showSharePopover, setShowSharePopover] = useState(false);
+  const sharePopoverRef = useRef<HTMLDivElement>(null);
+
+  // Close popover on outside click
+  useEffect(() => {
+    if (!showSharePopover) return;
+    function handleClick(e: MouseEvent) {
+      if (sharePopoverRef.current && !sharePopoverRef.current.contains(e.target as Node)) {
+        setShowSharePopover(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [showSharePopover]);
 
   const reactionTotal = getReactionTotal(comment);
   const isHot = reactionTotal >= 5;
@@ -921,22 +951,31 @@ function CommentItem({
             </button>
           )}
 
-          {/* Share button */}
-          <button
-            onClick={handleShare}
-            className="text-caption text-tertiary hover:text-ink transition-colors ml-1"
-            title="Share this take"
-          >
-            {showCopied ? (
-              <span className="text-ink">Copied!</span>
-            ) : (
+          {/* Share button with popover */}
+          <div className="relative ml-1" ref={sharePopoverRef}>
+            <button
+              onClick={() => setShowSharePopover((v) => !v)}
+              className={`text-caption transition-colors ${showSharePopover ? "text-amber" : "text-tertiary hover:text-ink"}`}
+              title="Share this take"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                 <polyline points="16 6 12 2 8 6" />
                 <line x1="12" y1="2" x2="12" y2="15" />
               </svg>
+            </button>
+            {showSharePopover && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-surface border border-divider rounded-xl shadow-lg p-2.5 animate-fade-in z-20 whitespace-nowrap">
+                <SocialShareRow
+                  commentText={comment.content}
+                  listingAddress={listingAddress}
+                  listingId={listingId}
+                  compact
+                />
+                <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-surface border-r border-b border-divider rotate-45" />
+              </div>
             )}
-          </button>
+          </div>
 
           {listingAddress && (
             <ShareableComment
@@ -977,6 +1016,119 @@ function CommentItem({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+/* ═══ Social Share Row ═══ */
+function SocialShareRow({
+  commentText,
+  listingAddress,
+  listingId,
+  compact = false,
+}: {
+  commentText: string;
+  listingAddress: string;
+  listingId: string;
+  compact?: boolean;
+}) {
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  const truncated = commentText.length > 200 ? commentText.slice(0, 197) + "..." : commentText;
+  const listingUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/listing/${listingId}`
+    : `https://gwakgwak.com/listing/${listingId}`;
+  const shareBody = `"${truncated}" \u{1F3E0} See what neighbors are saying about ${listingAddress} on gwak gwak`;
+  const encodedText = encodeURIComponent(shareBody);
+  const encodedUrl = encodeURIComponent(listingUrl);
+
+  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
+  const smsUrl = `sms:?body=${encodedText}%20${encodedUrl}`;
+
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(`${shareBody} ${listingUrl}`).catch(() => {});
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(listingUrl).catch(() => {});
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
+  const btnBase = compact
+    ? "w-8 h-8 rounded-full flex items-center justify-center transition-all hover:scale-110"
+    : "w-9 h-9 rounded-full flex items-center justify-center transition-all hover:scale-110";
+
+  return (
+    <div className={`flex items-center ${compact ? "gap-1.5" : "gap-2"}`}>
+      {/* Twitter / X */}
+      <a
+        href={twitterUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${btnBase} bg-[#1DA1F2]/10 text-[#1DA1F2] hover:bg-[#1DA1F2]/20`}
+        title="Share on X"
+      >
+        <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      </a>
+
+      {/* Instagram — copy for stories */}
+      <button
+        onClick={handleCopyText}
+        className={`${btnBase} bg-[#E1306C]/10 text-[#E1306C] hover:bg-[#E1306C]/20`}
+        title="Copy for Instagram Stories"
+      >
+        <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+      </button>
+
+      {/* Facebook */}
+      <a
+        href={facebookUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${btnBase} bg-[#1877F2]/10 text-[#1877F2] hover:bg-[#1877F2]/20`}
+        title="Share on Facebook"
+      >
+        <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </a>
+
+      {/* iMessage / SMS */}
+      <a
+        href={smsUrl}
+        className={`${btnBase} bg-[#34C759]/10 text-[#34C759] hover:bg-[#34C759]/20`}
+        title="Share via iMessage"
+      >
+        <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.477 2 2 5.813 2 10.5c0 2.614 1.384 4.957 3.563 6.563C5.2 18.594 4.2 20.5 2.5 22c2.5 0 5-1 6.854-2.688.863.122 1.753.188 2.646.188C17.523 2 22 5.813 22 10.5S17.523 19 12 19c-.893 0-1.783-.066-2.646-.188C7.5 21 5 22 2.5 22c1.7-1.5 2.7-3.406 3.063-4.937C3.384 15.457 2 13.114 2 10.5 2 5.813 6.477 2 12 2z"/>
+        </svg>
+      </a>
+
+      {/* Copy link */}
+      <button
+        onClick={handleCopyLink}
+        className={`${btnBase} ${copiedLink ? "bg-emerald-500/15 text-emerald-600" : "bg-ink/5 text-secondary hover:bg-ink/10"}`}
+        title={copiedLink ? "Copied!" : "Copy link"}
+      >
+        {copiedLink ? (
+          <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 13l4 4L19 7"/>
+          </svg>
+        ) : (
+          <svg width={compact ? 13 : 15} height={compact ? 13 : 15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+        )}
+      </button>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Turnstile from "./Turnstile";
 
 const NAV_COLUMNS = [
   {
@@ -66,6 +67,7 @@ const SOCIALS = [
 export default function Footer() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function handleSubscribe(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +77,7 @@ export default function Footer() {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, source: "footer" }),
+        body: JSON.stringify({ email, source: "footer", ...(turnstileToken ? { turnstileToken } : {}) }),
       });
       if (res.ok) {
         setStatus("success");
@@ -148,6 +150,7 @@ export default function Footer() {
             <p className="text-sm text-white/60">
               Get notified about trending listings and the hottest takes.
             </p>
+            <Turnstile onVerify={setTurnstileToken} size="compact" />
             <form onSubmit={handleSubscribe} className="flex gap-2">
               <input
                 type="email"

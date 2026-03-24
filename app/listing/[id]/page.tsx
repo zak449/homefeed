@@ -283,6 +283,35 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
+        {/* ── REIMAGINE — right after price, before conversation ── */}
+        {listing.photos.length > 0 && (
+          <div className="mb-6 rounded-2xl border border-amber/20 bg-gradient-to-br from-amber/[0.03] to-surface overflow-hidden shadow-soft">
+            <div className="p-5">
+              <AIReimagineTool photos={listing.photos} address={listing.address} />
+            </div>
+          </div>
+        )}
+
+        {/* ── NEIGHBOR INTEL — what the community knows ── */}
+        <div className="mb-6 rounded-2xl border border-divider bg-surface overflow-hidden shadow-soft">
+          <div className="p-5">
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="text-lg">🔍</span>
+              <h2 className="text-title text-ink font-bold">The real tea on this place</h2>
+            </div>
+            <DecisionComparison
+              comments={topComments.map(c => ({
+                name: c.name,
+                content: c.content,
+                createdAt: c.createdAt.toISOString(),
+              }))}
+              description={listing.description}
+              address={listing.address}
+              commentCount={commentCount}
+            />
+          </div>
+        </div>
+
         {/* ── THE CONVERSATION ── */}
         <div className="mb-8">
           <CommentSection
@@ -294,77 +323,29 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           />
         </div>
 
-        {/* ── Email capture ── */}
-        <div className="mb-8 bg-surface border border-divider rounded-card p-5 shadow-soft">
-          <p className="text-title text-ink mb-1">
-            Want to know when people react to this listing?
-          </p>
-          <p className="text-caption text-secondary mb-3">
-            Get notified when new comments drop.
-          </p>
-          <EmailCapture variant="inline" source={`listing-${listing.id}`} />
+        {/* ── Ask the neighborhood ── */}
+        <div className="mb-8 rounded-2xl border border-divider bg-surface overflow-hidden shadow-soft">
+          <div className="p-5">
+            <div className="flex items-center gap-2.5 mb-2">
+              <span className="text-lg">🏘️</span>
+              <h2 className="text-title text-ink font-bold">Ask the neighborhood</h2>
+            </div>
+            <p className="text-caption text-secondary mb-3">
+              Got questions? Verified locals have answers.
+            </p>
+            <NeighborQA zipCode={listing.zip} listingId={listing.id} />
+          </div>
         </div>
 
-        {/* ── AI Tools ── */}
-        <div className="space-y-4 mb-8">
-          {/* Decision Comparison */}
-          <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber/60 via-amber/30 to-transparent" />
-            <div className="p-5">
-              <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-                </div>
-                <h2 className="text-title text-ink">The real picture</h2>
-              </div>
-              <DecisionComparison
-                comments={topComments.map(c => ({
-                  name: c.name,
-                  content: c.content,
-                  createdAt: c.createdAt.toISOString(),
-                }))}
-                description={listing.description}
-                address={listing.address}
-                commentCount={commentCount}
-              />
-            </div>
-          </div>
-
-          {/* AI Reimagine */}
-          {listing.photos.length > 0 && (
-            <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-              <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-amber/30 to-amber/60" />
-              <div className="p-5">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-                  </div>
-                  <h2 className="text-title text-ink">Reimagine this property</h2>
-                </div>
-                <p className="text-caption text-secondary mb-3 pl-[38px]">
-                  See what this place could look like with a different style.
-                </p>
-                <AIReimagineTool photos={listing.photos} address={listing.address} />
-              </div>
-            </div>
-          )}
-
-          {/* Neighbor Q&A */}
-          <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
-            <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-amber/40 via-amber/50 to-amber/20" />
-            <div className="p-5">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="w-7 h-7 rounded-full bg-amber/10 flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                </div>
-                <h2 className="text-title text-ink">Ask the neighborhood</h2>
-              </div>
-              <p className="text-caption text-secondary mb-3 pl-[38px]">
-                Have a question about this block? Ask verified locals who actually live here.
-              </p>
-              <NeighborQA zipCode={listing.zip} listingId={listing.id} />
-            </div>
-          </div>
+        {/* ── Email capture ── */}
+        <div className="mb-8 bg-ink rounded-2xl p-5 text-center">
+          <p className="text-[15px] text-white font-bold mb-1">
+            Don&apos;t miss the tea ☕
+          </p>
+          <p className="text-caption text-white/60 mb-3">
+            Get notified when new takes drop on this listing.
+          </p>
+          <EmailCapture variant="inline" source={`listing-${listing.id}`} />
         </div>
 
         {/* ── Description ── */}

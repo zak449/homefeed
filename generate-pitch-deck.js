@@ -83,21 +83,21 @@ function darkSlide() {
 {
   const slide = pres.addSlide();
   fullBleedImage(slide, "hero-couple.jpg");
-  darkOverlay(slide, 60);
+  darkOverlay(slide, 65);
 
   slide.addText("gwak gwak", {
-    x: 0, y: 2.2, w: W, h: 1.5,
+    x: 0, y: 1.8, w: W, h: 1.5,
     fontSize: 72, fontFace: F.head, color: C.white,
     align: "center", bold: false, italic: true,
   });
 
-  slide.addText("the comment section real estate never had", {
-    x: 0, y: 3.6, w: W, h: 0.8,
+  slide.addText("the data layer for the next generation\nof real estate AI", {
+    x: 0, y: 3.3, w: W, h: 1.0,
     fontSize: 22, fontFace: F.body, color: C.amberSoft,
-    align: "center",
+    align: "center", lineSpacingMultiple: 1.3,
   });
 
-  slide.addText("Q1 2026  ·  Confidential", {
+  slide.addText("Seed Round  ·  Q1 2026  ·  Confidential", {
     x: 0, y: 6.5, w: W, h: 0.5,
     fontSize: 11, fontFace: F.body, color: C.mutedLight,
     align: "center", transparency: 30,
@@ -110,16 +110,21 @@ function darkSlide() {
 {
   const slide = pres.addSlide();
   fullBleedImage(slide, "neighbors.jpg");
-  darkOverlay(slide, 50);
+  darkOverlay(slide, 55);
 
   slide.addText(
-    "Your neighbor knows the truth about\nevery house on the block.\n\nThey've just never had a place to share it.",
+    "AI is about to help everyone buy a home.\n\nBut the most important data\ndoesn't exist yet.",
     {
-      x: 0.8, y: 1.8, w: 7, h: 4,
-      fontSize: 28, fontFace: F.head, color: C.white,
+      x: 0.8, y: 1.5, w: 8, h: 4,
+      fontSize: 30, fontFace: F.head, color: C.white,
       lineSpacingMultiple: 1.4, italic: true,
     }
   );
+
+  slide.addText("We're building it.", {
+    x: 0.8, y: 5.2, w: 8, h: 0.7,
+    fontSize: 22, fontFace: F.body, color: C.amberSoft,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -138,7 +143,7 @@ function darkSlide() {
   const stats = [
     { num: "85%", color: C.amber, desc: "of homebuyers say neighborhood\nmatters more than the house" },
     { num: "0", color: C.red, desc: "platforms let them hear\nfrom actual neighbors" },
-    { num: "$2.6B", color: C.text, desc: "Zillow's revenue.\nZero community features." },
+    { num: "$0", color: C.text, desc: "of real estate data captures\nverified community sentiment" },
   ];
 
   const colW = 3.5;
@@ -159,7 +164,6 @@ function darkSlide() {
     });
   });
 
-  // Dividers between stats
   for (let i = 1; i < 3; i++) {
     const x = startX + i * (colW + gap) - gap / 2;
     slide.addShape(pres.shapes.RECTANGLE, {
@@ -167,44 +171,59 @@ function darkSlide() {
       fill: { color: "E0DDD8" },
     });
   }
+
+  slide.addText("AI agents are already helping people buy homes. They pull MLS data, comps, and market trends.\nThe one thing they can't access: what the neighbors actually know.", {
+    x: 0.8, y: 5.6, w: 11, h: 0.9,
+    fontSize: 14, fontFace: F.head, color: C.muted, italic: true,
+    lineSpacingMultiple: 1.3,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 4: THE WORLD IS CHANGING — Light slide, amber borders
+// SLIDE 4: THE AGENTIC AI SHIFT — Light slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = lightSlide();
   addSlideNum(slide, 4);
 
-  slide.addText("THE WORLD IS CHANGING", {
+  slide.addText("THE AGENTIC AI SHIFT", {
     x: 0.8, y: 0.5, w: 6, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 4, bold: true,
   });
 
+  slide.addText("Real estate is being rebuilt\naround AI agents.", {
+    x: 0.8, y: 1.2, w: 10, h: 1.4,
+    fontSize: 36, fontFace: F.head, color: C.text, bold: true,
+    lineSpacingMultiple: 1.2,
+  });
+
   const items = [
-    "NAR commission settlement disrupted the agent model",
-    "Zillow removed climate risk data to protect agents",
-    "AI replaces search — but can't replace lived experience",
-    "Gen Z demands transparency for everything — except housing",
+    { text: "87% of brokerages now use AI tools daily", sub: "Delta Media, 2026" },
+    { text: "Lofty launched the first agentic AI OS for real estate", sub: "February 2026" },
+    { text: "McKinsey: $430-550B annual value unlock in RE through AI", sub: "Global real estate automation" },
+    { text: "NAR settlement + AI = the agent model is being rewritten", sub: "Commission disruption accelerating" },
   ];
 
-  const startY = 1.8;
-  const itemH = 1.1;
+  const startY = 2.9;
+  const itemH = 1.0;
 
-  items.forEach((text, i) => {
+  items.forEach((item, i) => {
     const y = startY + i * itemH;
-    amberLeftBorder(slide, 1.2, y + 0.1, 0.45);
-    slide.addText(text, {
-      x: 1.5, y, w: 9, h: 0.7,
-      fontSize: 20, fontFace: F.body, color: C.text,
-      lineSpacingMultiple: 1.2,
+    amberLeftBorder(slide, 1.2, y + 0.08, 0.5);
+    slide.addText(item.text, {
+      x: 1.5, y, w: 9, h: 0.5,
+      fontSize: 18, fontFace: F.body, color: C.text,
+    });
+    slide.addText(item.sub, {
+      x: 1.5, y: y + 0.42, w: 9, h: 0.35,
+      fontSize: 12, fontFace: F.body, color: C.muted, italic: true,
     });
   });
 
-  slide.addText("The infrastructure of home-buying trust is collapsing. Something new is coming.", {
-    x: 1.5, y: 6.0, w: 9, h: 0.6,
-    fontSize: 14, fontFace: F.head, color: C.muted, italic: true,
+  slide.addText("Every one of these AI agents needs ground truth data that doesn't exist in MLS. We're building it.", {
+    x: 0.8, y: 6.3, w: 11, h: 0.6,
+    fontSize: 14, fontFace: F.head, color: C.amber, italic: true,
   });
 }
 
@@ -217,21 +236,21 @@ function darkSlide() {
   leftHalfOverlay(slide);
 
   slide.addText("THIS IS", {
-    x: 0.8, y: 1.5, w: 5, h: 0.5,
+    x: 0.8, y: 1.2, w: 5, h: 0.5,
     fontSize: 12, fontFace: F.body, color: C.amberSoft,
     letterSpacing: 4, bold: true,
   });
 
   slide.addText("gwak gwak", {
-    x: 0.8, y: 2.0, w: 5, h: 1.2,
+    x: 0.8, y: 1.7, w: 5, h: 1.2,
     fontSize: 48, fontFace: F.head, color: C.white, italic: true,
   });
 
   slide.addText(
-    "A completely new way to engage with\nreal estate and community.\n\nSearch any address. See what neighbors\nare really saying. Drop your take.",
+    "The comment section real estate\nnever had.\n\nSearch any address. See what neighbors\nare really saying. Every verified take\nbecomes training data for the next\ngeneration of RE AI agents.",
     {
-      x: 0.8, y: 3.4, w: 5.5, h: 2.5,
-      fontSize: 17, fontFace: F.body, color: C.textLight,
+      x: 0.8, y: 3.0, w: 5.8, h: 3.2,
+      fontSize: 16, fontFace: F.body, color: C.textLight,
       lineSpacingMultiple: 1.5,
     }
   );
@@ -252,8 +271,8 @@ function darkSlide() {
 
   const steps = [
     { title: "Browse", num: "01", desc: "Search any address or zip.\nSee real neighbor takes.\nNo account needed." },
-    { title: "Verify", num: "02", desc: "Enter your zip code.\nYour location is your credential.\nNo sign-up friction." },
-    { title: "Gwak", num: "03", desc: "Drop your take.\nWarn buyers.\nEndorse your block." },
+    { title: "Verify", num: "02", desc: "Enter your zip code.\nYour location is your credential.\nGeo-locked verification." },
+    { title: "Gwak", num: "03", desc: "Drop your take.\nWarn buyers. Endorse your block.\nEvery take = a data point." },
   ];
 
   const colW = 3.4;
@@ -282,13 +301,12 @@ function darkSlide() {
     });
   });
 
-  // Bottom tagline
   slide.addShape(pres.shapes.RECTANGLE, {
     x: 0.8, y: 5.6, w: W - 1.6, h: 0.01,
     fill: { color: "E0DDD8" },
   });
 
-  slide.addText("Anyone can browse. Only verified locals can speak.", {
+  slide.addText("Anyone can browse. Only verified locals can speak. Every take trains AI.", {
     x: 0.8, y: 5.8, w: W - 1.6, h: 0.5,
     fontSize: 16, fontFace: F.head, color: C.amber, italic: true,
     align: "center",
@@ -296,11 +314,75 @@ function darkSlide() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 7: THE FOMO ENGINE — Light slide, secret weapon
+// SLIDE 7: THE .AI THESIS — Dark slide
+// ═══════════════════════════════════════════════════════════
+{
+  const slide = darkSlide();
+  addSlideNum(slide, 7);
+
+  slide.addText("THE .AI THESIS", {
+    x: 0.8, y: 0.5, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 4, bold: true,
+  });
+
+  slide.addText("We don't compete with AI.\nWe feed it.", {
+    x: 0.8, y: 1.2, w: 10, h: 1.6,
+    fontSize: 42, fontFace: F.head, color: C.textLight,
+    lineSpacingMultiple: 1.2, bold: true,
+  });
+
+  // Two columns: what AI does vs what it can't
+  slide.addText("WHAT AI DOES WELL", {
+    x: 0.8, y: 3.2, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 3,
+  });
+
+  const leftItems = ["Automated valuations & comps", "Market predictions & trends", "Virtual tours & 3D rendering", "Document processing & contracts"];
+  leftItems.forEach((item, i) => {
+    slide.addText(item, {
+      x: 0.8, y: 3.7 + i * 0.5, w: 5, h: 0.45,
+      fontSize: 14, fontFace: F.body, color: C.muted,
+    });
+  });
+
+  slide.addText("WHAT AI NEEDS FROM US", {
+    x: 7, y: 3.2, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.amberSoft,
+    letterSpacing: 3,
+  });
+
+  const rightItems = ["Does the basement actually flood?", "Are the neighbors fighting at 2am?", "Why did the last owner really sell?", "Is this block safe or just safe on paper?"];
+  rightItems.forEach((item, i) => {
+    amberLeftBorder(slide, 7, 3.8 + i * 0.5, 0.3);
+    slide.addText(item, {
+      x: 7.3, y: 3.7 + i * 0.5, w: 5, h: 0.45,
+      fontSize: 14, fontFace: F.body, color: C.amberSoft, bold: true,
+    });
+  });
+
+  slide.addShape(pres.shapes.RECTANGLE, {
+    x: 6.3, y: 3.4, w: 0.01, h: 2.3,
+    fill: { color: "333333" },
+  });
+
+  slide.addText(
+    "As AI gets better at everything else, our data becomes MORE valuable, not less.\nHuman-generated, verified, geo-locked sentiment that AI cannot synthesize.",
+    {
+      x: 0.8, y: 6.0, w: 11, h: 0.8,
+      fontSize: 14, fontFace: F.head, color: C.amberSoft, italic: true,
+      lineSpacingMultiple: 1.3,
+    }
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDE 8: THE FOMO ENGINE — Light slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = lightSlide();
-  addSlideNum(slide, 7);
+  addSlideNum(slide, 8);
 
   slide.addText("THE FOMO ENGINE", {
     x: 0.8, y: 0.5, w: 6, h: 0.4,
@@ -315,39 +397,38 @@ function darkSlide() {
   });
 
   slide.addText(
-    "Every listing is a ticking clock. If you want the truth about 742 Elm St — you better get in NOW. Once it sells, the conversation locks forever.",
+    "Every listing is a ticking clock. If you want the truth about 742 Elm St — you better get in NOW.\nOnce it sells, the conversation locks forever. But the data lives on in our training corpus.",
     {
-      x: 0.8, y: 3.5, w: 8, h: 1.2,
+      x: 0.8, y: 3.5, w: 9, h: 1.2,
       fontSize: 17, fontFace: F.body, color: C.muted,
       lineSpacingMultiple: 1.5,
     }
   );
 
   const hooks = [
-    "This creates urgency.",
-    "This creates engagement.",
-    "This creates a reason to come back.",
+    "This creates urgency — users return before listings close.",
+    "This creates engagement — every listing is a live conversation.",
+    "This creates data — every take is a permanent training signal.",
   ];
 
   hooks.forEach((text, i) => {
     const y = 5.0 + i * 0.55;
     amberLeftBorder(slide, 0.8, y + 0.05, 0.35);
     slide.addText(text, {
-      x: 1.1, y, w: 6, h: 0.5,
-      fontSize: 18, fontFace: F.head, color: C.amber,
+      x: 1.1, y, w: 10, h: 0.5,
+      fontSize: 17, fontFace: F.head, color: C.amber,
       italic: true, bold: true,
     });
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 8: WHO USES THIS — Full-bleed urban-woman.jpg
+// SLIDE 9: WHO USES THIS — Full-bleed urban-woman.jpg
 // ═══════════════════════════════════════════════════════════
 {
   const slide = pres.addSlide();
   fullBleedImage(slide, "urban-woman.jpg");
 
-  // Bottom half gradient overlay
   slide.addShape(pres.shapes.RECTANGLE, {
     x: 0, y: H * 0.35, w: W, h: H * 0.65,
     fill: { color: C.overlay, transparency: 15 },
@@ -363,7 +444,6 @@ function darkSlide() {
     letterSpacing: 4, bold: true,
   });
 
-  // Stats row
   const statsData = [
     { num: "44M", desc: "Americans move\neach year" },
     { num: "6.1M", desc: "homes sold\nannually" },
@@ -383,12 +463,11 @@ function darkSlide() {
     });
   });
 
-  // Personas
   const personas = [
-    { title: "First-time buyers", desc: "Need truth before biggest purchase of their life" },
-    { title: "Renters evaluating", desc: "Researching blocks before committing to a lease" },
-    { title: "Homeowners", desc: "Sharing what they know — warnings and endorsements" },
-    { title: "Agents", desc: "Building reputation through transparency" },
+    { title: "Homebuyers", desc: "Need ground truth before the biggest purchase of their life" },
+    { title: "Renters", desc: "Researching blocks before committing to a lease" },
+    { title: "Homeowners", desc: "Sharing warnings and endorsements — building the dataset" },
+    { title: "AI Platforms", desc: "Need verified sentiment data to power next-gen agents" },
   ];
 
   personas.forEach((p, i) => {
@@ -415,249 +494,330 @@ function darkSlide() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 9: THE MOAT — Dark slide
+// SLIDE 10: THE DATA MOAT — Dark slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = darkSlide();
-  addSlideNum(slide, 9);
+  addSlideNum(slide, 10);
 
-  slide.addText("THE MOAT", {
+  slide.addText("THE DATA MOAT", {
     x: 0.8, y: 0.5, w: 5, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 4, bold: true,
   });
 
-  slide.addText("AI replaces your realtor.\nAI cannot replace your neighbor.", {
-    x: 0.8, y: 1.2, w: 10, h: 1.5,
+  slide.addText("Five properties no AI model\ncan replicate.", {
+    x: 0.8, y: 1.2, w: 10, h: 1.4,
     fontSize: 36, fontFace: F.head, color: C.textLight,
-    lineSpacingMultiple: 1.3, italic: true,
+    lineSpacingMultiple: 1.2, italic: true,
   });
 
-  // Two columns
-  const leftItems = ["Automated valuations", "Virtual tours", "Document processing", "Market predictions"];
-  const rightItems = ["Does the basement flood?", "Neighbor disputes history", "Why they REALLY sold", "School pickup chaos at 3pm"];
+  const moatProps = [
+    { label: "Verified", desc: "Every contributor's address is confirmed. No bots. No fake reviews." },
+    { label: "Geo-locked", desc: "Data tied to specific zip codes and blocks. Spatial precision AI can't guess." },
+    { label: "Human-generated", desc: "Can't be scraped, synthesized, or hallucinated. Only humans who live there know." },
+    { label: "Sentiment-rich", desc: "Not just facts — emotions, warnings, endorsements. The context AI misses." },
+    { label: "Temporal", desc: "Tied to listing lifecycles. A living record of neighborhood truth over time." },
+  ];
 
-  slide.addText("WHAT AI DOES", {
-    x: 0.8, y: 3.0, w: 5, h: 0.4,
-    fontSize: 10, fontFace: F.body, color: C.muted,
-    letterSpacing: 3,
-  });
-
-  leftItems.forEach((item, i) => {
-    slide.addText(item, {
-      x: 0.8, y: 3.5 + i * 0.55, w: 5, h: 0.5,
-      fontSize: 15, fontFace: F.body, color: C.muted,
+  moatProps.forEach((p, i) => {
+    const y = 2.9 + i * 0.8;
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 0.8, y, w: 11.5, h: 0.65,
+      rectRadius: 0.06,
+      fill: { color: C.darkCard },
     });
-  });
-
-  slide.addText("WHAT AI CAN'T", {
-    x: 7, y: 3.0, w: 5, h: 0.4,
-    fontSize: 10, fontFace: F.body, color: C.amberSoft,
-    letterSpacing: 3,
-  });
-
-  rightItems.forEach((item, i) => {
-    amberLeftBorder(slide, 7, 3.6 + i * 0.55, 0.35);
-    slide.addText(item, {
-      x: 7.3, y: 3.5 + i * 0.55, w: 5, h: 0.5,
-      fontSize: 15, fontFace: F.body, color: C.amberSoft, bold: true,
+    amberLeftBorder(slide, 0.8, y + 0.1, 0.45);
+    slide.addText(p.label, {
+      x: 1.1, y, w: 2.2, h: 0.65,
+      fontSize: 16, fontFace: F.head, color: C.amberSoft, bold: true,
+      valign: "middle",
     });
-  });
-
-  // Divider
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: 6.3, y: 3.2, w: 0.01, h: 2.5,
-    fill: { color: "333333" },
+    slide.addText(p.desc, {
+      x: 3.3, y, w: 8.8, h: 0.65,
+      fontSize: 13, fontFace: F.body, color: C.mutedLight,
+      valign: "middle",
+    });
   });
 
   slide.addText(
-    "We own the only dataset of verified, geo-locked human sentiment\nin American real estate.",
+    "Network effects compound the moat: more residents = more takes = more value = more residents.",
     {
-      x: 0.8, y: 6.2, w: 10, h: 0.6,
+      x: 0.8, y: 6.5, w: 11, h: 0.5,
       fontSize: 14, fontFace: F.head, color: C.amberSoft, italic: true,
     }
   );
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 10: THE DATA PLAY — Light slide
-// ═══════════════════════════════════════════════════════════
-{
-  const slide = lightSlide();
-  addSlideNum(slide, 10);
-
-  slide.addText("THE DATA PLAY", {
-    x: 0.8, y: 0.5, w: 5, h: 0.4,
-    fontSize: 10, fontFace: F.body, color: C.muted,
-    letterSpacing: 4, bold: true,
-  });
-
-  slide.addText("Community → Data → Revenue", {
-    x: 0.8, y: 1.2, w: 10, h: 0.9,
-    fontSize: 36, fontFace: F.head, color: C.text, bold: true,
-  });
-
-  // Flywheel — circular flow represented as connected blocks
-  const flywheel = ["More residents", "More takes", "More data", "Licensing revenue", "Reinvest"];
-  const fwStartX = 1.0;
-  const fwY = 2.5;
-
-  flywheel.forEach((step, i) => {
-    const x = fwStartX + i * 2.3;
-    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x, y: fwY, w: 2.0, h: 0.7,
-      rectRadius: 0.06,
-      fill: { color: i === 3 ? C.amber : "EEEDEA" },
-    });
-    slide.addText(step, {
-      x, y: fwY, w: 2.0, h: 0.7,
-      fontSize: 12, fontFace: F.body, color: i === 3 ? C.white : C.text,
-      align: "center", bold: true,
-    });
-    if (i < flywheel.length - 1) {
-      slide.addText("→", {
-        x: x + 1.9, y: fwY, w: 0.5, h: 0.7,
-        fontSize: 18, fontFace: F.body, color: C.amber, align: "center",
-      });
-    }
-  });
-
-  // Curved arrow back from Reinvest to More residents
-  slide.addText("↻", {
-    x: 5.5, y: 3.3, w: 1, h: 0.6,
-    fontSize: 20, fontFace: F.body, color: C.amber, align: "center",
-  });
-
-  // Who pays
-  slide.addText("WHO PAYS FOR THIS DATA", {
-    x: 0.8, y: 4.0, w: 6, h: 0.4,
-    fontSize: 10, fontFace: F.body, color: C.muted,
-    letterSpacing: 3, bold: true,
-  });
-
-  const buyers = [
-    { who: "AI Platforms", price: "$85K/zip", desc: "Training on verified sentiment" },
-    { who: "Insurance", price: "Per-query", desc: "Hyper-local risk signals" },
-    { who: "City Planners", price: "Annual license", desc: "Community sentiment mapping" },
-    { who: "Hedge Funds", price: "Premium API", desc: "Predictive housing signals" },
-  ];
-
-  buyers.forEach((b, i) => {
-    const x = 0.8 + i * 3.05;
-    slide.addText(b.who, {
-      x, y: 4.5, w: 2.8, h: 0.4,
-      fontSize: 16, fontFace: F.head, color: C.text, bold: true,
-    });
-    slide.addText(b.price, {
-      x, y: 4.9, w: 2.8, h: 0.4,
-      fontSize: 14, fontFace: F.body, color: C.amber, bold: true,
-    });
-    slide.addText(b.desc, {
-      x, y: 5.3, w: 2.8, h: 0.4,
-      fontSize: 12, fontFace: F.body, color: C.muted,
-    });
-  });
-
-  slide.addShape(pres.shapes.RECTANGLE, {
-    x: 0.8, y: 6.0, w: W - 1.6, h: 0.01,
-    fill: { color: "E0DDD8" },
-  });
-
-  slide.addText("Comp: Reddit's Google deal = $60M/year. Our data is verified, geo-specific, real estate vertical.", {
-    x: 0.8, y: 6.2, w: 11, h: 0.5,
-    fontSize: 13, fontFace: F.head, color: C.amber, italic: true,
-  });
-}
-
-// ═══════════════════════════════════════════════════════════
-// SLIDE 11: HOW WE MAKE MONEY — Light slide
+// SLIDE 11: THE DATA FLYWHEEL — Light slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = lightSlide();
   addSlideNum(slide, 11);
 
-  slide.addText("HOW WE MAKE MONEY", {
+  slide.addText("THE DATA FLYWHEEL", {
+    x: 0.8, y: 0.5, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 4, bold: true,
+  });
+
+  slide.addText("Community \u2192 Data \u2192 AI Value \u2192 Revenue", {
+    x: 0.8, y: 1.2, w: 10, h: 0.9,
+    fontSize: 34, fontFace: F.head, color: C.text, bold: true,
+  });
+
+  // Flywheel steps
+  const flywheel = ["Verified residents", "Neighborhood takes", "Proprietary dataset", "AI licensing revenue", "Reinvest & grow"];
+  const fwStartX = 0.6;
+  const fwY = 2.5;
+
+  flywheel.forEach((step, i) => {
+    const x = fwStartX + i * 2.5;
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x, y: fwY, w: 2.2, h: 0.7,
+      rectRadius: 0.06,
+      fill: { color: i === 3 ? C.amber : "EEEDEA" },
+    });
+    slide.addText(step, {
+      x, y: fwY, w: 2.2, h: 0.7,
+      fontSize: 11, fontFace: F.body, color: i === 3 ? C.white : C.text,
+      align: "center", bold: true,
+    });
+    if (i < flywheel.length - 1) {
+      slide.addText("\u2192", {
+        x: x + 2.1, y: fwY, w: 0.5, h: 0.7,
+        fontSize: 18, fontFace: F.body, color: C.amber, align: "center",
+      });
+    }
+  });
+
+  slide.addText("\u21BB", {
+    x: 5.8, y: 3.3, w: 1, h: 0.6,
+    fontSize: 20, fontFace: F.body, color: C.amber, align: "center",
+  });
+
+  // The Reddit comp
+  slide.addText("THE REDDIT MODEL, APPLIED TO REAL ESTATE", {
+    x: 0.8, y: 3.8, w: 8, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 3, bold: true,
+  });
+
+  const compRows = [
+    { left: "Reddit licensed user posts to Google & OpenAI", right: "$203M in 2024 data licensing revenue" },
+    { left: "Reddit's data: unverified, general-purpose, noisy", right: "gwak gwak's data: verified, geo-locked, RE-specific" },
+    { left: "Reddit is the #1 cited domain by AI Overviews", right: "gwak gwak targets the #1 purchase decision in life" },
+  ];
+
+  compRows.forEach((row, i) => {
+    const y = 4.4 + i * 0.55;
+    if (i % 2 === 0) {
+      slide.addShape(pres.shapes.RECTANGLE, {
+        x: 0.8, y, w: 11.5, h: 0.5,
+        fill: { color: "F0EFEB" },
+      });
+    }
+    slide.addText(row.left, {
+      x: 0.8, y, w: 5.5, h: 0.5,
+      fontSize: 13, fontFace: F.body, color: C.muted, valign: "middle",
+    });
+    slide.addText(row.right, {
+      x: 6.5, y, w: 5.5, h: 0.5,
+      fontSize: 13, fontFace: F.body, color: C.text, bold: true, valign: "middle",
+    });
+  });
+
+  slide.addShape(pres.shapes.RECTANGLE, {
+    x: 0.8, y: 6.1, w: W - 1.6, h: 0.01,
+    fill: { color: "E0DDD8" },
+  });
+
+  slide.addText("Reddit proved the model. Our data is more valuable because it's verified, vertical, and spatial.", {
+    x: 0.8, y: 6.3, w: 11, h: 0.5,
+    fontSize: 14, fontFace: F.head, color: C.amber, italic: true,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDE 12: REVENUE MODEL — Light slide
+// ═══════════════════════════════════════════════════════════
+{
+  const slide = lightSlide();
+  addSlideNum(slide, 12);
+
+  slide.addText("REVENUE MODEL", {
     x: 0.8, y: 0.5, w: 6, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 4, bold: true,
   });
 
+  slide.addText("Four revenue streams.\nData licensing is the engine.", {
+    x: 0.8, y: 1.1, w: 10, h: 1.2,
+    fontSize: 32, fontFace: F.head, color: C.text, bold: true,
+    lineSpacingMultiple: 1.2,
+  });
+
   const streams = [
-    { name: "Premium Listings", y1: "$120K", y3: "$1.8M", pct: 33 },
-    { name: "Agent Profiles", y1: "$80K", y3: "$1.2M", pct: 22 },
-    { name: "Data Licensing", y1: "$200K", y3: "$2.0M", pct: 36 },
-    { name: "API Access", y1: "$40K", y3: "$520K", pct: 9 },
+    { name: "AI Data Licensing", y1: "$200K", y3: "$2.4M", pct: 40, desc: "AI platforms, hedge funds, insurers pay for verified sentiment" },
+    { name: "API Access", y1: "$80K", y3: "$1.2M", pct: 20, desc: "Per-query access for agentic AI platforms and developers" },
+    { name: "Premium Listings", y1: "$120K", y3: "$1.6M", pct: 27, desc: "Enhanced listing features for agents and property managers" },
+    { name: "Agent Profiles", y1: "$40K", y3: "$520K", pct: 13, desc: "Verified agent presence on the platform" },
   ];
 
-  const barMaxW = 6;
+  const barMaxW = 5.5;
 
   streams.forEach((s, i) => {
-    const y = 1.6 + i * 1.3;
+    const y = 2.6 + i * 1.05;
 
     slide.addText(s.name, {
-      x: 0.8, y, w: 3, h: 0.4,
-      fontSize: 16, fontFace: F.head, color: C.text, bold: true,
+      x: 0.8, y, w: 3, h: 0.35,
+      fontSize: 15, fontFace: F.head, color: C.text, bold: true,
+    });
+    slide.addText(s.desc, {
+      x: 0.8, y: y + 0.32, w: 4, h: 0.3,
+      fontSize: 10, fontFace: F.body, color: C.muted,
     });
 
     // Year 1 bar
     slide.addText("Y1", {
-      x: 4, y: y + 0.0, w: 0.5, h: 0.35,
+      x: 5.0, y: y - 0.02, w: 0.5, h: 0.35,
       fontSize: 10, fontFace: F.body, color: C.muted,
     });
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: 4.5, y: y + 0.05, w: barMaxW * (s.pct / 100) * 0.3, h: 0.25,
+      x: 5.5, y: y + 0.02, w: barMaxW * (s.pct / 100) * 0.35, h: 0.25,
       rectRadius: 0.04,
       fill: { color: C.amberSoft },
     });
     slide.addText(s.y1, {
-      x: 4.5 + barMaxW * (s.pct / 100) * 0.3 + 0.15, y: y - 0.02, w: 1.5, h: 0.35,
+      x: 5.5 + barMaxW * (s.pct / 100) * 0.35 + 0.1, y: y - 0.02, w: 1.5, h: 0.35,
       fontSize: 11, fontFace: F.body, color: C.muted,
     });
 
     // Year 3 bar
     slide.addText("Y3", {
-      x: 4, y: y + 0.4, w: 0.5, h: 0.35,
+      x: 5.0, y: y + 0.35, w: 0.5, h: 0.35,
       fontSize: 10, fontFace: F.body, color: C.muted,
     });
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: 4.5, y: y + 0.45, w: barMaxW * (s.pct / 100), h: 0.25,
+      x: 5.5, y: y + 0.38, w: barMaxW * (s.pct / 100), h: 0.25,
       rectRadius: 0.04,
       fill: { color: C.amber },
     });
     slide.addText(s.y3, {
-      x: 4.5 + barMaxW * (s.pct / 100) + 0.15, y: y + 0.38, w: 1.5, h: 0.35,
+      x: 5.5 + barMaxW * (s.pct / 100) + 0.1, y: y + 0.33, w: 1.5, h: 0.35,
       fontSize: 11, fontFace: F.body, color: C.text, bold: true,
     });
   });
 
   // Bottom highlights
   slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.8, y: 6.0, w: 4, h: 0.8,
+    x: 0.8, y: 6.2, w: 4, h: 0.7,
     rectRadius: 0.06,
     fill: { color: "EEEDEA" },
   });
   slide.addText([
-    { text: "$5.52M ", options: { fontSize: 24, fontFace: F.head, color: C.amber, bold: true } },
+    { text: "$5.72M ", options: { fontSize: 24, fontFace: F.head, color: C.amber, bold: true } },
     { text: "ARR by Year 3", options: { fontSize: 14, fontFace: F.body, color: C.text } },
-  ], { x: 1.0, y: 6.1, w: 3.6, h: 0.6 });
+  ], { x: 1.0, y: 6.25, w: 3.6, h: 0.6 });
 
   slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 5.5, y: 6.0, w: 4.5, h: 0.8,
+    x: 5.5, y: 6.2, w: 4.5, h: 0.7,
     rectRadius: 0.06,
     fill: { color: "EEEDEA" },
   });
   slide.addText([
     { text: "Cash-flow positive ", options: { fontSize: 16, fontFace: F.head, color: C.green, bold: true } },
     { text: "by Month 18", options: { fontSize: 14, fontFace: F.body, color: C.text } },
-  ], { x: 5.7, y: 6.1, w: 4.1, h: 0.6 });
+  ], { x: 5.7, y: 6.25, w: 4.1, h: 0.6 });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 12: COMPETITIVE LANDSCAPE — Light slide
+// SLIDE 13: WHO PAYS FOR THE DATA — Light slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = lightSlide();
-  addSlideNum(slide, 12);
+  addSlideNum(slide, 13);
+
+  slide.addText("WHO PAYS FOR THE DATA", {
+    x: 0.8, y: 0.5, w: 6, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 4, bold: true,
+  });
+
+  const buyers = [
+    {
+      who: "AI Platforms",
+      price: "$85K / zip code",
+      desc: "OpenAI, Google, and every agentic RE platform need verified\nsentiment to answer 'should I buy this house?'",
+      icon: "01",
+    },
+    {
+      who: "Insurance Companies",
+      price: "Per-query API",
+      desc: "Community-reported risk signals at the block level.\nFlood history, crime perception, infrastructure concerns.",
+      icon: "02",
+    },
+    {
+      who: "Hedge Funds & REITs",
+      price: "Premium API",
+      desc: "Block-level sentiment as a predictive signal for\ninvestment decisions. Alternative data at its purest.",
+      icon: "03",
+    },
+    {
+      who: "City Planners",
+      price: "Annual license",
+      desc: "Neighborhood sentiment mapping for development\ndecisions, zoning changes, and public investment.",
+      icon: "04",
+    },
+  ];
+
+  buyers.forEach((b, i) => {
+    const col = i < 2 ? 0 : 1;
+    const row = i % 2;
+    const x = 0.8 + col * 6.2;
+    const y = 1.4 + row * 2.7;
+
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x, y, w: 5.8, h: 2.3,
+      rectRadius: 0.08,
+      fill: { color: "F0EFEB" },
+    });
+
+    slide.addText(b.icon, {
+      x: x + 0.3, y: y + 0.2, w: 0.6, h: 0.5,
+      fontSize: 12, fontFace: F.mono, color: C.amberSoft,
+    });
+
+    slide.addText(b.who, {
+      x: x + 0.3, y: y + 0.5, w: 5, h: 0.5,
+      fontSize: 20, fontFace: F.head, color: C.text, bold: true,
+    });
+
+    slide.addText(b.price, {
+      x: x + 0.3, y: y + 1.0, w: 5, h: 0.35,
+      fontSize: 14, fontFace: F.body, color: C.amber, bold: true,
+    });
+
+    slide.addText(b.desc, {
+      x: x + 0.3, y: y + 1.35, w: 5, h: 0.8,
+      fontSize: 12, fontFace: F.body, color: C.muted,
+      lineSpacingMultiple: 1.3,
+    });
+  });
+
+  slide.addText("TAM: $18.9B PropTech  |  $17.4B Alternative Data  |  $3.2B RE Data specifically", {
+    x: 0.8, y: 6.6, w: 11, h: 0.4,
+    fontSize: 13, fontFace: F.body, color: C.amber, bold: true,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDE 14: COMPETITIVE LANDSCAPE — Light slide
+// ═══════════════════════════════════════════════════════════
+{
+  const slide = lightSlide();
+  addSlideNum(slide, 14);
 
   slide.addText("COMPETITIVE LANDSCAPE", {
     x: 0.8, y: 0.5, w: 6, h: 0.4,
@@ -665,12 +825,12 @@ function darkSlide() {
     letterSpacing: 4, bold: true,
   });
 
-  const features = ["Community Intel", "Verified Locals", "Gen Z Design", "Data Licensing", "Transparency"];
+  const features = ["Community Intel", "Verified Locals", "AI Training Data", "Data Licensing", "Gen Z Design"];
   const competitors = [
     { name: "gwak gwak", scores: [true, true, true, true, true] },
     { name: "Zillow", scores: [false, false, false, false, false] },
     { name: "Nextdoor", scores: [true, false, false, false, false] },
-    { name: "Redfin", scores: [false, false, false, false, true] },
+    { name: "Redfin", scores: [false, false, false, false, false] },
   ];
 
   const tableStartX = 0.8;
@@ -679,7 +839,6 @@ function darkSlide() {
   const rowH = 0.65;
   const labelColW = 2.5;
 
-  // Header row
   competitors.forEach((comp, i) => {
     const x = tableStartX + labelColW + i * colW;
     slide.addText(comp.name, {
@@ -691,11 +850,9 @@ function darkSlide() {
     });
   });
 
-  // Feature rows
   features.forEach((feat, fi) => {
     const y = tableStartY + (fi + 1) * rowH;
 
-    // Alternating row bg
     if (fi % 2 === 0) {
       slide.addShape(pres.shapes.RECTANGLE, {
         x: tableStartX, y, w: labelColW + colW * competitors.length, h: rowH,
@@ -711,7 +868,7 @@ function darkSlide() {
 
     competitors.forEach((comp, ci) => {
       const x = tableStartX + labelColW + ci * colW;
-      slide.addText(comp.scores[fi] ? "●" : "—", {
+      slide.addText(comp.scores[fi] ? "\u25CF" : "\u2014", {
         x, y, w: colW, h: rowH,
         fontSize: comp.scores[fi] ? 18 : 14,
         fontFace: F.body,
@@ -721,66 +878,208 @@ function darkSlide() {
     });
   });
 
-  slide.addText("gwak gwak wins every social and community category.", {
-    x: 0.8, y: 5.8, w: 10, h: 0.5,
-    fontSize: 15, fontFace: F.head, color: C.amber, italic: true,
+  // Key insight below table
+  slide.addText("WHY THEY CAN'T REPLICATE THIS", {
+    x: 0.8, y: 5.2, w: 6, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 3, bold: true,
+  });
+
+  const defenses = [
+    { scenario: "Zillow launches AI chat", impact: "Still no community data. They need us." },
+    { scenario: "OpenAI builds property agent", impact: "Still needs our sentiment dataset." },
+    { scenario: "Google integrates RE search", impact: "They have maps. We have the people who live there." },
+  ];
+
+  defenses.forEach((d, i) => {
+    const y = 5.6 + i * 0.45;
+    slide.addText(d.scenario, {
+      x: 0.8, y, w: 4.5, h: 0.4,
+      fontSize: 12, fontFace: F.body, color: C.text,
+    });
+    slide.addText(d.impact, {
+      x: 5.5, y, w: 6, h: 0.4,
+      fontSize: 12, fontFace: F.body, color: C.amber, bold: true, italic: true,
+    });
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 13: AI-NATIVE TEAM — Dark slide
+// SLIDE 15: AI-NATIVE OPERATING MODEL — Dark slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = darkSlide();
-  addSlideNum(slide, 13);
+  addSlideNum(slide, 15);
 
-  slide.addText("AI-NATIVE TEAM", {
-    x: 0.8, y: 0.5, w: 5, h: 0.4,
+  slide.addText("AI-NATIVE OPERATING MODEL", {
+    x: 0.8, y: 0.5, w: 6, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 4, bold: true,
   });
 
-  slide.addText("4 people. Not 45.", {
-    x: 0.8, y: 1.5, w: 10, h: 1.2,
-    fontSize: 52, fontFace: F.head, color: C.textLight, bold: true,
+  slide.addText("4 people doing what 45 would.", {
+    x: 0.8, y: 1.2, w: 10, h: 1.2,
+    fontSize: 44, fontFace: F.head, color: C.textLight, bold: true,
+  });
+
+  slide.addText("Not a slogan. An operating model.", {
+    x: 0.8, y: 2.3, w: 10, h: 0.6,
+    fontSize: 18, fontFace: F.body, color: C.amberSoft,
+  });
+
+  // AI coverage bars
+  const coverage = [
+    { func: "QA & Testing", pct: 100 },
+    { func: "Data Pipelines", pct: 100 },
+    { func: "Customer Support", pct: 90 },
+    { func: "Content Moderation", pct: 95 },
+    { func: "Marketing Content", pct: 80 },
+    { func: "Campaign Analysis", pct: 100 },
+  ];
+
+  coverage.forEach((c, i) => {
+    const y = 3.2 + i * 0.5;
+    slide.addText(c.func, {
+      x: 0.8, y, w: 3, h: 0.4,
+      fontSize: 12, fontFace: F.body, color: C.mutedLight,
+    });
+    // Bar background
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 4.0, y: y + 0.05, w: 5.5, h: 0.28,
+      rectRadius: 0.04,
+      fill: { color: C.darkCard },
+    });
+    // Bar fill
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 4.0, y: y + 0.05, w: 5.5 * (c.pct / 100), h: 0.28,
+      rectRadius: 0.04,
+      fill: { color: C.amber },
+    });
+    slide.addText(`${c.pct}% AI`, {
+      x: 9.8, y, w: 1.5, h: 0.4,
+      fontSize: 11, fontFace: F.mono, color: C.amberSoft,
+    });
   });
 
   // Comparison cards
   const cards = [
     { label: "Our burn", value: "$800K/yr", color: C.amberSoft },
-    { label: "Traditional startup", value: "$2M/yr", color: C.muted },
-    { label: "Savings", value: "60%", color: C.green },
+    { label: "Traditional PropTech", value: "$2M/yr", color: C.muted },
+    { label: "Capital efficiency", value: "60% savings", color: C.green },
   ];
 
   cards.forEach((c, i) => {
     const x = 0.8 + i * 3.8;
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x, y: 3.3, w: 3.4, h: 1.6,
+      x, y: 6.2, w: 3.4, h: 0.9,
       rectRadius: 0.08,
       fill: { color: C.darkCard },
     });
     slide.addText(c.label, {
-      x: x + 0.3, y: 3.5, w: 2.8, h: 0.4,
-      fontSize: 11, fontFace: F.body, color: C.muted,
+      x: x + 0.3, y: 6.25, w: 2.8, h: 0.3,
+      fontSize: 10, fontFace: F.body, color: C.muted,
     });
     slide.addText(c.value, {
-      x: x + 0.3, y: 3.9, w: 2.8, h: 0.8,
-      fontSize: 36, fontFace: F.head, color: c.color, bold: true,
+      x: x + 0.3, y: 6.5, w: 2.8, h: 0.5,
+      fontSize: 22, fontFace: F.head, color: c.color, bold: true,
     });
-  });
-
-  slide.addText("Every hire does 4x. Not a slogan — an operating model.", {
-    x: 0.8, y: 5.5, w: 10, h: 0.5,
-    fontSize: 18, fontFace: F.head, color: C.amberSoft, italic: true,
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 14: WHAT'S BUILT — Light slide
+// SLIDE 16: THE ROADMAP — Light slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = lightSlide();
-  addSlideNum(slide, 14);
+  addSlideNum(slide, 16);
+
+  slide.addText("THE ROADMAP", {
+    x: 0.8, y: 0.5, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 4, bold: true,
+  });
+
+  const phases = [
+    {
+      year: "2026-2027",
+      title: "Build the Data Moat",
+      items: "Launch in top 25 metros\nVerified resident onboarding\nEvery take = proprietary intelligence\nData compounds daily",
+    },
+    {
+      year: "2027-2028",
+      title: "Become the API",
+      items: "AI platforms pay for access\nData licensing at $85K/zip\nAPI for agentic AI agents\nInsurance & hedge fund deals",
+    },
+    {
+      year: "2028-2029",
+      title: "Launch gwak gwak AI",
+      items: "Our own agent on our data\n\"Ask gwak gwak about any address\"\nFlywheel: community grows the model\nNo competitor can replicate",
+    },
+    {
+      year: "2029-2030",
+      title: "The Platform Layer",
+      items: "Community truth layer for all RE\nCity planners, mortgage lenders\nInfrastructure for every transaction\nMultiple exit paths open",
+    },
+  ];
+
+  phases.forEach((p, i) => {
+    const x = 0.6 + i * 3.1;
+    const y = 1.4;
+
+    // Phase number/year
+    slide.addText(p.year, {
+      x, y, w: 2.8, h: 0.4,
+      fontSize: 12, fontFace: F.mono, color: C.amber, bold: true,
+    });
+
+    slide.addText(p.title, {
+      x, y: y + 0.4, w: 2.8, h: 0.7,
+      fontSize: 18, fontFace: F.head, color: C.text, bold: true,
+    });
+
+    amberLeftBorder(slide, x, y + 0.45, 0.5);
+
+    slide.addText(p.items, {
+      x, y: y + 1.2, w: 2.8, h: 2.5,
+      fontSize: 12, fontFace: F.body, color: C.muted,
+      lineSpacingMultiple: 1.5,
+    });
+
+    // Connector arrow
+    if (i < phases.length - 1) {
+      slide.addText("\u2192", {
+        x: x + 2.7, y: y + 0.5, w: 0.5, h: 0.5,
+        fontSize: 20, fontFace: F.body, color: C.amber, align: "center",
+      });
+    }
+  });
+
+  // Timeline bar at bottom
+  slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 0.8, y: 5.6, w: 11.7, h: 0.06,
+    rectRadius: 0.03,
+    fill: { color: "E0DDD8" },
+  });
+
+  // Active marker
+  slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 0.8, y: 5.55, w: 2.8, h: 0.16,
+    rectRadius: 0.04,
+    fill: { color: C.amber },
+  });
+
+  slide.addText("We are here. Building the moat that every AI platform will need.", {
+    x: 0.8, y: 5.9, w: 11, h: 0.5,
+    fontSize: 15, fontFace: F.head, color: C.amber, italic: true,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDE 17: WHAT'S BUILT — Light slide
+// ═══════════════════════════════════════════════════════════
+{
+  const slide = lightSlide();
+  addSlideNum(slide, 17);
 
   slide.addText("WHAT'S BUILT", {
     x: 0.8, y: 0.5, w: 5, h: 0.4,
@@ -788,56 +1087,63 @@ function darkSlide() {
     letterSpacing: 4, bold: true,
   });
 
-  slide.addText("Live product. Real listings.\nReal comments.", {
+  slide.addText("Live product. Real listings.\nReal community data.", {
     x: 0.8, y: 1.2, w: 10, h: 1.2,
     fontSize: 36, fontFace: F.head, color: C.text, bold: true,
     lineSpacingMultiple: 1.2,
   });
 
   const features = [
-    "Search any US city",
-    "Photo carousels",
-    "Split map view",
-    "Gated community join",
-    "Style Visualizer",
-    "Rate-limited API",
+    "Search any US city or address",
+    "Photo carousels with MLS data",
+    "Split map view with geo-filtering",
+    "Gated community membership",
+    "Style Visualizer (AI-powered)",
+    "Rate-limited API infrastructure",
+    "Verified resident system",
+    "AI content moderation",
   ];
 
   features.forEach((feat, i) => {
-    const col = i < 3 ? 0 : 1;
-    const row = i % 3;
+    const col = i < 4 ? 0 : 1;
+    const row = i % 4;
     const x = 0.8 + col * 5.5;
-    const y = 2.8 + row * 0.7;
+    const y = 2.8 + row * 0.65;
 
-    slide.addText("✓", {
+    slide.addText("\u2713", {
       x, y, w: 0.4, h: 0.5,
       fontSize: 16, fontFace: F.body, color: C.amber, bold: true,
     });
     slide.addText(feat, {
       x: x + 0.4, y, w: 4.5, h: 0.5,
-      fontSize: 16, fontFace: F.body, color: C.text,
+      fontSize: 15, fontFace: F.body, color: C.text,
     });
   });
 
   // URL callout
   slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.8, y: 5.4, w: 6, h: 0.8,
+    x: 0.8, y: 5.6, w: 6, h: 0.8,
     rectRadius: 0.06,
     fill: { color: "EEEDEA" },
   });
   slide.addText("homefeed-ivory.vercel.app", {
-    x: 1.0, y: 5.4, w: 5.6, h: 0.8,
+    x: 1.0, y: 5.6, w: 5.6, h: 0.8,
     fontSize: 18, fontFace: F.mono, color: C.amber,
     valign: "middle",
+  });
+
+  slide.addText("Built by 2 people + AI in 4 months. That's the thesis in action.", {
+    x: 7.2, y: 5.7, w: 5, h: 0.6,
+    fontSize: 14, fontFace: F.head, color: C.muted, italic: true,
   });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 15: THE ASK — Dark slide
+// SLIDE 18: THE ASK — Dark slide
 // ═══════════════════════════════════════════════════════════
 {
   const slide = darkSlide();
-  addSlideNum(slide, 15);
+  addSlideNum(slide, 18);
 
   slide.addText("THE ASK", {
     x: 0.8, y: 0.5, w: 5, h: 0.4,
@@ -846,47 +1152,47 @@ function darkSlide() {
   });
 
   slide.addText("$1.5M SAFE", {
-    x: 0.8, y: 1.2, w: 10, h: 1.4,
+    x: 0.8, y: 1.0, w: 10, h: 1.4,
     fontSize: 64, fontFace: F.head, color: C.amberSoft, bold: true,
   });
 
-  slide.addText("$10M post-money cap", {
-    x: 0.8, y: 2.5, w: 10, h: 0.6,
-    fontSize: 22, fontFace: F.body, color: C.textLight,
+  slide.addText("$10M post-money cap  ·  18-24 months runway", {
+    x: 0.8, y: 2.3, w: 10, h: 0.6,
+    fontSize: 20, fontFace: F.body, color: C.textLight,
   });
 
   // Use of funds
   slide.addText("USE OF FUNDS", {
-    x: 0.8, y: 3.5, w: 5, h: 0.4,
+    x: 0.8, y: 3.3, w: 5, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 3, bold: true,
   });
 
   const funds = [
-    { label: "Product", pct: 40, w: 4.8 },
-    { label: "Growth", pct: 25, w: 3.0 },
-    { label: "Ops", pct: 20, w: 2.4 },
+    { label: "Product & Data Infra", pct: 40, w: 4.8 },
+    { label: "Growth & Community", pct: 25, w: 3.0 },
+    { label: "Operations", pct: 20, w: 2.4 },
     { label: "Reserve", pct: 15, w: 1.8 },
   ];
 
   let barX = 0.8;
   funds.forEach((f) => {
     slide.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-      x: barX, y: 4.0, w: f.w, h: 0.5,
+      x: barX, y: 3.8, w: f.w, h: 0.5,
       rectRadius: 0.04,
       fill: { color: C.amber, transparency: (40 - f.pct) * 1.5 },
     });
     slide.addText(`${f.label} ${f.pct}%`, {
-      x: barX, y: 4.0, w: f.w, h: 0.5,
+      x: barX, y: 3.8, w: f.w, h: 0.5,
       fontSize: 11, fontFace: F.body, color: C.white,
       align: "center", valign: "middle", bold: true,
     });
     barX += f.w + 0.05;
   });
 
-  // MRR growth
+  // MRR trajectory
   slide.addText("MRR TRAJECTORY", {
-    x: 0.8, y: 5.0, w: 5, h: 0.4,
+    x: 0.8, y: 4.6, w: 5, h: 0.4,
     fontSize: 10, fontFace: F.body, color: C.muted,
     letterSpacing: 3, bold: true,
   });
@@ -901,45 +1207,98 @@ function darkSlide() {
   mrr.forEach((m, i) => {
     const x = 0.8 + i * 2.8;
     slide.addText(m.val, {
-      x, y: 5.4, w: 2.5, h: 0.6,
+      x, y: 5.1, w: 2.5, h: 0.6,
       fontSize: 28, fontFace: F.head, color: C.amberSoft, bold: true,
     });
     slide.addText(m.label, {
-      x, y: 6.0, w: 2.5, h: 0.3,
+      x, y: 5.7, w: 2.5, h: 0.3,
       fontSize: 11, fontFace: F.body, color: C.muted,
     });
 
     if (i < mrr.length - 1) {
-      slide.addText("→", {
-        x: x + 2.2, y: 5.4, w: 0.8, h: 0.6,
+      slide.addText("\u2192", {
+        x: x + 2.2, y: 5.1, w: 0.8, h: 0.6,
         fontSize: 20, fontFace: F.body, color: C.muted, align: "center",
       });
     }
   });
+
+  // Exit paths
+  slide.addText("EXIT PATHS: Acquisition (Zillow, Redfin, CoStar)  |  Data licensing scale  |  IPO", {
+    x: 0.8, y: 6.4, w: 11, h: 0.5,
+    fontSize: 12, fontFace: F.body, color: C.muted,
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
-// SLIDE 16: CLOSING — Full-bleed aerial.jpg
+// SLIDE 19: FOUNDER — Light slide
+// ═══════════════════════════════════════════════════════════
+{
+  const slide = lightSlide();
+  addSlideNum(slide, 19);
+
+  slide.addText("FOUNDER", {
+    x: 0.8, y: 0.5, w: 5, h: 0.4,
+    fontSize: 10, fontFace: F.body, color: C.muted,
+    letterSpacing: 4, bold: true,
+  });
+
+  slide.addText("Zachary Kaufman", {
+    x: 0.8, y: 1.2, w: 10, h: 1.0,
+    fontSize: 40, fontFace: F.head, color: C.text, bold: true,
+  });
+
+  slide.addText("CEO & Founder", {
+    x: 0.8, y: 2.1, w: 10, h: 0.5,
+    fontSize: 16, fontFace: F.body, color: C.amber,
+  });
+
+  const points = [
+    "Built the entire product with AI-native methodology — 2 people, 4 months, production-ready",
+    "Deep understanding of both the AI landscape and real estate market dynamics",
+    "First-hand experience with the broken information asymmetry in home buying",
+    "Obsessed with the intersection of community data and AI infrastructure",
+    "Technical founder who ships — not a pitch deck founder who talks",
+  ];
+
+  points.forEach((p, i) => {
+    const y = 3.0 + i * 0.7;
+    amberLeftBorder(slide, 0.8, y + 0.08, 0.4);
+    slide.addText(p, {
+      x: 1.1, y, w: 10, h: 0.55,
+      fontSize: 15, fontFace: F.body, color: C.text,
+    });
+  });
+
+  slide.addText("The product exists because I couldn't find what neighbors actually thought about a home I was buying.\nSo I built it.", {
+    x: 0.8, y: 6.0, w: 10, h: 0.8,
+    fontSize: 14, fontFace: F.head, color: C.muted, italic: true,
+    lineSpacingMultiple: 1.4,
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// SLIDE 20: CLOSING — Full-bleed aerial.jpg
 // ═══════════════════════════════════════════════════════════
 {
   const slide = pres.addSlide();
   fullBleedImage(slide, "aerial.jpg");
-  darkOverlay(slide, 55);
+  darkOverlay(slide, 60);
 
-  slide.addText("Every neighborhood has a truth.", {
-    x: 0, y: 1.8, w: W, h: 0.9,
-    fontSize: 32, fontFace: F.head, color: C.white,
-    align: "center", italic: true,
+  slide.addText("AI replaces search.\nAI replaces agents.\nAI cannot replace your neighbor.", {
+    x: 0, y: 1.2, w: W, h: 1.8,
+    fontSize: 30, fontFace: F.head, color: C.white,
+    align: "center", italic: true, lineSpacingMultiple: 1.4,
   });
 
-  slide.addText("We're building the infrastructure to surface it.", {
-    x: 0, y: 2.7, w: W, h: 0.7,
-    fontSize: 20, fontFace: F.body, color: C.mutedLight,
-    align: "center",
+  slide.addText("We own that data.", {
+    x: 0, y: 3.2, w: W, h: 0.8,
+    fontSize: 24, fontFace: F.body, color: C.amberSoft,
+    align: "center", bold: true,
   });
 
   slide.addText("gwak gwak", {
-    x: 0, y: 3.8, w: W, h: 1.2,
+    x: 0, y: 4.2, w: W, h: 1.2,
     fontSize: 56, fontFace: F.head, color: C.white,
     align: "center", italic: true,
   });
@@ -954,8 +1313,8 @@ function darkSlide() {
 // ─── EXPORT ───
 const outputPath = "/Users/zacharykaufman/Desktop/Pitch Decks/gwak gwak - Investor Pitch Q1 2026.pptx";
 pres.writeFile({ fileName: outputPath }).then(() => {
-  console.log(`✅ Deck saved to: ${outputPath}`);
+  console.log(`Deck saved to: ${outputPath}`);
   console.log(`   ${pres.slides.length} slides generated`);
 }).catch((err) => {
-  console.error("❌ Error generating deck:", err);
+  console.error("Error generating deck:", err);
 });

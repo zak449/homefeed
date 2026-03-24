@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendNewCommentAlert } from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-ip";
+import { verifyTurnstile } from "@/lib/verify-turnstile";
 
 export async function GET(req: NextRequest) {
   const listingId = req.nextUrl.searchParams.get("listingId");
@@ -55,7 +56,24 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => null);
-  const { listingId, name, email, content } = body ?? {};
+  const { listingId, name, email, content, turnstileToken } = body ?? {};
+
+  // Turnstile verification (skipped if TURNSTILE_SECRET_KEY is not set)
+  if (process.env.TURNSTILE_SECRET_KEY) {
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { error: "Verification required" },
+        { status: 400 }
+      );
+    }
+    const valid = await verifyTurnstile(turnstileToken);
+    if (!valid) {
+      return NextResponse.json(
+        { error: "Verification failed" },
+        { status: 403 }
+      );
+    }
+  }
 
   if (!listingId || !name || !email || !content) {
     return NextResponse.json({ error: "listingId, name, email, content required" }, { status: 400 });
