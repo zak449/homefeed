@@ -73,7 +73,11 @@ export default function ListingFeed({
       const res = await fetch(`/api/listings?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        setListings((prev) => [...prev, ...data.listings]);
+        setListings((prev) => {
+          const existingIds = new Set(prev.map((l: any) => l.id));
+          const newUnique = data.listings.filter((l: any) => !existingIds.has(l.id));
+          return [...prev, ...newUnique];
+        });
         setHasMore(data.hasMore);
         setPage(nextPage);
       } else {

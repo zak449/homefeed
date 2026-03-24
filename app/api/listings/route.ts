@@ -265,8 +265,16 @@ export async function GET(req: NextRequest) {
     })();
   }
 
+  // Deduplicate (word-match OR queries can return duplicates)
+  const seenIds = new Set<string>();
+  const uniqueListings = listings.filter((l) => {
+    if (seenIds.has(l.id)) return false;
+    seenIds.add(l.id);
+    return true;
+  });
+
   // Map listings to include topComment for the social layer
-  const withComments = listings.map((l) => ({
+  const withComments = uniqueListings.map((l) => ({
     ...l,
     topComment: l.comments?.[0] ?? null,
   }));
