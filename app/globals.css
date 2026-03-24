@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #0A0A0A;
-  color: #F2F0ED;
+  background-color: #FAFAF8;
+  color: #1A1A1A;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -39,8 +39,8 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Selection */
 ::selection {
-  background: #3A3630;
-  color: #F2F0ED;
+  background: #D4763C;
+  color: #FFFFFF;
 }
 
 /* Focus ring */
@@ -87,7 +87,7 @@ input[type=number]::-webkit-outer-spin-button {
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #1C1A17 25%, #252320 50%, #1C1A17 75%);
+  background: linear-gradient(90deg, #F0EDE8 25%, #E8E6E3 50%, #F0EDE8 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -104,7 +104,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Search bar amber glow on focus */
 .search-input-wrapper:focus-within .search-icon {
-  color: #E8A87C;
+  color: #D4763C;
 }
 .search-input-wrapper:focus-within input {
   box-shadow: 0 0 0 2px rgba(232, 168, 124, 0.25);
@@ -126,7 +126,7 @@ input[type=number]::-webkit-outer-spin-button {
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: #252320;
+  background: #E8E6E3;
   outline: none;
   cursor: pointer;
 }
@@ -135,9 +135,9 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F2F0ED;
-  border: 3px solid #0A0A0A;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  background: #1A1A1A;
+  border: 3px solid #FAFAF8;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: grab;
 }
 .mortgage-slider::-webkit-slider-thumb:active {
@@ -147,8 +147,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F2F0ED;
-  border: 3px solid #0A0A0A;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  background: #1A1A1A;
+  border: 3px solid #FAFAF8;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
   cursor: grab;
 }
