@@ -138,6 +138,95 @@ model AnalyticsEvent {
   @@index([type, createdAt])
 }
 
+// ── Zip-Verified Community System ─────────────────────────
+
+model ZipCommunity {
+  id              String   @id @default(cuid())
+  zipCode         String   @unique
+  city            String
+  state           String
+  memberCount     Int      @default(0)
+  activeDiscussions Int    @default(0)
+  totalTakes      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  residents       VerifiedResident[]
+  questions       NeighborQuestion[]
+  alerts          CommunityAlert[]
+}
+
+model VerifiedResident {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  zipCode       String
+  community     ZipCommunity @relation(fields: [zipCode], references: [zipCode])
+  address       String   // stored but NEVER shown publicly
+  badge         String   @default("newcomer") // newcomer | local | veteran | legend
+  reputation    Int      @default(0)
+  verifiedAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  questions     NeighborQuestion[]
+  answers       NeighborAnswer[]
+  alerts        CommunityAlert[]
+
+  @@index([zipCode])
+}
+
+model NeighborQuestion {
+  id          String   @id @default(cuid())
+  question    String   @db.Text
+  category    String   @default("general") // property | block | area | schools | safety
+  zipCode     String
+  community   ZipCommunity @relation(fields: [zipCode], references: [zipCode])
+  listingId   String?  // optional — can be about a specific property
+  askedById   String?
+  askedBy     VerifiedResident? @relation(fields: [askedById], references: [id])
+  askedByName String?  // for non-verified users
+  upvotes     Int      @default(0)
+  status      String   @default("open") // open | answered | closed
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  answers     NeighborAnswer[]
+
+  @@index([zipCode, createdAt])
+  @@index([listingId])
+}
+
+model NeighborAnswer {
+  id            String   @id @default(cuid())
+  content       String   @db.Text
+  questionId    String
+  question      NeighborQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answeredById  String
+  answeredBy    VerifiedResident @relation(fields: [answeredById], references: [id])
+  upvotes       Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([questionId, createdAt])
+}
+
+model CommunityAlert {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  type        String   @default("tip") // warning | tip | update
+  zipCode     String
+  community   ZipCommunity @relation(fields: [zipCode], references: [zipCode])
+  listingId   String?
+  createdById String
+  createdBy   VerifiedResident @relation(fields: [createdById], references: [id])
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime? // auto-set when listing sells
+  createdAt   DateTime @default(now())
+
+  @@index([zipCode, isActive])
+  @@index([listingId])
+}
+
 // Track when we last synced a city so we don't burn API calls
 model CitySync {
   id        String   @id @default(cuid())
