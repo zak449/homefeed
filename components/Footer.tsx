@@ -8,10 +8,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
             <p className="text-lg font-bold text-ink tracking-tight">
-              gwak<span className="text-secondary">gwak</span>
+              gwak <span className="text-secondary">gwak</span>
             </p>
             <p className="text-xs text-tertiary mt-2 leading-relaxed">
-              The comment section of real estate. See what people actually think.
+              Honest opinions on every listing. From people with nothing to sell.
             </p>
           </div>
 
@@ -48,8 +48,8 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="mt-8 pt-6 border-t border-divider flex items-center justify-between flex-wrap gap-2">
-          <p className="text-xs text-tertiary">&copy; 2026 gwakgwak. All rights reserved.</p>
-          <p className="text-xs text-tertiary">Real estate, real talk.</p>
+          <p className="text-xs text-tertiary">&copy; 2026 gwak gwak. All rights reserved.</p>
+          <p className="text-xs text-tertiary">Get inside.</p>
         </div>
       </div>
     </footer>

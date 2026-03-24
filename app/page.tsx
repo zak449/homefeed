@@ -317,14 +317,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {isDefaultLanding && (
         <div className="mb-8 max-w-xl">
           <h1 className="text-3xl sm:text-4xl font-bold text-ink tracking-tight leading-[1.15]">
-            the comment section<br />
-            of real estate.
+            get inside.<br />
+            <span className="text-secondary">real talk on every listing.</span>
           </h1>
           <p className="text-sm text-secondary mt-3 leading-relaxed">
-            See what neighbors, agents, and locals actually think about listings.
+            No agents. No spin. Just honest opinions from real people who know the neighborhood — insiders with nothing to sell.
             {commentCount > 0 && (
               <span className="text-tertiary">
-                {" "}· {commentCount.toLocaleString()} opinions shared
+                {" "}· {commentCount.toLocaleString()} insider takes
               </span>
             )}
           </p>
@@ -342,7 +342,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       {isDefaultLanding && commentsFeedData.length > 0 && (
         <div className="mb-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-ink">What people are saying</h2>
+            <h2 className="text-lg font-semibold text-ink">🔥 What insiders are saying</h2>
             <a href="/?sort=comments" className="text-sm text-secondary hover:text-ink transition-colors">
               See all →
             </a>
