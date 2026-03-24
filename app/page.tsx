@@ -316,75 +316,64 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
       {/* ====== HERO — only on default landing ====== */}
       {isDefaultLanding && (
-        <div className="mb-10">
-          <div className="relative overflow-hidden rounded-2xl bg-surface border border-divider px-6 sm:px-10 py-12 sm:py-20 mb-8 min-h-[480px] flex flex-col justify-center">
-            {/* Hero lifestyle image */}
-            <Image
-              src="/images/hero-exterior-gwagon.png"
-              alt="Luxury home"
-              fill
-              priority
-              className="absolute inset-0 object-cover opacity-40"
-              sizes="100vw"
-            />
-            {/* Dark gradient overlay — preserves readability over bg image */}
-            <div className="absolute inset-0 bg-gradient-to-br from-bg via-bg/80 to-surface/50 pointer-events-none" />
-            {/* Accent glow — animated shimmer */}
-            <div className="absolute -top-16 -right-16 w-80 h-80 rounded-full bg-hot/10 blur-3xl pointer-events-none amber-shimmer" />
-            <div className="absolute -bottom-8 -left-8 w-56 h-56 rounded-full bg-hot/5 blur-3xl pointer-events-none glow-pulse" />
+        <div className="mb-12">
+          {/* Clean, elegant hero — no background image, community-first */}
+          <div className="pt-4 sm:pt-8 pb-10 mb-8">
+            <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-tertiary mb-6">
+              real estate, real opinions
+            </p>
 
-            <div className="relative">
-              {/* Byline — NYT kicker style */}
-              <p className="text-[11px] font-semibold tracking-[0.2em] uppercase text-tertiary mb-4 flex items-center gap-2">
-                <span className="inline-block w-1 h-1 rounded-full bg-hot/60" />
-                your favorite local real estate
-                <span className="inline-block w-1 h-1 rounded-full bg-tertiary/40" />
-                Est. 2024
-              </p>
+            <h1 className="text-2xl sm:text-3xl font-medium text-ink mb-3 leading-snug tracking-tight">
+              Your neighbors know things<br className="hidden sm:block" />
+              <span className="text-secondary">your realtor won&apos;t tell you.</span>
+            </h1>
 
-              <h1 className="font-display text-4xl sm:text-6xl text-ink mb-5">
-                get inside.<br />
-                <span className="text-secondary font-normal" style={{ fontWeight: 300, letterSpacing: "-0.02em" }}>real talk on every listing.</span>
-              </h1>
+            <p className="text-sm text-tertiary leading-relaxed max-w-md mb-8">
+              Browse listings. Read what the community actually thinks. Verified locals sharing honest opinions — no spin, no agenda.
+            </p>
 
-              <p className="text-secondary leading-relaxed max-w-lg mb-8">
-                No agents. No spin. Just honest opinions from real people who know the neighborhood — insiders with nothing to sell.
-              </p>
-
-              {/* Hot takes examples */}
-              <div className="space-y-2 mb-8 max-w-xl">
-                {[
-                  { take: "2847 Micheltorena — overpriced by $200K. Been watching this sit for 90 days.", author: "local_insider_la" },
-                  { take: "That Silver Lake duplex asking $1.8M? Tenant has 4 years left on lease. Nobody mentions that.", author: "renter_rights_la" },
-                  { take: "The flood zone disclosure is buried on page 14. Read before you offer.", author: "former_agent_310" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 pl-3 border-l-2 border-hot/40">
-                    <p className="text-[13px] text-secondary leading-snug">
-                      🔥 <span className="text-ink/80 italic">&lsquo;{item.take}&rsquo;</span>{" "}
-                      <span className="text-tertiary not-italic">— {item.author}</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-
-              {(commentCount > 0 || listingCount > 0) && (
-                <div className="flex items-center gap-6 pt-6 border-t border-divider">
-                  {listingCount > 0 && (
-                    <div>
-                      <p className="text-2xl font-bold text-ink tracking-tight">{listingCount.toLocaleString()}</p>
-                      <p className="text-[11px] text-tertiary uppercase tracking-wider mt-0.5">Active listings</p>
-                    </div>
-                  )}
-                  {commentCount > 0 && (
-                    <div>
-                      <p className="text-2xl font-bold text-ink tracking-tight">{commentCount.toLocaleString()}</p>
-                      <p className="text-[11px] text-tertiary uppercase tracking-wider mt-0.5">Insider takes</p>
-                    </div>
-                  )}
+            {/* Community proof — warm, not aggressive */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mb-10">
+              {listingCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-hot/70" />
+                  <p className="text-xs text-secondary"><span className="text-ink font-medium">{listingCount.toLocaleString()}</span> active listings</p>
                 </div>
               )}
+              {commentCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-hot/70" />
+                  <p className="text-xs text-secondary"><span className="text-ink font-medium">{commentCount.toLocaleString()}</span> community takes</p>
+                </div>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500/70" />
+                <p className="text-xs text-secondary"><span className="text-ink font-medium">zip-verified</span> neighbors only</p>
+              </div>
+            </div>
+
+            {/* Sample takes — softer, conversation-like */}
+            <div className="grid sm:grid-cols-3 gap-3 max-w-3xl">
+              {[
+                { take: "Flooded twice. Insurance won't cover it anymore.", zip: "90026", vibe: "warning" },
+                { take: "Best block in the neighborhood. Raised 3 kids here.", zip: "90039", vibe: "positive" },
+                { take: "Seller is divorcing. That's why the price dropped $80K.", zip: "90012", vibe: "info" },
+              ].map((item, i) => (
+                <div key={i} className="bg-surface border border-divider rounded-lg p-3.5">
+                  <p className="text-xs text-tertiary mb-1.5 font-medium">
+                    {item.vibe === "warning" ? "⚠️" : item.vibe === "positive" ? "💚" : "💬"}{" "}
+                    verified local · {item.zip}
+                  </p>
+                  <p className="text-[13px] text-ink/90 leading-snug">
+                    &ldquo;{item.take}&rdquo;
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
+
+          {/* Divider */}
+          <div className="border-t border-divider" />
         </div>
       )}
 
