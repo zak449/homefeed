@@ -13,6 +13,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
     "@prisma/client": "^5.15.0",
     "autoprefixer": "^10.4.27",
     "next": "^15.5.12",

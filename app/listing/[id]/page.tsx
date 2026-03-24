@@ -339,6 +339,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             listingAddress={listing.address}
             listingPrice={price}
             photos={listing.photos as string[]}
+            listingContext={{
+              address: listing.address,
+              city: listing.city,
+              price: listing.price,
+              sqft: listing.sqft,
+              bedrooms: listing.bedrooms,
+              bathrooms: listing.bathrooms,
+              propertyType: listing.propertyType,
+            }}
           />
         </div>
 

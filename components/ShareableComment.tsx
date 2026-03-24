@@ -11,6 +11,12 @@ type ShareableCommentProps = {
   reactions?: Record<string, number>;
 };
 
+function formatName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 1) return name;
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (seconds < 60) return "just now";
@@ -48,7 +54,7 @@ export default function ShareableComment({
       try {
         await navigator.share({
           title: `Take on ${address}`,
-          text: `"${content}" — ${name} on Gwaky\n\n${address} · ${price}`,
+          text: `"${content}" — ${formatName(name)} on Gwaky\n\n${address} · ${price}`,
           url: window.location.href,
         });
         return;
@@ -60,7 +66,7 @@ export default function ShareableComment({
   }
 
   async function handleCopyText() {
-    const text = `"${content}"\n\n— ${name} on ${address} (${price})\nGwaky`;
+    const text = `"${content}"\n\n— ${formatName(name)} on ${address} (${price})\nGwaky`;
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -118,7 +124,7 @@ export default function ShareableComment({
                     {initials}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-ink">{name}</p>
+                    <p className="text-sm font-semibold text-ink">{formatName(name)}</p>
                     <p className="text-[11px] text-muted">{timeAgo(createdAt)}</p>
                   </div>
                   {totalReactions > 0 && topReaction && (

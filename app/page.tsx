@@ -403,13 +403,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     return `${Math.floor(seconds / 604800)}w ago`;
   }
 
+  /* ── Helper: first name + last initial ── */
+  function formatName(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length <= 1) return name;
+    return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+  }
+
   /* ── Category pills — each links to a real filtered view ── */
   const categories = [
-    { label: "Trending", emoji: "🔥", href: "/?sort=comments" },
-    { label: "New Listings", emoji: "🏠", href: "/?sort=newest" },
-    { label: "Buyer Warnings", emoji: "⚠️", href: "/?sort=comments&type=sale" },
-    { label: "Best Blocks", emoji: "💚", href: "/?sort=price-high" },
-    { label: "Price Drops", emoji: "💰", href: "/?sort=price-low" },
+    { label: "Most Unhinged", emoji: "🔥", href: "/?sort=comments" },
+    { label: "Just Dropped", emoji: "🆕", href: "/?sort=newest" },
+    { label: "Red Flags", emoji: "🚩", href: "/?sort=comments&type=sale" },
+    { label: "Price Check", emoji: "💀", href: "/?sort=price-low" },
     { label: "For Rent", emoji: "🔑", href: "/?type=rent&sort=newest" },
   ];
 
@@ -428,7 +434,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* ═══ HERO — DARK, TEXT-DRIVEN, CHAOTIC ═══ */}
           <div className="relative overflow-hidden" style={{ background: '#0A0A0A' }}>
             {/* Subtle amber glow orb */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #D4763C, transparent 70%)' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #FF4D00, transparent 70%)' }} />
 
             <div className="relative max-w-3xl mx-auto px-5 pt-16 pb-14 sm:pt-24 sm:pb-20">
               {/* Big bold logo */}
@@ -438,7 +444,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
               {/* Tagline */}
               <p className="text-[clamp(1rem,3vw,1.35rem)] text-white/50 font-medium tracking-tight mb-12 sm:mb-16 max-w-lg">
-                where your neighbors spill the tea on every listing
+                Real takes. Real addresses. No commission in the way.
               </p>
 
               {/* ── CHAOTIC COMMENT SNIPPETS ── */}
@@ -539,48 +545,55 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 if (item.type === "take" && item.data) {
                   const comment = item.data as CommentFeedItem;
                   const photo = comment.listing.photos[0];
-                  const initials = comment.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
                   const reactionCounts: Record<string, number> = {};
                   for (const r of comment.reactions) {
                     reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1;
                   }
-                  const totalReactions = comment.reactions.length;
-                  const isHotTake = totalReactions >= 5;
+
+                  // formatName: first name + last initial
+                  const nameParts = comment.name.trim().split(/\s+/);
+                  const formatName = nameParts.length > 1
+                    ? `${nameParts[0]} ${nameParts[nameParts.length - 1][0]}.`
+                    : nameParts[0];
+
+                  // Credibility tags
+                  const credTags: string[] = [];
+                  const lowerContent = comment.content.toLowerCase();
+                  if (lowerContent.includes("rent") || lowerContent.includes("tenant") || lowerContent.includes("lease")) credTags.push("past renter");
+                  else if (lowerContent.includes("neighbor") || lowerContent.includes("block") || lowerContent.includes("street")) credTags.push("neighbor");
+                  else if (lowerContent.includes("bought") || lowerContent.includes("buyer") || lowerContent.includes("offer")) credTags.push("buyer");
+                  else credTags.push("local");
+
+                  // Short address
+                  const shortAddr = comment.listing.address.split(",")[0];
 
                   return (
                     <div key={`take-${comment.id}`} className="rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
-                      {/* Author row — like a tweet header */}
-                      <div className="flex items-center gap-3 px-5 pt-5 pb-3">
-                        <div className="w-11 h-11 rounded-full bg-amber/10 border-2 border-amber/20 flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-amber">{initials}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-[15px] font-bold text-ink">{comment.name}</span>
-                            {isHotTake && (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">
-                                <span>&#x1F525;</span> Hot Take
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-[12px] text-tertiary">{timeAgo(comment.createdAt)}</span>
-                            <span className="text-tertiary/40">·</span>
-                            <span className="text-[12px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
-                          </div>
-                        </div>
+                      {/* Author row */}
+                      <div className="flex items-center gap-2 px-5 pt-5 pb-2">
+                        <span className="text-[14px] font-bold text-ink">{formatName}</span>
+                        <span className="text-tertiary/40">&middot;</span>
+                        <span className="text-[12px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
+                      </div>
+                      {/* Credibility tag */}
+                      <div className="px-5 pb-3">
+                        {credTags.map((tag) => (
+                          <span key={tag} className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20 mr-1">
+                            {tag}
+                          </span>
+                        ))}
                       </div>
 
-                      {/* THE TAKE — big, dominant quote */}
+                      {/* THE TAKE — hero text, large, bold, no quotes */}
                       <div className="px-5 pb-4">
-                        <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-medium">
+                        <p className="text-lg font-bold text-ink leading-snug">
                           {comment.content}
                         </p>
                       </div>
 
-                      {/* Property context — smaller, contextual */}
-                      <a href={`/listing/${comment.listing.id}`} className="block group/listing">
-                        <div className="relative w-full aspect-[2.5/1] overflow-hidden bg-highlight mx-5 mb-4 rounded-xl">
+                      {/* Listing evidence — small thumbnail */}
+                      <a href={`/listing/${comment.listing.id}`} className="block group/listing px-5 pb-4">
+                        <div className="relative w-full aspect-[3/1] overflow-hidden bg-highlight rounded-lg">
                           {photo ? (
                             <FallbackImage
                               src={photo}
@@ -590,22 +603,16 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
-                              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
                             </div>
                           )}
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-3 pt-10">
-                            <p className="text-lg font-extrabold text-white leading-none tracking-tight">{fmtPrice(comment.listing.price, comment.listing.listingType)}</p>
-                            <p className="text-xs text-white/70 mt-0.5 truncate">{comment.listing.address}, {comment.listing.city}</p>
-                          </div>
-                          <div className="absolute top-3 left-3">
-                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
-                              {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
-                            </span>
-                          </div>
                         </div>
+                        <p className="text-[13px] text-secondary mt-2 truncate">
+                          {shortAddr} &middot; {fmtPrice(comment.listing.price, comment.listing.listingType)} &middot; {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
+                        </p>
                       </a>
 
-                      {/* Reactions + Reply CTA */}
+                      {/* Reactions row + CTA */}
                       <div className="flex items-center justify-between px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
                         <div className="flex items-center gap-2 flex-wrap">
                           {Object.entries(reactionCounts).length > 0 ? (
@@ -616,15 +623,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                               </span>
                             ))
                           ) : (
-                            <span className="text-xs text-tertiary">Be the first to react</span>
+                            <span className="text-xs text-tertiary" title="React to this">React to this</span>
                           )}
                         </div>
                         <a
                           href={`/listing/${comment.listing.id}#comment-form`}
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-amber hover:underline shrink-0"
                         >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                          Reply to this take
+                          Add your take &rarr;
                         </a>
                       </div>
                     </div>
@@ -639,7 +645,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
                   return (
                     <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
-                      {/* Photo — context, not the star */}
+                      {/* Top comment — HEADLINE above photo */}
+                      {listing.topComment && (
+                        <div className="px-5 pt-5 pb-3">
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="w-7 h-7 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shrink-0">
+                              <span className="text-[9px] font-bold text-amber">
+                                {listing.topComment.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}
+                              </span>
+                            </div>
+                            <span className="text-sm font-bold text-ink">{formatName(listing.topComment.name)}</span>
+                          </div>
+                          <p className="text-[16px] sm:text-[17px] text-ink leading-snug font-semibold">
+                            {listing.topComment.content}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Photo */}
                       <div className="relative w-full aspect-[2.2/1] overflow-hidden bg-highlight">
                         {photo ? (
                           <FallbackImage
@@ -669,24 +692,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                         </div>
                       </div>
 
-                      {/* Top comment — PROMINENT, the main content */}
+                      {/* Details */}
                       <div className="p-5">
-                        {listing.topComment ? (
-                          <div className="mb-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-8 h-8 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shrink-0">
-                                <span className="text-[10px] font-bold text-amber">
-                                  {listing.topComment.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}
-                                </span>
-                              </div>
-                              <span className="text-sm font-bold text-ink">{listing.topComment.name}</span>
-                              <span className="text-[11px] text-tertiary">says:</span>
-                            </div>
-                            <p className="text-[16px] sm:text-[17px] text-ink leading-relaxed font-medium">
-                              {listing.topComment.content}
-                            </p>
-                          </div>
-                        ) : (
+                        {!listing.topComment && (
                           <p className="text-[15px] text-tertiary italic mb-4">No takes yet — be the first to share what you know.</p>
                         )}
 

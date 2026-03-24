@@ -24,6 +24,12 @@ type Listing = {
   topComment?: { name: string; content: string } | null;
 };
 
+function formatName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 1) return name;
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 function timeAgo(dateStr: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
   if (seconds < 60) return "just now";
@@ -195,10 +201,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             </p>
             <div className="flex items-center justify-between mt-2">
               <p className="text-[12px] text-secondary">
-                &mdash; {listing.topComment.name}
+                &mdash; {formatName(listing.topComment.name)}
               </p>
               <span className="text-[12px] font-semibold text-amber group-hover:underline">
-                {commentCount > 1 ? `${commentCount} takes` : "Read more"} &rarr;
+                {commentCount > 1 ? `${commentCount} takes` : "Full take"} &rarr;
               </span>
             </div>
           </div>

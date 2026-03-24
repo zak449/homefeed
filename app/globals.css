@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #111111;
-  color: #F2F0ED;
+  background-color: #0E0E0E;
+  color: #F5F5F5;
   font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -24,11 +24,10 @@ body {
 
 /* Display class for hero headlines */
 .font-display {
-  font-family: 'Barlow Condensed', 'Space Grotesk', system-ui, sans-serif;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-family: 'Bebas Neue', 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   line-height: 1.05;
-  font-feature-settings: 'ss01', 'cv01', 'cv11';
 }
 
 /* Number input spinners */
@@ -39,13 +38,13 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Selection */
 ::selection {
-  background: #D4763C;
+  background: #FF4D00;
   color: #FFFFFF;
 }
 
 /* Focus ring */
 :focus-visible {
-  outline: 2px solid rgba(232, 168, 124, 0.5);
+  outline: 2px solid rgba(255, 77, 0, 0.5);
   outline-offset: 2px;
 }
 
@@ -87,7 +86,7 @@ input[type=number]::-webkit-outer-spin-button {
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #1E1E1E 25%, #2A2A2A 50%, #1E1E1E 75%);
+  background: linear-gradient(90deg, #1A1A1A 25%, #2A2A2A 50%, #1A1A1A 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -104,16 +103,16 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Search bar amber glow on focus */
 .search-input-wrapper:focus-within .search-icon {
-  color: #D4763C;
+  color: #FF4D00;
 }
 .search-input-wrapper:focus-within input {
-  box-shadow: 0 0 0 2px rgba(232, 168, 124, 0.25);
+  box-shadow: 0 0 0 2px rgba(255, 77, 0, 0.25);
 }
 
 /* Comment textarea pulsing border on focus */
 @keyframes border-pulse {
-  0%, 100% { border-color: rgba(232, 168, 124, 0.3); }
-  50% { border-color: rgba(232, 168, 124, 0.6); }
+  0%, 100% { border-color: rgba(255, 77, 0, 0.3); }
+  50% { border-color: rgba(255, 77, 0, 0.6); }
 }
 .comment-textarea:focus {
   animation: border-pulse 2s ease-in-out infinite;
@@ -135,8 +134,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F2F0ED;
-  border: 3px solid #111111;
+  background: #F5F5F5;
+  border: 3px solid #0E0E0E;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }
@@ -147,8 +146,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F2F0ED;
-  border: 3px solid #111111;
+  background: #F5F5F5;
+  border: 3px solid #0E0E0E;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }

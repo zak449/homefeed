@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import dynamic from "next/dynamic";
 import ShareableComment from "@/components/ShareableComment";
+
+const GwakyAI = dynamic(() => import("@/components/GwakyAI"), { ssr: false });
 
 const REACTIONS = ["\uD83D\uDEA9", "\uD83D\uDCB8", "\uD83D\uDC40", "\uD83C\uDFC6", "\uD83D\uDC80"];
 const REACTION_LABELS: Record<string, string> = {
@@ -43,12 +46,19 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(seconds / 604800)}w ago`;
 }
 
+function formatName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length <= 1) return name;
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 export default function CommentSection({
   listingId,
   isLocked = false,
   listingAddress = "",
   listingPrice = "",
   photos,
+  listingContext,
 }: {
   listingId: string;
   isLocked?: boolean;
@@ -56,6 +66,15 @@ export default function CommentSection({
   listingPrice?: string;
   verified?: boolean;
   photos?: string[];
+  listingContext?: {
+    address: string;
+    city: string;
+    price: number;
+    sqft: number | null;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    propertyType: string;
+  };
 }) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +90,7 @@ export default function CommentSection({
   const [replyEmail, setReplyEmail] = useState("");
   const [replyStatus, setReplyStatus] = useState<"idle" | "loading" | "success">("idle");
   const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [inputMode, setInputMode] = useState<"take" | "ai">("take");
   const [expanded, setExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(5);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -386,12 +406,12 @@ export default function CommentSection({
       {!loading && comments.length === 0 && !isLocked && !showJoinForm && !isJoined && (
         <div className="text-center py-10 rounded-2xl bg-gradient-to-br from-amber/5 via-surface to-highlight border-2 border-dashed border-amber/20 mb-6">
           <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-amber/10 flex items-center justify-center">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF4D00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-ink mb-2">
-            No tea yet. Spill it.
+            No one&apos;s said anything yet. You go first.
           </h3>
           <p className="text-[15px] text-secondary max-w-sm mx-auto mb-6">
             The block is watching. What does this listing not tell you?
@@ -400,7 +420,7 @@ export default function CommentSection({
             onClick={() => { setShowJoinForm(true); }}
             className="px-8 py-3.5 bg-amber text-white text-[15px] font-bold rounded-full hover:bg-amber/90 active:scale-[0.97] transition-all shadow-glow-amber"
           >
-            Drop your take &rarr;
+            Spill it &rarr;
           </button>
         </div>
       )}
@@ -583,7 +603,7 @@ export default function CommentSection({
               {name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "?"}
             </div>
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-ink">{name}</span>
+              <span className="text-sm font-medium text-ink">{formatName(name)}</span>
               {zip && (
                 <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber/12 text-amber border border-amber/20">
                   ZIP {zip.slice(0, 5)} ✓
@@ -598,7 +618,50 @@ export default function CommentSection({
             </button>
           </div>
 
-          <form onSubmit={handlePost} className="space-y-3">
+          {/* ── Mode toggle: Drop a take / Ask Gwaky AI ── */}
+          <div className="flex items-center gap-1 mb-4 p-1 bg-bg rounded-full border border-divider w-fit">
+            <button
+              type="button"
+              onClick={() => setInputMode("take")}
+              className={`px-4 py-1.5 text-caption font-medium rounded-full transition-all ${
+                inputMode === "take"
+                  ? "bg-ink text-white shadow-sm"
+                  : "text-tertiary hover:text-ink"
+              }`}
+            >
+              Drop a take
+            </button>
+            <button
+              type="button"
+              onClick={() => setInputMode("ai")}
+              className={`px-4 py-1.5 text-caption font-medium rounded-full transition-all ${
+                inputMode === "ai"
+                  ? "bg-[#FF4D00] text-white shadow-sm"
+                  : "text-tertiary hover:text-ink"
+              }`}
+            >
+              Ask Gwaky AI
+            </button>
+          </div>
+
+          {/* ── Gwaky AI mode ── */}
+          {inputMode === "ai" && listingContext && (
+            <GwakyAI
+              listingId={listingId}
+              listingContext={{
+                ...listingContext,
+                topTakes: comments.slice(0, 5).map((c) => c.content.slice(0, 80)),
+              }}
+            />
+          )}
+          {inputMode === "ai" && !listingContext && (
+            <div className="text-center py-6 text-caption text-tertiary">
+              AI chat is not available for this listing.
+            </div>
+          )}
+
+          {/* ── Drop a take mode ── */}
+          {inputMode === "take" && <form onSubmit={handlePost} className="space-y-3">
             <div className="relative">
               <textarea
                 ref={textareaRef}
@@ -753,7 +816,7 @@ export default function CommentSection({
                 {posting ? "Posting..." : "Send it"}
               </button>
             </div>
-          </form>
+          </form>}
         </div>
       )}
 
@@ -905,8 +968,28 @@ function CommentItem({
   return (
     <div
       id={`comment-${comment.id}`}
-      className={`fade-up flex gap-3.5 py-5 border-b border-divider last:border-0 ${isLocked ? "opacity-50" : ""} ${isHot ? "pl-3 border-l-[3px] border-l-[#E8A87C]/50 rounded-sm" : ""}`}
+      className={`fade-up flex gap-3.5 py-5 border-b border-divider last:border-0 relative ${isLocked ? "opacity-50" : ""} ${isHot ? "pl-3 border-l-[3px] border-l-[#FF4D00]/50 rounded-sm" : ""}`}
     >
+      {/* Vibe Score Badge */}
+      {(() => {
+        const vFires = comment.reactions["\uD83D\uDD25"] ?? 0;
+        const vTrophies = comment.reactions["\uD83C\uDFC6"] ?? 0;
+        const vEyes = comment.reactions["\uD83D\uDC40"] ?? 0;
+        const vMoney = comment.reactions["\uD83D\uDCB8"] ?? 0;
+        const vFlags = comment.reactions["\uD83D\uDEA9"] ?? 0;
+        const vSkulls = comment.reactions["\uD83D\uDC80"] ?? 0;
+        const vibeScore = (vFires * 10) + (vTrophies * 15) + (vEyes * -5) + (vMoney * -10) + (vFlags * -15) + (vSkulls * -20);
+        const hasVibeReactions = vFires + vTrophies + vEyes + vMoney + vFlags + vSkulls > 0;
+        if (!hasVibeReactions) return null;
+        const badgeColor = vibeScore < 0 ? "#FF3B3B" : vibeScore <= 50 ? "#FFD166" : "#4ADE80";
+        const textColor = vibeScore <= 50 && vibeScore >= 0 ? "#000" : "#fff";
+        const vibeLabel = vibeScore >= 0 ? `+${vibeScore}` : `${vibeScore}`;
+        return (
+          <div className="absolute top-4 right-0 px-2.5 py-1 rounded-full text-[11px] font-extrabold tabular-nums" style={{ backgroundColor: badgeColor, color: textColor }}>
+            {vibeLabel}
+          </div>
+        );
+      })()}
       {/* Avatar */}
       <div className="w-10 h-10 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
         {initials}
@@ -915,7 +998,7 @@ function CommentItem({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-title text-ink">{comment.name}</span>
+          <span className="text-title text-ink">{formatName(comment.name)}</span>
           {(() => {
             const tag = getCredibilityTag(comment.content);
             return (
@@ -925,7 +1008,7 @@ function CommentItem({
             );
           })()}
           {verified && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[rgba(232,168,124,0.12)] text-[#E8A87C] border border-[rgba(232,168,124,0.2)]">
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[rgba(255,77,0,0.12)] text-[#FF4D00] border border-[rgba(255,77,0,0.2)]">
               ZIP ✓
             </span>
           )}
@@ -935,38 +1018,6 @@ function CommentItem({
           {comment.content}
         </p>
 
-        {/* Vibe Meter */}
-        {(() => {
-          const redFlags = comment.reactions["\uD83D\uDEA9"] ?? 0;
-          const fires = (comment.reactions["\uD83C\uDFC6"] ?? 0) + (comment.reactions["\uD83D\uDC40"] ?? 0);
-          const totalVibe = redFlags + fires;
-          const vibePercent = totalVibe > 0 ? (fires / totalVibe) * 100 : 50;
-          return (
-            <div className="mt-2.5 mb-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xs shrink-0">{"\uD83D\uDEA9"}</span>
-                <div className="flex-1 h-1 rounded-full bg-red-200/40 overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${vibePercent}%`,
-                      background: `linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #f97316 100%)`,
-                    }}
-                  />
-                </div>
-                <span className="text-xs shrink-0">{"\uD83D\uDD25"}</span>
-              </div>
-              {(redFlags > 0 || fires > 0) && (
-                <p className="text-[11px] text-tertiary mt-1">
-                  {redFlags > 0 ? `${redFlags} red flag${redFlags !== 1 ? "s" : ""}` : ""}
-                  {redFlags > 0 && fires > 0 ? " \u00B7 " : ""}
-                  {fires > 0 ? `${fires} fire${fires !== 1 ? "s" : ""}` : ""}
-                </p>
-              )}
-            </div>
-          );
-        })()}
-
         {/* Reactions + helpful */}
         <div className="flex gap-2 mt-2.5 flex-wrap items-center">
           {/* Helpful thumbs-up */}
@@ -974,7 +1025,7 @@ function CommentItem({
             onClick={handleHelpful}
             disabled={helpfulVoted}
             className={`flex items-center gap-1 text-caption transition-colors mr-1 ${
-              helpfulVoted ? "text-[#E8A87C]" : "text-tertiary/50 hover:text-secondary"
+              helpfulVoted ? "text-[#FF4D00]" : "text-tertiary/50 hover:text-secondary"
             } ${helpfulVoted ? "cursor-default" : "cursor-pointer"}`}
             title="Mark as helpful"
           >
@@ -1017,7 +1068,7 @@ function CommentItem({
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
               </svg>
-              <span>Reply</span>
+              <span>Add your take</span>
             </button>
           )}
 
@@ -1066,7 +1117,7 @@ function CommentItem({
               type="text"
               value={replyContent}
               onChange={(e) => onReplyContentChange(e.target.value)}
-              placeholder={`Reply to ${comment.name}...`}
+              placeholder={`Reply to ${formatName(comment.name)}...`}
               className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-full bg-bg border border-divider text-ink placeholder:text-tertiary focus:outline-none focus:border-amber/40 transition-colors"
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey && replyContent.trim()) {
