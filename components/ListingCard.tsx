@@ -126,7 +126,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goPrev}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
               aria-label="Previous"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
@@ -134,7 +134,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goNext}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
               aria-label="Next"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -148,9 +148,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {(photos.length <= 5 ? photos : photos.slice(0, 5)).map((_, i) => (
               <span
                 key={i}
-                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${
                   (photos.length <= 5 ? i === currentIndex : (i < 4 ? i === currentIndex : currentIndex >= 4))
-                    ? "bg-white w-2 shadow-sm"
+                    ? "bg-white !w-1.5 sm:!w-2 shadow-sm"
                     : "bg-white/50"
                 }`}
               />
@@ -172,18 +172,18 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       <div className="p-3.5">
         {/* Price + specs row */}
         <div className="flex items-baseline justify-between gap-2 mb-1">
-          <p className="text-[1.05rem] font-bold text-ink tracking-tight leading-none">
+          <p className="text-[15px] sm:text-[1.05rem] font-bold text-ink tracking-tight leading-none">
             {price}
           </p>
           {specs && (
-            <p className="text-[11px] text-tertiary font-medium shrink-0">
+            <p className="text-[11px] sm:text-[11px] text-tertiary font-medium shrink-0">
               {specs}
             </p>
           )}
         </div>
 
         {/* Address */}
-        <p className="text-[13px] text-secondary truncate leading-tight">
+        <p className="text-[13px] sm:text-[13px] text-secondary truncate leading-tight">
           {listing.address}, {listing.city}
         </p>
 

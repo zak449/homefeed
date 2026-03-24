@@ -124,14 +124,14 @@ export default function PhotoLightbox({
         </div>
         {/* Dot indicators */}
         {photos.length > 1 && (
-          <div className="flex justify-center gap-1.5 mt-2">
+          <div className="flex justify-center gap-1 mt-2">
             {photos.map((_, i) => (
               <span
                 key={i}
                 className={`block rounded-full transition-all duration-200 ${
                   i === mobileIndex
-                    ? "w-2 h-2 bg-ink"
-                    : "w-1.5 h-1.5 bg-tertiary/40"
+                    ? "w-1.5 h-1.5 bg-ink"
+                    : "w-1 h-1 bg-tertiary/40"
                 }`}
               />
             ))}
@@ -195,7 +195,7 @@ export default function PhotoLightbox({
           {/* Close button */}
           <button
             onClick={close}
-            className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-light z-10 w-10 h-10 flex items-center justify-center"
+            className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-light z-10 w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full bg-black/30 backdrop-blur-sm"
             aria-label="Close lightbox"
           >
             &times;
@@ -206,28 +206,28 @@ export default function PhotoLightbox({
             {index + 1} / {photos.length}
           </div>
 
-          {/* Previous */}
+          {/* Previous — hidden on mobile (swipe instead) */}
           {photos.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 prev();
               }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl font-light z-10 w-12 h-12 flex items-center justify-center"
+              className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl font-light z-10 w-12 h-12 items-center justify-center"
               aria-label="Previous photo"
             >
               &#8249;
             </button>
           )}
 
-          {/* Next */}
+          {/* Next — hidden on mobile (swipe instead) */}
           {photos.length > 1 && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 next();
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl font-light z-10 w-12 h-12 flex items-center justify-center"
+              className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-4xl font-light z-10 w-12 h-12 items-center justify-center"
               aria-label="Next photo"
             >
               &#8250;

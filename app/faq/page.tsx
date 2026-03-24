@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const faqs = [
   {
@@ -57,10 +57,23 @@ const faqs = [
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
+
+  const filteredFaqs = useMemo(() => {
+    if (!search.trim()) return faqs.map((faq, i) => ({ ...faq, originalIndex: i }));
+    const q = search.toLowerCase();
+    return faqs
+      .map((faq, i) => ({ ...faq, originalIndex: i }))
+      .filter(
+        (faq) =>
+          faq.question.toLowerCase().includes(q) ||
+          faq.answer.toLowerCase().includes(q)
+      );
+  }, [search]);
 
   return (
     <>
@@ -71,7 +84,7 @@ export default function FAQPage() {
         content="Frequently asked questions about gwakgwak, the social commentary platform for real estate."
       />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
         {/* Back link */}
         <a
           href="/"
@@ -94,16 +107,19 @@ export default function FAQPage() {
         </a>
 
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tighter">
+        <div className="mb-8">
+          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-3">
+            Support
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tight">
             Frequently Asked Questions
           </h1>
-          <p className="text-base text-muted mt-3 leading-relaxed">
+          <p className="text-base text-secondary mt-3 leading-relaxed">
             Got questions? We&rsquo;ve got answers. If you don&rsquo;t see what
             you&rsquo;re looking for, hit us up at{" "}
             <a
               href="mailto:support@gwakgwak.app"
-              className="text-social hover:text-social/80 font-medium transition-colors"
+              className="text-amber hover:text-amber/80 font-semibold transition-colors"
             >
               support@gwakgwak.app
             </a>
@@ -111,49 +127,94 @@ export default function FAQPage() {
           </p>
         </div>
 
+        {/* Search / filter */}
+        <div className="relative mb-8">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-tertiary pointer-events-none">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setOpenIndex(null);
+            }}
+            placeholder="Search questions..."
+            className="w-full pl-11 pr-4 py-3 border border-divider rounded-xl text-[15px] text-ink bg-surface placeholder:text-tertiary focus:outline-none focus:ring-2 focus:ring-amber/20 focus:border-amber transition-colors"
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(""); setOpenIndex(null); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-tertiary hover:text-ink transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* Results count when filtering */}
+        {search.trim() && (
+          <p className="text-[13px] text-tertiary mb-4">
+            {filteredFaqs.length} {filteredFaqs.length === 1 ? "result" : "results"} found
+          </p>
+        )}
+
         {/* Accordion */}
         <div className="space-y-3">
-          {faqs.map((faq, index) => {
-            const isOpen = openIndex === index;
+          {filteredFaqs.map((faq) => {
+            const isOpen = openIndex === faq.originalIndex;
             return (
               <div
-                key={index}
-                className={`bg-surface border rounded-xl transition-all duration-200 ${
+                key={faq.originalIndex}
+                className={`bg-surface border rounded-2xl transition-all duration-200 ${
                   isOpen
-                    ? "border-social/20 shadow-glow"
-                    : "border-border hover:border-border/80"
+                    ? "border-amber/30 shadow-glow"
+                    : "border-divider hover:border-divider/80"
                 }`}
               >
                 <button
-                  onClick={() => toggle(index)}
+                  onClick={() => toggle(faq.originalIndex)}
                   className="w-full text-left px-5 py-4 flex items-center justify-between gap-4"
                 >
                   <span
                     className={`font-display text-[15px] font-semibold tracking-tight transition-colors ${
-                      isOpen ? "text-social" : "text-ink"
+                      isOpen ? "text-amber" : "text-ink"
                     }`}
                   >
                     {faq.question}
                   </span>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`shrink-0 text-muted transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
+                  <div
+                    className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-200 ${
+                      isOpen ? "bg-amber/10 text-amber" : "bg-highlight text-tertiary"
                     }`}
                   >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`transition-transform duration-200 ${
+                        isOpen ? "rotate-180" : ""
+                      }`}
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </div>
                 </button>
                 {isOpen && (
                   <div className="px-5 pb-5 animate-fade-in">
-                    <p className="text-[15px] text-muted leading-relaxed">
+                    <div className="w-full h-px bg-divider mb-4" />
+                    <p className="text-[15px] text-secondary leading-relaxed">
                       {faq.answer}
                     </p>
                   </div>
@@ -163,33 +224,65 @@ export default function FAQPage() {
           })}
         </div>
 
-        {/* Bottom CTA */}
-        <div className="mt-12 bg-tag rounded-xl p-6 sm:p-8 text-center">
-          <p className="font-display text-lg font-semibold text-ink tracking-tight">
-            Still have questions?
-          </p>
-          <p className="text-sm text-muted mt-1 mb-4">
-            We&rsquo;re always happy to chat.
-          </p>
-          <a
-            href="/contact"
-            className="inline-flex items-center gap-2 bg-social text-white text-sm font-semibold px-5 py-2.5 rounded-lg hover:bg-social/90 transition-colors"
-          >
-            Get in Touch
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        {/* No results state */}
+        {search.trim() && filteredFaqs.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-glow flex items-center justify-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+            </div>
+            <p className="font-display text-lg font-bold text-ink mb-1">
+              No matching questions
+            </p>
+            <p className="text-sm text-secondary">
+              Try a different search term, or{" "}
+              <a href="/contact" className="text-amber font-semibold hover:text-amber/80 transition-colors">
+                ask us directly
+              </a>
+              .
+            </p>
+          </div>
+        )}
+
+        {/* Still have questions? CTA */}
+        <div className="mt-12 relative bg-gradient-to-br from-ink to-ink/95 rounded-3xl p-8 sm:p-10 text-center overflow-hidden">
+          {/* Ambient glow */}
+          <div className="absolute top-[-30px] right-[-30px] w-[160px] h-[160px] rounded-full bg-amber/[0.08] blur-[60px] pointer-events-none" />
+
+          <div className="relative z-10">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-amber/10 flex items-center justify-center">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <h2 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight mb-2">
+              Still have questions?
+            </h2>
+            <p className="text-sm text-white/50 mb-6 max-w-sm mx-auto">
+              We&rsquo;re always happy to chat. Reach out and we&rsquo;ll get back to you within 24 hours.
+            </p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-amber text-white text-sm font-bold px-6 py-3 rounded-xl shadow-glow hover:shadow-glow-amber hover:-translate-y-0.5 transition-all duration-200 active:scale-[0.98]"
             >
-              <path d="M5 12h14" />
-              <path d="M12 5l7 7-7 7" />
-            </svg>
-          </a>
+              Get in Touch
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
     </>

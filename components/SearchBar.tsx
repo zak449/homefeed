@@ -291,7 +291,7 @@ export default function SearchBar() {
           onChange={(e) => { setCity(e.target.value); setShowSuggestions(true); setGeoResolved(false); }}
           onFocus={() => setShowSuggestions(true)}
           placeholder={locating ? "Finding your location..." : "Drop an address, neighborhood, or zip..."}
-          className="w-full rounded-full bg-surface pl-11 pr-16 py-3 text-body text-ink placeholder:text-tertiary focus:outline-none transition-all duration-200"
+          className="w-full rounded-full bg-surface pl-11 pr-16 py-3.5 sm:py-3 text-[16px] sm:text-body text-ink placeholder:text-tertiary focus:outline-none transition-all duration-200"
           style={{ borderWidth: 0 }}
           autoComplete="off"
         />
@@ -306,7 +306,7 @@ export default function SearchBar() {
         {showSuggestions && (
           <div
             ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-surface border border-divider rounded-card shadow-hover z-50 max-h-[400px] overflow-y-auto animate-fade-in"
+            className="absolute top-full left-0 right-0 mt-2 bg-surface border border-divider rounded-card shadow-hover z-50 max-h-[40vh] sm:max-h-[400px] overflow-y-auto animate-fade-in"
           >
             {/* Current Location */}
             <button
@@ -488,7 +488,7 @@ export default function SearchBar() {
                 if (currentSort) params.set("sort", currentSort);
                 router.push(`/?${params.toString()}`);
               }}
-              className={`px-3 py-1 rounded-full text-caption transition-colors ${
+              className={`px-4 py-2.5 sm:px-3 sm:py-1 min-h-[44px] sm:min-h-0 rounded-full text-caption transition-colors ${
                 type === t.key
                   ? "bg-ink text-white"
                   : "bg-surface text-ink hover:bg-active"

@@ -39,7 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <meta name="theme-color" content="#0A0A0A" />
       </head>
-      <body className="min-h-screen flex flex-col bg-bg pb-14 sm:pb-0">
+      <body className="min-h-screen flex flex-col bg-bg pb-0 sm:pb-0">
         {/* Top nav — premium, clean */}
         <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-divider/60">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">

@@ -58,7 +58,7 @@ export default function ContactPage() {
         content="Get in touch with the gwakgwak team. We'd love to hear from you."
       />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
         {/* Back link */}
         <a
           href="/"
@@ -82,12 +82,15 @@ export default function ContactPage() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tighter">
-            Get in Touch
+          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-3">
+            Contact
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tight">
+            We&rsquo;d love to hear from you
           </h1>
-          <p className="text-base text-muted mt-3 leading-relaxed max-w-lg">
+          <p className="text-base text-secondary mt-3 leading-relaxed max-w-lg">
             Have a question, feedback, or just want to say hi? Fill out the form
-            below or reach out directly. We&rsquo;d love to hear from you.
+            below or reach out directly.
           </p>
         </div>
 
@@ -95,64 +98,69 @@ export default function ContactPage() {
           {/* Contact Form */}
           <div className="lg:col-span-2">
             {status === "success" ? (
-              <div className="bg-social-light border border-social/10 rounded-xl p-8 text-center">
-                <div className="text-4xl mb-3">✉️</div>
-                <p className="font-display text-lg font-semibold text-ink">
+              <div className="bg-glow border border-amber/10 rounded-2xl p-8 sm:p-10 text-center">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-amber/10 flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <path d="M22 4L12 14.01l-3-3" />
+                  </svg>
+                </div>
+                <p className="font-display text-xl font-bold text-ink mb-2">
                   Message sent!
                 </p>
-                <p className="text-sm text-muted mt-2">
-                  Thanks for reaching out. We&rsquo;ll get back to you as soon
-                  as we can.
+                <p className="text-sm text-secondary mt-2 max-w-sm mx-auto">
+                  Thanks for reaching out. We typically respond within 24 hours.
                 </p>
                 <button
                   onClick={() => setStatus("idle")}
-                  className="mt-5 text-sm font-semibold text-social hover:text-social/80 transition-colors"
+                  className="mt-6 text-sm font-semibold text-amber hover:text-amber/80 transition-colors"
                 >
                   Send another message
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* Name */}
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-[13px] font-semibold text-ink mb-1.5"
-                  >
-                    Name
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
-                    placeholder="Your name"
-                  />
-                </div>
+                {/* Name + Email row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label
+                      htmlFor="name"
+                      className="block text-[13px] font-semibold text-ink mb-1.5"
+                    >
+                      Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      required
+                      value={form.name}
+                      onChange={(e) =>
+                        setForm({ ...form, name: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 border border-divider rounded-xl text-[15px] text-ink bg-surface placeholder:text-tertiary focus:outline-none focus:ring-2 focus:ring-amber/20 focus:border-amber transition-colors"
+                      placeholder="Your name"
+                    />
+                  </div>
 
-                {/* Email */}
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-[13px] font-semibold text-ink mb-1.5"
-                  >
-                    Email
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors"
-                    placeholder="you@example.com"
-                  />
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-[13px] font-semibold text-ink mb-1.5"
+                    >
+                      Email
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={form.email}
+                      onChange={(e) =>
+                        setForm({ ...form, email: e.target.value })
+                      }
+                      className="w-full px-4 py-2.5 border border-divider rounded-xl text-[15px] text-ink bg-surface placeholder:text-tertiary focus:outline-none focus:ring-2 focus:ring-amber/20 focus:border-amber transition-colors"
+                      placeholder="you@example.com"
+                    />
+                  </div>
                 </div>
 
                 {/* Subject */}
@@ -170,8 +178,8 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, subject: e.target.value })
                     }
-                    className={`w-full px-4 py-2.5 border border-border rounded-lg text-[15px] bg-surface focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors ${
-                      form.subject ? "text-ink" : "text-muted/50"
+                    className={`w-full px-4 py-2.5 border border-divider rounded-xl text-[15px] bg-surface focus:outline-none focus:ring-2 focus:ring-amber/20 focus:border-amber transition-colors ${
+                      form.subject ? "text-ink" : "text-tertiary"
                     }`}
                   >
                     <option value="" disabled>
@@ -201,7 +209,7 @@ export default function ContactPage() {
                     onChange={(e) =>
                       setForm({ ...form, message: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 border border-border rounded-lg text-[15px] text-ink bg-surface placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/20 focus:border-social transition-colors resize-none"
+                    className="w-full px-4 py-2.5 border border-divider rounded-xl text-[15px] text-ink bg-surface placeholder:text-tertiary focus:outline-none focus:ring-2 focus:ring-amber/20 focus:border-amber transition-colors resize-none"
                     placeholder="Tell us what's on your mind..."
                   />
                 </div>
@@ -213,44 +221,53 @@ export default function ContactPage() {
                   </p>
                 )}
 
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={status === "sending"}
-                  className="w-full sm:w-auto bg-social text-white text-sm font-semibold px-6 py-2.5 rounded-lg hover:bg-social/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {status === "sending" ? "Sending..." : "Send Message"}
-                </button>
+                {/* Submit + response time */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <button
+                    type="submit"
+                    disabled={status === "sending"}
+                    className="w-full sm:w-auto bg-amber text-white text-sm font-bold px-8 py-3 rounded-xl shadow-glow hover:shadow-glow-amber hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {status === "sending" ? "Sending..." : "Send Message"}
+                  </button>
+                  <p className="text-[12px] text-tertiary flex items-center gap-1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    We typically respond within 24 hours
+                  </p>
+                </div>
               </form>
             )}
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Direct contact */}
-            <div className="bg-tag rounded-xl p-5">
-              <h3 className="font-display text-sm font-semibold text-ink mb-3">
+            <div className="bg-highlight rounded-2xl p-5">
+              <h3 className="font-display text-sm font-bold text-ink mb-3">
                 Direct Contact
               </h3>
               <div className="space-y-3">
                 <div>
-                  <p className="text-[12px] font-medium text-muted uppercase tracking-wide mb-0.5">
+                  <p className="text-[11px] font-bold text-tertiary uppercase tracking-wider mb-0.5">
                     Support
                   </p>
                   <a
                     href="mailto:support@gwakgwak.app"
-                    className="text-[14px] text-social hover:text-social/80 font-medium transition-colors"
+                    className="text-[14px] text-amber hover:text-amber/80 font-semibold transition-colors"
                   >
                     support@gwakgwak.app
                   </a>
                 </div>
                 <div>
-                  <p className="text-[12px] font-medium text-muted uppercase tracking-wide mb-0.5">
+                  <p className="text-[11px] font-bold text-tertiary uppercase tracking-wider mb-0.5">
                     Privacy
                   </p>
                   <a
                     href="mailto:privacy@gwakgwak.app"
-                    className="text-[14px] text-social hover:text-social/80 font-medium transition-colors"
+                    className="text-[14px] text-amber hover:text-amber/80 font-semibold transition-colors"
                   >
                     privacy@gwakgwak.app
                   </a>
@@ -259,8 +276,8 @@ export default function ContactPage() {
             </div>
 
             {/* Social media */}
-            <div className="bg-tag rounded-xl p-5">
-              <h3 className="font-display text-sm font-semibold text-ink mb-3">
+            <div className="bg-highlight rounded-2xl p-5">
+              <h3 className="font-display text-sm font-bold text-ink mb-3">
                 Follow Us
               </h3>
               <div className="space-y-2.5">
@@ -268,9 +285,9 @@ export default function ContactPage() {
                   href="https://twitter.com/gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
+                  className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-divider flex items-center justify-center group-hover:border-amber/30 transition-colors">
                     <svg
                       width="14"
                       height="14"
@@ -286,9 +303,9 @@ export default function ContactPage() {
                   href="https://instagram.com/gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
+                  className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-divider flex items-center justify-center group-hover:border-amber/30 transition-colors">
                     <svg
                       width="14"
                       height="14"
@@ -310,9 +327,9 @@ export default function ContactPage() {
                   href="https://tiktok.com/@gwakgwakapp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 text-[14px] text-muted hover:text-ink font-medium transition-colors group"
+                  className="flex items-center gap-3 text-[14px] text-secondary hover:text-ink font-medium transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-lg bg-surface border border-border flex items-center justify-center group-hover:border-ink/20 transition-colors">
+                  <div className="w-8 h-8 rounded-lg bg-surface border border-divider flex items-center justify-center group-hover:border-amber/30 transition-colors">
                     <svg
                       width="14"
                       height="14"
@@ -328,26 +345,26 @@ export default function ContactPage() {
             </div>
 
             {/* Quick links */}
-            <div className="bg-tag rounded-xl p-5">
-              <h3 className="font-display text-sm font-semibold text-ink mb-3">
+            <div className="bg-highlight rounded-2xl p-5">
+              <h3 className="font-display text-sm font-bold text-ink mb-3">
                 Quick Links
               </h3>
               <div className="space-y-2">
                 <a
                   href="/faq"
-                  className="block text-[14px] text-muted hover:text-ink font-medium transition-colors"
+                  className="block text-[14px] text-secondary hover:text-ink font-medium transition-colors"
                 >
                   FAQ
                 </a>
                 <a
                   href="/privacy"
-                  className="block text-[14px] text-muted hover:text-ink font-medium transition-colors"
+                  className="block text-[14px] text-secondary hover:text-ink font-medium transition-colors"
                 >
                   Privacy Policy
                 </a>
                 <a
                   href="/terms"
-                  className="block text-[14px] text-muted hover:text-ink font-medium transition-colors"
+                  className="block text-[14px] text-secondary hover:text-ink font-medium transition-colors"
                 >
                   Terms of Service
                 </a>

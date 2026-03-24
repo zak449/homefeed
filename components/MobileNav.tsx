@@ -86,7 +86,7 @@ export default function MobileNav() {
       {/* Bottom tab bar — fixed, always visible on mobile */}
       <nav
         className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg/95 backdrop-blur-sm border-t border-divider"
-        style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)" }}
+        style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
           {tabs.map((tab) => {
@@ -103,7 +103,7 @@ export default function MobileNav() {
 
                 {/* Amber accent button for +Take */}
                 {isAccent ? (
-                  <span className="flex items-center justify-center w-11 h-11 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
+                  <span className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
                     {tab.icon(false)}
                   </span>
                 ) : (
@@ -122,7 +122,7 @@ export default function MobileNav() {
               </>
             );
 
-            const className = `relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors rounded-xl ${
+            const className = `relative flex flex-col items-center gap-0.5 px-3 py-1.5 min-w-[44px] min-h-[44px] transition-colors rounded-xl ${
               isAccent
                 ? ""
                 : tab.active
@@ -155,7 +155,7 @@ export default function MobileNav() {
         </div>
       </nav>
       {/* Spacer to prevent content from being hidden behind bottom bar */}
-      <div className="sm:hidden h-16" />
+      <div className="sm:hidden h-16" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} />
     </>
   );
 }

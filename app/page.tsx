@@ -15,6 +15,7 @@ import { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
 import SplitMapLayout from "@/components/SplitMapLayout";
+import VoteButtons from "@/components/VoteButtons";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -559,7 +560,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           <div className="max-w-2xl mx-auto">
             <div className="space-y-5 px-5">
               {feedItems.map((item, idx) => {
-                /* ── TAKE CARD ── */
+                /* ── TAKE CARD (social-feed style) ── */
                 if (item.type === "take" && item.data) {
                   const comment = item.data as CommentFeedItem;
                   const photo = comment.listing.photos[0];
@@ -569,77 +570,95 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     reactionCounts[r.type] = (reactionCounts[r.type] || 0) + 1;
                   }
                   const totalReactions = comment.reactions.length;
+                  const isHotTake = totalReactions >= 5;
 
                   return (
-                    <a key={`take-${comment.id}`} href={`/listing/${comment.listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
-                      {/* Big property photo */}
-                      <div className="relative w-full aspect-[16/9] overflow-hidden bg-highlight">
-                        {photo ? (
-                          <FallbackImage
-                            src={photo}
-                            alt={comment.listing.address}
-                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                            loading={idx < 3 ? "eager" : "lazy"}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
-                          </div>
-                        )}
-                        {/* Price + location overlay */}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 pb-4 pt-14">
-                          <p className="text-2xl font-extrabold text-white leading-none tracking-tight">{fmtPrice(comment.listing.price, comment.listing.listingType)}</p>
-                          <p className="text-sm text-white/70 mt-1 truncate">{comment.listing.address}, {comment.listing.city}</p>
+                    <div key={`take-${comment.id}`} className="rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+                      {/* Author row — like a tweet header */}
+                      <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+                        <div className="w-11 h-11 rounded-full bg-amber/10 border-2 border-amber/20 flex items-center justify-center shrink-0">
+                          <span className="text-xs font-bold text-amber">{initials}</span>
                         </div>
-                        {/* Badge */}
-                        <div className="absolute top-4 left-4">
-                          <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
-                            {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Comment content */}
-                      <div className="p-5">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-10 h-10 rounded-full bg-amber/10 border-2 border-amber/20 flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-amber">{initials}</span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <span className="text-sm font-bold text-ink">{comment.name}</span>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[11px] text-tertiary">{timeAgo(comment.createdAt)}</span>
-                              <span className="text-tertiary/40">·</span>
-                              <span className="text-[11px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <p className="text-[15px] sm:text-[16px] text-ink leading-relaxed line-clamp-3 mb-4">
-                          &ldquo;{comment.content}&rdquo;
-                        </p>
-                        <div className="flex items-center justify-between pt-3 border-t border-divider">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            {Object.entries(reactionCounts).length > 0 ? (
-                              Object.entries(reactionCounts).map(([emoji, count]) => (
-                                <span key={emoji} className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-highlight border border-divider/60 text-ink font-medium">
-                                  <span className="text-sm">{emoji}</span>
-                                  <span className="tabular-nums">{count}</span>
-                                </span>
-                              ))
-                            ) : (
-                              <span className="text-xs text-tertiary">Be the first to react</span>
+                            <span className="text-[15px] font-bold text-ink">{comment.name}</span>
+                            {isHotTake && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-500 border border-orange-500/20">
+                                <span>&#x1F525;</span> Hot Take
+                              </span>
                             )}
                           </div>
-                          <span className="text-xs font-bold text-amber group-hover:underline shrink-0">
-                            {totalReactions > 0 ? `${totalReactions} takes` : "Add your take"} &rarr;
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[12px] text-tertiary">{timeAgo(comment.createdAt)}</span>
+                            <span className="text-tertiary/40">·</span>
+                            <span className="text-[12px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
+                          </div>
                         </div>
+                        {/* Upvote/downvote */}
+                        <VoteButtons />
                       </div>
-                    </a>
+
+                      {/* THE TAKE — big, dominant quote */}
+                      <div className="px-5 pb-4">
+                        <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-medium">
+                          &ldquo;{comment.content}&rdquo;
+                        </p>
+                      </div>
+
+                      {/* Property context — smaller, contextual */}
+                      <a href={`/listing/${comment.listing.id}`} className="block group/listing">
+                        <div className="relative w-full aspect-[2.5/1] overflow-hidden bg-highlight mx-5 mb-4 rounded-xl">
+                          {photo ? (
+                            <FallbackImage
+                              src={photo}
+                              alt={comment.listing.address}
+                              className="w-full h-full object-cover group-hover/listing:scale-[1.03] transition-transform duration-700"
+                              loading={idx < 3 ? "eager" : "lazy"}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
+                              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
+                            </div>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-3 pt-10">
+                            <p className="text-lg font-extrabold text-white leading-none tracking-tight">{fmtPrice(comment.listing.price, comment.listing.listingType)}</p>
+                            <p className="text-xs text-white/70 mt-0.5 truncate">{comment.listing.address}, {comment.listing.city}</p>
+                          </div>
+                          <div className="absolute top-3 left-3">
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
+                              {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
+                            </span>
+                          </div>
+                        </div>
+                      </a>
+
+                      {/* Reactions + Reply CTA */}
+                      <div className="flex items-center justify-between px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {Object.entries(reactionCounts).length > 0 ? (
+                            Object.entries(reactionCounts).map(([emoji, count]) => (
+                              <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink font-medium">
+                                <span className="text-sm">{emoji}</span>
+                                <span className="tabular-nums">{count}</span>
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-tertiary">Be the first to react</span>
+                          )}
+                        </div>
+                        <a
+                          href={`/listing/${comment.listing.id}#comment-form`}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-amber hover:underline shrink-0"
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                          Reply to this take
+                        </a>
+                      </div>
+                    </div>
                   );
                 }
 
-                /* ── LISTING CARD (in feed) ── */
+                /* ── LISTING CARD (in feed) — top comment is the main content ── */
                 if (item.type === "listing" && item.data) {
                   const listing = item.data as (typeof sortedListings)[number];
                   const photo = listing.photos[0];
@@ -647,7 +666,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
                   return (
                     <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
-                      <div className="relative w-full aspect-[16/9] overflow-hidden bg-highlight">
+                      {/* Photo — context, not the star */}
+                      <div className="relative w-full aspect-[2.2/1] overflow-hidden bg-highlight">
                         {photo ? (
                           <FallbackImage
                             src={photo}
@@ -660,39 +680,55 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
                           </div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 pb-4 pt-14">
-                          <p className="text-2xl font-extrabold text-white leading-none tracking-tight">{fmtPrice(listing.price, listing.listingType)}</p>
-                          <p className="text-sm text-white/70 mt-1 truncate">{listing.address}, {listing.city}</p>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 pb-3 pt-12">
+                          <p className="text-xl font-extrabold text-white leading-none tracking-tight">{fmtPrice(listing.price, listing.listingType)}</p>
+                          <p className="text-xs text-white/70 mt-1 truncate">{listing.address}, {listing.city}</p>
                         </div>
-                        <div className="absolute top-4 left-4 flex items-center gap-2">
-                          <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
+                        <div className="absolute top-3 left-3 flex items-center gap-2">
+                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
                             {listing.listingType === "rent" ? "Rental" : "For Sale"}
                           </span>
                           {listing.status === "active" && (
-                            <span className="text-[11px] font-bold px-3 py-1.5 rounded-full bg-green-500/80 backdrop-blur-md text-white">
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-green-500/80 backdrop-blur-md text-white">
                               Active
                             </span>
                           )}
                         </div>
                       </div>
+
+                      {/* Top comment — PROMINENT, the main content */}
                       <div className="p-5">
-                        <div className="flex items-center gap-4 text-sm text-secondary mb-3">
+                        {listing.topComment ? (
+                          <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shrink-0">
+                                <span className="text-[10px] font-bold text-amber">
+                                  {listing.topComment.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}
+                                </span>
+                              </div>
+                              <span className="text-sm font-bold text-ink">{listing.topComment.name}</span>
+                              <span className="text-[11px] text-tertiary">says:</span>
+                            </div>
+                            <p className="text-[16px] sm:text-[17px] text-ink leading-relaxed font-medium">
+                              &ldquo;{listing.topComment.content}&rdquo;
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-[15px] text-tertiary italic mb-4">No takes yet — be the first to share what you know.</p>
+                        )}
+
+                        <div className="flex items-center gap-4 text-xs text-secondary mb-3 pb-3 border-b border-divider">
                           {listing.bedrooms != null && <span className="font-medium">{listing.bedrooms} bd</span>}
                           {listing.bathrooms != null && <span className="font-medium">{listing.bathrooms} ba</span>}
                           {listing.sqft != null && <span className="font-medium">{listing.sqft.toLocaleString()} sqft</span>}
                           {listing.propertyType && <span className="text-tertiary capitalize">{listing.propertyType}</span>}
                         </div>
-                        {listing.topComment ? (
-                          <p className="text-sm text-ink/80 line-clamp-2 mb-3 italic leading-relaxed">
-                            &ldquo;{listing.topComment.content}&rdquo; &mdash; <span className="font-semibold not-italic">{listing.topComment.name}</span>
-                          </p>
-                        ) : null}
-                        <div className="flex items-center justify-between pt-3 border-t border-divider">
+                        <div className="flex items-center justify-between">
                           <span className="text-xs text-tertiary font-medium">
                             {commentCount_l > 0 ? `${commentCount_l} take${commentCount_l !== 1 ? "s" : ""}` : "No takes yet"}
                           </span>
                           <span className="text-xs font-bold text-amber group-hover:underline">
-                            {commentCount_l > 0 ? "Read takes" : "Be the first"} &rarr;
+                            {commentCount_l > 0 ? "Read all takes" : "Drop your take"} &rarr;
                           </span>
                         </div>
                       </div>
@@ -709,33 +745,51 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   );
                 }
 
-                /* ── FOUNDER STORY CARD ── */
+                /* ── FOUNDER CARD — pinned tweet style ── */
                 if (item.type === "founder") {
                   return (
-                    <div key="founder" className="rounded-2xl border border-divider bg-surface shadow-elevated overflow-hidden">
-                      <div className="bg-gradient-to-br from-ink to-ink/95 p-6 sm:p-8 relative">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-amber/[0.06] rounded-full blur-3xl pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 w-32 h-32 bg-amber/[0.04] rounded-full blur-3xl pointer-events-none" />
-                        <div className="relative">
-                          <div className="flex items-center gap-4 mb-5">
-                            <div className="w-12 h-12 rounded-full bg-white text-ink text-sm font-extrabold flex items-center justify-center shrink-0 shadow-soft ring-2 ring-white/20">ZK</div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2.5">
-                                <p className="text-[15px] font-bold text-white">Zachary Kaufman</p>
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber/20 text-amber font-bold uppercase tracking-wider">Founder</span>
-                              </div>
-                              <p className="text-[12px] text-white/40 mt-0.5">Building gwak gwak</p>
+                    <div key="founder" className="rounded-2xl border border-divider bg-surface shadow-card overflow-hidden">
+                      {/* Pinned indicator */}
+                      <div className="flex items-center gap-1.5 px-5 pt-3 pb-0">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-tertiary" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
+                        </svg>
+                        <span className="text-[11px] text-tertiary font-medium">Pinned</span>
+                      </div>
+
+                      <div className="p-5 pt-3">
+                        {/* Author row — tweet style */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="w-11 h-11 rounded-full bg-ink text-white text-sm font-extrabold flex items-center justify-center shrink-0">ZK</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[15px] font-bold text-ink">Zachary Kaufman</span>
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber/15 text-amber font-bold">Founder</span>
                             </div>
+                            <span className="text-[12px] text-tertiary">@zach · Building gwak gwak</span>
                           </div>
-                          <p className="text-[15px] sm:text-[16px] text-white/70 leading-relaxed mb-3">
-                            &ldquo;I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.&rdquo;
-                          </p>
-                          <p className="text-[15px] sm:text-[16px] text-white font-semibold leading-relaxed mb-5">
-                            &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
-                          </p>
-                          <a href="/about" className="inline-flex items-center gap-2 text-sm text-amber font-bold hover:underline transition-colors">
-                            Read the full story
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+                        </div>
+
+                        {/* The take — big text like a tweet */}
+                        <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed mb-3">
+                          I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.
+                        </p>
+                        <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-semibold mb-5">
+                          If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.
+                        </p>
+
+                        {/* Engagement row */}
+                        <div className="flex items-center gap-6 pt-4 border-t border-divider">
+                          <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            <span className="font-medium tabular-nums">{commentCount}</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
+                            <span>&#x2764;&#xFE0F;</span>
+                            <span className="font-medium tabular-nums">{listingCount}</span>
+                          </span>
+                          <a href="/about" className="ml-auto text-xs font-bold text-amber hover:underline transition-colors">
+                            Read the full story &rarr;
                           </a>
                         </div>
                       </div>

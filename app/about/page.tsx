@@ -19,21 +19,31 @@ export default async function AboutPage() {
   return (
     <div className="bg-bg min-h-screen">
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 1 — HERO
+          SECTION 1 — HERO with lifestyle background
       ═══════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden">
+        {/* Lifestyle hero background */}
+        <div className="absolute inset-0">
+          <img
+            src="/images/hero-lifestyle.jpg"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-bg/90 via-bg/80 to-bg" />
+        </div>
+
         {/* Ambient glow */}
         <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-amber/[0.06] blur-[120px] amber-shimmer pointer-events-none" />
 
-        <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-20 sm:pt-32 pb-16 sm:pb-24 relative z-10">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-5">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-28 pb-14 sm:pb-20 relative z-10">
+          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
             About gwak gwak
           </p>
           <h1 className="font-display text-[2.25rem] sm:text-[3.25rem] md:text-[4rem] font-extrabold text-ink tracking-[-0.04em] leading-[1.04] max-w-3xl">
             We built gwak gwak because buying blind shouldn&rsquo;t be{" "}
             <span className="text-amber">normal</span>.
           </h1>
-          <p className="text-lg sm:text-xl text-secondary mt-6 leading-relaxed max-w-2xl">
+          <p className="text-lg sm:text-xl text-secondary mt-5 leading-relaxed max-w-2xl">
             Real estate is a trillion-dollar industry built on information asymmetry.
             We&rsquo;re flipping it. One neighborhood at a time.
           </p>
@@ -43,21 +53,39 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 2 — FOUNDER'S STORY
       ═══════════════════════════════════════════════════════════ */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-20 sm:pb-28">
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
+        {/* Big pull quote */}
+        <div className="relative bg-ink rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden">
+          <div className="absolute top-[-30px] right-[-30px] w-[180px] h-[180px] rounded-full bg-amber/[0.08] blur-[60px] pointer-events-none" />
+          <div className="relative flex flex-col sm:flex-row items-start gap-6 sm:gap-10">
+            {/* Photo placeholder */}
+            <div className="shrink-0 w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-amber to-amber/60 flex items-center justify-center shadow-glow-amber">
+              <span className="text-white font-display text-2xl sm:text-4xl font-extrabold">ZK</span>
+            </div>
+            <div>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-amber/30 mb-3">
+                <path d="M3 21c3-3 4-6 4-9 0-2.5-2-4.5-4.5-4.5S-2 9.5-2 12c0 3.5 3 5.5 5 9zm13 0c3-3 4-6 4-9 0-2.5-2-4.5-4.5-4.5S11 9.5 11 12c0 3.5 3 5.5 5 9z" fill="currentColor" />
+              </svg>
+              <p className="font-display text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight leading-snug">
+                If gwak gwak existed, that truth would have been there.
+              </p>
+              <p className="text-sm text-amber font-semibold mt-4">
+                Zachary Kaufman, Founder
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="relative">
           {/* Vertical accent line */}
           <div className="absolute left-0 top-0 w-[3px] h-full bg-gradient-to-b from-amber via-amber/40 to-transparent rounded-full" />
 
-          <div className="pl-8 sm:pl-10 space-y-6">
+          <div className="pl-8 sm:pl-10 space-y-5">
             <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase">
               The origin story
             </p>
 
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight leading-tight">
-              &ldquo;If gwak gwak existed, that truth would have been there.&rdquo;
-            </h2>
-
-            <div className="space-y-5 text-[15px] sm:text-base text-secondary leading-[1.75]">
+            <div className="space-y-4 text-[15px] sm:text-base text-secondary leading-[1.75]">
               <p>
                 Our founder bought a place. Signed the papers. Moved in. And then the
                 neighbors started talking.
@@ -98,8 +126,8 @@ export default async function AboutPage() {
           SECTION 3 — THE MISSION
       ═══════════════════════════════════════════════════════════ */}
       <section className="bg-ink">
-        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-6">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-5">
             Our mission
           </p>
           <h2 className="font-display text-3xl sm:text-[2.75rem] md:text-5xl font-extrabold text-white tracking-[-0.04em] leading-[1.08] max-w-3xl">
@@ -112,7 +140,7 @@ export default async function AboutPage() {
           </p>
 
           {/* Mission pillars */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-14">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-12">
             {[
               {
                 title: "Radical transparency",
@@ -144,8 +172,8 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 4 — HOW IT WORKS (3-STEP)
       ═══════════════════════════════════════════════════════════ */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-        <div className="text-center mb-14">
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
+        <div className="text-center mb-12">
           <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
             How it works
           </p>
@@ -219,7 +247,7 @@ export default async function AboutPage() {
           SECTION 5 — THE AI VISION
       ═══════════════════════════════════════════════════════════ */}
       <section className="bg-highlight">
-        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
           <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
             The AI vision
           </p>
@@ -287,7 +315,7 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 6 — FOR AGENTS
       ═══════════════════════════════════════════════════════════ */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
         <div className="flex flex-col sm:flex-row gap-10 sm:gap-16 items-start">
           <div className="flex-1">
             <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
@@ -342,9 +370,12 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 7 — THE DATA
       ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-ink">
-        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
-          <div className="text-center mb-14">
+      <section className="bg-ink relative overflow-hidden">
+        {/* Ambient glow behind numbers */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-amber/[0.04] blur-[100px] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24 relative z-10">
+          <div className="text-center mb-12">
             <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
               Live from the platform
             </p>
@@ -352,8 +383,7 @@ export default async function AboutPage() {
               Real numbers. Real community.
             </h2>
             <p className="text-sm text-white/40 mt-3 max-w-md mx-auto">
-              These aren&rsquo;t vanity metrics. Every number represents a real person
-              sharing something real about a real place.
+              Every number represents a real person sharing something real about a real place.
             </p>
           </div>
 
@@ -363,11 +393,12 @@ export default async function AboutPage() {
               { value: commentCount.toLocaleString(), label: "Comments Shared", sub: "Opinions from real people" },
               { value: reactionCount.toLocaleString(), label: "Reactions", sub: "Community engagement signals" },
             ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <p className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-[-0.04em]">
+              <div key={stat.label} className="text-center group">
+                <p className="font-display text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-[-0.04em] group-hover:text-amber transition-colors duration-300">
                   {stat.value}
                 </p>
-                <p className="text-xs sm:text-sm font-semibold text-white/70 mt-2">
+                <div className="w-8 h-[2px] bg-amber/40 rounded-full mx-auto mt-3 mb-2" />
+                <p className="text-xs sm:text-sm font-bold text-white/70 tracking-tight">
                   {stat.label}
                 </p>
                 <p className="text-[11px] text-white/30 mt-1 hidden sm:block">
@@ -382,7 +413,7 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 8 — THE FOUNDER
       ═══════════════════════════════════════════════════════════ */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
           <div className="shrink-0 w-24 h-24 rounded-2xl bg-gradient-to-br from-amber to-amber/60 flex items-center justify-center shadow-glow-amber">
             <span className="text-white font-display text-3xl font-extrabold">ZK</span>
@@ -417,7 +448,7 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 9 — CTA: JOIN YOUR NEIGHBORHOOD
       ═══════════════════════════════════════════════════════════ */}
-      <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-20 sm:pb-28">
+      <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
         <div className="relative bg-gradient-to-br from-ink to-ink/95 rounded-3xl p-8 sm:p-14 text-center overflow-hidden">
           {/* Ambient amber glow */}
           <div className="absolute top-[-40px] right-[-40px] w-[200px] h-[200px] rounded-full bg-amber/[0.08] blur-[80px] pointer-events-none" />

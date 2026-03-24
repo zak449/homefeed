@@ -69,6 +69,9 @@ export default function CommentSection({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [visionOpen, setVisionOpen] = useState(false);
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [postingReply, setPostingReply] = useState(false);
 
   // Gate states
   const [isJoined, setIsJoined] = useState(false);
@@ -263,6 +266,32 @@ export default function CommentSection({
     const url = `${window.location.origin}/listing/${listingId}#comment-${commentId}`;
     navigator.clipboard.writeText(url).catch(() => {});
   }, [listingId]);
+
+  async function handleReplyPost(replyToName: string) {
+    if (!replyContent.trim() || !name || !email) return;
+    setPostingReply(true);
+    try {
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listingId,
+          name,
+          email,
+          content: `@${replyToName} ${replyContent}`,
+        }),
+      });
+      if (res.ok) {
+        const newComment = await res.json();
+        setComments((prev) => [...prev, newComment]);
+        setReplyContent("");
+        setReplyingTo(null);
+      }
+    } catch {
+      // silently fail
+    }
+    setPostingReply(false);
+  }
 
   const SORT_OPTIONS: { key: SortMode; label: string }[] = [
     { key: "newest", label: "Newest" },
@@ -474,6 +503,16 @@ export default function CommentSection({
               listingAddress={listingAddress}
               listingPrice={listingPrice}
               verified={false}
+              isReplyOpen={replyingTo === comment.id}
+              onReplyToggle={() => {
+                setReplyingTo(replyingTo === comment.id ? null : comment.id);
+                setReplyContent("");
+              }}
+              replyContent={replyContent}
+              onReplyContentChange={setReplyContent}
+              onReplySubmit={() => handleReplyPost(comment.name)}
+              postingReply={postingReply}
+              canReply={!isLocked && isJoined && !!(name && email)}
             />
           ))}
 
@@ -568,7 +607,7 @@ export default function CommentSection({
             </div>
 
             {/* Quick suggestion chips */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 overflow-hidden">
               {[
                 "Hard pass",
                 "Would make an offer",
@@ -580,7 +619,7 @@ export default function CommentSection({
                   key={suggestion}
                   type="button"
                   onClick={() => setContent((prev) => prev ? `${prev} ${suggestion}` : suggestion)}
-                  className="text-caption px-3 py-1.5 rounded-full bg-bg border border-divider text-secondary hover:text-ink hover:border-tertiary/40 transition-colors"
+                  className="text-caption px-3 py-2 sm:py-1.5 min-h-[36px] sm:min-h-0 rounded-full bg-bg border border-divider text-secondary hover:text-ink hover:border-tertiary/40 transition-colors"
                 >
                   {suggestion}
                 </button>
@@ -595,7 +634,7 @@ export default function CommentSection({
                   <span className="text-sm font-semibold text-ink">Share your vision for this place</span>
                 </div>
                 {/* Photo preview with filter — always shown */}
-                <div className="overflow-hidden rounded-lg relative" style={{ height: 120 }}>
+                <div className="overflow-hidden rounded-lg relative h-[100px] sm:h-[120px]">
                   <img
                     src={photos[0]}
                     alt="Style preview"
@@ -754,6 +793,13 @@ function CommentItem({
   listingAddress = "",
   listingPrice = "",
   verified = false,
+  isReplyOpen = false,
+  onReplyToggle,
+  replyContent = "",
+  onReplyContentChange,
+  onReplySubmit,
+  postingReply = false,
+  canReply = false,
 }: {
   comment: Comment;
   canReact: boolean;
@@ -763,6 +809,13 @@ function CommentItem({
   listingAddress?: string;
   listingPrice?: string;
   verified?: boolean;
+  isReplyOpen?: boolean;
+  onReplyToggle?: () => void;
+  replyContent?: string;
+  onReplyContentChange?: (val: string) => void;
+  onReplySubmit?: () => void;
+  postingReply?: boolean;
+  canReply?: boolean;
 }) {
   const [showCopied, setShowCopied] = useState(false);
   const [helpful, setHelpful] = useState(0);
@@ -852,6 +905,22 @@ function CommentItem({
             );
           })}
 
+          {/* Reply button */}
+          {canReply && onReplyToggle && (
+            <button
+              onClick={onReplyToggle}
+              className={`flex items-center gap-1 text-caption transition-colors ml-1 ${
+                isReplyOpen ? "text-amber font-medium" : "text-tertiary hover:text-ink"
+              }`}
+              title="Reply to this take"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span>Reply</span>
+            </button>
+          )}
+
           {/* Share button */}
           <button
             onClick={handleShare}
@@ -880,6 +949,33 @@ function CommentItem({
             />
           )}
         </div>
+
+        {/* Inline reply input */}
+        {isReplyOpen && onReplyContentChange && onReplySubmit && (
+          <div className="mt-2.5 flex items-center gap-2 animate-fade-in">
+            <input
+              type="text"
+              value={replyContent}
+              onChange={(e) => onReplyContentChange(e.target.value)}
+              placeholder={`Reply to ${comment.name}...`}
+              className="flex-1 min-w-0 px-3 py-1.5 text-sm rounded-full bg-bg border border-divider text-ink placeholder:text-tertiary focus:outline-none focus:border-amber/40 transition-colors"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey && replyContent.trim()) {
+                  e.preventDefault();
+                  onReplySubmit();
+                }
+              }}
+              autoFocus
+            />
+            <button
+              onClick={onReplySubmit}
+              disabled={!replyContent.trim() || postingReply}
+              className="shrink-0 px-3 py-1.5 text-sm font-semibold rounded-full bg-amber text-white hover:bg-amber/90 active:scale-[0.97] transition-all disabled:opacity-40"
+            >
+              {postingReply ? "..." : "Send"}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
