@@ -17,7 +17,7 @@ export default function MobileNav() {
   const tabs = [
     {
       href: "/",
-      label: "Browse",
+      label: "My Block",
       active: isHome,
       accent: false,
       icon: (active: boolean) => (
@@ -29,13 +29,12 @@ export default function MobileNav() {
     },
     {
       href: "/?sort=comments",
-      label: "Trending",
+      label: "Hot Takes",
       active: isTrending,
       accent: false,
       icon: (active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill={active ? "currentColor" : "none"} />
-          <path d="M12 6v6l4 2" stroke={active ? "white" : "currentColor"} strokeLinecap="round" />
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
+          <path d="M12 23c-3.866 0-7-3.134-7-7 0-3 2-6 4-8 0 3 2 4 3 4 0-4 2-8 5-10-1 3 1 5 3 6 2 1.5 3 3.5 3 6 0 4.5-3.5 9-11 9z" />
         </svg>
       ),
     },

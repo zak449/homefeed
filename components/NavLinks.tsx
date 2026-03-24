@@ -21,7 +21,7 @@ export default function NavLinks() {
             : "text-secondary hover:text-ink hover:bg-surface"
         }`}
       >
-        Your neighborhood
+        My Block
       </Link>
       <Link
         href="/?sort=comments"
@@ -31,7 +31,13 @@ export default function NavLinks() {
             : "text-secondary hover:text-ink hover:bg-surface"
         }`}
       >
-        Trending
+        Hot Takes
+      </Link>
+      <Link
+        href="/?sort=comments&type=sale"
+        className="px-4 py-1.5 rounded-full text-sm transition-all text-secondary hover:text-ink hover:bg-surface"
+      >
+        Red Flags 🚩
       </Link>
       <Link
         href="/?city="

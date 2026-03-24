@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #FAFAF8;
-  color: #1A1A1A;
+  background-color: #111111;
+  color: #F2F0ED;
   font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -87,7 +87,7 @@ input[type=number]::-webkit-outer-spin-button {
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #F0EDE8 25%, #E8E6E3 50%, #F0EDE8 75%);
+  background: linear-gradient(90deg, #1E1E1E 25%, #2A2A2A 50%, #1E1E1E 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -126,7 +126,7 @@ input[type=number]::-webkit-outer-spin-button {
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: #E8E6E3;
+  background: #2A2A2A;
   outline: none;
   cursor: pointer;
 }
@@ -135,9 +135,9 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #1A1A1A;
-  border: 3px solid #FAFAF8;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  background: #F2F0ED;
+  border: 3px solid #111111;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }
 .mortgage-slider::-webkit-slider-thumb:active {
@@ -147,9 +147,9 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #1A1A1A;
-  border: 3px solid #FAFAF8;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  background: #F2F0ED;
+  border: 3px solid #111111;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }
 

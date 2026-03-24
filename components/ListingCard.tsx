@@ -206,7 +206,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           <div className="mt-3 pt-3 border-t border-divider">
             <div className="flex items-center justify-between">
               <span className="text-[13px] font-bold text-amber group-hover:text-amber/80 transition-colors">
-                Drop your take &rarr;
+                no takes yet 👀
               </span>
               {listedAgo && (
                 <span className="text-[10px] text-tertiary">{listedAgo}</span>

@@ -426,112 +426,88 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* Auto-enhance feed with geo when location is available */}
           <GeoFeedEnhancer />
 
-          {/* ═══ HERO — LIFESTYLE IMAGE + OVERLAY ═══ */}
-          <div className="relative overflow-hidden bg-ink">
-            {/* Lifestyle background image */}
-            <div className="absolute inset-0">
-              <img
-                src="/images/hero-lifestyle.jpg"
-                alt=""
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/70 to-ink/95" />
-            </div>
+          {/* ═══ HERO — DARK, TEXT-DRIVEN, CHAOTIC ═══ */}
+          <div className="relative overflow-hidden" style={{ background: '#0A0A0A' }}>
+            {/* Subtle amber glow orb */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #D4763C, transparent 70%)' }} />
 
-            <div className="relative max-w-2xl mx-auto px-5 pt-14 pb-12 sm:pt-20 sm:pb-16">
-              {/* Wordmark */}
-              <div className="flex items-center gap-3 mb-10 sm:mb-14">
-                <h1 className="text-xl font-extrabold text-white tracking-tight font-display">Gwak<span className="text-amber">y</span></h1>
-                <span className="h-px flex-1 bg-white/10" />
-                <span className="text-[11px] text-white/40 font-medium tracking-wide uppercase">Real estate, real talk</span>
-              </div>
+            <div className="relative max-w-3xl mx-auto px-5 pt-16 pb-14 sm:pt-24 sm:pb-20">
+              {/* Big bold logo */}
+              <h1 className="text-[clamp(3rem,10vw,5.5rem)] font-extrabold tracking-tighter font-display leading-[0.95] mb-4">
+                <span className="text-white">Gwak</span><span className="text-amber">y</span>
+              </h1>
 
-              {/* Display headline */}
-              <h2 className="text-[clamp(2.2rem,6vw,3.5rem)] font-extrabold text-white leading-[1.05] tracking-tight font-display mb-6">
-                The stuff your realtor<br />
-                <span className="text-amber">will never tell you.</span>
-              </h2>
-
-              <p className="text-[16px] sm:text-[18px] text-white/50 leading-relaxed max-w-lg mb-10">
-                Every property has a history. Your neighbors know it. Your realtor won&apos;t share it. This is where the truth lives.
+              {/* Tagline */}
+              <p className="text-[clamp(1rem,3vw,1.35rem)] text-white/50 font-medium tracking-tight mb-12 sm:mb-16 max-w-lg">
+                where your neighbors spill the tea on every listing
               </p>
 
-              {/* ── SEARCH BAR — hero focal point ── */}
-              <div className="mb-10">
+              {/* ── CHAOTIC COMMENT SNIPPETS ── */}
+              <div className="relative mb-14 sm:mb-16" style={{ minHeight: '280px' }}>
+                {/* Card 1 — warning, slight tilt left */}
+                <div className="absolute top-0 left-0 sm:left-4 max-w-[340px] sm:max-w-[380px] rounded-xl border-l-4 border-l-red-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(-2deg)' }}>
+                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
+                    &#x1F6A8; The basement floods EVERY spring. Seller painted over the mold.
+                  </p>
+                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
+                    &mdash; Verified Neighbor
+                  </p>
+                </div>
+
+                {/* Card 2 — positive, tilt right, offset right and down */}
+                <div className="absolute top-6 right-0 sm:right-2 max-w-[300px] sm:max-w-[340px] rounded-xl border-l-4 border-l-green-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(1.5deg)' }}>
+                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
+                    &#x1F49A; Best block in the city. My kids walk to school. 11 years here.
+                  </p>
+                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
+                    &mdash; Local Since 2015
+                  </p>
+                </div>
+
+                {/* Card 3 — snarky, tilt left, bottom-left */}
+                <div className="absolute top-[130px] sm:top-[120px] left-2 sm:left-12 max-w-[310px] sm:max-w-[350px] rounded-xl border-l-4 border-l-amber bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(-1deg)' }}>
+                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
+                    &#x1F480; $800K for THAT kitchen?? no way lmao
+                  </p>
+                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
+                    &mdash; Drive-by Opinion
+                  </p>
+                </div>
+
+                {/* Card 4 — warning/suspicious, tilt right, bottom-right */}
+                <div className="absolute top-[200px] sm:top-[190px] right-4 sm:right-8 max-w-[320px] sm:max-w-[360px] rounded-xl border-l-4 border-l-yellow-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(2deg)' }}>
+                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
+                    &#x26A0;&#xFE0F; They&apos;re hiding an un-permitted addition. I watched them build it.
+                  </p>
+                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
+                    &mdash; Past Renter
+                  </p>
+                </div>
+              </div>
+
+              {/* ── SEARCH BAR ── */}
+              <div className="mb-8">
                 <Suspense>
                   <SearchBar />
                 </Suspense>
               </div>
 
-              {/* ── SOCIAL PROOF BAR ── */}
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+              {/* ── STATS BAR ── */}
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-sm font-semibold text-white/90 tabular-nums">{listingCount.toLocaleString()}</span>
-                  <span className="text-sm text-white/40">listings</span>
+                  <span className="text-sm font-semibold text-white/80 tabular-nums">{listingCount.toLocaleString()}</span>
+                  <span className="text-sm text-white/30">listings</span>
                 </div>
-                <div className="w-px h-4 bg-white/10 hidden sm:block" />
+                <span className="text-white/10">&middot;</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white/90 tabular-nums">{commentCount.toLocaleString()}</span>
-                  <span className="text-sm text-white/40">neighbor takes</span>
+                  <span className="text-sm font-semibold text-white/80 tabular-nums">{commentCount.toLocaleString()}</span>
+                  <span className="text-sm text-white/30">takes</span>
                 </div>
-                <div className="w-px h-4 bg-white/10 hidden sm:block" />
-                <div className="flex items-center gap-2">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/40"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                  <span className="text-sm text-white/40">Any city in the US</span>
-                </div>
+                <span className="text-white/10">&middot;</span>
+                <span className="text-sm text-white/30">any city in the US</span>
               </div>
             </div>
-          </div>
-
-          {/* ═══ EXAMPLE QUOTES — social-media style cards ═══ */}
-          <div className="max-w-2xl mx-auto px-5 -mt-1">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-8">
-              {[
-                { text: "The basement flooded 3 times. Insurance dropped them.", name: "Mike R.", location: "Denver, CO", time: "2h ago", avatar: "MR", hearts: 47, fires: 12 },
-                { text: "Best street in the neighborhood. My kids walk to school every day.", name: "Sarah L.", location: "Austin, TX", time: "5h ago", avatar: "SL", hearts: 83, fires: 0 },
-                { text: "Seller is hiding mold behind the new drywall. I watched them cover it up.", name: "James T.", location: "Miami, FL", time: "1h ago", avatar: "JT", hearts: 29, fires: 64 },
-              ].map((ex, i) => (
-                <div key={i} className="bg-surface rounded-2xl border border-divider p-5 shadow-card hover:shadow-card-hover transition-shadow duration-300 flex flex-col">
-                  {/* Author row */}
-                  <div className="flex items-center gap-3 mb-3.5">
-                    <div className="w-9 h-9 rounded-full bg-ink text-white text-[11px] font-bold flex items-center justify-center shrink-0 shadow-soft">{ex.avatar}</div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-bold text-ink leading-tight">{ex.name}</p>
-                      <div className="flex items-center gap-1.5">
-                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-tertiary shrink-0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                        <span className="text-[11px] text-tertiary truncate">{ex.location}</span>
-                        <span className="text-[11px] text-tertiary/60">·</span>
-                        <span className="text-[11px] text-tertiary/60">{ex.time}</span>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Quote */}
-                  <p className="text-[14px] text-ink leading-snug font-medium flex-1 mb-4">
-                    &ldquo;{ex.text}&rdquo;
-                  </p>
-                  {/* Reactions */}
-                  <div className="flex items-center gap-3 pt-3 border-t border-divider">
-                    {ex.hearts > 0 && (
-                      <span className="inline-flex items-center gap-1 text-xs text-secondary">
-                        <span>&#x2764;&#xFE0F;</span>
-                        <span className="font-medium tabular-nums">{ex.hearts}</span>
-                      </span>
-                    )}
-                    {ex.fires > 0 && (
-                      <span className="inline-flex items-center gap-1 text-xs text-secondary">
-                        <span>&#x1F525;</span>
-                        <span className="font-medium tabular-nums">{ex.fires}</span>
-                      </span>
-                    )}
-                    <span className="ml-auto text-[11px] text-amber font-semibold">Read more &rarr;</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <p className="text-[12px] text-tertiary text-center pb-2">
-              Real takes from verified neighbors. Not reviews. Not ratings. <span className="text-ink font-semibold">The truth.</span>
-            </p>
           </div>
 
           {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
@@ -760,7 +736,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       <div className="p-5 pt-3">
                         {/* Author row — tweet style */}
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-11 h-11 rounded-full bg-ink text-white text-sm font-extrabold flex items-center justify-center shrink-0">ZK</div>
+                          <div className="w-11 h-11 rounded-full bg-amber text-white text-sm font-extrabold flex items-center justify-center shrink-0">ZK</div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-[15px] font-bold text-ink">Zachary Kaufman</span>
@@ -833,7 +809,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             <div className="max-w-2xl mx-auto px-5 py-8">
               <a
                 href="/?sort=comments"
-                className="block text-center py-4 bg-ink text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.98] transition-all shadow-elevated"
+                className="block text-center py-4 bg-amber text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.98] transition-all shadow-elevated"
               >
                 See all trending listings &rarr;
               </a>
@@ -888,7 +864,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       href={`/?${params.toString()}`}
                       className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                         isActive
-                          ? "bg-ink text-bg font-medium"
+                          ? "bg-ink text-surface font-medium"
                           : "text-secondary hover:bg-surface hover:text-ink"
                       }`}
                     >
@@ -930,7 +906,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 Tip: Add a state abbreviation for best results (e.g. &ldquo;Austin, TX&rdquo;)
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="/" className="px-5 py-2.5 rounded-full bg-ink text-bg text-sm font-medium hover:opacity-90 transition-opacity">
+                <a href="/" className="px-5 py-2.5 rounded-full bg-ink text-surface text-sm font-medium hover:opacity-90 transition-opacity">
                   Browse all listings
                 </a>
                 <a href="/?sort=comments" className="px-5 py-2.5 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">

@@ -40,33 +40,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#0A0A0A" />
       </head>
       <body className="min-h-screen flex flex-col bg-bg pb-0 sm:pb-0">
-        {/* Top nav — premium, clean */}
-        <header className="sticky top-0 z-50 bg-bg/95 backdrop-blur-sm border-b border-divider/60">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-            {/* Logo — left */}
-            <a href="/" className="shrink-0 flex items-center gap-1.5">
-              <span className="text-xl font-bold text-ink tracking-tight">
+        {/* Top nav — minimal, dark */}
+        <header className="sticky top-0 z-50 bg-bg/80 backdrop-blur-md">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
+            {/* Logo — left, small */}
+            <a href="/" className="shrink-0 flex items-center">
+              <span className="text-[16px] font-bold text-ink tracking-tight">
                 Gwak<span className="text-amber">y</span>
               </span>
             </a>
 
-            {/* Center — intentionally empty for clean feel */}
-            <div className="hidden sm:block" />
-
-            {/* Right — desktop nav links */}
+            {/* Right — desktop nav links only */}
             <Suspense fallback={
               <nav className="hidden sm:flex items-center gap-1">
-                <span className="px-3 py-1.5 rounded-full text-sm text-secondary">Your neighborhood</span>
-                <span className="px-3 py-1.5 rounded-full text-sm text-secondary">Trending</span>
+                <span className="px-3 py-1.5 rounded-full text-sm text-secondary">My Block</span>
+                <span className="px-3 py-1.5 rounded-full text-sm text-secondary">Hot Takes</span>
               </nav>
             }>
               <NavLinks />
             </Suspense>
-
-            {/* Mobile: show tagline */}
-            <span className="sm:hidden text-[11px] text-tertiary tracking-wide uppercase">
-              real takes.
-            </span>
           </div>
         </header>
 

@@ -357,7 +357,7 @@ export default function CommentSection({
               </span>
             </div>
             <h3 className="text-lg font-bold text-ink mb-1">
-              Join the conversation
+              Get in
             </h3>
             <p className="text-body text-secondary mb-4">
               Get the full picture from people who actually live here. Share what you know, see what others are saying.
@@ -384,10 +384,10 @@ export default function CommentSection({
             </svg>
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-ink mb-2">
-            Be the first to share what you know
+            No tea yet. Spill it.
           </h3>
           <p className="text-[15px] text-secondary max-w-sm mx-auto mb-6">
-            Your neighbors are listening. What does this listing not tell you?
+            The block is watching. What does this listing not tell you?
           </p>
           <button
             onClick={() => { setShowJoinForm(true); }}
@@ -409,8 +409,8 @@ export default function CommentSection({
               </svg>
             </div>
             <div>
-              <h3 className="text-title text-ink">Join Gwaky</h3>
-              <p className="text-caption text-tertiary">Your identity stays private. Only your first name shows.</p>
+              <h3 className="text-title text-ink">Get in on it</h3>
+              <p className="text-caption text-tertiary">Anonymous. Unfiltered. Zero cap.</p>
             </div>
           </div>
 
@@ -446,7 +446,7 @@ export default function CommentSection({
                 type="submit"
                 className="px-6 py-2.5 bg-ink text-white text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
               >
-                Join the conversation
+                Get in
               </button>
               <button
                 type="button"
@@ -612,11 +612,14 @@ export default function CommentSection({
             {/* Quick suggestion chips */}
             <div className="flex flex-wrap gap-1.5 overflow-hidden">
               {[
-                "Hard pass",
-                "Would make an offer",
-                "Someone explain this price",
-                "The neighborhood tho",
-                "Needs work but potential",
+                "major red flag 🚩",
+                "underpriced fr",
+                "that kitchen tho 💀",
+                "hard pass",
+                "would lowkey offer",
+                "explain this price plz",
+                "the block is elite",
+                "needs work but potential",
               ].map((suggestion) => (
                 <button
                   key={suggestion}
@@ -740,7 +743,7 @@ export default function CommentSection({
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                   </svg>
                 )}
-                {posting ? "Posting..." : "Post your take"}
+                {posting ? "Posting..." : "Send it"}
               </button>
             </div>
           </form>
@@ -796,6 +799,25 @@ export default function CommentSection({
       )}
     </div>
   );
+}
+
+function getCredibilityTag(content: string): { label: string; className: string } {
+  const lower = content.toLowerCase();
+  if (/\b(years?|lived here|moved|since)\b/.test(lower)) {
+    const yearMatch = lower.match(/(?:since|in)\s*((?:19|20)\d{2})/);
+    const year = yearMatch ? yearMatch[1] : "ʼ09";
+    return { label: `Local Since ${year}`, className: "bg-amber-100 text-amber-800 border border-amber-200" };
+  }
+  if (/\b(rent|tenant|lease)\b/.test(lower)) {
+    return { label: "Past Renter", className: "bg-blue-100 text-blue-800 border border-blue-200" };
+  }
+  if (/\b(neighbor|next door|block)\b/.test(lower)) {
+    return { label: "Verified Neighbor", className: "bg-emerald-100 text-emerald-800 border border-emerald-200" };
+  }
+  if (/\b(drive|visited|looked at)\b/.test(lower)) {
+    return { label: "Drive-by Opinion", className: "bg-gray-100 text-gray-500 border border-gray-200 italic" };
+  }
+  return { label: "Neighbor", className: "bg-gray-100 text-gray-600 border border-gray-200" };
 }
 
 function CommentItem({
@@ -887,6 +909,14 @@ function CommentItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-title text-ink">{comment.name}</span>
+          {(() => {
+            const tag = getCredibilityTag(comment.content);
+            return (
+              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${tag.className}`}>
+                {tag.label}
+              </span>
+            );
+          })()}
           {verified && (
             <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[rgba(232,168,124,0.12)] text-[#E8A87C] border border-[rgba(232,168,124,0.2)]">
               ZIP ✓
