@@ -1,16 +1,18 @@
 "use client";
 
-import { useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function MobileNav() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const router = useRouter();
   const currentSort = searchParams.get("sort");
 
   const isHome = pathname === "/" && currentSort !== "comments";
   const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending";
   const isSaved = pathname === "/saved";
+  const isListingPage = pathname.startsWith("/listing/");
 
   const tabs = [
     {
@@ -38,7 +40,7 @@ export default function MobileNav() {
       ),
     },
     {
-      href: "#comment-form",
+      href: "#take",
       label: "+Take",
       active: false,
       accent: true,
@@ -62,6 +64,23 @@ export default function MobileNav() {
     },
   ];
 
+  function handleTakeClick(e: React.MouseEvent) {
+    e.preventDefault();
+    if (isListingPage) {
+      // On listing pages, scroll to the comment form
+      const el = document.getElementById("comment-form");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Focus the first input in the form
+        const input = el.querySelector("textarea, input[type='text']") as HTMLElement | null;
+        if (input) setTimeout(() => input.focus(), 400);
+        return;
+      }
+    }
+    // On all other pages, go to search/browse view
+    router.push("/?city=");
+  }
+
   return (
     <>
       {/* Bottom tab bar — fixed, always visible on mobile */}
@@ -70,46 +89,69 @@ export default function MobileNav() {
         style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)" }}
       >
         <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
-          {tabs.map((tab) => (
-            <Link
-              key={tab.href + tab.label}
-              href={tab.href}
-              className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors rounded-xl ${
-                tab.accent
-                  ? ""
-                  : tab.active
-                    ? "text-[#E8A87C]"
-                    : "text-tertiary hover:text-secondary"
-              }`}
-            >
-              {/* Active amber dot indicator above icon */}
-              {tab.active && !tab.accent && (
-                <span
-                  className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
-                  aria-hidden="true"
-                />
-              )}
+          {tabs.map((tab) => {
+            const isAccent = tab.accent;
+            const content = (
+              <>
+                {/* Active amber dot indicator above icon */}
+                {tab.active && !isAccent && (
+                  <span
+                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
+                    aria-hidden="true"
+                  />
+                )}
 
-              {/* Amber accent button for +Take */}
-              {tab.accent ? (
-                <span className="flex items-center justify-center w-11 h-11 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
-                  {tab.icon(false)}
+                {/* Amber accent button for +Take */}
+                {isAccent ? (
+                  <span className="flex items-center justify-center w-11 h-11 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
+                    {tab.icon(false)}
+                  </span>
+                ) : (
+                  tab.icon(tab.active)
+                )}
+
+                <span className={`text-[10px] font-medium ${
+                  isAccent
+                    ? "text-amber font-bold"
+                    : tab.active
+                      ? "text-[#E8A87C]"
+                      : "text-tertiary"
+                }`}>
+                  {tab.label}
                 </span>
-              ) : (
-                tab.icon(tab.active)
-              )}
+              </>
+            );
 
-              <span className={`text-[10px] font-medium ${
-                tab.accent
-                  ? "text-amber font-bold"
-                  : tab.active
-                    ? "text-[#E8A87C]"
-                    : "text-tertiary"
-              }`}>
-                {tab.label}
-              </span>
-            </Link>
-          ))}
+            const className = `relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors rounded-xl ${
+              isAccent
+                ? ""
+                : tab.active
+                  ? "text-[#E8A87C]"
+                  : "text-tertiary hover:text-secondary"
+            }`;
+
+            if (isAccent) {
+              return (
+                <button
+                  key={tab.href + tab.label}
+                  onClick={handleTakeClick}
+                  className={className}
+                >
+                  {content}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={tab.href + tab.label}
+                href={tab.href}
+                className={className}
+              >
+                {content}
+              </Link>
+            );
+          })}
         </div>
       </nav>
       {/* Spacer to prevent content from being hidden behind bottom bar */}

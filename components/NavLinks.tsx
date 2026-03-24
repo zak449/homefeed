@@ -34,7 +34,7 @@ export default function NavLinks() {
         Trending
       </Link>
       <Link
-        href="/?sort=comments"
+        href="/?city="
         className="ml-1 p-2 rounded-full text-secondary hover:text-ink hover:bg-surface transition-all"
         aria-label="Search"
       >

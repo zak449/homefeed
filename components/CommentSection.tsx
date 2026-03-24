@@ -320,7 +320,7 @@ export default function CommentSection({
 
       {/* Post form */}
       {!isLocked && (
-        <div className="rounded-card border border-divider bg-surface p-5">
+        <div id="comment-form" className="rounded-card border border-divider bg-surface p-5 scroll-mt-20">
           <form onSubmit={handlePost} className="space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <input

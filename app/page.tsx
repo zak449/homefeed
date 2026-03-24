@@ -2,6 +2,11 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
+import GeoFeedEnhancer from "@/components/GeoFeedEnhancer";
+import GeoCategoryPill from "@/components/GeoCategoryPill";
+import GeoNeighborhoodSpotlight from "@/components/GeoNeighborhoodSpotlight";
+import GeoStickyBottomCTA from "@/components/GeoStickyBottomCTA";
+import GeoPulseBar from "@/components/GeoPulseBar";
 import ListingFeed from "@/components/ListingFeed";
 import FallbackImage from "@/components/FallbackImage";
 import { Prisma } from "@prisma/client";
@@ -30,8 +35,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const sort        = str(sp.sort) ?? "newest";
   const perPage     = 12;
 
+  const searchMode = "city" in sp; // User explicitly opened search (even with empty query)
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
-  const isDefaultLanding = !hasFilters && sort === "newest";
+  const isDefaultLanding = !hasFilters && sort === "newest" && !searchMode;
 
   // Community stats + comments feed -- only on default landing
   const [listingCount, commentCount, latestCommentsFeed] = isDefaultLanding
@@ -384,14 +390,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Geolocation (invisible) */}
+      {/* Geolocation context provider — wraps entire page for geo-aware components */}
       <Suspense>
-        <GeoProvider />
-      </Suspense>
+        <GeoProvider>
 
       {/* ====== DEFAULT LANDING: THE FEED ====== */}
       {isDefaultLanding ? (
         <div className="max-w-xl mx-auto pb-24">
+          {/* Auto-enhance feed with geo when location is available */}
+          <GeoFeedEnhancer />
 
           {/* ── TIGHT HEADER BAR ── */}
           <div className="sticky top-0 z-40 bg-bg/95 backdrop-blur-md border-b border-divider">
@@ -401,7 +408,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <span className="text-xs text-tertiary font-medium hidden sm:inline">&mdash; real estate, real talk</span>
               </div>
               <a
-                href="/?sort=newest&city="
+                href="/?city="
                 className="w-9 h-9 rounded-full bg-highlight border border-divider flex items-center justify-center hover:bg-surface hover:border-ink/20 transition-all active:scale-95"
                 aria-label="Search"
               >
@@ -414,6 +421,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
             {/* ── CATEGORY PILLS ── */}
             <div className="flex gap-2 px-4 pb-3 overflow-x-auto scrollbar-none -mx-0">
+              <GeoCategoryPill />
               {categories.map((cat) => (
                 <a
                   key={cat.label}
@@ -463,18 +471,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               </Suspense>
             </div>
 
-            {/* Live activity */}
-            {commentCount > 0 && (
-              <div className="flex items-center justify-center gap-2 py-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                </span>
-                <span className="text-[11px] text-tertiary">
-                  {commentCount.toLocaleString()} takes shared across {listingCount.toLocaleString()} listings
-                </span>
-              </div>
-            )}
+            {/* Live activity (geo-aware) */}
+            <GeoPulseBar commentCount={commentCount} listingCount={listingCount} />
           </div>
 
           {/* ═══ THE FEED — now that they understand WHY, show them WHAT ═══ */}
@@ -615,31 +613,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 );
               }
 
-              /* ── NEIGHBORHOOD SPOTLIGHT CARD ── */
+              /* ── NEIGHBORHOOD SPOTLIGHT CARD (geo-aware) ── */
               if (item.type === "neighborhood") {
-                return (
-                  <div key="neighborhood" className="px-4 py-5">
-                    <div className="rounded-2xl bg-gradient-to-br from-amber/5 via-surface to-highlight border border-amber/15 p-5 relative overflow-hidden">
-                      <div className="absolute -top-8 -right-8 w-28 h-28 bg-amber/10 rounded-full blur-2xl pointer-events-none" />
-                      <div className="relative">
-                        <p className="text-[11px] font-bold tracking-widest uppercase text-amber mb-2">Neighborhood Spotlight</p>
-                        <h3 className="text-lg font-extrabold text-ink mb-1">What&apos;s happening in 90026</h3>
-                        <p className="text-sm text-secondary mb-3">See what verified neighbors are saying about Echo Park, Silver Lake, and surrounding areas.</p>
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="flex -space-x-2">
-                            {["ZK", "ML", "JR", "AS"].map((init) => (
-                              <div key={init} className="w-7 h-7 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center border-2 border-surface">{init}</div>
-                            ))}
-                          </div>
-                          <span className="text-xs text-secondary">{commentCount > 0 ? `${commentCount} takes shared` : "Join the conversation"}</span>
-                        </div>
-                        <a href="/community/90026" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-white text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
-                          Join the conversation &rarr;
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                );
+                return <GeoNeighborhoodSpotlight key="neighborhood" commentCount={commentCount} />;
               }
 
               /* ── FOUNDER STORY CARD ── */
@@ -666,7 +642,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           &ldquo;If gwak gwak existed, I would have had second thoughts. That&apos;s why I built it.&rdquo;
                         </p>
                         <div className="flex items-center gap-3">
-                          <span className="text-xs text-amber font-semibold">Read the full story →</span>
+                          <a href="/about" className="text-xs text-amber font-semibold hover:underline">Read the full story →</a>
                         </div>
                       </div>
                     </div>
@@ -713,21 +689,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           )}
 
-          {/* ── STICKY BOTTOM CTA (mobile) ── */}
-          <div className="fixed bottom-0 left-0 right-0 z-50 sm:hidden">
-            <div className="bg-surface/95 backdrop-blur-md border-t border-divider px-4 py-3 safe-area-pb">
-              <a
-                href="/?city="
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-xl bg-highlight border border-divider text-left hover:border-amber/30 active:scale-[0.98] transition-all"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-tertiary shrink-0">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                </svg>
-                <span className="text-sm text-tertiary">What do you know about your neighborhood?</span>
-              </a>
-            </div>
-          </div>
+          {/* ── STICKY BOTTOM CTA (mobile, geo-aware) ── */}
+          <GeoStickyBottomCTA />
         </div>
       ) : (
         /* ====== FILTERED / SEARCH VIEW ====== */
@@ -815,6 +778,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           )}
         </div>
       )}
+
+        </GeoProvider>
+      </Suspense>
     </div>
   );
 }
