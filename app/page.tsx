@@ -427,20 +427,57 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </div>
 
-          {/* ── Live pulse bar ── */}
-          {commentCount > 0 && (
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-highlight/60 border-b border-divider">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-              </span>
-              <span className="text-xs text-secondary">
-                {commentCount.toLocaleString()} takes across {listingCount.toLocaleString()} listings &mdash; <span className="text-amber font-semibold">Stop buying blind</span>
-              </span>
-            </div>
-          )}
+          {/* ═══ THE GUT PUNCH — why this exists ═══ */}
+          <div className="px-4 pt-6 pb-4">
+            {/* The pain — hit them immediately */}
+            <h2 className="text-[22px] sm:text-[26px] font-bold text-ink leading-[1.15] tracking-tight mb-3">
+              The stuff your realtor<br />
+              <span className="text-amber">will never tell you.</span>
+            </h2>
+            <p className="text-[14px] text-secondary leading-relaxed mb-5 max-w-md">
+              Every property has a history. Your neighbors know it. Your realtor won&apos;t share it. gwak gwak is where the truth lives.
+            </p>
 
-          {/* ── THE FEED ── */}
+            {/* Real examples — the "oh shit" moment */}
+            <div className="space-y-2.5 mb-5">
+              {[
+                { text: "The basement flooded 3 times. Insurance dropped them.", vibe: "🚨" },
+                { text: "Best street in the neighborhood. My kids walk to school every day.", vibe: "💚" },
+                { text: "Seller is hiding mold behind the new drywall. I watched them cover it up.", vibe: "⚠️" },
+              ].map((ex, i) => (
+                <div key={i} className="flex items-start gap-2.5 bg-surface border border-divider rounded-xl px-3.5 py-3">
+                  <span className="text-lg shrink-0">{ex.vibe}</span>
+                  <p className="text-[13px] text-ink leading-snug font-medium italic">&ldquo;{ex.text}&rdquo;</p>
+                </div>
+              ))}
+              <p className="text-[11px] text-tertiary text-center pt-1">
+                Real takes from verified neighbors. Not reviews. Not ratings. <span className="text-ink font-semibold">The truth.</span>
+              </p>
+            </div>
+
+            {/* The hook — enter your zip */}
+            <div className="bg-ink rounded-xl p-4 text-center mb-2">
+              <p className="text-[13px] text-white/70 mb-2">What are your neighbors saying about your block?</p>
+              <Suspense>
+                <SearchBar />
+              </Suspense>
+            </div>
+
+            {/* Live activity */}
+            {commentCount > 0 && (
+              <div className="flex items-center justify-center gap-2 py-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+                <span className="text-[11px] text-tertiary">
+                  {commentCount.toLocaleString()} takes shared across {listingCount.toLocaleString()} listings
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* ═══ THE FEED — now that they understand WHY, show them WHAT ═══ */}
           <div className="divide-y divide-divider">
             {feedItems.map((item, idx) => {
               /* ── TAKE CARD ── */

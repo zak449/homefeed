@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function TrendingPage() {
-  // Most Discussed — sorted by comment count
+  // ── Tab 1: Most Discussed — listings sorted by comment count ──
   const mostDiscussed = await prisma.listing.findMany({
-    where: { status: "active" },
+    where: { status: "active", comments: { some: {} } },
     orderBy: { comments: { _count: "desc" } },
     take: 20,
     select: {
@@ -22,52 +22,39 @@ export default async function TrendingPage() {
       state: true,
       price: true,
       listingType: true,
+      propertyType: true,
+      bedrooms: true,
+      bathrooms: true,
+      sqft: true,
       photos: true,
       _count: { select: { comments: true } },
       comments: {
         take: 2,
         orderBy: { createdAt: "desc" },
-        select: { name: true, content: true },
+        select: {
+          id: true,
+          name: true,
+          content: true,
+          createdAt: true,
+          reactions: { select: { type: true } },
+        },
       },
     },
   });
 
-  // Most Reactions — listings whose comments have the most reactions
-  const topReactedComments = await prisma.comment.findMany({
+  // ── Tab 2: Hottest Takes — individual comments with most reactions ──
+  const hottestComments = await prisma.comment.findMany({
+    where: { reactions: { some: {} } },
     orderBy: { reactions: { _count: "desc" } },
-    take: 40,
+    take: 20,
     select: {
-      listingId: true,
+      id: true,
       name: true,
       content: true,
+      createdAt: true,
       _count: { select: { reactions: true } },
-    },
-  });
-
-  // Deduplicate by listing, keep the top comment per listing
-  const seenListingIds = new Set<string>();
-  const topListingIds: string[] = [];
-  const topCommentByListing: Record<string, { name: string; content: string; reactionCount: number }[]> = {};
-  for (const c of topReactedComments) {
-    if (!topCommentByListing[c.listingId]) {
-      topCommentByListing[c.listingId] = [];
-    }
-    if (topCommentByListing[c.listingId].length < 2) {
-      topCommentByListing[c.listingId].push({
-        name: c.name,
-        content: c.content,
-        reactionCount: c._count.reactions,
-      });
-    }
-    if (!seenListingIds.has(c.listingId)) {
-      seenListingIds.add(c.listingId);
-      topListingIds.push(c.listingId);
-    }
-  }
-
-  const mostReactedListings = topListingIds.length > 0
-    ? await prisma.listing.findMany({
-        where: { id: { in: topListingIds.slice(0, 20) }, status: "active" },
+      reactions: { select: { type: true } },
+      listing: {
         select: {
           id: true,
           address: true,
@@ -75,137 +62,183 @@ export default async function TrendingPage() {
           state: true,
           price: true,
           listingType: true,
+          propertyType: true,
+          bedrooms: true,
+          bathrooms: true,
+          sqft: true,
           photos: true,
-          _count: { select: { comments: true } },
         },
-      })
-    : [];
-
-  // Maintain the order from topListingIds
-  const orderedMostReacted = topListingIds
-    .map((id) => mostReactedListings.find((l) => l.id === id))
-    .filter(Boolean)
-    .map((listing) => ({
-      ...listing!,
-      comments: topCommentByListing[listing!.id] ?? [],
-    }));
-
-  // Newest Hot Takes — most recent listings that already have comments
-  const newestHotTakes = await prisma.listing.findMany({
-    where: {
-      status: "active",
-      comments: { some: {} },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-    select: {
-      id: true,
-      address: true,
-      city: true,
-      state: true,
-      price: true,
-      listingType: true,
-      photos: true,
-      _count: { select: { comments: true } },
-      comments: {
-        take: 2,
-        orderBy: { createdAt: "desc" },
-        select: { name: true, content: true },
       },
     },
   });
 
-  // Normalize data shapes for the client component
-  const tabs = [
-    {
-      id: "discussed" as const,
-      label: "Most Discussed",
-      listings: mostDiscussed.map((l) => ({
-        id: l.id,
-        address: l.address,
-        city: l.city,
-        state: l.state,
-        price: l.price,
-        listingType: l.listingType,
-        photo: l.photos[0] ?? null,
-        commentCount: l._count.comments,
-        comments: l.comments.map((c) => ({ name: c.name, content: c.content })),
-      })),
+  // ── Tab 3: Most Active Neighborhoods — cities ranked by comment volume ──
+  const cityCommentCounts = await prisma.comment.groupBy({
+    by: ["listingId"],
+    _count: { id: true },
+  });
+
+  // Resolve listingId -> city mapping
+  const allListingIds = cityCommentCounts.map((c) => c.listingId);
+  const listingsForCities =
+    allListingIds.length > 0
+      ? await prisma.listing.findMany({
+          where: { id: { in: allListingIds }, status: "active" },
+          select: {
+            id: true,
+            city: true,
+            state: true,
+            photos: true,
+          },
+        })
+      : [];
+
+  const listingMap = new Map(listingsForCities.map((l) => [l.id, l]));
+  const cityAgg: Record<
+    string,
+    { city: string; state: string; commentCount: number; photos: string[] }
+  > = {};
+
+  for (const row of cityCommentCounts) {
+    const listing = listingMap.get(row.listingId);
+    if (!listing) continue;
+    const key = `${listing.city}|${listing.state}`;
+    if (!cityAgg[key]) {
+      cityAgg[key] = {
+        city: listing.city,
+        state: listing.state,
+        commentCount: 0,
+        photos: [],
+      };
+    }
+    cityAgg[key].commentCount += row._count.id;
+    // Collect up to 4 unique photos for the collage
+    if (cityAgg[key].photos.length < 4) {
+      for (const p of listing.photos) {
+        if (cityAgg[key].photos.length < 4 && !cityAgg[key].photos.includes(p)) {
+          cityAgg[key].photos.push(p);
+        }
+      }
+    }
+  }
+
+  // Also get listing count per city
+  const cityListingCounts = await prisma.listing.groupBy({
+    by: ["city", "state"],
+    where: { status: "active" },
+    _count: { id: true },
+  });
+  const cityListingMap = new Map(
+    cityListingCounts.map((c) => [`${c.city}|${c.state}`, c._count.id])
+  );
+
+  const sortedCities = Object.values(cityAgg)
+    .sort((a, b) => b.commentCount - a.commentCount)
+    .slice(0, 15)
+    .map((c) => ({
+      ...c,
+      listingCount: cityListingMap.get(`${c.city}|${c.state}`) ?? 0,
+    }));
+
+  // ── Normalize for client ──
+  const discussedTab = mostDiscussed.map((l) => ({
+    id: l.id,
+    address: l.address,
+    city: l.city,
+    state: l.state,
+    price: l.price,
+    listingType: l.listingType,
+    propertyType: l.propertyType,
+    bedrooms: l.bedrooms,
+    bathrooms: l.bathrooms,
+    sqft: l.sqft,
+    photo: l.photos[0] ?? null,
+    photos: l.photos.slice(0, 3),
+    commentCount: l._count.comments,
+    comments: l.comments.map((c) => ({
+      id: c.id,
+      name: c.name,
+      content: c.content,
+      createdAt: c.createdAt.toISOString(),
+      reactions: c.reactions.map((r) => r.type),
+    })),
+  }));
+
+  const hottestTab = hottestComments.map((c) => ({
+    commentId: c.id,
+    name: c.name,
+    content: c.content,
+    createdAt: c.createdAt.toISOString(),
+    reactionCount: c._count.reactions,
+    reactions: c.reactions.map((r) => r.type),
+    listing: {
+      id: c.listing.id,
+      address: c.listing.address,
+      city: c.listing.city,
+      state: c.listing.state,
+      price: c.listing.price,
+      listingType: c.listing.listingType,
+      propertyType: c.listing.propertyType,
+      bedrooms: c.listing.bedrooms,
+      bathrooms: c.listing.bathrooms,
+      sqft: c.listing.sqft,
+      photo: c.listing.photos[0] ?? null,
     },
-    {
-      id: "reactions" as const,
-      label: "Most Reactions",
-      listings: orderedMostReacted.map((l) => ({
-        id: l.id,
-        address: l.address,
-        city: l.city,
-        state: l.state,
-        price: l.price,
-        listingType: l.listingType,
-        photo: l.photos[0] ?? null,
-        commentCount: l._count.comments,
-        comments: l.comments.map((c) => ({ name: c.name, content: c.content })),
-      })),
-    },
-    {
-      id: "newest" as const,
-      label: "Newest Hot Takes",
-      listings: newestHotTakes.map((l) => ({
-        id: l.id,
-        address: l.address,
-        city: l.city,
-        state: l.state,
-        price: l.price,
-        listingType: l.listingType,
-        photo: l.photos[0] ?? null,
-        commentCount: l._count.comments,
-        comments: l.comments.map((c) => ({ name: c.name, content: c.content })),
-      })),
-    },
-  ];
+  }));
+
+  const neighborhoodsTab = sortedCities;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      {/* Back link */}
-      <Link
-        href="/"
-        className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-ink transition-colors mb-8"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+    <div className="min-h-screen bg-bg">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
+        {/* Back link */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-tertiary hover:text-ink transition-colors mb-8"
         >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-        Back to gwakgwak
-      </Link>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
+          Back to gwakgwak
+        </Link>
 
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-2 h-2 rounded-full bg-social animate-activity-pulse" />
-          <p className="text-[11px] font-bold text-social tracking-widest uppercase">
-            Live
+        {/* Header */}
+        <div className="mb-10">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+            </span>
+            <p className="text-[11px] font-bold tracking-widest uppercase text-green-600">
+              Live
+            </p>
+          </div>
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-ink tracking-tighter leading-[1.08]">
+            Trending{" "}
+            <span className="text-amber">Conversations</span>
+          </h1>
+          <p className="text-base text-secondary mt-3 leading-relaxed max-w-lg">
+            The listings people can&rsquo;t stop talking about. Real-time
+            leaderboard of the hottest discussions on gwak gwak.
           </p>
         </div>
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tighter">
-          Trending{" "}
-          <span className="social-gradient">Conversations</span>
-        </h1>
-        <p className="text-base text-muted mt-3 leading-relaxed max-w-lg">
-          The listings people can&rsquo;t stop talking about. Real-time
-          leaderboard of the hottest discussions on gwakgwak.
-        </p>
-      </div>
 
-      <TrendingTabs tabs={tabs} />
+        <TrendingTabs
+          discussed={discussedTab}
+          hottest={hottestTab}
+          neighborhoods={neighborhoodsTab}
+        />
+      </div>
     </div>
   );
 }

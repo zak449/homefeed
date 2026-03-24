@@ -15,7 +15,7 @@ export function getAnonId(): string {
 }
 
 // Get stored location
-export function getStoredLocation(): { latitude: number; longitude: number; city: string; state: string } | null {
+export function getStoredLocation(): { latitude: number; longitude: number; city: string; state: string; zip?: string } | null {
   if (typeof window === "undefined") return null;
   const stored = localStorage.getItem("hf_location");
   if (!stored) return null;
@@ -27,7 +27,7 @@ export function getStoredLocation(): { latitude: number; longitude: number; city
 }
 
 // Store location
-export function storeLocation(loc: { latitude: number; longitude: number; city: string; state: string }) {
+export function storeLocation(loc: { latitude: number; longitude: number; city: string; state: string; zip?: string }) {
   if (typeof window === "undefined") return;
   localStorage.setItem("hf_location", JSON.stringify(loc));
 }
@@ -61,6 +61,7 @@ export async function requestGeolocation(): Promise<{
   longitude: number;
   city: string;
   state: string;
+  zip?: string;
 } | null> {
   // Check if we already have a recent location (less than 5 minutes old)
   const stored = getStoredLocation();
@@ -97,6 +98,7 @@ export async function requestGeolocation(): Promise<{
               longitude,
               city: data.city || "",
               state: data.state || "",
+              zip: data.zip || "",
             };
             storeLocation(loc);
             localStorage.setItem("hf_location_time", String(Date.now()));

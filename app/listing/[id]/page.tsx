@@ -124,7 +124,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-[#FAFAF8]">
       {/* Track listing view */}
       <ListingViewTracker
         listingId={listing.id}
@@ -135,349 +135,455 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         listingType={listing.listingType}
       />
 
-      {/* Back link */}
-      <Link
-        href="/"
-        className="inline-block text-caption text-secondary hover:text-ink transition-colors mb-5"
-      >
-        &larr; back
-      </Link>
-
-      {/* Status banner */}
-      {listing.status === "off_market" && (
-        <div className="bg-surface border border-divider rounded-card px-4 py-3 mb-5">
-          <p className="text-body text-ink font-medium">
-            This property is not currently on the market
-          </p>
-          <p className="text-caption text-secondary mt-0.5">
-            Showing the latest available property information.
-            {listing.price > 0 && " Last known value shown below."}
-          </p>
-        </div>
-      )}
-      {listing.status === "sold" && (
-        <div className="bg-surface border border-divider rounded-card px-4 py-3 mb-5">
-          <p className="text-body text-ink font-medium">This listing has been sold</p>
-          <p className="text-caption text-secondary mt-0.5">
-            Comments are locked.{commentCount > 0 ? ` ${commentCount} comments preserved below.` : ""}
-          </p>
-        </div>
-      )}
-
-      {/* Photos */}
+      {/* ── Immersive Photo Gallery ── */}
       {listing.photos.length > 0 && (
-        <div className="mb-4">
-          <PhotoLightbox photos={listing.photos} address={listing.address} />
+        <div className="w-full max-w-5xl mx-auto px-0 sm:px-6 pt-0 sm:pt-6">
+          <div className="sm:rounded-2xl overflow-hidden">
+            <PhotoLightbox photos={listing.photos} address={listing.address} />
+          </div>
         </div>
       )}
 
-      {/* Price + Address + Key Facts */}
-      <div className="mb-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-display text-ink leading-tight">
-              {price}
-            </h1>
-            <p className="text-body text-secondary mt-1">
-              {listing.address} &middot; {listing.city}, {listing.state} {listing.zip}
+      {/* ── Main Content ── */}
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 text-caption text-tertiary pt-6 pb-4">
+          <Link href="/" className="hover:text-amber transition-colors font-medium">
+            gwak gwak
+          </Link>
+          <span className="text-divider">/</span>
+          <a
+            href={`/?city=${encodeURIComponent(listing.city)}`}
+            className="hover:text-amber transition-colors"
+          >
+            {listing.city}
+          </a>
+          <span className="text-divider">/</span>
+          <span className="text-secondary truncate max-w-[200px]">{listing.address}</span>
+        </nav>
+
+        {/* Back link — styled pill */}
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-caption text-secondary hover:text-ink bg-surface border border-divider hover:border-ink/10 rounded-full px-3.5 py-1.5 transition-all hover:shadow-soft mb-6"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
+          </svg>
+          Back to feed
+        </Link>
+
+        {/* Status banner */}
+        {listing.status === "off_market" && (
+          <div className="bg-surface border border-divider rounded-card px-5 py-4 mb-6 shadow-soft">
+            <p className="text-body text-ink font-medium">
+              This property is not currently on the market
             </p>
-            <p className="text-caption text-tertiary mt-0.5">
-              {listing.bedrooms != null && `${listing.bedrooms} bd`}
-              {listing.bathrooms != null && ` \u00b7 ${listing.bathrooms} ba`}
-              {listing.sqft != null && ` \u00b7 ${listing.sqft.toLocaleString()} sqft`}
-              {listing.yearBuilt != null && ` \u00b7 Built ${listing.yearBuilt}`}
-              {listing.propertyType && ` \u00b7 ${capitalize(listing.propertyType)}`}
+            <p className="text-caption text-secondary mt-0.5">
+              Showing the latest available property information.
+              {listing.price > 0 && " Last known value shown below."}
             </p>
           </div>
-          <span className="text-caption text-secondary shrink-0 mt-2">
-            {isRent ? "For Rent" : "For Sale"}
-          </span>
+        )}
+        {listing.status === "sold" && (
+          <div className="bg-surface border border-divider rounded-card px-5 py-4 mb-6 shadow-soft">
+            <p className="text-body text-ink font-medium">This listing has been sold</p>
+            <p className="text-caption text-secondary mt-0.5">
+              Comments are locked.{commentCount > 0 ? ` ${commentCount} comments preserved below.` : ""}
+            </p>
+          </div>
+        )}
+
+        {/* ── Price + Address + Key Facts ── */}
+        <div className="mb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="font-display text-[2.75rem] sm:text-[3.25rem] text-ink leading-[1.05] tracking-[-0.035em]">
+                {price}
+              </h1>
+              <p className="text-body text-secondary mt-2">
+                {listing.address} &middot; {listing.city}, {listing.state} {listing.zip}
+              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2">
+                {listing.bedrooms != null && (
+                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
+                    {listing.bedrooms} bd
+                  </span>
+                )}
+                {listing.bathrooms != null && (
+                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
+                    {listing.bathrooms} ba
+                  </span>
+                )}
+                {listing.sqft != null && (
+                  <span className="text-caption text-ink font-medium bg-highlight px-2.5 py-1 rounded-full">
+                    {listing.sqft.toLocaleString()} sqft
+                  </span>
+                )}
+                {listing.yearBuilt != null && (
+                  <span className="text-caption text-tertiary">
+                    Built {listing.yearBuilt}
+                  </span>
+                )}
+                {listing.propertyType && (
+                  <span className="text-caption text-tertiary">
+                    {capitalize(listing.propertyType)}
+                  </span>
+                )}
+              </div>
+            </div>
+            <span className="text-caption text-secondary bg-highlight px-3 py-1.5 rounded-full shrink-0 mt-2 font-medium">
+              {isRent ? "For Rent" : "For Sale"}
+            </span>
+          </div>
         </div>
-      </div>
 
-      {/* Save + Share */}
-      <div className="flex items-center justify-between mb-6 pb-6 border-b border-divider">
-        <div className="flex items-center gap-4">
-          <SaveButton listingId={listing.id} />
-          <ShareButton
-            listingId={listing.id}
-            address={listing.address}
-            city={listing.city}
-            price={price}
-          />
-        </div>
-        <div className="flex gap-4 text-caption text-tertiary">
-          {commentCount > 0 && (
-            <span>{commentCount} comment{commentCount !== 1 ? "s" : ""}</span>
-          )}
-          {reactionCount > 0 && (
-            <span>{reactionCount} reaction{reactionCount !== 1 ? "s" : ""}</span>
-          )}
-        </div>
-      </div>
-
-      {/* THE CONVERSATION */}
-      <div className="mb-8">
-        <CommentSection
-          listingId={listing.id}
-          isLocked={isLocked}
-          listingAddress={listing.address}
-          listingPrice={price}
-        />
-      </div>
-
-      {/* Email capture */}
-      <div className="mb-8 bg-highlight border border-divider rounded-card p-5">
-        <p className="text-title text-ink mb-1">
-          Want to know when people react to this listing?
-        </p>
-        <p className="text-caption text-secondary mb-3">
-          Get notified when new comments drop.
-        </p>
-        <EmailCapture variant="inline" source={`listing-${listing.id}`} />
-      </div>
-
-      {/* ── AI TOOLS — integrated into every listing ── */}
-
-      {/* Decision Comparison: What the listing says vs what the community says */}
-      <div className="mb-8">
-        <h2 className="text-title text-ink mb-3 flex items-center gap-2">
-          ⚖️ The real picture
-        </h2>
-        <DecisionComparison
-          listing={{
-            description: listing.description ?? undefined,
-            price: listing.price,
-            address: listing.address,
-          }}
-          commentCount={commentCount}
-          topComments={topComments}
-        />
-      </div>
-
-      {/* AI Reimagine — see the property your way */}
-      {listing.photos.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-title text-ink mb-3 flex items-center gap-2">
-            🎨 Reimagine this property
-          </h2>
-          <p className="text-caption text-secondary mb-3">
-            See what this place could look like with a different style. AI-powered visualization.
-          </p>
-          <AIReimagineTool photos={listing.photos} address={listing.address} />
-        </div>
-      )}
-
-      {/* Neighbor Q&A — ask the neighborhood */}
-      <div className="mb-8">
-        <h2 className="text-title text-ink mb-3 flex items-center gap-2">
-          🏘️ Ask the neighborhood
-        </h2>
-        <p className="text-caption text-secondary mb-3">
-          Have a question about this block? Ask verified locals who actually live here.
-        </p>
-        <NeighborQA zipCode={listing.zip} listingId={listing.id} />
-      </div>
-
-      {/* Description */}
-      {listing.description && (
-        <div className="mb-8">
-          <h2 className="text-title text-ink mb-2">About this property</h2>
-          <p className="text-body text-secondary leading-relaxed">{listing.description}</p>
-        </div>
-      )}
-
-      {/* Map */}
-      {listing.latitude != null && listing.longitude != null && (
-        <div className="mb-8">
-          <h2 className="text-title text-ink mb-2">Location</h2>
-          <MapPreview
-            latitude={listing.latitude}
-            longitude={listing.longitude}
-            address={listing.address}
-            className="mb-3"
-          />
-          <div className="flex flex-wrap gap-2">
-            {listing.neighborhood && (
-              <a
-                href={`/?city=${encodeURIComponent(listing.neighborhood)}`}
-                className="text-caption text-secondary bg-surface hover:bg-active px-3 py-1.5 rounded-full transition-colors"
-              >
-                {listing.neighborhood}
-              </a>
+        {/* ── Save + Share — prominent action bar ── */}
+        <div className="flex items-center justify-between mb-8 pb-6 border-b border-divider">
+          <div className="flex items-center gap-3">
+            <div className="[&_button]:bg-surface [&_button]:border [&_button]:border-divider [&_button]:rounded-full [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-ink/20 [&_button]:hover:shadow-soft [&_button]:transition-all">
+              <SaveButton listingId={listing.id} />
+            </div>
+            <div className="[&_button]:bg-ink [&_button]:text-white [&_button]:border [&_button]:border-ink [&_button]:rounded-full [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:bg-ink/90 [&_button]:transition-all">
+              <ShareButton
+                listingId={listing.id}
+                address={listing.address}
+                city={listing.city}
+                price={price}
+              />
+            </div>
+          </div>
+          <div className="flex gap-4 text-caption text-tertiary">
+            {commentCount > 0 && (
+              <span className="flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                {commentCount}
+              </span>
             )}
-            <a
-              href={`/?city=${encodeURIComponent(listing.city)}`}
-              className="text-caption text-secondary bg-surface hover:bg-active px-3 py-1.5 rounded-full transition-colors"
-            >
-              {listing.city}, {listing.state}
-            </a>
+            {reactionCount > 0 && (
+              <span className="flex items-center gap-1">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                {reactionCount}
+              </span>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Mortgage Calculator -- collapsible */}
-      {!isRent && (
-        <CollapsibleSection title="Estimate your payment">
-          <MortgageCalculator price={listing.price} />
-        </CollapsibleSection>
-      )}
+        {/* ── THE CONVERSATION — "What neighbors say" ── */}
+        <div className="mb-10">
+          {/* Section header with count badge */}
+          <div className="flex items-center gap-3 mb-5">
+            <h2 className="text-headline text-ink">What neighbors say</h2>
+            {commentCount > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-full bg-amber/10 text-amber text-caption font-semibold">
+                {commentCount}
+              </span>
+            )}
+          </div>
 
-      {/* Detailed Property Information */}
-      <div className="mb-8 border-t border-divider pt-6 space-y-6">
-        <DetailSection title="Property Details">
-          <DetailRow label="Status" value={isSold ? "Sold" : isRent ? "For Rent" : "For Sale"} />
-          <DetailRow label="Type" value={capitalize(listing.propertyType)} />
-          {listing.bedrooms != null && <DetailRow label="Beds" value={String(listing.bedrooms)} />}
-          {listing.bathrooms != null && <DetailRow label="Baths" value={String(listing.bathrooms)} />}
-          {listing.sqft != null && <DetailRow label="Sqft" value={listing.sqft.toLocaleString()} />}
-          {listing.lotSqft != null && (
-            <DetailRow label="Lot Size" value={`${listing.lotSqft.toLocaleString()} sqft`} />
-          )}
-          {listing.yearBuilt != null && <DetailRow label="Year Built" value={String(listing.yearBuilt)} />}
-          {listing.parking != null && <DetailRow label="Parking" value={listing.parking} />}
-        </DetailSection>
+          {/* Prominent comment prompt */}
+          <div className="bg-gradient-to-br from-glow via-[#FAFAF8] to-highlight border border-amber/15 rounded-card p-5 mb-6">
+            <p className="text-title text-ink leading-snug">
+              What do you know about this block that the listing doesn&apos;t say?
+            </p>
+            <p className="text-caption text-secondary mt-1">
+              Your neighbors are listening. Share something real.
+            </p>
+          </div>
 
-        <DetailSection title="Price & Tax Info">
-          <DetailRow label="List Price" value={price} />
-          {pricePerSqft && <DetailRow label="Price / Sqft" value={pricePerSqft} />}
-          <DetailRow
-            label="Listed"
-            value={listing.createdAt.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+          <CommentSection
+            listingId={listing.id}
+            isLocked={isLocked}
+            listingAddress={listing.address}
+            listingPrice={price}
           />
-          {priceHistory && priceHistory.length > 0 && (
-            <div className="col-span-2 mt-2">
-              <p className="text-caption text-secondary mb-1.5">Price History</p>
-              <div className="space-y-1">
-                {priceHistory.map((entry, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between text-caption py-1 border-b border-divider last:border-0"
-                  >
-                    <span className="text-secondary">{entry.date}</span>
-                    <span className="text-ink font-medium">
-                      ${entry.price.toLocaleString()}
-                      {entry.event && (
-                        <span className="ml-1.5 text-tertiary font-normal">({entry.event})</span>
-                      )}
-                    </span>
+        </div>
+
+        {/* ── Email capture ── */}
+        <div className="mb-10 bg-surface border border-divider rounded-card p-6 shadow-soft">
+          <p className="text-title text-ink mb-1">
+            Want to know when people react to this listing?
+          </p>
+          <p className="text-caption text-secondary mb-4">
+            Get notified when new comments drop.
+          </p>
+          <EmailCapture variant="inline" source={`listing-${listing.id}`} />
+        </div>
+
+        {/* ── AI TOOLS — premium card treatment ── */}
+        <div className="space-y-6 mb-10">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="h-px flex-1 bg-divider" />
+            <span className="text-caption text-tertiary uppercase tracking-widest font-medium px-2">AI Tools</span>
+            <div className="h-px flex-1 bg-divider" />
+          </div>
+
+          {/* Decision Comparison */}
+          <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
+            {/* Subtle amber gradient accent */}
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber/60 via-amber/30 to-transparent" />
+            <div className="p-6">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18"/><path d="M3 12h18"/><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                </div>
+                <h2 className="text-title text-ink">The real picture</h2>
+              </div>
+              <DecisionComparison
+                listing={{
+                  description: listing.description ?? undefined,
+                  price: listing.price,
+                  address: listing.address,
+                }}
+                commentCount={commentCount}
+                topComments={topComments}
+              />
+            </div>
+          </div>
+
+          {/* AI Reimagine */}
+          {listing.photos.length > 0 && (
+            <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber/30 to-amber/60" />
+              <div className="p-6">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
                   </div>
-                ))}
+                  <h2 className="text-title text-ink">Reimagine this property</h2>
+                </div>
+                <p className="text-caption text-secondary mb-4 pl-[42px]">
+                  See what this place could look like with a different style. AI-powered visualization.
+                </p>
+                <AIReimagineTool photos={listing.photos} address={listing.address} />
               </div>
             </div>
           )}
-        </DetailSection>
 
-        <DetailSection title="Location">
-          <DetailRow label="Address" value={listing.address} />
-          <DetailRow label="City" value={listing.city} />
-          <DetailRow label="State" value={listing.state} />
-          <DetailRow label="Zip" value={listing.zip} />
-          {listing.neighborhood && <DetailRow label="Neighborhood" value={listing.neighborhood} />}
-        </DetailSection>
-
-        <DetailSection title="Listing Info">
-          <DetailRow label="Source" value={capitalize(listing.source)} />
-          {listing.listingUrl && (
-            <div className="grid grid-cols-2 gap-x-4 py-2 border-b border-divider">
-              <dt className="text-caption text-secondary">Listing URL</dt>
-              <dd className="text-body text-right">
-                <a
-                  href={listing.listingUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-ink hover:text-secondary font-medium truncate block"
-                >
-                  View original &rarr;
-                </a>
-              </dd>
+          {/* Neighbor Q&A */}
+          <div className="relative bg-surface rounded-card border border-divider overflow-hidden shadow-soft hover:shadow-card-hover transition-shadow">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber/40 via-amber/50 to-amber/20" />
+            <div className="p-6">
+              <div className="flex items-center gap-2.5 mb-2">
+                <div className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <h2 className="text-title text-ink">Ask the neighborhood</h2>
+              </div>
+              <p className="text-caption text-secondary mb-4 pl-[42px]">
+                Have a question about this block? Ask verified locals who actually live here.
+              </p>
+              <NeighborQA zipCode={listing.zip} listingId={listing.id} />
             </div>
-          )}
-          {listing.agentName && <DetailRow label="Agent" value={listing.agentName} />}
-          {listing.agentBrokerage && <DetailRow label="Brokerage" value={listing.agentBrokerage} />}
-          <DetailRow
-            label="Cached"
-            value={listing.cachedAt.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          />
-        </DetailSection>
-      </div>
-
-      {/* More listings in [city] */}
-      {moreSameCity.length > 0 && (
-        <div className="mb-8 border-t border-divider pt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-title text-ink">
-              More in {listing.city}
-            </h2>
-            <a
-              href={`/?city=${encodeURIComponent(listing.city)}`}
-              className="text-caption text-tertiary hover:text-ink transition-colors"
-            >
-              See all &rarr;
-            </a>
-          </div>
-          <div className="space-y-4">
-            {moreSameCity.map((l) => {
-              const lPrice = l.listingType === "rent"
-                ? `$${l.price.toLocaleString()}/mo`
-                : `$${l.price.toLocaleString()}`;
-              const photo = l.photos[0];
-              const latestComment = l.comments[0];
-              return (
-                <a
-                  key={l.id}
-                  href={`/listing/${l.id}`}
-                  className="group block rounded-card hover:shadow-hover transition-shadow"
-                >
-                  <div className="flex gap-4">
-                    {/* Thumbnail */}
-                    <div className="w-20 h-20 rounded-avatar overflow-hidden bg-surface shrink-0">
-                      {photo ? (
-                        <FallbackImage
-                          src={photo}
-                          alt={l.address}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-tertiary/30">
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                            <polyline points="9 22 9 12 15 12 15 22" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    {/* Info */}
-                    <div className="flex-1 min-w-0 py-1">
-                      <p className="text-body text-ink font-medium">{lPrice}</p>
-                      <p className="text-caption text-secondary truncate">{l.address}</p>
-                      <p className="text-caption text-tertiary mt-0.5">
-                        {l.bedrooms != null && `${l.bedrooms} bd`}
-                        {l.bathrooms != null && ` \u00b7 ${l.bathrooms} ba`}
-                        {l.sqft != null && ` \u00b7 ${l.sqft.toLocaleString()} sqft`}
-                      </p>
-                      {latestComment && (
-                        <p className="text-caption text-tertiary mt-1 truncate">
-                          &ldquo;{latestComment.content}&rdquo;
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </a>
-              );
-            })}
           </div>
         </div>
-      )}
+
+        {/* ── Description ── */}
+        {listing.description && (
+          <div className="mb-10">
+            <h2 className="text-title text-ink mb-3">About this property</h2>
+            <p className="text-body text-secondary leading-relaxed">{listing.description}</p>
+          </div>
+        )}
+
+        {/* ── Map ── */}
+        {listing.latitude != null && listing.longitude != null && (
+          <div className="mb-10">
+            <h2 className="text-title text-ink mb-3">Location</h2>
+            <div className="rounded-card overflow-hidden border border-divider">
+              <MapPreview
+                latitude={listing.latitude}
+                longitude={listing.longitude}
+                address={listing.address}
+                className="mb-0"
+              />
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3">
+              {listing.neighborhood && (
+                <a
+                  href={`/?city=${encodeURIComponent(listing.neighborhood)}`}
+                  className="text-caption text-secondary bg-surface border border-divider hover:border-ink/15 hover:shadow-soft px-3.5 py-1.5 rounded-full transition-all"
+                >
+                  {listing.neighborhood}
+                </a>
+              )}
+              <a
+                href={`/?city=${encodeURIComponent(listing.city)}`}
+                className="text-caption text-secondary bg-surface border border-divider hover:border-ink/15 hover:shadow-soft px-3.5 py-1.5 rounded-full transition-all"
+              >
+                {listing.city}, {listing.state}
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* ── Mortgage Calculator ── */}
+        {!isRent && (
+          <CollapsibleSection title="Estimate your payment">
+            <MortgageCalculator price={listing.price} />
+          </CollapsibleSection>
+        )}
+
+        {/* ── Detailed Property Information ── */}
+        <div className="mb-10 border-t border-divider pt-8 space-y-8">
+          <DetailSection title="Property Details">
+            <DetailRow label="Status" value={isSold ? "Sold" : isRent ? "For Rent" : "For Sale"} />
+            <DetailRow label="Type" value={capitalize(listing.propertyType)} />
+            {listing.bedrooms != null && <DetailRow label="Beds" value={String(listing.bedrooms)} />}
+            {listing.bathrooms != null && <DetailRow label="Baths" value={String(listing.bathrooms)} />}
+            {listing.sqft != null && <DetailRow label="Sqft" value={listing.sqft.toLocaleString()} />}
+            {listing.lotSqft != null && (
+              <DetailRow label="Lot Size" value={`${listing.lotSqft.toLocaleString()} sqft`} />
+            )}
+            {listing.yearBuilt != null && <DetailRow label="Year Built" value={String(listing.yearBuilt)} />}
+            {listing.parking != null && <DetailRow label="Parking" value={listing.parking} />}
+          </DetailSection>
+
+          <DetailSection title="Price & Tax Info">
+            <DetailRow label="List Price" value={price} />
+            {pricePerSqft && <DetailRow label="Price / Sqft" value={pricePerSqft} />}
+            <DetailRow
+              label="Listed"
+              value={listing.createdAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            />
+            {priceHistory && priceHistory.length > 0 && (
+              <div className="col-span-2 mt-2">
+                <p className="text-caption text-secondary mb-1.5">Price History</p>
+                <div className="space-y-1">
+                  {priceHistory.map((entry, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between text-caption py-1.5 border-b border-divider last:border-0"
+                    >
+                      <span className="text-secondary">{entry.date}</span>
+                      <span className="text-ink font-medium">
+                        ${entry.price.toLocaleString()}
+                        {entry.event && (
+                          <span className="ml-1.5 text-tertiary font-normal">({entry.event})</span>
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </DetailSection>
+
+          <DetailSection title="Location">
+            <DetailRow label="Address" value={listing.address} />
+            <DetailRow label="City" value={listing.city} />
+            <DetailRow label="State" value={listing.state} />
+            <DetailRow label="Zip" value={listing.zip} />
+            {listing.neighborhood && <DetailRow label="Neighborhood" value={listing.neighborhood} />}
+          </DetailSection>
+
+          <DetailSection title="Listing Info">
+            <DetailRow label="Source" value={capitalize(listing.source)} />
+            {listing.listingUrl && (
+              <div className="grid grid-cols-2 gap-x-4 py-2.5 border-b border-divider">
+                <dt className="text-caption text-secondary">Listing URL</dt>
+                <dd className="text-body text-right">
+                  <a
+                    href={listing.listingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-amber hover:text-amber/80 font-medium truncate block transition-colors"
+                  >
+                    View original &rarr;
+                  </a>
+                </dd>
+              </div>
+            )}
+            {listing.agentName && <DetailRow label="Agent" value={listing.agentName} />}
+            {listing.agentBrokerage && <DetailRow label="Brokerage" value={listing.agentBrokerage} />}
+            <DetailRow
+              label="Cached"
+              value={listing.cachedAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            />
+          </DetailSection>
+        </div>
+
+        {/* ── More listings in [city] ── */}
+        {moreSameCity.length > 0 && (
+          <div className="mb-10 border-t border-divider pt-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-headline text-ink">
+                More in {listing.city}
+              </h2>
+              <a
+                href={`/?city=${encodeURIComponent(listing.city)}`}
+                className="text-caption text-amber hover:text-amber/80 font-medium transition-colors"
+              >
+                See all &rarr;
+              </a>
+            </div>
+            <div className="space-y-3">
+              {moreSameCity.map((l) => {
+                const lPrice = l.listingType === "rent"
+                  ? `$${l.price.toLocaleString()}/mo`
+                  : `$${l.price.toLocaleString()}`;
+                const photo = l.photos[0];
+                const latestComment = l.comments[0];
+                return (
+                  <a
+                    key={l.id}
+                    href={`/listing/${l.id}`}
+                    className="group block bg-surface rounded-card border border-divider p-3 hover:shadow-card-hover hover:border-ink/10 transition-all"
+                  >
+                    <div className="flex gap-4">
+                      {/* Thumbnail */}
+                      <div className="w-24 h-24 rounded-avatar overflow-hidden bg-highlight shrink-0">
+                        {photo ? (
+                          <FallbackImage
+                            src={photo}
+                            alt={l.address}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-tertiary/30">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                              <polyline points="9 22 9 12 15 12 15 22" />
+                            </svg>
+                          </div>
+                        )}
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0 py-1">
+                        <p className="font-display text-lg text-ink font-bold tracking-tight">{lPrice}</p>
+                        <p className="text-caption text-secondary truncate">{l.address}</p>
+                        <p className="text-caption text-tertiary mt-0.5">
+                          {l.bedrooms != null && `${l.bedrooms} bd`}
+                          {l.bathrooms != null && ` \u00b7 ${l.bathrooms} ba`}
+                          {l.sqft != null && ` \u00b7 ${l.sqft.toLocaleString()} sqft`}
+                        </p>
+                        {latestComment && (
+                          <p className="text-caption text-tertiary mt-1.5 truncate italic">
+                            &ldquo;{latestComment.content}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Bottom spacer */}
+        <div className="h-8" />
+      </div>
     </div>
   );
 }
@@ -486,7 +592,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
 function CollapsibleSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <details className="mb-8 border-t border-divider pt-4 group">
+    <details className="mb-10 border-t border-divider pt-6 group">
       <summary className="text-title text-ink cursor-pointer list-none flex items-center justify-between">
         {title}
         <span className="text-tertiary text-caption group-open:rotate-90 transition-transform">&rsaquo;</span>
@@ -501,7 +607,7 @@ function CollapsibleSection({ title, children }: { title: string; children: Reac
 function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h3 className="text-caption text-secondary uppercase tracking-wider mb-3">{title}</h3>
+      <h3 className="text-caption text-amber uppercase tracking-wider mb-3 font-semibold">{title}</h3>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">{children}</dl>
     </div>
   );
@@ -509,7 +615,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid grid-cols-2 gap-x-4 py-2 border-b border-divider">
+    <div className="grid grid-cols-2 gap-x-4 py-2.5 border-b border-divider">
       <dt className="text-caption text-secondary">{label}</dt>
       <dd className="text-body font-medium text-ink text-right truncate">{value}</dd>
     </div>
