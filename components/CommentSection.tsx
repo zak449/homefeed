@@ -418,9 +418,9 @@ export default function CommentSection({
           </p>
           <button
             onClick={() => { setShowJoinForm(true); }}
-            className="px-8 py-3.5 bg-amber text-white text-[15px] font-bold rounded-full hover:bg-amber/90 active:scale-[0.97] transition-all shadow-glow-amber"
+            className="w-full max-w-sm mx-auto block py-4 bg-amber text-white text-[18px] font-bold rounded-lg hover:bg-amber/90 active:scale-[0.97] transition-all shadow-glow-amber"
           >
-            Spill it &rarr;
+            🫖 Spill the tea on this place &rarr;
           </button>
         </div>
       )}

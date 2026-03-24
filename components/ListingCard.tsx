@@ -196,27 +196,21 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {/* Comment / social layer */}
         {listing.topComment ? (
           <div className="mt-3 pt-3 border-t border-divider">
-            <p className="text-[13px] text-ink leading-snug line-clamp-2 font-medium">
+            <p className="text-[14px] text-ink leading-snug line-clamp-2 font-bold">
               {listing.topComment.content}
             </p>
-            <div className="flex items-center justify-between mt-2">
-              <p className="text-[12px] text-secondary">
-                &mdash; {formatName(listing.topComment.name)}
-              </p>
-              <span className="text-[12px] font-semibold text-amber group-hover:underline">
-                {commentCount > 1 ? `${commentCount} takes` : "Full take"} &rarr;
-              </span>
+            <p className="text-[11px] text-secondary mt-1.5">
+              &mdash; {formatName(listing.topComment.name)}
+              {commentCount > 1 && <span className="text-[#999999] ml-1">+ {commentCount - 1} more</span>}
+            </p>
+            <div className="mt-3 w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+              🫖 Spill the tea &rarr;
             </div>
           </div>
         ) : (
           <div className="mt-3 pt-3 border-t border-divider">
-            <div className="flex items-center justify-between">
-              <span className="text-[13px] font-bold text-amber group-hover:text-amber/80 transition-colors">
-                no takes yet 👀
-              </span>
-              {listedAgo && (
-                <span className="text-[10px] text-tertiary">{listedAgo}</span>
-              )}
+            <div className="w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+              🫖 Spill the tea &rarr;
             </div>
           </div>
         )}

@@ -126,7 +126,7 @@ export default function MobileNav() {
                 ? ""
                 : tab.active
                   ? "text-[#E8A87C]"
-                  : "text-tertiary hover:text-secondary"
+                  : "text-[#999999] hover:text-[#CCCCCC]"
             }`;
 
             if (isAccent) {
