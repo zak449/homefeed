@@ -425,11 +425,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* Auto-enhance feed with geo when location is available */}
           <GeoFeedEnhancer />
 
-          {/* ═══ HERO — COMMANDING ABOVE-THE-FOLD ═══ */}
+          {/* ═══ HERO — LIFESTYLE IMAGE + OVERLAY ═══ */}
           <div className="relative overflow-hidden bg-ink">
-            {/* Ambient glow */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-amber/[0.04] rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-32 -right-32 w-64 h-64 bg-amber/[0.06] rounded-full blur-3xl pointer-events-none" />
+            {/* Lifestyle background image */}
+            <div className="absolute inset-0">
+              <img
+                src="/images/hero-lifestyle.jpg"
+                alt=""
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-ink/80 via-ink/70 to-ink/95" />
+            </div>
 
             <div className="relative max-w-2xl mx-auto px-5 pt-14 pb-12 sm:pt-20 sm:pb-16">
               {/* Wordmark */}

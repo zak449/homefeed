@@ -334,11 +334,11 @@ export default function CommentSection({
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowJoinForm(true)}
-                className="px-5 py-2.5 bg-ink text-white text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
+                className="px-8 py-3.5 bg-amber text-white text-[15px] font-bold rounded-full hover:bg-amber/90 active:scale-[0.97] transition-all shadow-glow-amber"
               >
-                Join &amp; see all takes
+                Join &amp; see all takes &rarr;
               </button>
-              <span className="text-caption text-tertiary">Free. Takes 10 seconds.</span>
+              <span className="text-caption text-tertiary">Free. 10 seconds.</span>
             </div>
           </div>
         </div>
@@ -352,17 +352,17 @@ export default function CommentSection({
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-ink mb-1">
+          <h3 className="text-xl sm:text-2xl font-bold text-ink mb-2">
             Be the first to share what you know
           </h3>
-          <p className="text-body text-secondary max-w-sm mx-auto mb-5">
+          <p className="text-[15px] text-secondary max-w-sm mx-auto mb-6">
             Your neighbors are listening. What does this listing not tell you?
           </p>
           <button
             onClick={() => { setShowJoinForm(true); }}
-            className="px-6 py-2.5 bg-ink text-white text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
+            className="px-8 py-3.5 bg-amber text-white text-[15px] font-bold rounded-full hover:bg-amber/90 active:scale-[0.97] transition-all shadow-glow-amber"
           >
-            Drop your take
+            Drop your take &rarr;
           </button>
         </div>
       )}
@@ -483,9 +483,9 @@ export default function CommentSection({
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-bg/80 to-bg z-10 flex items-end justify-center pb-4">
                 <button
                   onClick={() => setShowJoinForm(true)}
-                  className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-full hover:bg-ink/90 shadow-elevated active:scale-[0.97] transition-all"
+                  className="px-8 py-3.5 bg-amber text-white text-[15px] font-bold rounded-full hover:bg-amber/90 shadow-glow-amber active:scale-[0.97] transition-all"
                 >
-                  Join to see {hiddenCount} more take{hiddenCount !== 1 ? "s" : ""}
+                  See {hiddenCount} more take{hiddenCount !== 1 ? "s" : ""} &rarr;
                 </button>
               </div>
               {/* Blurred preview of next comment */}

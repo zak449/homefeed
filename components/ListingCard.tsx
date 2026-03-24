@@ -189,32 +189,29 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         {/* Comment / social layer */}
         {listing.topComment ? (
-          <div className="mt-2.5 pt-2.5 border-t border-divider">
-            <p className="text-[12px] text-ink leading-snug line-clamp-2">
+          <div className="mt-3 pt-3 border-t border-divider">
+            <p className="text-[13px] text-ink leading-snug line-clamp-2 font-medium">
               &ldquo;{listing.topComment.content}&rdquo;
             </p>
-            <div className="flex items-center justify-between mt-1.5">
-              <p className="text-[11px] text-tertiary">
-                {listing.topComment.name}
-                {commentCount > 1 && (
-                  <span className="text-amber font-medium ml-1">
-                    +{commentCount - 1} more
-                  </span>
-                )}
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-[12px] text-secondary">
+                &mdash; {listing.topComment.name}
               </p>
+              <span className="text-[12px] font-semibold text-amber group-hover:underline">
+                {commentCount > 1 ? `${commentCount} takes` : "Read more"} &rarr;
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3 pt-3 border-t border-divider">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-bold text-amber group-hover:text-amber/80 transition-colors">
+                Drop your take &rarr;
+              </span>
               {listedAgo && (
                 <span className="text-[10px] text-tertiary">{listedAgo}</span>
               )}
             </div>
-          </div>
-        ) : (
-          <div className="mt-2.5 pt-2.5 border-t border-divider flex items-center justify-between">
-            <p className="text-[11px] text-tertiary group-hover:text-amber transition-colors">
-              Drop your take &rarr;
-            </p>
-            {listedAgo && (
-              <span className="text-[10px] text-tertiary">{listedAgo}</span>
-            )}
           </div>
         )}
       </div>
