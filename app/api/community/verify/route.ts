@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 
 // Simple zip code to city/state lookup (covers common cases, defaults to "Unknown")
 const ZIP_LOOKUP: Record<string, { city: string; state: string }> = {
