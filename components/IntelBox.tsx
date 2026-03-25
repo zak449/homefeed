@@ -618,6 +618,161 @@ export default function IntelBox({
         {/* ──── TAB 1: Take (Intel Feed) ──── */}
         {activeTab === "take" && (
           <div className="p-4">
+            {/* ── Compose area — TOP of feed, before comments ── */}
+            {!isLocked && (
+              <div className="mb-4 space-y-3 bg-surface rounded-xl p-3 border border-divider">
+                {/* Context tags */}
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+                  {CONTEXT_TAGS.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        if (selectedTag === tag) {
+                          setSelectedTag(null);
+                          setRolePrompt("");
+                        } else {
+                          setSelectedTag(tag);
+                          const prompts = ROLE_PROMPTS[tag];
+                          setRolePrompt(prompts[Math.floor(Math.random() * prompts.length)]);
+                        }
+                      }}
+                      className={`whitespace-nowrap text-xs px-2.5 py-1 rounded-full transition-all ${
+                        selectedTag === tag
+                          ? "bg-accent text-white"
+                          : "bg-bg border border-divider text-tertiary hover:text-secondary"
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input row */}
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={content}
+                    onChange={(e) => {
+                      setContent(e.target.value);
+                      if (!e.target.value.trim()) setShowInlineAuth(false);
+                    }}
+                    placeholder={rolePrompt || "Pick a role above, then spill..."}
+                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                  />
+                  <button
+                    type="button"
+                    disabled={posting || !content.trim()}
+                    onClick={(e) => {
+                      if (isJoined) {
+                        handlePost(e as unknown as React.FormEvent);
+                      } else {
+                        setShowInlineAuth(true);
+                        setTimeout(() => {
+                          const authForm = document.querySelector("[data-auth-form]");
+                          if (authForm) authForm.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 100);
+                      }
+                    }}
+                    className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {posting ? "..." : "Drop it →"}
+                  </button>
+                </div>
+
+                {/* Inline auth */}
+                {showInlineAuth && !isJoined && (
+                  <form
+                    data-auth-form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!name.trim() || !email.trim()) return;
+                      setIsJoined(true);
+                      setShowInlineAuth(false);
+                      try {
+                        localStorage.setItem("hf_commenter", JSON.stringify({ name, email, zip }));
+                      } catch {}
+                      fetch("/api/subscribe", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, source: `join-community-${listingId}`, name, zip: zip || undefined }),
+                      }).catch(() => {});
+                      fetch("/api/analytics", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "community_join", data: { listingId, hasZip: !!zip, source: "intelbox_inline" } }),
+                      }).catch(() => {});
+                      handlePost(e);
+                    }}
+                    className="rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-base">🫖</span>
+                      <p className="text-white text-sm font-semibold">
+                        Take saved — just need your name to post it
+                      </p>
+                    </div>
+                    <p className="text-secondary text-xs">Add your zip to earn a Local badge</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Your name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                        required
+                        autoFocus
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email (private)"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                        required
+                      />
+                    </div>
+                    {showZipField && (
+                      <input
+                        type="text"
+                        placeholder="Zip code (unlocks local badge)"
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        className="w-full rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                      />
+                    )}
+                    <label className="flex items-center gap-2 text-xs text-secondary cursor-pointer">
+                      <input type="checkbox" defaultChecked className="accent-accent" />
+                      Email me when someone reacts to my take
+                    </label>
+                    <div className="flex items-center justify-between">
+                      {!showZipField && (
+                        <button
+                          type="button"
+                          onClick={() => setShowZipField(true)}
+                          className="text-xs text-tertiary hover:text-secondary transition-colors"
+                        >
+                          + Add zip for local badge
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={!name.trim() || !email.trim()}
+                        className="ml-auto px-4 py-2 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Post take →
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {postError && (
+                  <p className="text-red-400 text-xs">{postError}</p>
+                )}
+              </div>
+            )}
+
             {commentsLoading ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -1073,178 +1228,6 @@ export default function IntelBox({
 
       {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}
       <div className="shrink-0 bg-surface border-t border-divider">
-        {/* ── Take input ── */}
-        {activeTab === "take" && (
-          <>
-            {isLocked ? (
-              <div className="px-4 py-3 text-center">
-                <p className="text-tertiary text-sm">
-                  Comments locked — this listing is no longer active.
-                </p>
-              </div>
-            ) : (
-              <div className="p-4 space-y-3">
-                {/* Context tags — always visible */}
-                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
-                  {CONTEXT_TAGS.map((tag) => (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        if (selectedTag === tag) {
-                          setSelectedTag(null);
-                          setRolePrompt("");
-                        } else {
-                          setSelectedTag(tag);
-                          const prompts = ROLE_PROMPTS[tag];
-                          setRolePrompt(prompts[Math.floor(Math.random() * prompts.length)]);
-                        }
-                      }}
-                      className={`whitespace-nowrap text-xs px-2.5 py-1 rounded-full transition-all ${
-                        selectedTag === tag
-                          ? "bg-accent text-white"
-                          : "bg-bg border border-divider text-tertiary hover:text-secondary"
-                      }`}
-                    >
-                      {tag}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Input row — always visible */}
-                <div className="flex items-center gap-2">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={content}
-                    onChange={(e) => {
-                      setContent(e.target.value);
-                      // Hide inline auth if user clears their take
-                      if (!e.target.value.trim()) setShowInlineAuth(false);
-                    }}
-                    placeholder={rolePrompt || "Pick a role above, then spill..."}
-                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                  />
-                  <button
-                    type="button"
-                    disabled={posting || !content.trim()}
-                    onClick={(e) => {
-                      if (isJoined) {
-                        handlePost(e as unknown as React.FormEvent);
-                      } else {
-                        // Show inline auth with confirmation feedback
-                        setShowInlineAuth(true);
-                        // Scroll the auth form into view
-                        setTimeout(() => {
-                          const authForm = document.querySelector("[data-auth-form]");
-                          if (authForm) authForm.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }, 100);
-                      }
-                    }}
-                    className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {posting ? "..." : "Drop it →"}
-                  </button>
-                </div>
-
-                {/* Inline auth — slides in after user tries to post */}
-                {showInlineAuth && !isJoined && (
-                  <form
-                    data-auth-form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (!name.trim() || !email.trim()) return;
-                      // Join the user
-                      setIsJoined(true);
-                      setShowInlineAuth(false);
-                      try {
-                        localStorage.setItem("hf_commenter", JSON.stringify({ name, email, zip }));
-                      } catch {
-                        // ignore
-                      }
-                      fetch("/api/subscribe", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email, source: `join-community-${listingId}`, name, zip: zip || undefined }),
-                      }).catch(() => {});
-                      fetch("/api/analytics", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ type: "community_join", data: { listingId, hasZip: !!zip, source: "intelbox_inline" } }),
-                      }).catch(() => {});
-                      // Immediately post the take
-                      handlePost(e);
-                    }}
-                    className="rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200"
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-base">🫖</span>
-                      <p className="text-white text-sm font-semibold">
-                        Take saved — just need your name to post it
-                      </p>
-                    </div>
-                    <p className="text-secondary text-xs">Add your zip to earn a Local badge</p>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        placeholder="Your name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                        required
-                        autoFocus
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email (private)"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                        required
-                      />
-                    </div>
-                    {showZipField && (
-                      <input
-                        type="text"
-                        placeholder="Zip code (unlocks local badge)"
-                        value={zip}
-                        onChange={(e) => setZip(e.target.value)}
-                        className="w-full rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                      />
-                    )}
-                    <label className="flex items-center gap-2 text-xs text-secondary cursor-pointer">
-                      <input type="checkbox" defaultChecked className="accent-accent" />
-                      Email me when someone reacts to my take
-                    </label>
-                    <div className="flex items-center justify-between">
-                      {!showZipField && (
-                        <button
-                          type="button"
-                          onClick={() => setShowZipField(true)}
-                          className="text-xs text-tertiary hover:text-secondary transition-colors"
-                        >
-                          + Add zip for local badge
-                        </button>
-                      )}
-                      <button
-                        type="submit"
-                        disabled={!name.trim() || !email.trim()}
-                        className="ml-auto px-4 py-2 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Post take →
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                {postError && (
-                  <p className="text-red-400 text-xs">{postError}</p>
-                )}
-              </div>
-            )}
-          </>
-        )}
-
         {/* ── Ask AI input ── */}
         {activeTab === "ai" && (
           <div className="p-4">
