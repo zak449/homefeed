@@ -1,13 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import SpillSheet from "./SpillSheet";
 
 export default function MobileNav() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const currentSort = searchParams.get("sort");
+  const [isSpillOpen, setIsSpillOpen] = useState(false);
+  const [spillAddress, setSpillAddress] = useState<string | undefined>(undefined);
+  const [spillListingId, setSpillListingId] = useState<string | undefined>(undefined);
 
   const isHome = pathname === "/" && currentSort !== "comments";
   const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending";
@@ -76,31 +81,15 @@ export default function MobileNav() {
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
     if (isListingPage) {
-      // On listing pages, scroll to IntelBox and activate the Take tab
-      const intelBox = document.querySelector("[data-intel-box]") || document.getElementById("comment-form");
-      if (intelBox) {
-        intelBox.scrollIntoView({ behavior: "smooth", block: "center" });
-        // Click the Take tab if it exists
-        const takeTab = intelBox.querySelector("[data-tab='take']") as HTMLElement | null;
-        if (takeTab) setTimeout(() => takeTab.click(), 400);
-        // Focus the first input in the form
-        const input = intelBox.querySelector("textarea, input[type='text']") as HTMLElement | null;
-        if (input) setTimeout(() => input.focus(), 600);
-        return;
-      }
+      const listingId = pathname.split("/listing/")[1] || undefined;
+      const address = document.querySelector("h1")?.textContent?.split(",")[0] || undefined;
+      setSpillListingId(listingId);
+      setSpillAddress(address);
+    } else {
+      setSpillListingId(undefined);
+      setSpillAddress(undefined);
     }
-    // On homepage or other pages, scroll to search bar and focus it
-    const searchInput = document.querySelector("input[type='search'], input[type='text'][placeholder*='Search'], input[placeholder*='search'], input[placeholder*='address']") as HTMLInputElement | null;
-    if (searchInput) {
-      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
-      setTimeout(() => {
-        searchInput.focus();
-        searchInput.setAttribute("placeholder", "Find a listing to spill tea on...");
-      }, 400);
-      return;
-    }
-    // Fallback: navigate to search view
-    router.push("/?city=");
+    setIsSpillOpen(true);
   }
 
   return (
@@ -178,6 +167,12 @@ export default function MobileNav() {
       </nav>
       {/* Spacer to prevent content from being hidden behind bottom bar */}
       <div className="sm:hidden h-16" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} />
+      <SpillSheet
+        isOpen={isSpillOpen}
+        onClose={() => setIsSpillOpen(false)}
+        listingAddress={spillAddress}
+        listingId={spillListingId}
+      />
     </>
   );
 }

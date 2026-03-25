@@ -206,10 +206,29 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       {/* ── Immersive Photo Gallery ── */}
       {listing.photos.length > 0 && (
-        <div className="w-full max-w-5xl mx-auto px-0 sm:px-6 pt-0 sm:pt-6">
+        <div className="w-full max-w-5xl mx-auto px-0 sm:px-6 pt-0 sm:pt-6 relative">
           <div className="sm:rounded-2xl overflow-hidden">
             <PhotoLightbox photos={listing.photos} address={listing.address} />
           </div>
+          {/* Social proof pill — THE value prop, top billing */}
+          <a
+            href="#comment-form"
+            className="absolute bottom-3 sm:bottom-9 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-2 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white text-sm font-semibold shadow-lg hover:bg-black/80 transition-all group"
+          >
+            {commentCount > 0 ? (
+              <>
+                <span className="text-base">🔥</span>
+                <span>{commentCount} local{commentCount !== 1 ? "s" : ""} spilled tea on this place</span>
+                <span className="text-accent group-hover:translate-x-0.5 transition-transform">→</span>
+              </>
+            ) : (
+              <>
+                <span className="text-base">👻</span>
+                <span>No intel yet — be the first to spill</span>
+                <span className="text-accent group-hover:translate-x-0.5 transition-transform">→</span>
+              </>
+            )}
+          </a>
         </div>
       )}
 

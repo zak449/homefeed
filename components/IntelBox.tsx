@@ -98,6 +98,34 @@ const REACTION_LABELS: Record<string, string> = {
 const CONTEXT_TAGS = ["neighbor", "past renter", "drove by", "almost bought", "local"] as const;
 type ContextTag = (typeof CONTEXT_TAGS)[number];
 
+const ROLE_PROMPTS: Record<ContextTag, string[]> = {
+  neighbor: [
+    "What does the seller NOT want buyers to know?",
+    "What's the real noise situation after 10pm?",
+    "What happened to the last family that lived here?",
+  ],
+  "past renter": [
+    "What broke first? What were they slow to fix?",
+    "Would you rent here again knowing what you know?",
+    "What did the landlord hide during your tour?",
+  ],
+  "drove by": [
+    "What's the vibe on that block at 11pm?",
+    "Do the listing photos match reality?",
+    "What did you notice that the photos don't show?",
+  ],
+  "almost bought": [
+    "What made you walk?",
+    "What did the inspection reveal?",
+    "What did your agent say off the record?",
+  ],
+  local: [
+    "What's the one thing Zillow can't tell you?",
+    "Is this block trending up or down?",
+    "What do neighbors actually think about this place?",
+  ],
+};
+
 const GWAKY_PROMPTS = [
   "Is this overpriced for the area?",
   "What are red flags at this price point?",
@@ -187,6 +215,7 @@ export default function IntelBox({
   const [commentsLoading, setCommentsLoading] = useState(true);
   const [content, setContent] = useState("");
   const [selectedTag, setSelectedTag] = useState<ContextTag | null>(null);
+  const [rolePrompt, setRolePrompt] = useState("");
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState("");
 
@@ -1220,7 +1249,16 @@ export default function IntelBox({
                     <button
                       key={tag}
                       type="button"
-                      onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                      onClick={() => {
+                        if (selectedTag === tag) {
+                          setSelectedTag(null);
+                          setRolePrompt("");
+                        } else {
+                          setSelectedTag(tag);
+                          const prompts = ROLE_PROMPTS[tag];
+                          setRolePrompt(prompts[Math.floor(Math.random() * prompts.length)]);
+                        }
+                      }}
                       className={`whitespace-nowrap text-xs px-2.5 py-1 rounded-full transition-all ${
                         selectedTag === tag
                           ? "bg-accent text-white"
@@ -1243,7 +1281,7 @@ export default function IntelBox({
                       // Hide inline auth if user clears their take
                       if (!e.target.value.trim()) setShowInlineAuth(false);
                     }}
-                    placeholder="Spill the tea on this place..."
+                    placeholder={rolePrompt || "Pick a role above, then spill..."}
                     className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   />
                   <button
