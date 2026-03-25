@@ -64,6 +64,8 @@ export default function SearchBar() {
   const [minSqft, setMinSqft] = useState(sp.get("minSqft") ?? "");
   const [maxSqft, setMaxSqft] = useState(sp.get("maxSqft") ?? "");
   const [showFilters, setShowFilters] = useState(false);
+  const [showSort, setShowSort] = useState(false);
+  const currentSort = sp.get("sort") ?? "";
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [locating, setLocating] = useState(false);
   const [geoResolved, setGeoResolved] = useState(false);
@@ -499,14 +501,55 @@ export default function SearchBar() {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowFilters(!showFilters)}
-          className="text-caption text-tertiary hover:text-ink transition-colors ml-auto"
-        >
-          {showFilters ? "Hide filters" : "Filters"}
-          {hasActiveFilters && " \u00b7"}
-        </button>
+        <div className="flex items-center gap-2 ml-auto">
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => { setShowSort(!showSort); setShowFilters(false); }}
+              className="px-3 py-2 text-sm font-semibold text-white bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#FF4D00]/40 transition-colors flex items-center gap-1.5"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
+              Sort
+            </button>
+            {showSort && (
+              <div className="absolute right-0 top-full mt-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl shadow-modal z-50 min-w-[160px] overflow-hidden animate-fade-in">
+                {[
+                  { key: "", label: "Newest" },
+                  { key: "price-low", label: "Price: Low → High" },
+                  { key: "price-high", label: "Price: High → Low" },
+                  { key: "comments", label: "Most Takes" },
+                ].map((s) => (
+                  <button
+                    key={s.key}
+                    type="button"
+                    onClick={() => {
+                      const params = new URLSearchParams(sp.toString());
+                      if (s.key) params.set("sort", s.key); else params.delete("sort");
+                      router.push(`/?${params.toString()}`);
+                      setShowSort(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                      currentSort === s.key
+                        ? "text-[#FF4D00] font-semibold bg-[#FF4D00]/10"
+                        : "text-white/80 hover:bg-[#2A2A2A]"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => { setShowFilters(!showFilters); setShowSort(false); }}
+            className="px-3 py-2 text-sm font-semibold text-white bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#FF4D00]/40 transition-colors flex items-center gap-1.5"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+            Filters
+            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-[#FF4D00]" />}
+          </button>
+        </div>
       </div>
 
       {/* Expandable filters */}
