@@ -724,9 +724,7 @@ export default function IntelBox({
                               } disabled:opacity-40 disabled:cursor-not-allowed`}
                             >
                               <span>{emoji}</span>
-                              {count > 0 && (
-                                <span className="font-medium">{count}</span>
-                              )}
+                              <span className="font-medium">{count}</span>
                             </button>
                           );
                         })}

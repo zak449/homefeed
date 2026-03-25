@@ -129,33 +129,29 @@ export default function ProfilePage() {
   if (!email && !loading) {
     return (
       <div className="min-h-screen bg-[#0E0E0E] flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="w-20 h-20 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center mx-auto mb-6">
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#555"
-              strokeWidth="1.5"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <h1 className="text-white text-xl font-bold mb-2">
-            Join to see your profile
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-6">🏡</div>
+          <h1 className="text-white text-2xl font-extrabold mb-3 tracking-tight">
+            Your Gwaky profile lives here
           </h1>
-          <p className="text-[#666] text-sm mb-6">
-            Drop a take on any listing to create your profile. Your comments,
-            questions, and saved listings will appear here.
+          <p className="text-[#999] text-[15px] leading-relaxed mb-8 max-w-xs mx-auto">
+            Drop a take on any listing to get started. Your takes, saved
+            listings, and activity will show up here.
           </p>
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 transition-all"
+            className="inline-block px-8 py-3.5 bg-[#FF4D00] text-white text-sm font-bold rounded-xl hover:bg-[#FF4D00]/90 transition-all shadow-lg shadow-[#FF4D00]/20"
           >
-            Browse listings →
+            Browse Listings &rarr;
           </Link>
+          <div className="mt-5">
+            <Link
+              href="/about"
+              className="text-[#666] text-sm hover:text-[#999] transition-colors underline underline-offset-4 decoration-[#333]"
+            >
+              What is Gwaky?
+            </Link>
+          </div>
         </div>
       </div>
     );

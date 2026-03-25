@@ -39,7 +39,7 @@ export async function sendAgentMessage({
           <p style="margin: 0; font-size: 15px; color: #1A1A2E;">${message}</p>
         </div>
         <p style="font-size: 14px; color: #666;">From: <strong>${senderName}</strong> (${senderEmail})</p>
-        <p style="font-size: 12px; color: #999; margin-top: 32px;">Sent via <a href="#" style="color: #FF6B6B;">Gwaky</a></p>
+        <p style="font-size: 12px; color: #999; margin-top: 32px;">Sent via <a href="https://gwaky.com" style="color: #FF6B6B;">Gwaky</a></p>
       </div>
     `,
   });

@@ -227,12 +227,30 @@ export default function ListingCard({ listing }: { listing: Listing }) {
               &mdash; {formatName(listing.topComment.name)}
               {commentCount > 1 && <span className="text-[#999999] ml-1">+ {commentCount - 1} more</span>}
             </p>
+            {/* Reaction row — always visible */}
+            <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
+              {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
+                <span key={emoji} className="inline-flex items-center gap-0.5 text-[11px] px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
+                  <span>{emoji}</span>
+                  <span className="tabular-nums">0</span>
+                </span>
+              ))}
+            </div>
             <div className="mt-3 w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
               🫖 Spill the tea &rarr;
             </div>
           </div>
         ) : (
           <div className="mt-3 pt-3 border-t border-divider">
+            {/* Reaction row — always visible */}
+            <div className="flex items-center gap-1.5 flex-wrap mb-3">
+              {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
+                <span key={emoji} className="inline-flex items-center gap-0.5 text-[11px] px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
+                  <span>{emoji}</span>
+                  <span className="tabular-nums">0</span>
+                </span>
+              ))}
+            </div>
             <div className="w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
               🫖 Spill the tea &rarr;
             </div>

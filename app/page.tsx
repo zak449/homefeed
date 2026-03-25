@@ -444,7 +444,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
               {/* Tagline */}
               <p className="text-[clamp(1rem,3vw,1.35rem)] text-white/50 font-medium tracking-tight mb-12 sm:mb-16 max-w-lg">
-                Real takes. Real addresses. No commission in the way.
+                Real takes. Real addresses. <span className="whitespace-nowrap">No commission in the way.</span>
               </p>
 
               {/* ── CHAOTIC COMMENT SNIPPETS ── */}
@@ -615,16 +615,19 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       {/* Reactions row + CTA */}
                       <div className="flex items-center justify-between px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          {Object.entries(reactionCounts).length > 0 ? (
-                            Object.entries(reactionCounts).map(([emoji, count]) => (
-                              <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight border border-divider/60 text-ink font-medium">
+                          {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => {
+                            const count = reactionCounts[emoji] || 0;
+                            return (
+                              <span key={emoji} className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium ${
+                                count > 0
+                                  ? "bg-highlight border-divider/60 text-ink"
+                                  : "bg-highlight/50 border-divider/30 text-tertiary"
+                              }`}>
                                 <span className="text-sm">{emoji}</span>
                                 <span className="tabular-nums">{count}</span>
                               </span>
-                            ))
-                          ) : (
-                            <span className="text-xs text-tertiary" title="React to this">React to this</span>
-                          )}
+                            );
+                          })}
                         </div>
                         <a
                           href={`/listing/${comment.listing.id}#comment-form`}
@@ -703,6 +706,15 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           {listing.bathrooms != null && <span className="font-medium">{listing.bathrooms} ba</span>}
                           {listing.sqft != null && <span className="font-medium">{listing.sqft.toLocaleString()} sqft</span>}
                           {listing.propertyType && <span className="text-tertiary capitalize">{listing.propertyType}</span>}
+                        </div>
+                        {/* Reaction row — always visible */}
+                        <div className="flex items-center gap-2 flex-wrap mb-3">
+                          {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
+                            <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
+                              <span className="text-sm">{emoji}</span>
+                              <span className="tabular-nums">0</span>
+                            </span>
+                          ))}
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-tertiary font-medium">

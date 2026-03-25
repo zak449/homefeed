@@ -7,6 +7,7 @@ import KlaviyoScript from "@/components/KlaviyoScript";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gwaky.com"),
   title: "Gwaky — the comment section real estate never had",
   description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing. No agents. No spin. Just the truth.",
   manifest: "/manifest.json",
@@ -42,7 +43,6 @@ export const viewport: Viewport = {
   themeColor: "#0A0A0A",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
