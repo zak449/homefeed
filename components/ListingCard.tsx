@@ -78,15 +78,28 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     [photos.length]
   );
 
+  const swipedRef = useRef(false);
+
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    swipedRef.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = Math.abs(touchStartX.current - e.touches[0].clientX);
+    if (diff > 30) {
+      // Horizontal swipe detected — prevent link navigation
+      swipedRef.current = true;
+    }
   }, []);
 
   const handleTouchEnd = useCallback(
     (e: React.TouchEvent) => {
       if (touchStartX.current === null) return;
       const diff = touchStartX.current - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
+      if (Math.abs(diff) > 40) {
+        swipedRef.current = true;
         if (diff > 0) {
           setCurrentIndex((prev) => (prev === photos.length - 1 ? 0 : prev + 1));
         } else {
@@ -98,6 +111,14 @@ export default function ListingCard({ listing }: { listing: Listing }) {
     [photos.length]
   );
 
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    if (swipedRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      swipedRef.current = false;
+    }
+  }, []);
+
   const currentPhoto = photos[currentIndex] ?? null;
 
   return (
@@ -106,10 +127,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
       className="group block rounded-2xl overflow-hidden bg-surface border border-divider hover:shadow-card-hover hover:border-amber/20 transition-all duration-300"
     >
       {/* ── CLEAN IMAGE — no text overlays except minimal badge ── */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         className="relative aspect-[4/3] overflow-hidden bg-highlight"
         onTouchStart={hasMultiple ? handleTouchStart : undefined}
+        onTouchMove={hasMultiple ? handleTouchMove : undefined}
         onTouchEnd={hasMultiple ? handleTouchEnd : undefined}
+        onClick={hasMultiple ? handleClick : undefined}
       >
         {currentPhoto ? (
           <FallbackImage
@@ -132,7 +156,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goPrev}
-              className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
+              className="flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
               aria-label="Previous"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
@@ -140,7 +164,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goNext}
-              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
+              className="flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
               aria-label="Next"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
