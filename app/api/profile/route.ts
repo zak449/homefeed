@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
         },
       }),
       prisma.neighborQuestion.findMany({
-        where: { askerEmail: email },
+        where: { askedBy: { email } },
         take: 50,
         orderBy: { createdAt: "desc" },
         include: {

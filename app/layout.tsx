@@ -21,11 +21,20 @@ export const metadata: Metadata = {
     locale: "en_US",
     title: "Gwaky — the comment section real estate never had",
     description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Gwaky — the comment section real estate never had",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Gwaky — the comment section real estate never had",
     description: "Real takes from real people. No agents. No spin. Just the truth.",
+    images: ["/og-image.png"],
   },
 };
 

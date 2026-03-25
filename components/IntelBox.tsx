@@ -219,6 +219,8 @@ export default function IntelBox({
   const [renoLoading, setRenoLoading] = useState(false);
   const [renoResult, setRenoResult] = useState<RenoResult | null>(null);
   const [renoError, setRenoError] = useState("");
+  const [renoNotes, setRenoNotes] = useState("");
+  const [renoPhotoIndex, setRenoPhotoIndex] = useState(0);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -517,6 +519,7 @@ export default function IntelBox({
           listingAddress,
           listingPhoto: photos?.[0] ?? null,
           listingPrice,
+          notes: renoNotes || undefined,
         }),
       });
       if (!res.ok) {
@@ -951,25 +954,45 @@ export default function IntelBox({
         {/* ──── TAB 4: Reno Vision ──── */}
         {activeTab === "reno" && (
           <div className="p-4">
-            {photos && photos.length > 0 && (() => {
-              const typeIndex = RENO_TYPES.findIndex((t) => t.key === renoType);
-              const photoIndex = typeIndex % photos.length;
-              return (
-                <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A] relative">
-                  <img src={photos[photoIndex]} alt={listingAddress} className="w-full h-40 object-cover transition-all duration-500" />
-                  {photos.length > 1 && (
-                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
-                      {photoIndex + 1}/{photos.length}
+            {photos && photos.length > 0 && (
+              <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A] relative">
+                <img src={photos[renoPhotoIndex % photos.length]} alt={listingAddress} className="w-full h-40 object-cover transition-all duration-500" />
+                {photos.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setRenoPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-all text-sm"
+                      aria-label="Previous photo"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setRenoPhotoIndex((prev) => (prev + 1) % photos.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-all text-sm"
+                      aria-label="Next photo"
+                    >
+                      ›
+                    </button>
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                      {photos.map((_: string, i: number) => (
+                        <span
+                          key={i}
+                          className={`w-1.5 h-1.5 rounded-full transition-all ${i === renoPhotoIndex % photos.length ? "bg-white" : "bg-white/40"}`}
+                        />
+                      ))}
                     </div>
-                  )}
-                </div>
-              );
-            })()}
+                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
+                      {(renoPhotoIndex % photos.length) + 1}/{photos.length}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
             <div className="mb-3">
               <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Type</p>
               <div className="flex flex-wrap gap-1.5">
                 {RENO_TYPES.map((t) => (
-                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); setRenoPhotoIndex((prev) => prev + 1); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
                     {t.label}
                   </button>
                 ))}
@@ -984,6 +1007,18 @@ export default function IntelBox({
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="mb-4">
+              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Your Notes (optional)</p>
+              <textarea
+                value={renoNotes}
+                onChange={(e) => setRenoNotes(e.target.value)}
+                placeholder="Describe what you'd like... e.g. 'open concept with island, marble counters, matte black fixtures'"
+                className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 resize-none"
+                rows={3}
+                maxLength={500}
+              />
+              <p className="text-[#444] text-[10px] mt-1 text-right">{renoNotes.length}/500</p>
             </div>
             <button onClick={handleGenerateReno} disabled={renoLoading} className="w-full py-3 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-50 mb-4">
               {renoLoading ? "Generating..." : "Generate Vision \u2192"}
@@ -1025,7 +1060,7 @@ export default function IntelBox({
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#2A2A2A] text-white text-sm font-medium rounded-lg hover:border-[#444] transition-all">Post as Take</button>
+                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#2A2A2A] text-white text-sm font-medium rounded-lg hover:border-[#444] transition-all">Spill the Tea ☕</button>
                   <button onClick={handleSaveRenoVision} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#FF4D00]/30 text-[#FF4D00] text-sm font-medium rounded-lg hover:bg-[#FF4D00]/10 transition-all">Save Vision</button>
                 </div>
               </div>

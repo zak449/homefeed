@@ -64,7 +64,11 @@ export async function POST(request: NextRequest) {
       listingPhoto,
       listingPrice,
       turnstileToken,
+      notes,
     } = body;
+
+    // Sanitize notes (optional free-text, max 500 chars)
+    const sanitizedNotes = typeof notes === "string" ? notes.trim().slice(0, 500) : "";
 
     // Validate Turnstile token if configured
     if (process.env.TURNSTILE_SECRET_KEY) {
@@ -139,7 +143,7 @@ export async function POST(request: NextRequest) {
     try {
       const imageResponse = await openai.images.generate({
         model: "dall-e-3",
-        prompt: `Professional architectural rendering of a ${styleLabel} style ${renoLabel} renovation for a residential property. Photorealistic, interior design magazine quality, well-lit, showing finished materials and furnishings. No text or watermarks.`,
+        prompt: `Professional architectural rendering of a ${styleLabel} style ${renoLabel} renovation for a residential property.${sanitizedNotes ? ` Client notes: ${sanitizedNotes}.` : ""} Photorealistic, interior design magazine quality, well-lit, showing finished materials and furnishings. No text or watermarks.`,
         size: "1024x1024",
         quality: "standard",
         n: 1,
@@ -162,7 +166,7 @@ export async function POST(request: NextRequest) {
           messages: [
             {
               role: "user",
-              content: `You are a renovation cost estimator. For a ${styleLabel} style ${renoLabel} renovation${listingAddress ? ` at ${listingAddress}` : ""}, provide a JSON array of 5-7 key materials/items needed. Each item should have real brand names and realistic price ranges. Format: [{"item": "name", "brand": "BrandName", "priceRange": "$X,XXX - $X,XXX"}]. Only respond with the JSON array, no other text.`,
+              content: `You are a renovation cost estimator. For a ${styleLabel} style ${renoLabel} renovation${listingAddress ? ` at ${listingAddress}` : ""}${sanitizedNotes ? `. The client wants: ${sanitizedNotes}` : ""}, provide a JSON array of 5-7 key materials/items needed. Each item should have real brand names and realistic price ranges. Format: [{"item": "name", "brand": "BrandName", "priceRange": "$X,XXX - $X,XXX"}]. Only respond with the JSON array, no other text.`,
             },
           ],
         });
