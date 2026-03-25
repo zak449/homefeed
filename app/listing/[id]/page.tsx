@@ -279,7 +279,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           className="group mb-6 flex items-center justify-between bg-[#1A1A1A] border border-[#FF4D00] rounded-lg px-5 py-3.5 hover:bg-[#222222] hover:shadow-[0_0_20px_rgba(255,77,0,0.15)] transition-all"
         >
           <div className="flex items-center gap-3">
-            <span className="text-lg">{"\uD83D\uDCCB"}</span>
+            <span className="text-lg">{"\uD83D\uDD25"}</span>
             <div>
               <span className="text-body text-ink font-bold block">View full rap sheet</span>
               <span className="text-caption text-secondary">

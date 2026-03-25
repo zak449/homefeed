@@ -21,12 +21,8 @@ export default function MapPreview({
 }) {
   const [failed, setFailed] = useState(false);
 
-  // Build query from address if available, otherwise use coordinates
-  const query = address
-    ? encodeURIComponent(address)
-    : `${latitude},${longitude}`;
-
-  const embedUrl = `https://maps.google.com/maps?q=${query}&output=embed&z=${zoom}`;
+  // Always use coordinates for the embed — most reliable
+  const embedUrl = `https://maps.google.com/maps?q=${latitude},${longitude}&output=embed&z=${zoom}`;
   const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || `${latitude},${longitude}`)}`;
 
   if (failed) {
@@ -54,16 +50,14 @@ export default function MapPreview({
   }
 
   return (
-    <div className={`relative rounded-xl overflow-hidden bg-[#1A1A1A] ${className ?? ""}`}>
+    <div className={`relative rounded-xl overflow-hidden bg-[#1A1A1A] ${className ?? ""}`} style={{ minHeight: 300 }}>
       <iframe
         src={embedUrl}
-        width="100%"
-        height="300"
-        style={{ border: 0, borderRadius: "12px", display: "block" }}
+        className="w-full rounded-xl"
+        style={{ border: 0, height: "300px", minHeight: "300px", display: "block" }}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
         allowFullScreen
-        onError={() => setFailed(true)}
         title={address ? `Map of ${address}` : "Property location map"}
       />
       {/* Fallback link below the map */}

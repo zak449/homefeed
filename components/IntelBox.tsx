@@ -133,6 +133,14 @@ function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function parseRoleTag(content: string): { role: string | null; text: string } {
+  const match = content.match(/^\[([^\]]+)\]\s*/);
+  if (match) {
+    return { role: match[1], text: content.slice(match[0].length) };
+  }
+  return { role: null, text: content };
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function IntelBox({
@@ -515,12 +523,13 @@ export default function IntelBox({
                 <p className="text-2xl mb-2">🫖</p>
                 <p className="text-white font-semibold text-lg">No tea yet.</p>
                 <p className="text-[#666] text-sm mt-1">
-                  The block is watching. Be first to spill.
+                  Be the first to drop intel on this block.
                 </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {sortedComments.map((comment) => {
+                  const { role, text: commentText } = parseRoleTag(comment.content);
                   const tag = getCredibilityTag(comment.content);
                   return (
                     <div
@@ -541,6 +550,11 @@ export default function IntelBox({
                           >
                             {tag.label}
                           </span>
+                          {role && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/20 text-white/60 font-medium">
+                              {role}
+                            </span>
+                          )}
                         </div>
                         <span className="ml-auto text-[11px] text-[#555] shrink-0">
                           {timeAgo(comment.createdAt)}
@@ -549,7 +563,7 @@ export default function IntelBox({
 
                       {/* Take */}
                       <p className="text-[#E0E0E0] text-sm font-semibold leading-relaxed mb-3">
-                        {comment.content}
+                        {commentText}
                       </p>
 
                       {/* Reactions */}

@@ -161,7 +161,7 @@ export default function Footer() {
                   setEmail(e.target.value);
                   if (status !== "idle") setStatus("idle");
                 }}
-                className="flex-1 min-w-0 px-3.5 py-2.5 text-sm rounded-lg bg-white/10 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-[#E8A87C]/50 transition-colors"
+                className="flex-1 min-w-0 px-3.5 py-2.5 text-sm rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] text-white placeholder:text-[#666] focus:outline-none focus:border-[#FF4D00]/50 transition-colors"
               />
               <button
                 type="submit"

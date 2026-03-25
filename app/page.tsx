@@ -695,7 +695,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       {/* Details */}
                       <div className="p-5">
                         {!listing.topComment && (
-                          <p className="text-[15px] text-tertiary italic mb-4">No takes yet — be the first to share what you know.</p>
+                          <p className="text-[15px] text-tertiary italic mb-4">Be the first to drop intel on this block.</p>
                         )}
 
                         <div className="flex items-center gap-4 text-xs text-secondary mb-3 pb-3 border-b border-divider">
