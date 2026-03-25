@@ -860,24 +860,6 @@ export default function IntelBox({
                         })}
                       </div>
 
-                      {/* Helpful button */}
-                      <div className="mt-2">
-                        <button
-                          onClick={() => handleReact(comment.id, "\u2705")}
-                          disabled={!isJoined}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${
-                            (comment.reactions["\u2705"] || 0) > 0
-                              ? "bg-emerald-900/20 border border-emerald-700/30 text-emerald-400"
-                              : "bg-surface border border-divider text-tertiary hover:text-emerald-400 hover:border-emerald-700/30"
-                          } disabled:opacity-40 disabled:cursor-not-allowed`}
-                        >
-                          <span className="text-sm">&#x2713;</span>
-                          <span className="font-medium">Helpful</span>
-                          {(comment.reactions["\u2705"] || 0) > 0 && (
-                            <span className="font-medium tabular-nums">{comment.reactions["\u2705"]}</span>
-                          )}
-                        </button>
-                      </div>
                     </div>
                   );
                 })}

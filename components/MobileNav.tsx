@@ -1,21 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams, usePathname, useRouter } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import SpillSheet from "./SpillSheet";
 
 export default function MobileNav() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
   const currentSort = searchParams.get("sort");
   const [isSpillOpen, setIsSpillOpen] = useState(false);
   const [spillAddress, setSpillAddress] = useState<string | undefined>(undefined);
   const [spillListingId, setSpillListingId] = useState<string | undefined>(undefined);
 
   const isHome = pathname === "/" && currentSort !== "comments";
-  const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending";
+  const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending" || pathname === "/hot-takes";
   const isSaved = pathname === "/saved";
   const isProfile = pathname === "/profile";
   const isListingPage = pathname.startsWith("/listing/");
@@ -34,7 +33,7 @@ export default function MobileNav() {
       ),
     },
     {
-      href: "/?sort=comments",
+      href: "/hot-takes",
       label: "Hot Takes",
       active: isTrending,
       accent: false,
@@ -81,35 +80,15 @@ export default function MobileNav() {
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
     if (isListingPage) {
-      // On listing page — open SpillSheet with listing context
       const listingId = pathname.split("/listing/")[1] || undefined;
       const address = document.querySelector("h1")?.textContent?.split(",")[0] || undefined;
       setSpillListingId(listingId);
       setSpillAddress(address);
-      setIsSpillOpen(true);
     } else {
-      // On homepage — try to navigate to the first listing card
-      const listingLink = document.querySelector("a[href^='/listing/']") as HTMLAnchorElement;
-      if (listingLink) {
-        // Navigate to that listing so the user lands on a real property
-        router.push(listingLink.getAttribute("href") || "/");
-      } else {
-        // No listing cards visible — open search
-        const searchInput = document.querySelector("input[placeholder*='address'], input[placeholder*='search'], input[type='search']") as HTMLInputElement;
-        if (searchInput) {
-          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
-          setTimeout(() => {
-            searchInput.focus();
-            searchInput.setAttribute("placeholder", "Search an address to spill tea on...");
-          }, 300);
-        } else {
-          // Fallback: open SpillSheet anyway
-          setSpillListingId(undefined);
-          setSpillAddress(undefined);
-          setIsSpillOpen(true);
-        }
-      }
+      setSpillListingId(undefined);
+      setSpillAddress(undefined);
     }
+    setIsSpillOpen(true);
   }
 
   return (

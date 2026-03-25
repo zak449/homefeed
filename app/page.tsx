@@ -380,17 +380,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     | { type: "listing"; data: (typeof sortedListings)[number] }
     | { type: "neighborhood"; data?: undefined }
     | { type: "founder"; data?: undefined }
-    | { type: "how-it-works"; data?: undefined };
+;
 
   const feedItems: FeedItem[] = [];
 
   if (isDefaultLanding) {
     const takes = [...commentsFeedData];
     const listings_pool = [...sortedListings];
-    // Pattern: take, take, neighborhood, listing, take, founder, listing, listing, how-it-works, then remaining
+    // Pattern: take, take, neighborhood, listing, take, founder, listing, listing, then remaining
     const pattern: FeedItem["type"][] = [
       "take", "take", "neighborhood", "listing", "take", "founder",
-      "listing", "listing", "how-it-works",
+      "listing", "listing",
     ];
 
     let takeIdx = 0;
@@ -405,8 +405,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         feedItems.push({ type: "neighborhood" });
       } else if (slot === "founder") {
         feedItems.push({ type: "founder" });
-      } else if (slot === "how-it-works") {
-        feedItems.push({ type: "how-it-works" });
       }
     }
 
@@ -446,6 +444,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     const parts = name.trim().split(/\s+/);
     if (parts.length <= 1) return name;
     return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+  }
+
+  /* ── Helper: strip [role] tag from comment content ── */
+  function parseRoleTag(content: string): string {
+    return content.replace(/^\[([^\]]+)\]\s*/, "");
   }
 
   /* ── Category pills — each links to a real filtered view ── */
@@ -577,31 +580,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </div>
 
-          {/* ═══ HOW IT WORKS — below hero ═══ */}
-          <div className="max-w-2xl mx-auto px-5 py-10">
-            <div className="rounded-2xl border border-divider bg-surface shadow-card overflow-hidden">
-              <div className="p-6 sm:p-8">
-                <p className="text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber mb-6">How it works</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {[
-                    { step: "01", emoji: "🏠", title: "Browse", desc: "Find any listing in the US", href: "/?city=" },
-                    { step: "02", emoji: "🍵", title: "Read the tea", desc: "See what the community really thinks", href: "/?sort=comments" },
-                    { step: "03", emoji: "🗣️", title: "Drop your take", desc: "Share what you know (anonymously or not)", href: "/?sort=comments#spill" },
-                  ].map((s) => (
-                    <a key={s.step} href={s.href} className="text-center group cursor-pointer">
-                      <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft group-hover:border-accent/40 group-hover:shadow-accent/10 group-hover:scale-105 transition-all">
-                        {s.emoji}
-                      </div>
-                      <p className="text-[10px] font-bold text-amber mb-1 tracking-wider">{s.step}</p>
-                      <p className="text-sm text-ink font-bold leading-tight mb-1 group-hover:text-accent transition-colors">{s.title}</p>
-                      <p className="text-xs text-tertiary leading-snug">{s.desc}</p>
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
           <div className="max-w-2xl mx-auto px-5 py-6">
             <div className="relative">
@@ -678,7 +656,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       {/* THE TAKE — hero text, large, bold, no quotes */}
                       <div className="px-5 pb-4">
                         <p className="text-lg font-bold text-ink leading-snug">
-                          {comment.content}
+                          {parseRoleTag(comment.content)}
                         </p>
                       </div>
 
@@ -736,7 +714,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             <span className="text-sm font-bold text-ink">{formatName(listing.topComment.name)}</span>
                           </div>
                           <p className="text-[16px] sm:text-[17px] text-ink leading-snug font-semibold">
-                            {listing.topComment.content}
+                            {parseRoleTag(listing.topComment.content)}
                           </p>
                         </div>
                       )}
@@ -851,32 +829,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           <a href="/about" className="ml-auto text-xs font-bold text-amber hover:underline transition-colors">
                             Read the full story &rarr;
                           </a>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
-                /* ── HOW IT WORKS CARD ── */
-                if (item.type === "how-it-works") {
-                  return (
-                    <div key="how-it-works" className="rounded-2xl border border-divider bg-surface shadow-card overflow-hidden">
-                      <div className="p-6 sm:p-8">
-                        <p className="text-xs font-extrabold tracking-[0.15em] uppercase text-amber mb-5">How it works</p>
-                        <div className="grid grid-cols-3 gap-5">
-                          {[
-                            { step: "01", icon: "🏠", label: "Search any address or neighborhood", href: "/?city=" },
-                            { step: "02", icon: "💬", label: "Read real takes from verified neighbors", href: "/?sort=comments" },
-                            { step: "03", icon: "🗣️", label: "Verify your zip and share what you know", href: "/?sort=comments#spill" },
-                          ].map((s) => (
-                            <a key={s.step} href={s.href} className="text-center group cursor-pointer">
-                              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft group-hover:border-accent/40 group-hover:scale-105 transition-all">
-                                {s.icon}
-                              </div>
-                              <p className="text-xs font-bold text-amber mb-1 tracking-wider">{s.step}</p>
-                              <p className="text-xs text-ink font-semibold leading-tight group-hover:text-accent transition-colors">{s.label}</p>
-                            </a>
-                          ))}
                         </div>
                       </div>
                     </div>

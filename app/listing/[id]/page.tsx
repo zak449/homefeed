@@ -5,7 +5,6 @@ import ListingViewTracker from "@/components/ListingViewTracker";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import SaveButton from "@/components/SaveButton";
 import ShareButton from "@/components/ShareButton";
-import FallbackImage from "@/components/FallbackImage";
 import MortgageCalculator from "@/components/MortgageCalculator";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 import MapPreview from "@/components/MapPreview";
@@ -112,35 +111,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     land: "bg-amber-900/30 text-amber-400 border-amber-700/40",
   };
   const typeColor = typeColorMap[listing.propertyType] ?? "bg-highlight text-secondary border-divider";
-
-  // Fetch "More listings in [city]"
-  const moreSameCity = await prisma.listing.findMany({
-    where: {
-      city: { equals: listing.city, mode: "insensitive" },
-      status: "active",
-      id: { not: listing.id },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 3,
-    select: {
-      id: true,
-      address: true,
-      city: true,
-      state: true,
-      price: true,
-      listingType: true,
-      photos: true,
-      bedrooms: true,
-      bathrooms: true,
-      sqft: true,
-      _count: { select: { comments: true } },
-      comments: {
-        take: 1,
-        orderBy: { createdAt: "desc" },
-        select: { name: true, content: true },
-      },
-    },
-  });
 
   return (
     <div className="min-h-screen bg-bg">
@@ -448,20 +418,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* ── Detailed Property Information ── */}
         <div className="mb-8 border-t border-divider pt-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Property Details */}
-            <DetailCard title="Property Details">
-              <DetailRow label="Status" value={isSold ? "Sold" : isRent ? "For Rent" : "For Sale"} />
-              <DetailRow label="Type" value={capitalize(listing.propertyType)} />
-              {listing.bedrooms != null && <DetailRow label="Beds" value={String(listing.bedrooms)} />}
-              {listing.bathrooms != null && <DetailRow label="Baths" value={String(listing.bathrooms)} />}
-              {listing.sqft != null && <DetailRow label="Sqft" value={listing.sqft.toLocaleString()} />}
-              {listing.lotSqft != null && (
-                <DetailRow label="Lot Size" value={`${listing.lotSqft.toLocaleString()} sqft`} />
-              )}
-              {listing.yearBuilt != null && <DetailRow label="Year Built" value={String(listing.yearBuilt)} />}
-              {listing.parking != null && <DetailRow label="Parking" value={listing.parking} />}
-            </DetailCard>
-
             {/* Price & Tax */}
             <DetailCard title="Price & Tax Info">
               <DetailRow label="List Price" value={price} />
@@ -476,33 +432,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               />
             </DetailCard>
 
-            {/* Location */}
-            <DetailCard title="Location">
-              <DetailRow label="Address" value={listing.address} />
-              <DetailRow label="City" value={listing.city} />
-              <DetailRow label="State" value={listing.state} />
-              <DetailRow label="Zip" value={listing.zip} />
-              {listing.neighborhood && <DetailRow label="Neighborhood" value={listing.neighborhood} />}
-            </DetailCard>
-
             {/* Listing Info */}
             <DetailCard title="Listing Info">
               <DetailRow label="Source" value={capitalize(listing.source)} />
-              {listing.listingUrl && (
-                <div className="flex items-center justify-between py-2 border-b border-divider/60 last:border-0">
-                  <span className="text-caption text-secondary">Listing URL</span>
-                  <a
-                    href={listing.listingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-caption text-amber hover:text-amber/80 font-medium transition-colors"
-                  >
-                    View original &rarr;
-                  </a>
-                </div>
-              )}
-              {listing.agentName && <DetailRow label="Agent" value={listing.agentName} />}
-              {listing.agentBrokerage && <DetailRow label="Brokerage" value={listing.agentBrokerage} />}
               <DetailRow
                 label="Cached"
                 value={listing.cachedAt.toLocaleDateString("en-US", {
@@ -540,74 +472,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           )}
         </div>
 
-        {/* ── More listings in [city] ── */}
-        {moreSameCity.length > 0 && (
-          <div className="mb-8 border-t border-divider pt-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-headline text-ink">
-                More in {listing.city}
-              </h2>
-              <a
-                href={`/?city=${encodeURIComponent(listing.city)}`}
-                className="text-caption text-amber hover:text-amber/80 font-medium transition-colors"
-              >
-                See all &rarr;
-              </a>
-            </div>
-            <div className="space-y-3">
-              {moreSameCity.map((l) => {
-                const lPrice = l.listingType === "rent"
-                  ? `$${l.price.toLocaleString()}/mo`
-                  : `$${l.price.toLocaleString()}`;
-                const photo = l.photos[0];
-                const latestComment = l.comments[0];
-                return (
-                  <a
-                    key={l.id}
-                    href={`/listing/${l.id}`}
-                    className="group block bg-surface rounded-card border border-divider p-3 hover:shadow-card-hover hover:border-ink/10 transition-all"
-                  >
-                    <div className="flex gap-4">
-                      {/* Thumbnail */}
-                      <div className="w-24 h-24 rounded-avatar overflow-hidden bg-highlight shrink-0">
-                        {photo ? (
-                          <FallbackImage
-                            src={photo}
-                            alt={l.address}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-tertiary/30">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                              <polyline points="9 22 9 12 15 12 15 22" />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      {/* Info */}
-                      <div className="flex-1 min-w-0 py-1">
-                        <p className="font-display text-lg text-ink font-bold tracking-tight">{lPrice}</p>
-                        <p className="text-caption text-ink/80 truncate">{l.address}</p>
-                        <p className="text-caption text-tertiary mt-0.5">
-                          {l.bedrooms != null && `${l.bedrooms} bd`}
-                          {l.bathrooms != null && ` \u00b7 ${l.bathrooms} ba`}
-                          {l.sqft != null && ` \u00b7 ${l.sqft.toLocaleString()} sqft`}
-                        </p>
-                        {latestComment && (
-                          <p className="text-caption text-tertiary mt-1.5 truncate italic">
-                            &ldquo;{latestComment.content}&rdquo;
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Bottom spacer */}
         <div className="h-8" />
