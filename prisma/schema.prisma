@@ -186,6 +186,7 @@ model NeighborQuestion {
   askedById   String?
   askedBy     VerifiedResident? @relation(fields: [askedById], references: [id])
   askedByName String?  // for non-verified users
+  askerEmail  String?  // email for answer notifications
   upvotes     Int      @default(0)
   status      String   @default("open") // open | answered | closed
   createdAt   DateTime @default(now())

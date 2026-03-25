@@ -57,7 +57,34 @@ type Answer = {
   createdAt: string;
 };
 
-type Tab = "take" | "ai" | "question";
+type Tab = "take" | "ai" | "question" | "reno";
+
+type RenoResult = {
+  imageUrl: string | null;
+  estimateLow: number;
+  estimateHigh: number;
+  materials: { item: string; brand: string; priceRange: string }[];
+  renovationType: string;
+  style: string;
+  isMock?: boolean;
+};
+
+const RENO_TYPES = [
+  { key: "kitchen", label: "Kitchen" },
+  { key: "exterior", label: "Exterior" },
+  { key: "master-bath", label: "Master Bath" },
+  { key: "landscaping", label: "Landscaping" },
+  { key: "adu", label: "ADU" },
+  { key: "full-gut", label: "Full Gut" },
+] as const;
+
+const RENO_STYLES = [
+  { key: "modern", label: "Modern" },
+  { key: "mediterranean", label: "Mediterranean" },
+  { key: "coastal", label: "Coastal" },
+  { key: "mid-century", label: "Mid-Century" },
+  { key: "farmhouse", label: "Farmhouse" },
+] as const;
 
 const REACTIONS = ["🚩", "💸", "👀", "🔥", "💀"];
 const REACTION_LABELS: Record<string, string> = {
@@ -185,6 +212,13 @@ export default function IntelBox({
   const [newQCategory, setNewQCategory] = useState("area");
   const [postingQ, setPostingQ] = useState(false);
   const [postQError, setPostQError] = useState("");
+
+  // ── Reno state ──
+  const [renoType, setRenoType] = useState("kitchen");
+  const [renoStyle, setRenoStyle] = useState("modern");
+  const [renoLoading, setRenoLoading] = useState(false);
+  const [renoResult, setRenoResult] = useState<RenoResult | null>(null);
+  const [renoError, setRenoError] = useState("");
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -388,6 +422,7 @@ export default function IntelBox({
           text: newQuestion.trim(),
           category: newQCategory,
           authorName: name || "Anonymous",
+          askerEmail: email,
         }),
       });
       if (!res.ok) {
@@ -465,12 +500,72 @@ export default function IntelBox({
     });
   }
 
+  // ── Generate reno vision ──
+  async function handleGenerateReno() {
+    if (renoLoading) return;
+    setRenoLoading(true);
+    setRenoError("");
+    setRenoResult(null);
+    try {
+      const res = await fetch("/api/reno-vision", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          listingId,
+          renovationType: renoType,
+          style: renoStyle,
+          listingAddress,
+          listingPhoto: photos?.[0] ?? null,
+          listingPrice,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to generate vision");
+      }
+      const result: RenoResult = await res.json();
+      setRenoResult(result);
+    } catch (err: unknown) {
+      setRenoError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setRenoLoading(false);
+    }
+  }
+
+  function handleSaveRenoVision() {
+    if (!renoResult) return;
+    try {
+      const saved = localStorage.getItem("gwaky_saved_reno_visions");
+      const visions = saved ? JSON.parse(saved) : [];
+      visions.push({
+        ...renoResult,
+        listingId,
+        listingAddress,
+        savedAt: new Date().toISOString(),
+      });
+      localStorage.setItem("gwaky_saved_reno_visions", JSON.stringify(visions));
+    } catch {
+      // ignore
+    }
+  }
+
+  function handlePostRenoAsTake() {
+    if (!renoResult) return;
+    const low = renoResult.estimateLow.toLocaleString();
+    const high = renoResult.estimateHigh.toLocaleString();
+    const label = RENO_TYPES.find((t) => t.key === renoResult.renovationType)?.label ?? renoResult.renovationType;
+    const styleLabel = RENO_STYLES.find((s) => s.key === renoResult.style)?.label ?? renoResult.style;
+    setContent(`[Reno Vision] ${styleLabel} ${label} reno would cost $${low}–$${high}. Top materials: ${renoResult.materials.slice(0, 3).map((m) => `${m.brand} ${m.item}`).join(", ")}.`);
+    setActiveTab("take");
+  }
+
   // ─── Tabs config ──────────────────────────────────────────────────────────
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "take", label: "🫖 Take" },
     { key: "ai", label: "✨ Ask AI" },
     { key: "question", label: "❓ Question" },
+    { key: "reno", label: "🔨 Reno" },
   ];
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -848,6 +943,82 @@ export default function IntelBox({
                     </div>
                   );
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ──── TAB 4: Reno Vision ──── */}
+        {activeTab === "reno" && (
+          <div className="p-4">
+            {photos && photos[0] && (
+              <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A]">
+                <img src={photos[0]} alt={listingAddress} className="w-full h-40 object-cover" />
+              </div>
+            )}
+            <div className="mb-3">
+              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Type</p>
+              <div className="flex flex-wrap gap-1.5">
+                {RENO_TYPES.map((t) => (
+                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mb-4">
+              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Style</p>
+              <div className="flex flex-wrap gap-1.5">
+                {RENO_STYLES.map((s) => (
+                  <button key={s.key} onClick={() => { setRenoStyle(s.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoStyle === s.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={handleGenerateReno} disabled={renoLoading} className="w-full py-3 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-50 mb-4">
+              {renoLoading ? "Generating..." : "Generate Vision \u2192"}
+            </button>
+            {renoError && <p className="text-red-400 text-sm mb-4">{renoError}</p>}
+            {renoLoading && (
+              <div className="space-y-3 animate-pulse">
+                <div className="h-48 bg-[#222] rounded-xl" />
+                <div className="h-5 w-1/2 bg-[#222] rounded" />
+                <div className="h-10 bg-[#222] rounded-lg" />
+                <div className="h-10 bg-[#222] rounded-lg" />
+              </div>
+            )}
+            {renoResult && !renoLoading && (
+              <div className="space-y-4">
+                {renoResult.imageUrl && (
+                  <div className="rounded-xl overflow-hidden border border-[#2A2A2A]">
+                    <img src={renoResult.imageUrl} alt={`${renoResult.style} ${renoResult.renovationType} vision`} className="w-full object-cover" />
+                  </div>
+                )}
+                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
+                  <p className="text-[#888] text-xs font-medium mb-1 uppercase tracking-wider">Estimated Cost Range</p>
+                  <p className="text-white text-2xl font-bold">${renoResult.estimateLow.toLocaleString()} – ${renoResult.estimateHigh.toLocaleString()}</p>
+                </div>
+                {renoResult.materials && renoResult.materials.length > 0 && (
+                  <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 border-b border-[#2A2A2A]">
+                      <p className="text-[#888] text-xs font-medium uppercase tracking-wider">Materials & Brands</p>
+                    </div>
+                    {renoResult.materials.map((mat: any, i: number) => (
+                      <div key={i} className="px-4 py-3 flex items-center justify-between gap-3 border-b border-[#2A2A2A] last:border-0">
+                        <div className="min-w-0">
+                          <p className="text-[#E0E0E0] text-sm font-medium truncate">{mat.item}</p>
+                          <p className="text-[#666] text-xs">{mat.brand}</p>
+                        </div>
+                        <span className="text-[#FF4D00] text-xs font-semibold whitespace-nowrap">{mat.priceRange}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#2A2A2A] text-white text-sm font-medium rounded-lg hover:border-[#444] transition-all">Post as Take</button>
+                  <button onClick={handleSaveRenoVision} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#FF4D00]/30 text-[#FF4D00] text-sm font-medium rounded-lg hover:bg-[#FF4D00]/10 transition-all">Save Vision</button>
+                </div>
               </div>
             )}
           </div>

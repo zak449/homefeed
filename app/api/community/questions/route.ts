@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { question, category, zipCode, listingId, askedById, askedByName } =
+    const { question, category, zipCode, listingId, askedById, askedByName, askerEmail } =
       body;
 
     if (!question || !zipCode) {
@@ -82,6 +82,7 @@ export async function POST(request: NextRequest) {
         listingId: listingId || null,
         askedById: askedById || null,
         askedByName: askedByName || null,
+        askerEmail: askerEmail || null,
       },
     });
 

@@ -103,6 +103,52 @@ export async function sendReactionAlert({
   });
 }
 
+export async function sendAnswerNotification({
+  recipientEmail,
+  questionText,
+  answerContent,
+  answererName,
+  listingId,
+}: {
+  recipientEmail: string;
+  questionText: string;
+  answerContent: string;
+  answererName: string;
+  listingId?: string | null;
+}) {
+  if (!resend) return;
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+  const link = listingId ? `${baseUrl}/listing/${listingId}` : baseUrl;
+
+  await resend.emails.send({
+    from: FROM,
+    to: recipientEmail,
+    subject: `${answererName} answered your question on Gwaky`,
+    html: `
+      <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #0E0E0E; padding: 40px; border-radius: 16px;">
+        <div style="background: #6366F1; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+          <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">Your question got an answer!</h1>
+        </div>
+        <p style="font-size: 16px; color: #E0E0E0;">Someone answered your question on Gwaky:</p>
+        <div style="background: #1A1A1A; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #6366F1;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Your question</p>
+          <p style="margin: 0; font-size: 15px; color: #E0E0E0; font-style: italic;">"${questionText}"</p>
+        </div>
+        <div style="background: #1A1A1A; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #FF4D00;">
+          <p style="margin: 0 0 8px 0; font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">${answererName}'s answer</p>
+          <p style="margin: 0; font-size: 15px; color: #E0E0E0;">${answerContent}</p>
+        </div>
+        <a href="${link}"
+           style="display: inline-block; background: #FF4D00; color: white; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">
+          View the conversation →
+        </a>
+        <p style="font-size: 12px; color: #555; margin-top: 32px;">Sent via <a href="${baseUrl}" style="color: #6366F1;">Gwaky</a></p>
+      </div>
+    `,
+  });
+}
+
 export async function sendNewCommentAlert({
   subscribers,
   commenterName,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendAnswerNotification } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -67,6 +68,21 @@ export async function POST(
       where: { id: answeredById },
       data: { reputation: { increment: 1 } },
     });
+
+    // Send answer notification email (fire-and-forget)
+    if (question.askerEmail) {
+      try {
+        sendAnswerNotification({
+          recipientEmail: question.askerEmail,
+          questionText: question.question,
+          answerContent: content,
+          answererName: resident.name,
+          listingId: question.listingId,
+        }).catch(() => {});
+      } catch {
+        // silently fail — don't block the response
+      }
+    }
 
     return NextResponse.json({ success: true, answer }, { status: 201 });
   } catch (error: unknown) {

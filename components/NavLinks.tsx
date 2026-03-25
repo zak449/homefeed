@@ -8,6 +8,7 @@ export default function NavLinks() {
   const pathname = usePathname();
   const currentSort = searchParams.get("sort");
   const isSaved = pathname === "/saved";
+  const isProfile = pathname === "/profile";
   const isExplore = pathname === "/" && currentSort !== "comments" && !isSaved;
   const isTrending = (currentSort === "comments" && pathname === "/") || pathname === "/trending";
 
@@ -38,6 +39,16 @@ export default function NavLinks() {
         className="px-4 py-1.5 rounded-full text-sm transition-all text-[#AAAAAA] hover:text-ink hover:bg-surface"
       >
         Red Flags 🚩
+      </Link>
+      <Link
+        href="/profile"
+        className={`px-4 py-1.5 rounded-full text-sm transition-all ${
+          isProfile
+            ? "bg-amber text-white font-medium"
+            : "text-[#AAAAAA] hover:text-ink hover:bg-surface"
+        }`}
+      >
+        Profile
       </Link>
       <Link
         href="/?city="
