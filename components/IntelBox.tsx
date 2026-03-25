@@ -1132,8 +1132,13 @@ export default function IntelBox({
                       if (isJoined) {
                         handlePost(e as unknown as React.FormEvent);
                       } else {
-                        // Show inline auth — user has typed but isn't identified yet
+                        // Show inline auth with confirmation feedback
                         setShowInlineAuth(true);
+                        // Scroll the auth form into view
+                        setTimeout(() => {
+                          const authForm = document.querySelector("[data-auth-form]");
+                          if (authForm) authForm.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 100);
                       }
                     }}
                     className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1142,9 +1147,10 @@ export default function IntelBox({
                   </button>
                 </div>
 
-                {/* Inline auth — only shows after user tries to post without being joined */}
+                {/* Inline auth — slides in after user tries to post */}
                 {showInlineAuth && !isJoined && (
                   <form
+                    data-auth-form
                     onSubmit={(e) => {
                       e.preventDefault();
                       if (!name.trim() || !email.trim()) return;
@@ -1169,11 +1175,15 @@ export default function IntelBox({
                       // Immediately post the take
                       handlePost(e);
                     }}
-                    className="rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2"
+                    className="rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-200"
                   >
-                    <p className="text-white text-sm font-semibold">
-                      Almost there — add your name to post
-                    </p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-base">🫖</span>
+                      <p className="text-white text-sm font-semibold">
+                        Take saved — just need your name to post it
+                      </p>
+                    </div>
+                    <p className="text-secondary text-xs">Add your zip to earn a Local badge</p>
                     <div className="flex gap-2">
                       <input
                         type="text"
