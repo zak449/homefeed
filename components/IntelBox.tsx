@@ -951,11 +951,20 @@ export default function IntelBox({
         {/* ──── TAB 4: Reno Vision ──── */}
         {activeTab === "reno" && (
           <div className="p-4">
-            {photos && photos[0] && (
-              <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A]">
-                <img src={photos[0]} alt={listingAddress} className="w-full h-40 object-cover" />
-              </div>
-            )}
+            {photos && photos.length > 0 && (() => {
+              const typeIndex = RENO_TYPES.findIndex((t) => t.key === renoType);
+              const photoIndex = typeIndex % photos.length;
+              return (
+                <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A] relative">
+                  <img src={photos[photoIndex]} alt={listingAddress} className="w-full h-40 object-cover transition-all duration-500" />
+                  {photos.length > 1 && (
+                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
+                      {photoIndex + 1}/{photos.length}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
             <div className="mb-3">
               <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Type</p>
               <div className="flex flex-wrap gap-1.5">
