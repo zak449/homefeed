@@ -76,6 +76,11 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabKey>("takes");
   const [expandedQId, setExpandedQId] = useState<string | null>(null);
 
+  // Login form state
+  const [loginName, setLoginName] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginZip, setLoginZip] = useState("");
+
   // Load localStorage data
   useEffect(() => {
     try {
@@ -133,30 +138,75 @@ export default function ProfilePage() {
     { key: "answers", label: "Answers", count: answers.length },
   ];
 
-  // No email — show join CTA
+  // No email — show auth entry point
   if (!email && !loading) {
     return (
       <div className="min-h-screen bg-bg flex items-center justify-center px-4">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-6">🏡</div>
-          <h1 className="text-white text-2xl font-extrabold mb-3 tracking-tight">
-            Your Gwaky profile lives here
+        <div className="text-center max-w-md w-full">
+          <div className="text-6xl mb-6">🫖</div>
+          <h1 className="text-white text-2xl font-extrabold mb-2 tracking-tight">
+            Sign in to Gwaky
           </h1>
           <p className="text-secondary text-[15px] leading-relaxed mb-8 max-w-xs mx-auto">
-            Drop a take on any listing to get started. Your takes, saved
-            listings, and activity will show up here.
+            Your takes, saved listings, and notifications — all in one place.
           </p>
-          <Link
-            href="/"
-            className="inline-block px-8 py-3.5 bg-accent text-white text-sm font-bold rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-[#FF4D00]/20"
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!loginEmail.trim() || !loginName.trim()) return;
+              setName(loginName.trim());
+              setEmail(loginEmail.trim());
+              try {
+                localStorage.setItem("hf_commenter", JSON.stringify({ name: loginName.trim(), email: loginEmail.trim(), zip: loginZip }));
+              } catch {}
+              // Subscribe for notifications
+              fetch("/api/subscribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: loginEmail.trim(), source: "profile-login", name: loginName.trim(), zip: loginZip || undefined }),
+              }).catch(() => {});
+            }}
+            className="space-y-3 text-left"
           >
-            Browse Listings &rarr;
-          </Link>
-          <div className="mt-5">
-            <Link
-              href="/about"
-              className="text-tertiary text-sm hover:text-secondary transition-colors underline underline-offset-4 decoration-[#333]"
+            <input
+              type="text"
+              placeholder="Your name"
+              value={loginName}
+              onChange={(e) => setLoginName(e.target.value)}
+              className="w-full rounded-xl bg-surface border border-divider px-4 py-3 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+              required
+            />
+            <input
+              type="email"
+              placeholder="Email address"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              className="w-full rounded-xl bg-surface border border-divider px-4 py-3 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Zip code (optional — unlocks Local badge)"
+              value={loginZip}
+              onChange={(e) => setLoginZip(e.target.value)}
+              className="w-full rounded-xl bg-surface border border-divider px-4 py-3 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+            />
+            <button
+              type="submit"
+              disabled={!loginEmail.trim() || !loginName.trim()}
+              className="w-full py-3.5 bg-accent text-white text-sm font-bold rounded-xl hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 shadow-lg shadow-accent/20"
             >
+              Continue →
+            </button>
+          </form>
+
+          <p className="text-tertiary text-xs mt-6">
+            No password needed. We use your email to sync your takes and notify you when someone reacts.
+          </p>
+
+          <div className="mt-5">
+            <Link href="/about" className="text-tertiary text-sm hover:text-secondary transition-colors underline underline-offset-4 decoration-[#333]">
               What is Gwaky?
             </Link>
           </div>

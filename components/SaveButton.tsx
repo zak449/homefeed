@@ -38,13 +38,16 @@ export default function SaveButton({ listingId }: { listingId: string }) {
   const [animate, setAnimate] = useState(false);
   const [totalSaves, setTotalSaves] = useState(0);
   const [showTooltip, setShowTooltip] = useState(false);
+  const [showSaveAuth, setShowSaveAuth] = useState(false);
+  const [saveEmail, setSaveEmail] = useState("");
+  const [saveName, setSaveName] = useState("");
 
   useEffect(() => {
     setSavedState(getSaved().includes(listingId));
     setTotalSaves(getSaveCount());
   }, [listingId]);
 
-  function toggle() {
+  function toggleSave() {
     const current = getSaved();
     let next: string[];
     if (current.includes(listingId)) {
@@ -69,10 +72,21 @@ export default function SaveButton({ listingId }: { listingId: string }) {
     setSaved(next);
   }
 
+  function handleSave() {
+    try {
+      const commenter = localStorage.getItem("hf_commenter");
+      if (!commenter || !JSON.parse(commenter).email) {
+        setShowSaveAuth(true);
+        return;
+      }
+    } catch {}
+    toggleSave();
+  }
+
   return (
     <div className="relative">
       <button
-        onClick={toggle}
+        onClick={handleSave}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink transition-colors"
         aria-label={saved ? "Unsave listing" : "Save listing"}
       >
@@ -105,6 +119,31 @@ export default function SaveButton({ listingId }: { listingId: string }) {
         <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-ink text-bg text-xs font-medium px-3 py-2 rounded-lg shadow-modal animate-fade-in z-50">
           Want alerts when prices drop? Subscribe!
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-ink rotate-45" />
+        </div>
+      )}
+
+      {/* Email capture gate for saving */}
+      {showSaveAuth && (
+        <div className="absolute top-full left-0 z-50 mt-2 bg-surface border border-accent/30 rounded-xl p-4 space-y-2 animate-in fade-in w-72 shadow-xl">
+          <p className="text-white text-sm font-semibold">Save across all your devices</p>
+          <p className="text-secondary text-xs">Drop your email to sync saves, takes & notifications.</p>
+          <div className="flex gap-2">
+            <input type="text" placeholder="Name" value={saveName} onChange={e => setSaveName(e.target.value)} className="flex-1 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50" required />
+            <input type="email" placeholder="Email" value={saveEmail} onChange={e => setSaveEmail(e.target.value)} className="flex-1 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50" required />
+          </div>
+          <button
+            onClick={() => {
+              if (!saveName.trim() || !saveEmail.trim()) return;
+              localStorage.setItem("hf_commenter", JSON.stringify({ name: saveName, email: saveEmail }));
+              fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: saveEmail, source: "save-gate", name: saveName }) }).catch(() => {});
+              setShowSaveAuth(false);
+              toggleSave();
+            }}
+            disabled={!saveName.trim() || !saveEmail.trim()}
+            className="w-full py-2 bg-accent text-white text-sm font-bold rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
+          >
+            Save & sync →
+          </button>
         </div>
       )}
     </div>
