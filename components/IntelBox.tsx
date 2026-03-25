@@ -563,9 +563,9 @@ export default function IntelBox({
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "take", label: "🫖 Take" },
-    { key: "ai", label: "✨ Ask AI" },
+    { key: "reno", label: "✨ Vision" },
+    { key: "ai", label: "🤖 Ask AI" },
     { key: "question", label: "❓ Question" },
-    { key: "reno", label: "🔨 Reno" },
   ];
 
   // ─── Render ───────────────────────────────────────────────────────────────
