@@ -471,7 +471,7 @@ export default function CommentSection({
             <div className="flex items-center gap-2 pt-1">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
+                className="px-6 py-2.5 bg-ink text-bg text-body font-medium rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
               >
                 Get in
               </button>
@@ -599,13 +599,13 @@ export default function CommentSection({
         <div id="comment-form" className="rounded-2xl border border-divider bg-surface p-5 scroll-mt-20">
           {/* Identity bar */}
           <div className="flex items-center gap-2.5 mb-4 pb-3 border-b border-divider">
-            <div className="w-8 h-8 rounded-full bg-amber/15 flex items-center justify-center text-[10px] font-bold text-amber">
+            <div className="w-8 h-8 rounded-full bg-amber/15 flex items-center justify-center text-xs font-bold text-amber">
               {name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "?"}
             </div>
             <div className="flex-1 min-w-0">
               <span className="text-sm font-medium text-ink">{formatName(name)}</span>
               {zip && (
-                <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber/12 text-amber border border-amber/20">
+                <span className="ml-2 text-xs font-semibold px-1.5 py-0.5 rounded bg-amber/12 text-amber border border-amber/20">
                   ZIP {zip.slice(0, 5)} ✓
                 </span>
               )}
@@ -625,7 +625,7 @@ export default function CommentSection({
               onClick={() => setInputMode("take")}
               className={`px-4 py-1.5 text-caption font-medium rounded-full transition-all ${
                 inputMode === "take"
-                  ? "bg-[#F5F5F5] text-[#0E0E0E] shadow-sm"
+                  ? "bg-ink text-bg shadow-sm"
                   : "text-tertiary hover:text-ink"
               }`}
             >
@@ -636,7 +636,7 @@ export default function CommentSection({
               onClick={() => setInputMode("ai")}
               className={`px-4 py-1.5 text-caption font-medium rounded-full transition-all ${
                 inputMode === "ai"
-                  ? "bg-[#FF4D00] text-white shadow-sm"
+                  ? "bg-accent text-white shadow-sm"
                   : "text-tertiary hover:text-ink"
               }`}
             >
@@ -707,7 +707,7 @@ export default function CommentSection({
               <div className="rounded-xl border border-amber/20 bg-gradient-to-br from-amber/5 to-bg p-3 space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-base">🎨</span>
-                  <span className="text-sm font-semibold text-ink">Share your vision for this place</span>
+                  <span className="text-sm font-medium text-ink">Share your vision for this place</span>
                 </div>
                 {/* Photo preview with filter — always shown */}
                 <div className="overflow-hidden rounded-lg relative h-[100px] sm:h-[120px]">
@@ -722,7 +722,7 @@ export default function CommentSection({
                     }}
                   />
                   {selectedStyle && (
-                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-[10px] text-white font-semibold">
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-xs text-white font-semibold">
                       {selectedStyle} filter
                     </div>
                   )}
@@ -797,7 +797,7 @@ export default function CommentSection({
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 private &amp; secure
                 {selectedStyle && (
-                  <span className="px-2 py-0.5 rounded-full bg-amber/12 text-amber border border-amber/20 font-semibold text-[10px]">
+                  <span className="px-2 py-0.5 rounded-full bg-amber/12 text-amber border border-amber/20 font-semibold text-xs">
                     {selectedStyle} vision
                   </span>
                 )}
@@ -805,7 +805,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={posting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-bg text-body font-medium rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all disabled:opacity-50"
               >
                 {posting && (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -852,7 +852,7 @@ export default function CommentSection({
                 <button
                   type="submit"
                   disabled={replyStatus === "loading"}
-                  className="shrink-0 px-4 py-2 text-body font-medium rounded-button bg-[#F5F5F5] text-[#0E0E0E] hover:bg-ink/90 transition-colors disabled:opacity-50"
+                  className="shrink-0 px-4 py-2 text-body font-medium rounded-button bg-ink text-bg hover:bg-ink/90 transition-colors disabled:opacity-50"
                 >
                   {replyStatus === "loading" ? "..." : "Notify me"}
                 </button>
@@ -985,13 +985,13 @@ function CommentItem({
         const textColor = vibeScore <= 50 && vibeScore >= 0 ? "#000" : "#fff";
         const vibeLabel = vibeScore >= 0 ? `+${vibeScore}` : `${vibeScore}`;
         return (
-          <div className="absolute top-4 right-0 px-2.5 py-1 rounded-full text-[11px] font-extrabold tabular-nums" style={{ backgroundColor: badgeColor, color: textColor }}>
+          <div className="absolute top-4 right-0 px-2.5 py-1 rounded-full text-xs font-extrabold tabular-nums" style={{ backgroundColor: badgeColor, color: textColor }}>
             {vibeLabel}
           </div>
         );
       })()}
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
+      <div className="w-10 h-10 rounded-avatar bg-active flex items-center justify-center text-xs font-semibold text-ink shrink-0">
         {initials}
       </div>
 
@@ -1002,13 +1002,13 @@ function CommentItem({
           {(() => {
             const tag = getCredibilityTag(comment.content);
             return (
-              <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${tag.className}`}>
+              <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${tag.className}`}>
                 {tag.label}
               </span>
             );
           })()}
           {verified && (
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[rgba(255,77,0,0.12)] text-[#FF4D00] border border-[rgba(255,77,0,0.2)]">
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-[rgba(255,77,0,0.12)] text-accent border border-[rgba(255,77,0,0.2)]">
               ZIP ✓
             </span>
           )}
@@ -1025,7 +1025,7 @@ function CommentItem({
             onClick={handleHelpful}
             disabled={helpfulVoted}
             className={`flex items-center gap-1 text-caption transition-colors mr-1 ${
-              helpfulVoted ? "text-[#FF4D00]" : "text-tertiary/50 hover:text-secondary"
+              helpfulVoted ? "text-accent" : "text-tertiary/50 hover:text-secondary"
             } ${helpfulVoted ? "cursor-default" : "cursor-pointer"}`}
             title="Mark as helpful"
           >

@@ -50,7 +50,7 @@ export default function RecentlyViewed() {
         </h2>
         <button
           onClick={handleClear}
-          className="text-[11px] text-muted hover:text-ink transition-colors font-medium"
+          className="text-xs text-muted hover:text-ink transition-colors font-medium"
         >
           Clear
         </button>
@@ -65,7 +65,7 @@ export default function RecentlyViewed() {
             <Link
               key={item.id}
               href={`/listing/${item.id}`}
-              className="flex-shrink-0 w-[140px] bg-[#1A1A1A] border border-border rounded-lg overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+              className="flex-shrink-0 w-[140px] bg-surface border border-border rounded-lg overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-tag">
                 {item.photo ? (
@@ -92,8 +92,8 @@ export default function RecentlyViewed() {
                 )}
               </div>
               <div className="p-2">
-                <p className="text-[12px] font-semibold text-ink">{priceLabel}</p>
-                <p className="text-[11px] text-muted truncate">{item.address}</p>
+                <p className="text-xs font-semibold text-ink">{priceLabel}</p>
+                <p className="text-xs text-muted truncate">{item.address}</p>
               </div>
             </Link>
           );

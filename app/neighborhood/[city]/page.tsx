@@ -154,7 +154,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       {/* Breadcrumbs */}
-      <nav className="flex items-center gap-1.5 text-[13px] text-muted mb-6">
+      <nav className="flex items-center gap-1.5 text-sm text-muted mb-6">
         <Link href="/" className="hover:text-ink transition-colors">Gwaky</Link>
         <span>/</span>
         <span className="text-ink font-medium">{cityDecoded}</span>
@@ -170,14 +170,14 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
         {/* Stats row */}
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-5">
           <div className="flex items-center gap-2 bg-tag px-3 py-1.5 rounded-full">
-            <span className="text-[13px] font-semibold text-ink">
+            <span className="text-sm font-medium text-ink">
               {totalListings} listing{totalListings !== 1 ? "s" : ""}
             </span>
           </div>
           {commentCount > 0 && (
             <div className="flex items-center gap-2 bg-social-light border border-social/10 px-3 py-1.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-social live-dot" />
-              <span className="text-[13px] font-semibold text-social">
+              <span className="text-sm font-semibold text-social">
                 {commentCount} opinion{commentCount !== 1 ? "s" : ""}
               </span>
             </div>
@@ -185,7 +185,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
           <span className="text-sm text-muted">
             Avg <span className="font-semibold text-ink">${avgPrice.toLocaleString()}</span>
           </span>
-          <span className="text-[12px] text-muted">
+          <span className="text-xs text-muted">
             ${minPrice.toLocaleString()} &ndash; ${maxPrice.toLocaleString()}
           </span>
         </div>
@@ -217,7 +217,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                   className="flex items-center gap-1.5 bg-tag px-3 py-1.5 rounded-full"
                 >
                   <span className="text-base">{emoji}</span>
-                  <span className="text-[13px] font-semibold text-ink">{count}</span>
+                  <span className="text-sm font-medium text-ink">{count}</span>
                 </div>
               );
             })}
@@ -232,7 +232,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
             <h2 className="font-display text-base font-bold text-ink">
               Most Discussed
             </h2>
-            <span className="text-[11px] font-semibold text-social bg-social-light px-2 py-0.5 rounded-full">
+            <span className="text-xs font-semibold text-social bg-social-light px-2 py-0.5 rounded-full">
               Hot
             </span>
           </div>
@@ -269,9 +269,9 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-ink truncate">{tPrice}</p>
-                      <p className="text-[12px] text-muted truncate">{t.address}</p>
-                      <span className="inline-flex items-center gap-1 mt-1 text-[11px] font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
+                      <p className="text-sm font-medium text-ink truncate">{tPrice}</p>
+                      <p className="text-xs text-muted truncate">{t.address}</p>
+                      <span className="inline-flex items-center gap-1 mt-1 text-xs font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
                         {"\uD83D\uDCAC"} {t._count.comments} comment{t._count.comments !== 1 ? "s" : ""}
                       </span>
                     </div>
@@ -279,7 +279,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                   {latestComment && (
                     <div className="px-4 pb-3 -mt-1">
                       <div className="bg-tag rounded-lg px-3 py-2">
-                        <p className="text-[12px] text-muted line-clamp-2">
+                        <p className="text-xs text-muted line-clamp-2">
                           <span className="font-semibold text-ink">{latestComment.name}</span>{" "}
                           {latestComment.content}
                         </p>
@@ -310,7 +310,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                   className="block bg-surface border border-border rounded-xl px-4 py-3 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center text-[10px] font-semibold text-white shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-ink flex items-center justify-center text-xs font-semibold text-white shrink-0">
                       {c.name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -319,7 +319,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
                         <span className="text-xs text-muted/50">{timeAgo(String(c.createdAt))}</span>
                       </div>
                       <p className="text-sm text-ink/80 mt-0.5 line-clamp-2">{c.content}</p>
-                      <p className="text-[11px] text-muted mt-1">
+                      <p className="text-xs text-muted mt-1">
                         on {cPrice} &middot; {c.listing.address}
                       </p>
                     </div>
@@ -341,7 +341,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
         </p>
         <Link
           href={`/?city=${encodeURIComponent(cityDecoded)}`}
-          className="inline-block px-5 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold rounded-xl hover:bg-ink/90 transition-colors"
+          className="inline-block px-5 py-2.5 bg-ink text-bg text-sm font-semibold rounded-xl hover:bg-ink/90 transition-colors"
         >
           Browse all listings
         </Link>

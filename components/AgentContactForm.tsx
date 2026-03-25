@@ -41,7 +41,7 @@ export default function AgentContactForm({
   const inputClass = "w-full rounded-lg border border-border px-3 py-2.5 text-sm bg-bg focus:outline-none focus:border-ink focus:ring-1 focus:ring-ink/10 transition-colors";
 
   return (
-    <div className="bg-[#1A1A1A] rounded-xl border border-border overflow-hidden">
+    <div className="bg-surface rounded-xl border border-border overflow-hidden">
       {/* Agent info */}
       <div className="px-5 py-4 flex items-center gap-3 border-b border-border">
         {agent.photo ? (
@@ -107,7 +107,7 @@ export default function AgentContactForm({
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-ink text-bg text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
             >
               {status === "sending" ? "Sending..." : "Send Message"}
             </button>

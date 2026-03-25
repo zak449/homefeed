@@ -21,7 +21,7 @@ export default function UserBadge({ commentCount }: { commentCount: number }) {
 
   return (
     <span
-      className={`inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${badge.color}`}
+      className={`inline-flex items-center text-xs font-semibold px-1.5 py-0.5 rounded-md border ${badge.color}`}
     >
       {badge.label}
     </span>

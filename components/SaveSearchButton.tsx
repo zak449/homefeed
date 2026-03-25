@@ -161,7 +161,7 @@ export default function SaveSearchButton({
 
       {/* Toast */}
       {toast && (
-        <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#F5F5F5] text-[#0E0E0E] text-xs font-medium px-3 py-1.5 rounded-lg shadow-modal animate-fade-in z-50">
+        <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-ink text-bg text-xs font-medium px-3 py-1.5 rounded-lg shadow-modal animate-fade-in z-50">
           {toast}
         </div>
       )}

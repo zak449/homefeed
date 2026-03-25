@@ -206,7 +206,7 @@ export default async function CommunityPage({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
               </span>
-              <span className="text-caption font-semibold text-ink">
+              <span className="text-caption font-medium text-ink">
                 {memberCount.toLocaleString()} member
                 {memberCount !== 1 ? "s" : ""}
               </span>
@@ -214,7 +214,7 @@ export default async function CommunityPage({
             {totalTakes > 0 && (
               <div className="flex items-center gap-2 bg-surface border border-divider px-4 py-2 rounded-full shadow-card">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                <span className="text-caption font-semibold text-ink">
+                <span className="text-caption font-medium text-ink">
                   {totalTakes.toLocaleString()} take
                   {totalTakes !== 1 ? "s" : ""}
                 </span>
@@ -232,7 +232,7 @@ export default async function CommunityPage({
             {questions > 0 && (
               <div className="flex items-center gap-2 bg-surface border border-divider px-4 py-2 rounded-full shadow-card">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-secondary"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                <span className="text-caption font-semibold text-ink">
+                <span className="text-caption font-medium text-ink">
                   {questions} question{questions !== 1 ? "s" : ""}
                 </span>
               </div>
@@ -277,7 +277,7 @@ export default async function CommunityPage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-caption font-semibold text-ink">
+                              <span className="text-caption font-medium text-ink">
                                 {comment.name}
                               </span>
                               <span className="text-caption text-tertiary">
@@ -300,7 +300,7 @@ export default async function CommunityPage({
                             </div>
                             {reactionCount > 0 && (
                               <div className="mt-2">
-                                <span className="inline-flex items-center gap-1 text-[11px] text-tertiary">
+                                <span className="inline-flex items-center gap-1 text-xs text-tertiary">
                                   {reactionCount} reaction
                                   {reactionCount !== 1 ? "s" : ""}
                                 </span>
@@ -331,7 +331,7 @@ export default async function CommunityPage({
                     Active listings
                   </h2>
                   {listings.length > 0 && (
-                    <span className="text-[11px] font-semibold text-amber bg-amber/10 px-2.5 py-0.5 rounded-full border border-amber/20">
+                    <span className="text-xs font-semibold text-amber bg-amber/10 px-2.5 py-0.5 rounded-full border border-amber/20">
                       {listings.length}
                     </span>
                   )}
@@ -376,7 +376,7 @@ export default async function CommunityPage({
                           )}
                           {/* Type badge */}
                           <div className="absolute top-2 left-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1A1A1A]/90 text-white backdrop-blur-sm">
+                            <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-surface/90 text-white backdrop-blur-sm">
                               {listing.listingType === "rent" ? "Rent" : "Sale"}
                             </span>
                           </div>
@@ -389,7 +389,7 @@ export default async function CommunityPage({
                               {priceDisplay}
                             </span>
                             {commentCount > 0 && (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber">
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                                 {commentCount}
                               </span>
@@ -457,7 +457,7 @@ export default async function CommunityPage({
               <section>
                 <div className="flex items-center gap-2.5 mb-5">
                   <h2 className="text-headline text-ink">Community alerts</h2>
-                  <span className="text-[11px] font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
+                  <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-200">
                     {alerts.length}
                   </span>
                 </div>
@@ -482,7 +482,7 @@ export default async function CommunityPage({
                             </span>
                             {alert.createdBy.badge !== "newcomer" && (
                               <span
-                                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border ${
+                                className={`text-xs font-semibold px-1.5 py-0.5 rounded-md border ${
                                   badgeLabel(alert.createdBy.badge).color
                                 }`}
                               >
@@ -520,7 +520,7 @@ export default async function CommunityPage({
             {/* ── 7. MEMBER HIGHLIGHTS ───────────────────── */}
             {topContributors.length > 0 && (
               <div className="bg-surface border border-divider rounded-card p-5">
-                <h3 className="text-body font-semibold text-ink mb-4">
+                <h3 className="text-body font-medium text-ink mb-4">
                   Top neighbors
                 </h3>
                 <div className="space-y-3.5">
@@ -536,7 +536,7 @@ export default async function CommunityPage({
                       >
                         {/* Rank */}
                         <div
-                          className={`w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0 ${
+                          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
                             i === 0
                               ? "bg-amber/15 text-amber border border-amber/20"
                               : i === 1
@@ -551,16 +551,16 @@ export default async function CommunityPage({
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-caption font-semibold text-ink truncate">
+                            <span className="text-caption font-medium text-ink truncate">
                               {resident.name}
                             </span>
                             <span
-                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-md border shrink-0 ${badge.color}`}
+                              className={`text-xs font-semibold px-1.5 py-0.5 rounded-md border shrink-0 ${badge.color}`}
                             >
                               {badge.text}
                             </span>
                           </div>
-                          <p className="text-[11px] text-tertiary mt-0.5">
+                          <p className="text-xs text-tertiary mt-0.5">
                             {totalContributions} contribution
                             {totalContributions !== 1 ? "s" : ""}
                             {resident.reputation > 0 &&
@@ -576,7 +576,7 @@ export default async function CommunityPage({
 
             {/* How it works */}
             <div className="bg-surface border border-divider rounded-card p-5">
-              <h3 className="text-body font-semibold text-ink mb-3">
+              <h3 className="text-body font-medium text-ink mb-3">
                 How it works
               </h3>
               <div className="space-y-3">
@@ -598,7 +598,7 @@ export default async function CommunityPage({
                   },
                 ].map((item) => (
                   <div key={item.step} className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#F5F5F5] text-[#0E0E0E] flex items-center justify-center text-[12px] font-bold shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-ink text-bg flex items-center justify-center text-xs font-bold shrink-0">
                       {item.step}
                     </div>
                     <div>
@@ -614,7 +614,7 @@ export default async function CommunityPage({
 
             {/* Community guidelines */}
             <div className="bg-surface border border-divider rounded-card p-5">
-              <h3 className="text-body font-semibold text-ink mb-2">
+              <h3 className="text-body font-medium text-ink mb-2">
                 Community guidelines
               </h3>
               <ul className="space-y-1.5 text-caption text-secondary">

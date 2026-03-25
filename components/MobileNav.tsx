@@ -122,7 +122,7 @@ export default function MobileNav() {
                   tab.icon(tab.active)
                 )}
 
-                <span className={`text-[10px] font-medium ${
+                <span className={`text-xs font-medium ${
                   isAccent
                     ? "text-amber font-bold"
                     : tab.active
@@ -139,7 +139,7 @@ export default function MobileNav() {
                 ? ""
                 : tab.active
                   ? "text-[#E8A87C]"
-                  : "text-[#999999] hover:text-[#CCCCCC]"
+                  : "text-secondary hover:text-ink"
             }`;
 
             if (isAccent) {

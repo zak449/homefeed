@@ -156,7 +156,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goPrev}
-              className="flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
+              className="flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
               aria-label="Previous"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
@@ -164,7 +164,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goNext}
-              className="flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
+              className="flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
               aria-label="Next"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -190,8 +190,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         {/* Single small badge — top left only */}
         <div className="absolute top-2.5 left-2.5">
-          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm ${
-            isRent ? "bg-blue-500/90 text-white" : "bg-[#1A1A1A]/90 text-white shadow-sm"
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full backdrop-blur-sm ${
+            isRent ? "bg-blue-500/90 text-white" : "bg-surface/90 text-white shadow-sm"
           }`}>
             {isRent ? "Rent" : "Sale"}
           </span>
@@ -206,37 +206,37 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {price}
           </p>
           {specs && (
-            <p className="text-[11px] sm:text-[11px] text-tertiary font-medium shrink-0">
+            <p className="text-xs sm:text-xs text-tertiary font-medium shrink-0">
               {specs}
             </p>
           )}
         </div>
 
         {/* Address */}
-        <p className="text-[13px] sm:text-[13px] text-secondary truncate leading-tight">
+        <p className="text-sm sm:text-sm text-secondary truncate leading-tight">
           {listing.address}, {listing.city}
         </p>
 
         {/* Comment / social layer */}
         {listing.topComment ? (
           <div className="mt-3 pt-3 border-t border-divider">
-            <p className="text-[14px] text-ink leading-snug line-clamp-2 font-bold">
+            <p className="text-sm text-ink leading-snug line-clamp-2 font-bold">
               {listing.topComment.content}
             </p>
-            <p className="text-[11px] text-secondary mt-1.5">
+            <p className="text-xs text-secondary mt-1.5">
               &mdash; {formatName(listing.topComment.name)}
-              {commentCount > 1 && <span className="text-[#999999] ml-1">+ {commentCount - 1} more</span>}
+              {commentCount > 1 && <span className="text-secondary ml-1">+ {commentCount - 1} more</span>}
             </p>
             {/* Reaction row — always visible */}
             <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
               {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
-                <span key={emoji} className="inline-flex items-center gap-0.5 text-[11px] px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
+                <span key={emoji} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
                   <span>{emoji}</span>
                   <span className="tabular-nums">0</span>
                 </span>
               ))}
             </div>
-            <div className="mt-3 w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+            <div className="mt-3 w-full py-2.5 bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
               🫖 Spill the tea &rarr;
             </div>
           </div>
@@ -245,13 +245,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {/* Reaction row — always visible */}
             <div className="flex items-center gap-1.5 flex-wrap mb-3">
               {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
-                <span key={emoji} className="inline-flex items-center gap-0.5 text-[11px] px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
+                <span key={emoji} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
                   <span>{emoji}</span>
                   <span className="tabular-nums">0</span>
                 </span>
               ))}
             </div>
-            <div className="w-full py-2.5 bg-amber text-white text-[14px] font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+            <div className="w-full py-2.5 bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
               🫖 Spill the tea &rarr;
             </div>
           </div>

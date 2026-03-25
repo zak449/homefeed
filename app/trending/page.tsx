@@ -220,7 +220,7 @@ export default async function TrendingPage() {
         </Link>
 
         {/* Hero header */}
-        <div className="relative mb-10 overflow-hidden rounded-2xl bg-[#111111] px-6 py-8 sm:px-8 sm:py-10">
+        <div className="relative mb-10 overflow-hidden rounded-2xl bg-bg px-6 py-8 sm:px-8 sm:py-10">
           {/* Background glow orbs */}
           <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-amber/20 blur-3xl amber-shimmer pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber/10 blur-3xl glow-pulse pointer-events-none" />
@@ -232,7 +232,7 @@ export default async function TrendingPage() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-400" />
               </span>
-              <p className="text-[11px] font-bold tracking-widest uppercase text-green-400">
+              <p className="text-xs font-bold tracking-widest uppercase text-green-400">
                 Live now
               </p>
             </div>
@@ -257,7 +257,7 @@ export default async function TrendingPage() {
                     <p className="text-xl font-extrabold text-white font-display tracking-tight leading-none">
                       {totalComments.toLocaleString()}
                     </p>
-                    <p className="text-[11px] text-white/40 font-medium">takes dropped</p>
+                    <p className="text-xs text-white/40 font-medium">takes dropped</p>
                   </div>
                 </div>
 
@@ -275,7 +275,7 @@ export default async function TrendingPage() {
                     <p className="text-xl font-extrabold text-white font-display tracking-tight leading-none">
                       {activeListingCount}
                     </p>
-                    <p className="text-[11px] text-white/40 font-medium">active listings</p>
+                    <p className="text-xs text-white/40 font-medium">active listings</p>
                   </div>
                 </div>
               </div>
@@ -322,7 +322,7 @@ function EmptyStateHero() {
 
         <Link
           href="/"
-          className="inline-flex items-center gap-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
+          className="inline-flex items-center gap-2.5 bg-ink text-bg text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />

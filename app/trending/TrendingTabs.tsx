@@ -213,7 +213,7 @@ export default function TrendingTabs({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 text-[13px] font-semibold py-3 px-3 rounded-xl transition-all duration-200 ${
+              className={`flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold py-3 px-3 rounded-xl transition-all duration-200 ${
                 isActive
                   ? "bg-surface text-ink shadow-card"
                   : "text-tertiary hover:text-ink"
@@ -256,7 +256,7 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
             Most discussed
           </h2>
         </div>
-        <span className="text-[11px] font-medium text-tertiary">
+        <span className="text-xs font-medium text-tertiary">
           {listings.length} active listings
         </span>
       </div>
@@ -289,7 +289,7 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                     <div className="absolute top-3 left-3 flex items-center gap-2">
                       {/* Heat badge */}
                       <span
-                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${HEAT_COLORS[heat]}`}
+                        className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full backdrop-blur-sm ${HEAT_COLORS[heat]}`}
                       >
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -297,7 +297,7 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                         {listing.commentCount} takes
                       </span>
                       {isNew && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/90 text-white backdrop-blur-sm">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-green-500/90 text-white backdrop-blur-sm">
                           <span className="relative flex h-1.5 w-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
                             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white" />
@@ -312,14 +312,14 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                       <p className="text-lg font-extrabold text-white leading-none drop-shadow-sm">
                         {fmtPrice(listing.price, listing.listingType)}
                       </p>
-                      <p className="text-[13px] text-white/80 mt-0.5 truncate">
+                      <p className="text-sm text-white/80 mt-0.5 truncate">
                         {listing.address}, {listing.city}
                       </p>
                     </div>
 
                     {/* Type badge */}
                     <div className="absolute top-3 right-3">
-                      <span className="text-[10px] font-semibold px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 border border-white/10">
+                      <span className="text-xs font-semibold px-2 py-1 rounded-full bg-black/40 backdrop-blur-sm text-white/80 border border-white/10">
                         {listing.listingType === "rent" ? "Rental" : "For Sale"}
                       </span>
                     </div>
@@ -337,12 +337,12 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                         <p className="text-[15px] font-bold text-ink">
                           {fmtPrice(listing.price, listing.listingType)}
                         </p>
-                        <p className="text-[13px] text-secondary truncate">
+                        <p className="text-sm text-secondary truncate">
                           {listing.address}, {listing.city}
                         </p>
                       </div>
                       <span
-                        className={`inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full ${HEAT_COLORS[heat]}`}
+                        className={`inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full ${HEAT_COLORS[heat]}`}
                       >
                         {listing.commentCount} takes
                       </span>
@@ -359,20 +359,20 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                         <div key={comment.id} className="flex items-start gap-2.5">
                           {/* Avatar */}
                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber/20 to-amber/5 border border-amber/15 flex items-center justify-center shrink-0 mt-0.5">
-                            <span className="text-[10px] font-bold text-amber">
+                            <span className="text-xs font-bold text-amber">
                               {initials(comment.name)}
                             </span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <span className="text-[13px] font-semibold text-ink">
+                              <span className="text-sm font-medium text-ink">
                                 {comment.name}
                               </span>
-                              <span className="text-[11px] text-tertiary">
+                              <span className="text-xs text-tertiary">
                                 {timeAgo(comment.createdAt)}
                               </span>
                             </div>
-                            <p className="text-[14px] text-ink/80 leading-relaxed line-clamp-2">
+                            <p className="text-sm text-ink/80 leading-relaxed line-clamp-2">
                               {comment.content}
                             </p>
                             {/* Reaction pills inline */}
@@ -381,7 +381,7 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                                 {Object.entries(rcounts).map(([emoji, count]) => (
                                   <span
                                     key={emoji}
-                                    className="inline-flex items-center gap-0.5 text-[11px] px-1.5 py-0.5 rounded-full bg-highlight text-secondary"
+                                    className="inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full bg-highlight text-secondary"
                                   >
                                     <span className="text-xs">{emoji}</span>
                                     <span className="font-medium">{count}</span>
@@ -401,12 +401,12 @@ function DiscussedTab({ listings }: { listings: DiscussedListing[] }) {
                   href={`/listing/${listing.id}`}
                   className="flex items-center justify-between mt-4 pt-3 border-t border-divider/60"
                 >
-                  <span className="text-[12px] text-tertiary">
+                  <span className="text-xs text-tertiary">
                     {listing.commentCount > 2
                       ? `+ ${listing.commentCount - 2} more takes`
                       : `${listing.commentCount} take${listing.commentCount !== 1 ? "s" : ""}`}
                   </span>
-                  <span className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-amber hover:underline">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber hover:underline">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                     </svg>
@@ -439,7 +439,7 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
             Hottest takes
           </h2>
         </div>
-        <span className="text-[11px] font-medium text-tertiary">
+        <span className="text-xs font-medium text-tertiary">
           {takes.length} takes with reactions
         </span>
       </div>
@@ -469,22 +469,22 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
                         : "bg-gradient-to-br from-amber/20 to-amber/5 border border-amber/15 text-amber"
                     }`}
                   >
-                    <span className={`font-bold ${isTop ? "text-[11px]" : "text-[10px]"}`}>
+                    <span className={`font-bold ${isTop ? "text-xs" : "text-xs"}`}>
                       {initials(take.name)}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold text-ink">
+                      <span className="text-sm font-semibold text-ink">
                         {take.name}
                       </span>
                       {isTop && (
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber">
                           Top take
                         </span>
                       )}
                     </div>
-                    <span className="text-[12px] text-tertiary">
+                    <span className="text-xs text-tertiary">
                       {timeAgo(take.createdAt)}
                     </span>
                   </div>
@@ -501,7 +501,7 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
                     Object.entries(rcounts).map(([emoji, count]) => (
                       <span
                         key={emoji}
-                        className="inline-flex items-center gap-1 text-[12px] px-3 py-1.5 rounded-full bg-highlight border border-divider/40 text-ink hover:border-amber/30 transition-colors cursor-default"
+                        className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-highlight border border-divider/40 text-ink hover:border-amber/30 transition-colors cursor-default"
                       >
                         <span className="text-sm">{emoji}</span>
                         <span className="font-semibold">{count}</span>
@@ -538,8 +538,8 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] text-tertiary mb-0.5">Commenting on</p>
-                    <p className="text-[13px] font-semibold text-ink truncate">
+                    <p className="text-xs text-tertiary mb-0.5">Commenting on</p>
+                    <p className="text-sm font-medium text-ink truncate">
                       {fmtPrice(take.listing.price, take.listing.listingType)} &middot; {take.listing.address}
                     </p>
                   </div>
@@ -552,7 +552,7 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
                 <div className="flex items-center gap-3 mt-4 pt-3 border-t border-divider/50">
                   <Link
                     href={`/listing/${take.listing.id}`}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-amber hover:underline"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber hover:underline"
                   >
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -562,7 +562,7 @@ function HottestTab({ takes }: { takes: HottestTake[] }) {
                   <span className="text-divider">|</span>
                   <Link
                     href={`/listing/${take.listing.id}`}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-semibold text-secondary hover:text-ink transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-secondary hover:text-ink transition-colors"
                   >
                     See all takes
                   </Link>
@@ -597,7 +597,7 @@ function NeighborhoodsTab({
             Trending neighborhoods
           </h2>
         </div>
-        <span className="text-[11px] font-medium text-tertiary">
+        <span className="text-xs font-medium text-tertiary">
           {neighborhoods.length} active areas
         </span>
       </div>
@@ -670,7 +670,7 @@ function NeighborhoodsTab({
                           </p>
                         </div>
                         {isTop && (
-                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white border border-white/10">
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white border border-white/10">
                             #{index + 1} trending
                           </span>
                         )}
@@ -722,7 +722,7 @@ function NeighborhoodsTab({
                         <p className="text-[15px] font-bold text-ink truncate">
                           {hood.city}
                         </p>
-                        <p className="text-[12px] text-tertiary">
+                        <p className="text-xs text-tertiary">
                           {hood.state}
                         </p>
                       </div>
@@ -731,13 +731,13 @@ function NeighborhoodsTab({
 
                   {/* Stats + sentiment */}
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="inline-flex items-center gap-1.5 text-[12px] font-bold px-3 py-1.5 rounded-full bg-amber/10 text-amber">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-amber/10 text-amber">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                       </svg>
                       {hood.commentCount} take{hood.commentCount !== 1 ? "s" : ""}
                     </span>
-                    <span className="inline-flex items-center gap-1.5 text-[12px] font-medium px-3 py-1.5 rounded-full bg-highlight text-secondary">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-highlight text-secondary">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                         <polyline points="9 22 9 12 15 12 15 22" />
@@ -745,14 +745,14 @@ function NeighborhoodsTab({
                       {hood.listingCount} listing{hood.listingCount !== 1 ? "s" : ""}
                     </span>
                     {/* Sentiment indicator */}
-                    <span className={`text-[11px] font-semibold ${sentimentColor} ml-auto`}>
+                    <span className={`text-xs font-semibold ${sentimentColor} ml-auto`}>
                       {sentiment}
                     </span>
                   </div>
 
                   {/* CTA */}
                   <div className="flex items-center justify-end mt-3 pt-3 border-t border-divider/50">
-                    <span className="text-[12px] font-semibold text-amber group-hover:underline">
+                    <span className="text-xs font-semibold text-amber group-hover:underline">
                       Explore neighborhood &rarr;
                     </span>
                   </div>
@@ -787,12 +787,12 @@ function EmptyState() {
         <h3 className="font-display text-xl font-extrabold text-ink tracking-tight mb-2">
           Be the first to start a conversation
         </h3>
-        <p className="text-[14px] text-secondary leading-relaxed max-w-xs mx-auto mb-6">
+        <p className="text-sm text-secondary leading-relaxed max-w-xs mx-auto mb-6">
           Search any listing and drop your take. Your opinion could start the next big debate.
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all"
+          className="inline-flex items-center gap-2 bg-ink text-bg text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />

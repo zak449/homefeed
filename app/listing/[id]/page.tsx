@@ -125,7 +125,57 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   });
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A]">
+    <div className="min-h-screen bg-bg">
+      {/* JSON-LD Structured Data for Google Rich Snippets */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: listing.address,
+            description: listing.description ?? `${listing.address}, ${listing.city}, ${listing.state} ${listing.zip}`,
+            image: listing.photos[0] ?? undefined,
+            offers: {
+              "@type": "Offer",
+              price: listing.price,
+              priceCurrency: "USD",
+              availability: listing.status === "active"
+                ? "https://schema.org/InStock"
+                : "https://schema.org/SoldOut",
+            },
+            ...(listing.bedrooms != null || listing.bathrooms != null || listing.sqft != null
+              ? {
+                  additionalProperty: [
+                    ...(listing.bedrooms != null
+                      ? [{ "@type": "PropertyValue", name: "numberOfRooms", value: listing.bedrooms }]
+                      : []),
+                    ...(listing.bathrooms != null
+                      ? [{ "@type": "PropertyValue", name: "numberOfBathrooms", value: listing.bathrooms }]
+                      : []),
+                    ...(listing.sqft != null
+                      ? [{
+                          "@type": "PropertyValue",
+                          name: "floorSize",
+                          value: listing.sqft,
+                          unitCode: "SQF",
+                        }]
+                      : []),
+                  ],
+                }
+              : {}),
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: listing.address,
+              addressLocality: listing.city,
+              addressRegion: listing.state,
+              postalCode: listing.zip,
+              addressCountry: "US",
+            },
+          }),
+        }}
+      />
+
       {/* Track listing view */}
       <ListingViewTracker
         listingId={listing.id}
@@ -208,7 +258,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           {/* Spec pills bar */}
           <div className="flex flex-wrap items-center gap-2 mt-3">
             {listing.propertyType && (
-              <span className={`text-caption font-semibold px-3 py-1 rounded-full border ${typeColor}`}>
+              <span className={`text-caption font-medium px-3 py-1 rounded-full border ${typeColor}`}>
                 {capitalize(listing.propertyType)}
               </span>
             )}
@@ -244,10 +294,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* ── Save + Share ── */}
         <div className="flex items-center justify-between mb-6 pb-5 border-b border-divider">
           <div className="flex items-center gap-3">
-            <div className="[&_button]:bg-[#1A1A1A] [&_button]:text-[#F5F5F5] [&_button]:border [&_button]:border-[#3A3A3A] [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-[#FF4D00]/40 [&_button]:hover:shadow-soft [&_button]:transition-all">
+            <div className="[&_button]:bg-surface [&_button]:text-ink [&_button]:border [&_button]:border-divider [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-accent/40 [&_button]:hover:shadow-soft [&_button]:transition-all">
               <SaveButton listingId={listing.id} />
             </div>
-            <div className="[&_button]:bg-[#1A1A1A] [&_button]:text-[#F5F5F5] [&_button]:border [&_button]:border-[#3A3A3A] [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-[#FF4D00]/40 [&_button]:transition-all">
+            <div className="[&_button]:bg-surface [&_button]:text-ink [&_button]:border [&_button]:border-divider [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-accent/40 [&_button]:transition-all">
               <ShareButton
                 listingId={listing.id}
                 address={listing.address}
@@ -275,7 +325,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* ── RAP SHEET CTA ── */}
         <Link
           href={`/rap-sheet/${listing.id}`}
-          className="group mb-6 flex items-center justify-between bg-[#1A1A1A] border border-[#FF4D00] rounded-lg px-5 py-3.5 hover:bg-[#222222] hover:shadow-[0_0_20px_rgba(255,77,0,0.15)] transition-all"
+          className="group mb-6 flex items-center justify-between bg-surface border border-accent rounded-lg px-5 py-3.5 hover:bg-elevated hover:shadow-[0_0_20px_rgba(255,77,0,0.15)] transition-all"
         >
           <div className="flex items-center gap-3">
             <span className="text-lg">{"\uD83D\uDD25"}</span>
@@ -286,7 +336,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </span>
             </div>
           </div>
-          <span className="text-[#FF4D00] font-semibold text-body group-hover:translate-x-0.5 transition-transform">
+          <span className="text-accent font-semibold text-body group-hover:translate-x-0.5 transition-transform">
             &rarr;
           </span>
         </Link>

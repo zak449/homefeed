@@ -117,7 +117,7 @@ function NeighborhoodCard({ neighborhood: n }: { neighborhood: NeighborhoodData 
   return (
     <Link
       href={`/?city=${encodeURIComponent(n.city)}`}
-      className="group bg-[#1A1A1A] border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+      className="group bg-surface border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
     >
       {/* City name + state */}
       <div className="flex items-start justify-between gap-2 mb-3">
@@ -125,17 +125,17 @@ function NeighborhoodCard({ neighborhood: n }: { neighborhood: NeighborhoodData 
           <h3 className="font-display text-lg font-bold text-ink tracking-tight group-hover:text-social transition-colors">
             {n.city}
           </h3>
-          <p className="text-[12px] text-muted">{n.state}</p>
+          <p className="text-xs text-muted">{n.state}</p>
         </div>
         {/* Sentiment badge */}
-        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-full border ${sentiment.color}`}>
+        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full border ${sentiment.color}`}>
           <span>{sentiment.icon}</span>
           {sentiment.label}
         </span>
       </div>
 
       {/* Stats row */}
-      <div className="flex items-center gap-3 text-[12px] text-muted">
+      <div className="flex items-center gap-3 text-xs text-muted">
         <span>
           <span className="font-semibold text-ink">{n.listingCount}</span> listing{n.listingCount !== 1 ? "s" : ""}
         </span>
@@ -151,7 +151,7 @@ function NeighborhoodCard({ neighborhood: n }: { neighborhood: NeighborhoodData 
 
       {/* CTA */}
       <div className="mt-3 pt-3 border-t border-border">
-        <span className="text-[12px] font-semibold text-social group-hover:underline">
+        <span className="text-xs font-semibold text-social group-hover:underline">
           See what people are saying &rarr;
         </span>
       </div>

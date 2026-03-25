@@ -89,7 +89,7 @@ export default async function HotTakeOfTheDay() {
 
       <div className="flex items-start gap-3">
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-avatar bg-active flex items-center justify-center text-[11px] font-semibold text-ink shrink-0">
+        <div className="w-9 h-9 rounded-avatar bg-active flex items-center justify-center text-xs font-semibold text-ink shrink-0">
           {initials}
         </div>
 

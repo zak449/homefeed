@@ -119,7 +119,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
   );
 
   return (
-    <div className="min-h-screen bg-[#111111] text-[#F2F0ED]">
+    <div className="min-h-screen bg-bg text-ink">
 
       {/* ══ HERO HEADER ══ */}
       <div className="relative w-full min-h-[340px] sm:min-h-[420px] overflow-hidden">
@@ -151,7 +151,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
 
           {/* Badge */}
           <div className="mb-4">
-            <span className="inline-block bg-[#D4763C] text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
+            <span className="inline-block bg-[#D4763C] text-white text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full">
               Property Rap Sheet
             </span>
           </div>
@@ -173,11 +173,11 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
       <div className="max-w-2xl mx-auto px-4 sm:px-6">
 
         {/* ── COMMUNITY VERDICT ── */}
-        <div className="py-8 border-b border-[#2A2A2A]">
+        <div className="py-8 border-b border-divider">
           <h2 className="font-display text-[1.75rem] sm:text-[2rem] font-extrabold tracking-tight mb-1">
             Community Verdict
           </h2>
-          <p className="text-[#9A9A9A] text-body mb-6">
+          <p className="text-secondary text-body mb-6">
             {uniqueCommenters} neighbor{uniqueCommenters !== 1 ? "s" : ""} ha{uniqueCommenters !== 1 ? "ve" : "s"} spoken
           </p>
 
@@ -194,7 +194,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
                   <span className="text-base">{"\uD83D\uDD25"}</span>
                 </span>
               </div>
-              <div className="w-full h-3 bg-[#2A2A2A] rounded-full overflow-hidden flex">
+              <div className="w-full h-3 bg-elevated rounded-full overflow-hidden flex">
                 <div
                   className="h-full bg-red-500 transition-all"
                   style={{ width: `${(flagCount / totalVibeVotes) * 100}%` }}
@@ -223,11 +223,11 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
         </div>
 
         {/* ── SHARE SECTION ── */}
-        <div className="py-8 border-t border-[#2A2A2A]">
+        <div className="py-8 border-t border-divider">
           <h2 className="font-display text-[1.5rem] font-extrabold tracking-tight mb-1">
             Share this rap sheet
           </h2>
-          <p className="text-[#9A9A9A] text-caption mb-5">
+          <p className="text-secondary text-caption mb-5">
             Let people know what the community thinks
           </p>
 
@@ -237,7 +237,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
               href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#F2F0ED]/20 hover:shadow-soft text-[#F2F0ED] text-caption font-semibold px-4 py-2.5 rounded-full transition-all"
+              className="inline-flex items-center gap-2 bg-surface border border-divider hover:border-ink/20 hover:shadow-soft text-ink text-caption font-semibold px-4 py-2.5 rounded-full transition-all"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -250,7 +250,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
               href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#1A1A1A] border border-[#2A2A2A] hover:border-[#F2F0ED]/20 hover:shadow-soft text-[#F2F0ED] text-caption font-semibold px-4 py-2.5 rounded-full transition-all"
+              className="inline-flex items-center gap-2 bg-surface border border-divider hover:border-ink/20 hover:shadow-soft text-ink text-caption font-semibold px-4 py-2.5 rounded-full transition-all"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -264,7 +264,7 @@ export default async function RapSheetPage({ params }: { params: Promise<{ id: s
         </div>
 
         {/* CTA back to listing */}
-        <div className="py-8 border-t border-[#2A2A2A] text-center">
+        <div className="py-8 border-t border-divider text-center">
           <Link
             href={`/listing/${id}`}
             className="inline-flex items-center gap-2 bg-[#D4763C] hover:bg-[#D4763C]/90 text-white font-semibold text-body px-6 py-3 rounded-full transition-colors"

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0D0D0D]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-[720px] mx-auto px-5 py-16 sm:py-24">
         <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
           Terms of Service
@@ -99,12 +99,12 @@ export default function TermsPage() {
               Questions about these terms? Reach us at{" "}
               <a
                 href="mailto:hello@gwaky.com"
-                className="text-[#FF4D00] hover:underline"
+                className="text-accent hover:underline"
               >
                 hello@gwaky.com
               </a>{" "}
               or through our{" "}
-              <a href="/contact" className="text-[#FF4D00] hover:underline">
+              <a href="/contact" className="text-accent hover:underline">
                 contact page
               </a>
               .
@@ -125,7 +125,7 @@ function Section({
 }) {
   return (
     <section>
-      <h2 className="text-[#FF4D00] text-base font-semibold mb-3">
+      <h2 className="text-accent text-base font-semibold mb-3">
         {title}
       </h2>
       {children}

@@ -90,7 +90,7 @@ export default function CareersPage() {
         </Link>
 
         <div className="mb-14">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-3">
+          <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-3">
             Careers at Gwaky
           </p>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-ink tracking-[-0.04em] leading-[1.08]">
@@ -107,7 +107,7 @@ export default function CareersPage() {
 
       {/* Founder quote */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
-        <div className="relative bg-[#111111] rounded-2xl p-6 sm:p-10 overflow-hidden">
+        <div className="relative bg-bg rounded-2xl p-6 sm:p-10 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber/[0.06] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="relative">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-amber/30 mb-4">
@@ -127,7 +127,7 @@ export default function CareersPage() {
 
       {/* Our Values */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
-        <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-3">
+        <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-3">
           What we believe
         </p>
         <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-8">
@@ -145,7 +145,7 @@ export default function CareersPage() {
               <h3 className="font-display text-[15px] font-bold text-ink mb-1.5">
                 {value.title}
               </h3>
-              <p className="text-[13px] text-secondary leading-relaxed">
+              <p className="text-sm text-secondary leading-relaxed">
                 {value.description}
               </p>
             </div>
@@ -179,10 +179,10 @@ export default function CareersPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-display text-[13px] font-semibold text-ink mb-0.5">
+                <h3 className="font-display text-sm font-medium text-ink mb-0.5">
                   {perk.title}
                 </h3>
-                <p className="text-[12px] text-secondary leading-relaxed">
+                <p className="text-xs text-secondary leading-relaxed">
                   {perk.description}
                 </p>
               </div>
@@ -231,7 +231,7 @@ export default function CareersPage() {
 
           <div className="relative z-10">
             <div className="text-center mb-8">
-              <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+              <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
                 Get ahead of the crowd
               </p>
               <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight mb-3">

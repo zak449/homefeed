@@ -98,7 +98,7 @@ export default function StickyEmailCTA() {
             visible ? "translate-y-0" : "translate-y-full"
           }`}
         >
-          <div className="bg-[#1A1A1A] border-t border-border shadow-modal">
+          <div className="bg-surface border-t border-border shadow-modal">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center gap-3">
               {/* Copy */}
               <p className="text-sm text-ink font-medium text-center sm:text-left flex-1 min-w-0">
@@ -130,7 +130,7 @@ export default function StickyEmailCTA() {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-48 sm:w-56 px-3.5 py-2 text-sm rounded-xl border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+                    className="w-48 sm:w-56 px-3.5 py-2 text-sm rounded-xl border border-border bg-surface text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
                   />
                   <button
                     type="submit"

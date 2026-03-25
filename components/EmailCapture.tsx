@@ -104,14 +104,14 @@ export default function EmailCapture({
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-border bg-surface text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
             />
             <input
               type="tel"
               placeholder="Phone (optional, for SMS)"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+              className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-border bg-surface text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
             />
           </div>
 
@@ -149,7 +149,7 @@ export default function EmailCapture({
           placeholder="your@email.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-xl border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+          className="flex-1 min-w-0 px-3.5 py-2 text-sm rounded-xl border border-border bg-surface text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
         />
         <button
           type="submit"
@@ -179,7 +179,7 @@ export default function EmailCapture({
         placeholder="your@email.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-48 px-3 py-1.5 text-xs rounded-lg border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+        className="w-48 px-3 py-1.5 text-xs rounded-lg border border-border bg-surface text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
       />
       <button
         type="submit"

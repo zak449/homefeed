@@ -101,7 +101,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
   const incomeNeeded = Math.round((calc.totalMonthly / 0.28) * 12);
 
   return (
-    <div className="rounded-xl border border-border bg-[#1A1A1A] overflow-hidden animate-fade-in">
+    <div className="rounded-xl border border-border bg-surface overflow-hidden animate-fade-in">
       {/* Toggle header */}
       <button
         type="button"
@@ -148,7 +148,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-medium text-muted">Down Payment</label>
-                <span className="text-sm font-semibold text-ink">
+                <span className="text-sm font-medium text-ink">
                   {downPaymentPct}% &middot; ${Math.round(price * downPaymentPct / 100).toLocaleString()}
                 </span>
               </div>
@@ -161,12 +161,12 @@ export default function MortgageCalculator({ price }: { price: number }) {
                 onChange={(e) => setDownPaymentPct(Number(e.target.value))}
                 className="mortgage-slider w-full"
               />
-              <div className="flex justify-between text-[10px] text-muted/50 mt-1">
+              <div className="flex justify-between text-xs text-muted/50 mt-1">
                 <span>3%</span>
                 <span>50%</span>
               </div>
               {downPaymentPct < 20 && (
-                <p className="text-[11px] text-social font-medium mt-1 animate-fade-in">
+                <p className="text-xs text-social font-medium mt-1 animate-fade-in">
                   PMI required below 20% down
                 </p>
               )}
@@ -184,7 +184,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   >
                     -
                   </button>
-                  <span className="text-sm font-semibold text-ink w-14 text-center">{interestRate}%</span>
+                  <span className="text-sm font-medium text-ink w-14 text-center">{interestRate}%</span>
                   <button
                     type="button"
                     onClick={() => setInterestRate(Math.min(12, +(interestRate + 0.25).toFixed(2)))}
@@ -205,8 +205,8 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   onClick={() => setLoanTerm(30)}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 30
-                      ? "bg-[#F5F5F5] text-[#0E0E0E]"
-                      : "bg-[#1A1A1A] text-[#888] hover:text-ink hover:bg-tag"
+                      ? "bg-ink text-bg"
+                      : "bg-surface text-secondary hover:text-ink hover:bg-tag"
                   }`}
                 >
                   30 years
@@ -216,8 +216,8 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   onClick={() => setLoanTerm(15)}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 15
-                      ? "bg-[#F5F5F5] text-[#0E0E0E]"
-                      : "bg-[#1A1A1A] text-[#888] hover:text-ink hover:bg-tag"
+                      ? "bg-ink text-bg"
+                      : "bg-surface text-secondary hover:text-ink hover:bg-tag"
                   }`}
                 >
                   15 years
@@ -261,13 +261,13 @@ export default function MortgageCalculator({ price }: { price: number }) {
             {/* Total cost */}
             <div className="mt-5 pt-4 border-t border-border grid grid-cols-2 gap-3">
               <div className="bg-tag rounded-lg px-3 py-2.5">
-                <p className="text-[10px] text-muted uppercase tracking-wider">Total over {loanTerm}yr</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Total over {loanTerm}yr</p>
                 <p className="text-sm font-bold text-ink mt-0.5">
                   $<AnimatedNumber value={calc.totalCost} />
                 </p>
               </div>
               <div className="bg-tag rounded-lg px-3 py-2.5">
-                <p className="text-[10px] text-muted uppercase tracking-wider">Total Interest</p>
+                <p className="text-xs text-muted uppercase tracking-wider">Total Interest</p>
                 <p className="text-sm font-bold text-social mt-0.5">
                   $<AnimatedNumber value={calc.totalInterest} />
                 </p>
@@ -279,7 +279,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
               <p className="text-xs font-semibold text-ink flex items-center gap-1.5">
                 <span>💰</span> Can you afford this?
               </p>
-              <p className="text-[11px] text-muted mt-1 leading-relaxed">
+              <p className="text-xs text-muted mt-1 leading-relaxed">
                 To keep housing at 28% of income, you&apos;d need a household income of{" "}
                 <span className="font-semibold text-ink">${incomeNeeded.toLocaleString()}/yr</span>{" "}
                 (${Math.round(incomeNeeded / 12).toLocaleString()}/mo gross).

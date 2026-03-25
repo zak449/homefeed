@@ -41,7 +41,7 @@ export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-[#0D0D0D]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-[720px] mx-auto px-5 py-16 sm:py-24">
         <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
           Frequently Asked Questions
@@ -56,11 +56,11 @@ export default function FAQPage() {
             return (
               <div
                 key={i}
-                className="border border-[#2A2A2A] rounded-xl overflow-hidden"
+                className="border border-divider rounded-xl overflow-hidden"
               >
                 <button
                   onClick={() => setOpenIndex(isOpen ? null : i)}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-[#1A1A1A] transition-colors"
+                  className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-surface transition-colors"
                 >
                   <span className="text-white text-sm font-medium pr-4">
                     {faq.q}
@@ -72,7 +72,7 @@ export default function FAQPage() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
-                    className={`text-[#555] shrink-0 transition-transform ${
+                    className={`text-tertiary shrink-0 transition-transform ${
                       isOpen ? "rotate-180" : ""
                     }`}
                   >

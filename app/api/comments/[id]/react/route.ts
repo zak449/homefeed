@@ -4,6 +4,27 @@ import { sendReactionAlert } from "@/lib/email";
 
 const VALID_REACTIONS = ["❤️", "🔥", "😂", "😮", "💀"];
 
+// In-memory rate limit: max 1 notification email per comment per hour
+const reactionEmailSentAt = new Map<string, number>();
+const RATE_LIMIT_MS = 60 * 60 * 1000; // 1 hour
+
+function canSendReactionEmail(commentId: string): boolean {
+  const lastSent = reactionEmailSentAt.get(commentId);
+  if (!lastSent) return true;
+  return Date.now() - lastSent >= RATE_LIMIT_MS;
+}
+
+function markReactionEmailSent(commentId: string) {
+  reactionEmailSentAt.set(commentId, Date.now());
+  // Prune old entries to prevent memory leak
+  if (reactionEmailSentAt.size > 10000) {
+    const cutoff = Date.now() - RATE_LIMIT_MS;
+    for (const [key, ts] of reactionEmailSentAt) {
+      if (ts < cutoff) reactionEmailSentAt.delete(key);
+    }
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,7 +58,8 @@ export async function POST(
     await prisma.reaction.create({ data: { commentId: id, email, type } });
     action = "added";
 
-    if (comment.email !== email && comment.email) {
+    if (comment.email !== email && comment.email && canSendReactionEmail(id)) {
+      markReactionEmailSent(id);
       sendReactionAlert({
         recipientEmail: comment.email,
         recipientName: comment.name,

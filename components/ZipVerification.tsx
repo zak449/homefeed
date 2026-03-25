@@ -1342,7 +1342,7 @@ export default function ZipVerification({
                 className="zv-input"
                 autoComplete="street-address"
               />
-              <p className="text-[11px] text-tertiary flex items-center gap-1.5 pl-1">
+              <p className="text-xs text-tertiary flex items-center gap-1.5 pl-1">
                 <span>&#128274;</span> Encrypted. Never shown publicly.
               </p>
             </div>

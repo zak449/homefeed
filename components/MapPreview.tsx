@@ -46,7 +46,7 @@ export default function MapPreview({
     : null;
 
   return (
-    <div className={`relative rounded-xl overflow-hidden border border-[#2A2A2A] bg-[#0E0E0E] ${className ?? ""}`}>
+    <div className={`relative rounded-xl overflow-hidden border border-divider bg-bg ${className ?? ""}`}>
       <a
         href={directionsUrl}
         target="_blank"
@@ -62,7 +62,7 @@ export default function MapPreview({
           />
         ) : (
           /* Dark-themed custom map using iframe with dark embed */
-          <div className="relative w-full h-[220px] bg-[#111]">
+          <div className="relative w-full h-[220px] bg-bg">
             <iframe
               src={`https://maps.google.com/maps?q=${latitude},${longitude}&output=embed&z=${zoom}`}
               className="w-full h-full"
@@ -88,21 +88,21 @@ export default function MapPreview({
       </a>
 
       {/* Bottom bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[#111]">
+      <div className="flex items-center justify-between px-4 py-3 bg-bg">
         <div className="flex items-center gap-2 min-w-0">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-[#FF4D00] shrink-0">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="text-accent shrink-0">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="2" />
             <circle cx="12" cy="10" r="3" fill="currentColor" />
           </svg>
           {address && (
-            <span className="text-[#C0C0C0] text-sm truncate">{address}</span>
+            <span className="text-ink text-sm truncate">{address}</span>
           )}
         </div>
         <a
           href={directionsUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-[#FF4D00] font-semibold hover:text-[#FF4D00]/80 transition-colors whitespace-nowrap ml-3"
+          className="text-xs text-accent font-semibold hover:text-accent/80 transition-colors whitespace-nowrap ml-3"
         >
           Directions →
         </a>

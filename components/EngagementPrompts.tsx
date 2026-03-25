@@ -74,7 +74,7 @@ export default function EngagementPrompts(props: EngagementPromptsProps) {
       className={`rounded-xl px-4 py-3 bg-gradient-to-r ${prompt.bgClass} border flex items-center gap-3`}
     >
       <span className="text-xl shrink-0">{prompt.icon}</span>
-      <p className="text-sm font-semibold text-ink">{prompt.text}</p>
+      <p className="text-sm font-medium text-ink">{prompt.text}</p>
     </div>
   );
 }

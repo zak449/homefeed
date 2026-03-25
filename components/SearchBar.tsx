@@ -299,7 +299,7 @@ export default function SearchBar() {
         />
         {/* ⌘K shortcut hint — hidden when focused/has value */}
         {!city && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-medium text-tertiary/50 pointer-events-none select-none hidden sm:block">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-tertiary/50 pointer-events-none select-none hidden sm:block">
             ⌘K
           </span>
         )}
@@ -354,6 +354,7 @@ export default function SearchBar() {
                       className="text-tertiary hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1"
                       role="button"
                       tabIndex={-1}
+                      aria-label="Remove recent search"
                     >
                       &times;
                     </span>
@@ -382,6 +383,7 @@ export default function SearchBar() {
                       className="text-tertiary hover:text-ink opacity-0 group-hover:opacity-100 transition-opacity p-1"
                       role="button"
                       tabIndex={-1}
+                      aria-label="Remove saved search"
                     >
                       &times;
                     </span>
@@ -412,7 +414,7 @@ export default function SearchBar() {
                       <circle cx="12" cy="10" r="3" />
                     </svg>
                     <span className="text-ink flex-1">{s.label}</span>
-                    <span className="text-[10px] text-tertiary capitalize">{s.type === "postal_code" ? "zip" : s.type}</span>
+                    <span className="text-xs text-tertiary capitalize">{s.type === "postal_code" ? "zip" : s.type}</span>
                   </button>
                 ))}
               </>
@@ -492,7 +494,7 @@ export default function SearchBar() {
               }}
               className={`px-4 py-2.5 sm:px-3 sm:py-1 min-h-[44px] sm:min-h-0 rounded-full text-caption transition-colors ${
                 type === t.key
-                  ? "bg-[#F5F5F5] text-[#0E0E0E]"
+                  ? "bg-ink text-bg"
                   : "bg-surface text-ink hover:bg-active"
               }`}
             >
@@ -506,13 +508,13 @@ export default function SearchBar() {
             <button
               type="button"
               onClick={() => { setShowSort(!showSort); setShowFilters(false); }}
-              className="px-3 py-2 text-sm font-semibold text-white bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#FF4D00]/40 transition-colors flex items-center gap-1.5"
+              className="px-3 py-2 text-sm font-medium text-white bg-surface border border-divider rounded-lg hover:border-accent/40 transition-colors flex items-center gap-1.5"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M6 12h12M9 18h6"/></svg>
               Sort
             </button>
             {showSort && (
-              <div className="absolute right-0 top-full mt-1.5 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl shadow-modal z-50 min-w-[160px] overflow-hidden animate-fade-in">
+              <div className="absolute right-0 top-full mt-1.5 bg-surface border border-divider rounded-xl shadow-modal z-50 min-w-[160px] overflow-hidden animate-fade-in">
                 {[
                   { key: "", label: "Newest" },
                   { key: "price-low", label: "Price: Low → High" },
@@ -530,8 +532,8 @@ export default function SearchBar() {
                     }}
                     className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
                       currentSort === s.key
-                        ? "text-[#FF4D00] font-semibold bg-[#FF4D00]/10"
-                        : "text-white/80 hover:bg-[#2A2A2A]"
+                        ? "text-accent font-semibold bg-accent/10"
+                        : "text-white/80 hover:bg-elevated"
                     }`}
                   >
                     {s.label}
@@ -543,11 +545,11 @@ export default function SearchBar() {
           <button
             type="button"
             onClick={() => { setShowFilters(!showFilters); setShowSort(false); }}
-            className="px-3 py-2 text-sm font-semibold text-white bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg hover:border-[#FF4D00]/40 transition-colors flex items-center gap-1.5"
+            className="px-3 py-2 text-sm font-medium text-white bg-surface border border-divider rounded-lg hover:border-accent/40 transition-colors flex items-center gap-1.5"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
             Filters
-            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-[#FF4D00]" />}
+            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
           </button>
         </div>
       </div>

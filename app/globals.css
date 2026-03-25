@@ -12,8 +12,8 @@ html {
 }
 
 body {
-  background-color: #0E0E0E;
-  color: #F5F5F5;
+  background-color: #09090B;
+  color: #F0F0F0;
   font-family: 'Space Grotesk', 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -86,7 +86,7 @@ input[type=number]::-webkit-outer-spin-button {
   100% { background-position: 200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #1A1A1A 25%, #2A2A2A 50%, #1A1A1A 75%);
+  background: linear-gradient(90deg, #131316 25%, #222226 50%, #131316 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 8px;
@@ -125,7 +125,7 @@ input[type=number]::-webkit-outer-spin-button {
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: #2A2A2A;
+  background: #222226;
   outline: none;
   cursor: pointer;
 }
@@ -134,8 +134,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F5F5F5;
-  border: 3px solid #0E0E0E;
+  background: #F0F0F0;
+  border: 3px solid #09090B;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }
@@ -146,8 +146,8 @@ input[type=number]::-webkit-outer-spin-button {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #F5F5F5;
-  border: 3px solid #0E0E0E;
+  background: #F0F0F0;
+  border: 3px solid #09090B;
   box-shadow: 0 1px 4px rgba(0,0,0,0.4);
   cursor: grab;
 }

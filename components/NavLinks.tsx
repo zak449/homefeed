@@ -19,7 +19,7 @@ export default function NavLinks() {
         className={`px-4 py-1.5 rounded-full text-sm transition-all ${
           isExplore
             ? "bg-amber text-white font-medium"
-            : "text-[#AAAAAA] hover:text-ink hover:bg-surface"
+            : "text-secondary hover:text-ink hover:bg-surface"
         }`}
       >
         My Block
@@ -29,14 +29,14 @@ export default function NavLinks() {
         className={`px-4 py-1.5 rounded-full text-sm transition-all ${
           isTrending
             ? "bg-amber text-white font-medium"
-            : "text-[#AAAAAA] hover:text-ink hover:bg-surface"
+            : "text-secondary hover:text-ink hover:bg-surface"
         }`}
       >
         Hot Takes
       </Link>
       <Link
         href="/?sort=comments&type=sale"
-        className="px-4 py-1.5 rounded-full text-sm transition-all text-[#AAAAAA] hover:text-ink hover:bg-surface"
+        className="px-4 py-1.5 rounded-full text-sm transition-all text-secondary hover:text-ink hover:bg-surface"
       >
         Red Flags 🚩
       </Link>
@@ -45,7 +45,7 @@ export default function NavLinks() {
         className={`px-4 py-1.5 rounded-full text-sm transition-all ${
           isProfile
             ? "bg-amber text-white font-medium"
-            : "text-[#AAAAAA] hover:text-ink hover:bg-surface"
+            : "text-secondary hover:text-ink hover:bg-surface"
         }`}
       >
         Profile

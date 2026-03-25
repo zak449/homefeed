@@ -52,11 +52,11 @@ export default function NeighborhoodGrid() {
           <h2 className="font-display text-base font-bold text-ink">
             Explore Neighborhoods
           </h2>
-          <span className="text-[11px] font-semibold text-muted bg-tag px-2 py-0.5 rounded-full">
+          <span className="text-xs font-semibold text-muted bg-tag px-2 py-0.5 rounded-full">
             {neighborhoods.length} cities
           </span>
         </div>
-        <span className="text-[12px] text-muted">
+        <span className="text-xs text-muted">
           Most discussed {"\u2192"}
         </span>
       </div>
@@ -66,21 +66,21 @@ export default function NeighborhoodGrid() {
           <Link
             key={`${n.city}-${n.state}`}
             href={`/neighborhood/${encodeURIComponent(n.city)}`}
-            className="group block bg-[#1A1A1A] border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+            className="group block bg-surface border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="min-w-0">
                 <p className="font-display text-[15px] font-semibold text-ink truncate group-hover:text-social transition-colors">
                   {n.city}
                 </p>
-                <p className="text-[12px] text-muted">{n.state}</p>
+                <p className="text-xs text-muted">{n.state}</p>
               </div>
               {n.topReaction && (
                 <span className="text-lg shrink-0">{n.topReaction}</span>
               )}
             </div>
 
-            <div className="flex items-center gap-2 text-[12px] text-muted">
+            <div className="flex items-center gap-2 text-xs text-muted">
               <span>{n.listingCount} listing{n.listingCount !== 1 ? "s" : ""}</span>
               <span className="text-border">{"\u00b7"}</span>
               <span className="font-semibold text-ink">
@@ -90,7 +90,7 @@ export default function NeighborhoodGrid() {
 
             {n.commentCount > 0 && (
               <div className="mt-2">
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-social bg-social-light px-1.5 py-0.5 rounded">
                   {"\uD83D\uDCAC"} {n.commentCount} opinion{n.commentCount !== 1 ? "s" : ""}
                 </span>
               </div>

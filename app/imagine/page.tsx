@@ -10,7 +10,7 @@ export default function ImaginePage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
       {/* Hero */}
       <div className="text-center mb-16">
-        <p className="text-[11px] font-medium tracking-[0.15em] uppercase text-tertiary mb-4">
+        <p className="text-xs font-medium tracking-[0.15em] uppercase text-tertiary mb-4">
           coming Q3 2026
         </p>
         <h1 className="text-3xl sm:text-4xl font-medium text-ink mb-4 tracking-tight">
@@ -43,7 +43,7 @@ export default function ImaginePage() {
         ].map((feature, i) => (
           <div key={i} className="bg-surface border border-divider rounded-xl p-6 hover:shadow-hover transition-shadow">
             <div className="text-2xl mb-3">{feature.emoji}</div>
-            <h3 className="text-sm font-semibold text-ink mb-2">{feature.title}</h3>
+            <h3 className="text-sm font-medium text-ink mb-2">{feature.title}</h3>
             <p className="text-xs text-secondary leading-relaxed">{feature.desc}</p>
           </div>
         ))}
@@ -86,7 +86,7 @@ export default function ImaginePage() {
               </div>
               <div className="p-2.5">
                 <p className="text-xs font-medium text-ink">{item.style}</p>
-                <p className="text-[10px] text-tertiary">{item.zip} · {item.likes} likes</p>
+                <p className="text-xs text-tertiary">{item.zip} · {item.likes} likes</p>
               </div>
             </div>
           ))}
@@ -109,7 +109,7 @@ export default function ImaginePage() {
             Join waitlist
           </button>
         </div>
-        <p className="text-[10px] text-tertiary mt-3">No spam. Just early access.</p>
+        <p className="text-xs text-tertiary mt-3">No spam. Just early access.</p>
       </div>
 
       <div className="text-center mt-8">

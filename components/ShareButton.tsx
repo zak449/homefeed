@@ -90,7 +90,7 @@ export default function ShareButton({ listingId, address, city, price }: ShareBu
 
       {/* Dropdown */}
       {showDropdown && (
-        <div className="absolute top-full right-0 mt-2 bg-[#1A1A1A] rounded-xl border border-border shadow-modal z-50 min-w-[180px] animate-fade-in overflow-hidden">
+        <div className="absolute top-full right-0 mt-2 bg-surface rounded-xl border border-border shadow-modal z-50 min-w-[180px] animate-fade-in overflow-hidden">
           {/* Share on X */}
           <button
             onClick={handleShareX}

@@ -79,7 +79,7 @@ export default function RapSheetFeed({ comments, reactionCounts, listingId }: Ra
 
   function pillClasses(emoji: string | null, bg: string, borderDefault: string, text: string) {
     const isActive = activeFilter === emoji;
-    const border = isActive ? "border-[#FF4D00]" : borderDefault;
+    const border = isActive ? "border-accent" : borderDefault;
     return `${pillBase} ${bg} border ${border} ${text}`;
   }
 
@@ -89,8 +89,8 @@ export default function RapSheetFeed({ comments, reactionCounts, listingId }: Ra
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setActiveFilter(null)}
-          className={pillClasses(null, "bg-[#1E1E1E]", "border-[#2A2A2A]", "text-[#F2F0ED]") +
-            (activeFilter === null ? " border-[#FF4D00]" : "")}
+          className={pillClasses(null, "bg-elevated", "border-divider", "text-ink") +
+            (activeFilter === null ? " border-accent" : "")}
         >
           {comments.length} take{comments.length !== 1 ? "s" : ""} total
         </button>
@@ -149,14 +149,14 @@ export default function RapSheetFeed({ comments, reactionCounts, listingId }: Ra
         <h2 className="font-display text-[1.5rem] sm:text-[1.75rem] font-extrabold tracking-tight mb-1">
           {activeFilter ? "Filtered Takes" : "All Takes"}
         </h2>
-        <p className="text-[#9A9A9A] text-caption mb-6">
+        <p className="text-secondary text-caption mb-6">
           {activeFilter
             ? `${filteredComments.length} take${filteredComments.length !== 1 ? "s" : ""} with this reaction`
             : "Sorted by most reactions first"}
         </p>
 
         {filteredComments.length === 0 ? (
-          <div className="text-center py-12 text-[#666666]">
+          <div className="text-center py-12 text-tertiary">
             {activeFilter ? (
               <p className="text-body">No takes with this reaction.</p>
             ) : (
@@ -191,27 +191,27 @@ export default function RapSheetFeed({ comments, reactionCounts, listingId }: Ra
               return (
                 <div
                   key={comment.id}
-                  className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-5 fade-up"
+                  className="bg-surface border border-divider rounded-[16px] p-5 fade-up"
                   style={{ animationDelay: `${Math.min(i * 60, 600)}ms` }}
                 >
                   {/* Header */}
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-[12px] bg-[#252525] flex items-center justify-center text-[11px] font-semibold text-[#F2F0ED] shrink-0">
+                    <div className="w-10 h-10 rounded-[12px] bg-elevated flex items-center justify-center text-xs font-semibold text-ink shrink-0">
                       {initials}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-title text-[#F2F0ED] font-semibold">{comment.name}</span>
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${tag.className}`}>
+                        <span className="text-title text-ink font-semibold">{comment.name}</span>
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${tag.className}`}>
                           {tag.label}
                         </span>
                       </div>
-                      <span className="text-caption text-[#666666]">{timeAgo(comment.createdAt)}</span>
+                      <span className="text-caption text-tertiary">{timeAgo(comment.createdAt)}</span>
                     </div>
                   </div>
 
                   {/* Comment text */}
-                  <p className="text-[0.9375rem] text-[#F2F0ED] leading-relaxed whitespace-pre-wrap mb-3">
+                  <p className="text-[0.9375rem] text-ink leading-relaxed whitespace-pre-wrap mb-3">
                     {comment.content}
                   </p>
 
@@ -221,10 +221,10 @@ export default function RapSheetFeed({ comments, reactionCounts, listingId }: Ra
                       {Object.entries(rxCounts).map(([type, count]) => (
                         <span
                           key={type}
-                          className="inline-flex items-center gap-1 text-caption bg-[#252525] border border-[#2A2A2A] px-2.5 py-1 rounded-full"
+                          className="inline-flex items-center gap-1 text-caption bg-elevated border border-divider px-2.5 py-1 rounded-full"
                         >
                           <span className="text-sm">{type}</span>
-                          <span className="text-[#9A9A9A] font-medium">{count}</span>
+                          <span className="text-secondary font-medium">{count}</span>
                         </span>
                       ))}
                     </div>

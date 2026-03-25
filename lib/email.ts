@@ -83,21 +83,22 @@ export async function sendReactionAlert({
   await resend.emails.send({
     from: FROM,
     to: recipientEmail,
-    subject: `${reactorName} reacted to your comment on Gwaky`,
+    subject: "Someone reacted to your take on Gwaky",
     html: `
-      <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #FAFAF7; padding: 40px; border-radius: 16px;">
-        <div style="background: #FFD93D; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
-          <h1 style="color: #1A1A2E; font-size: 24px; margin: 0; font-family: Georgia, serif;">${reactionType} New reaction on Gwaky</h1>
+      <div style="font-family: DM Sans, sans-serif; max-width: 600px; margin: 0 auto; background: #0E0E0E; padding: 40px; border-radius: 16px;">
+        <div style="background: #FF4D00; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+          <h1 style="color: white; font-size: 24px; margin: 0; font-family: Georgia, serif;">${reactionType} Someone reacted to your take</h1>
         </div>
-        <p style="font-size: 16px; color: #1A1A2E;">Hi ${recipientName},</p>
-        <p style="font-size: 16px; color: #1A1A2E;"><strong>${reactorName}</strong> reacted ${reactionType} to your comment on <strong>${listingAddress}</strong>:</p>
-        <div style="background: white; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #FFD93D; font-style: italic; color: #555;">
+        <p style="font-size: 16px; color: #E0E0E0;">Hi ${recipientName},</p>
+        <p style="font-size: 16px; color: #E0E0E0;"><strong>${reactorName}</strong> reacted ${reactionType} to your take on <strong style="color: #FF4D00;">${listingAddress}</strong>:</p>
+        <div style="background: #1A1A1A; border-radius: 12px; padding: 20px; margin: 20px 0; border-left: 4px solid #FF4D00; font-style: italic; color: #999;">
           "${commentSnippet}"
         </div>
         <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}/listing/${listingId}"
-           style="display: inline-block; background: #FF6B6B; color: white; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">
+           style="display: inline-block; background: #FF4D00; color: white; padding: 12px 24px; border-radius: 999px; text-decoration: none; font-weight: 600;">
           View the conversation →
         </a>
+        <p style="font-size: 12px; color: #555; margin-top: 32px;">Sent via <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000"}" style="color: #FF4D00;">Gwaky</a></p>
       </div>
     `,
   });

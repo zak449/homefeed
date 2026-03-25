@@ -36,7 +36,7 @@ export default async function AboutPage() {
         <div className="absolute top-[-120px] left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-amber/[0.06] blur-[120px] amber-shimmer pointer-events-none" />
 
         <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-16 sm:pt-28 pb-14 sm:pb-20 relative z-10">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+          <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
             About Gwaky
           </p>
           <h1 className="font-display text-[2.25rem] sm:text-[3.25rem] md:text-[4rem] font-extrabold text-ink tracking-[-0.04em] leading-[1.04] max-w-3xl">
@@ -55,7 +55,7 @@ export default async function AboutPage() {
       ═══════════════════════════════════════════════════════════ */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
         {/* Big pull quote */}
-        <div className="relative bg-[#111111] rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden">
+        <div className="relative bg-bg rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden">
           <div className="absolute top-[-30px] right-[-30px] w-[180px] h-[180px] rounded-full bg-amber/[0.08] blur-[60px] pointer-events-none" />
           <div className="relative flex flex-col sm:flex-row items-start gap-6 sm:gap-10">
             {/* Photo placeholder */}
@@ -81,7 +81,7 @@ export default async function AboutPage() {
           <div className="absolute left-0 top-0 w-[3px] h-full bg-gradient-to-b from-amber via-amber/40 to-transparent rounded-full" />
 
           <div className="pl-8 sm:pl-10 space-y-5">
-            <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase">
+            <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase">
               The origin story
             </p>
 
@@ -125,9 +125,9 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 3 — THE MISSION
       ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-[#111111]">
+      <section className="bg-bg">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-5">
+          <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-5">
             Our mission
           </p>
           <h2 className="font-display text-3xl sm:text-[2.75rem] md:text-5xl font-extrabold text-white tracking-[-0.04em] leading-[1.08] max-w-3xl">
@@ -160,7 +160,7 @@ export default async function AboutPage() {
                 <h3 className="text-sm font-bold text-white tracking-tight mb-2">
                   {pillar.title}
                 </h3>
-                <p className="text-[13px] text-white/50 leading-relaxed">
+                <p className="text-sm text-white/50 leading-relaxed">
                   {pillar.text}
                 </p>
               </div>
@@ -174,7 +174,7 @@ export default async function AboutPage() {
       ═══════════════════════════════════════════════════════════ */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
         <div className="text-center mb-12">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+          <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
             How it works
           </p>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight">
@@ -235,7 +235,7 @@ export default async function AboutPage() {
               <h3 className="font-display text-lg font-bold text-ink tracking-tight mb-2">
                 {item.title}
               </h3>
-              <p className="text-[13px] text-secondary leading-relaxed">
+              <p className="text-sm text-secondary leading-relaxed">
                 {item.description}
               </p>
             </div>
@@ -248,7 +248,7 @@ export default async function AboutPage() {
       ═══════════════════════════════════════════════════════════ */}
       <section className="bg-highlight">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
-          <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+          <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
             The AI vision
           </p>
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-4 max-w-2xl">
@@ -292,7 +292,7 @@ export default async function AboutPage() {
                     {item.title}
                   </h3>
                   <span
-                    className={`shrink-0 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full ${
+                    className={`shrink-0 text-xs font-bold tracking-wider uppercase px-2 py-0.5 rounded-full ${
                       item.badge === "Live"
                         ? "bg-amber/10 text-amber"
                         : item.badge === "Building"
@@ -303,7 +303,7 @@ export default async function AboutPage() {
                     {item.badge}
                   </span>
                 </div>
-                <p className="text-[13px] text-secondary leading-relaxed">
+                <p className="text-sm text-secondary leading-relaxed">
                   {item.text}
                 </p>
               </div>
@@ -318,7 +318,7 @@ export default async function AboutPage() {
       <section className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
         <div className="flex flex-col sm:flex-row gap-10 sm:gap-16 items-start">
           <div className="flex-1">
-            <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+            <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
               For real estate agents
             </p>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight mb-5 leading-tight">
@@ -356,8 +356,8 @@ export default async function AboutPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-ink">{item.label}</p>
-                      <p className="text-[12px] text-tertiary">{item.desc}</p>
+                      <p className="text-sm font-medium text-ink">{item.label}</p>
+                      <p className="text-xs text-tertiary">{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -370,13 +370,13 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 7 — THE DATA
       ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-[#111111] relative overflow-hidden">
+      <section className="bg-bg relative overflow-hidden">
         {/* Ambient glow behind numbers */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-amber/[0.04] blur-[100px] pointer-events-none" />
 
         <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24 relative z-10">
           <div className="text-center mb-12">
-            <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-4">
+            <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-4">
               Live from the platform
             </p>
             <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight">
@@ -401,7 +401,7 @@ export default async function AboutPage() {
                 <p className="text-xs sm:text-sm font-bold text-white/70 tracking-tight">
                   {stat.label}
                 </p>
-                <p className="text-[11px] text-white/30 mt-1 hidden sm:block">
+                <p className="text-xs text-white/30 mt-1 hidden sm:block">
                   {stat.sub}
                 </p>
               </div>
@@ -455,7 +455,7 @@ export default async function AboutPage() {
           <div className="absolute bottom-[-40px] left-[-40px] w-[160px] h-[160px] rounded-full bg-amber/[0.06] blur-[60px] pointer-events-none" />
 
           <div className="relative z-10">
-            <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-5">
+            <p className="text-xs font-bold text-amber tracking-[0.2em] uppercase mb-5">
               Your move
             </p>
             <h2 className="font-display text-2xl sm:text-4xl font-extrabold text-white tracking-[-0.03em] leading-[1.1] mb-4">
@@ -468,7 +468,7 @@ export default async function AboutPage() {
 
             <JoinNeighborhood />
 
-            <p className="text-[11px] text-white/25 mt-6">
+            <p className="text-xs text-white/25 mt-6">
               Available nationwide. Growing every day.
             </p>
           </div>

@@ -41,7 +41,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const isDefaultLanding = !hasFilters && sort === "newest" && !searchMode;
 
   // Community stats + comments feed -- only on default landing
-  const [listingCount, commentCount, latestCommentsFeed] = isDefaultLanding
+  const [listingCount, commentCount, latestCommentsFeed, hottestTakeRaw] = isDefaultLanding
     ? await Promise.all([
         prisma.listing.count({ where: { status: "active" } }),
         prisma.comment.count(),
@@ -55,8 +55,28 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             reactions: true,
           },
         }),
+        // Fetch the #1 most-reacted comment for the hero
+        prisma.$queryRaw<{ id: string }[]>`
+          SELECT c.id
+          FROM "Comment" c
+          LEFT JOIN "Reaction" r ON r."commentId" = c.id
+          GROUP BY c.id
+          ORDER BY COUNT(r.id) DESC
+          LIMIT 1
+        `.then(async (rows) => {
+          if (rows.length === 0) return null;
+          return prisma.comment.findUnique({
+            where: { id: rows[0].id },
+            include: {
+              listing: {
+                select: { id: true, address: true, city: true, state: true, price: true, photos: true, listingType: true },
+              },
+              reactions: true,
+            },
+          });
+        }),
       ])
-    : [0, 0, []];
+    : [0, 0, [], null];
 
   // Map the prisma result to the CommentFeedItem type
   const commentsFeedData: CommentFeedItem[] = latestCommentsFeed.map((c) => ({
@@ -75,6 +95,24 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
       listingType: c.listing.listingType,
     },
   }));
+
+  // Map hottest take for hero
+  const hottestTake = hottestTakeRaw ? {
+    id: hottestTakeRaw.id,
+    name: hottestTakeRaw.name,
+    content: hottestTakeRaw.content,
+    createdAt: hottestTakeRaw.createdAt.toISOString(),
+    reactions: hottestTakeRaw.reactions.map((r: { type: string }) => ({ type: r.type })),
+    listing: {
+      id: hottestTakeRaw.listing.id,
+      address: hottestTakeRaw.listing.address,
+      city: hottestTakeRaw.listing.city,
+      state: hottestTakeRaw.listing.state,
+      price: hottestTakeRaw.listing.price,
+      photos: hottestTakeRaw.listing.photos,
+      listingType: hottestTakeRaw.listing.listingType,
+    },
+  } : null;
 
   // Lat/lng for radius search
   const lat = sp.lat ? Number(sp.lat) : undefined;
@@ -431,71 +469,95 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* Auto-enhance feed with geo when location is available */}
           <GeoFeedEnhancer />
 
-          {/* ═══ HERO — DARK, TEXT-DRIVEN, CHAOTIC ═══ */}
+          {/* ═══ HERO — HOTTEST TAKE SHOWCASE ═══ */}
           <div className="relative overflow-hidden" style={{ background: '#0A0A0A' }}>
             {/* Subtle amber glow orb */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #FF4D00, transparent 70%)' }} />
 
             <div className="relative max-w-3xl mx-auto px-5 pt-16 pb-14 sm:pt-24 sm:pb-20">
-              {/* Big bold logo */}
-              <h1 className="text-[clamp(3rem,10vw,5.5rem)] font-extrabold tracking-tighter font-display leading-[0.95] mb-4">
-                <span className="text-white">Gwak</span><span className="text-amber">y</span>
+              {/* Big heading */}
+              <h1 className="text-[clamp(2rem,7vw,3.5rem)] font-extrabold tracking-tighter font-display leading-[1.05] mb-4 text-white">
+                Real estate finally has a <span className="text-amber">comment section.</span>
               </h1>
 
-              {/* Tagline */}
-              <p className="text-[clamp(1rem,3vw,1.35rem)] text-white/50 font-medium tracking-tight mb-12 sm:mb-16 max-w-lg">
-                Real takes. Real addresses. <span className="whitespace-nowrap">No commission in the way.</span>
+              {/* Subtext */}
+              <p className="text-[clamp(0.95rem,2.5vw,1.2rem)] text-white/50 font-medium tracking-tight mb-10 sm:mb-14 max-w-xl">
+                See what neighbors, past renters, and drive-by experts are really saying.
               </p>
 
-              {/* ── CHAOTIC COMMENT SNIPPETS ── */}
-              <div className="relative mb-14 sm:mb-16" style={{ minHeight: '280px' }}>
-                {/* Card 1 — warning, slight tilt left */}
-                <div className="absolute top-0 left-0 sm:left-4 max-w-[340px] sm:max-w-[380px] rounded-xl border-l-4 border-l-red-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(-2deg)' }}>
-                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
-                    &#x1F6A8; The basement floods EVERY spring. Seller painted over the mold.
-                  </p>
-                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
-                    &mdash; Verified Neighbor
-                  </p>
-                </div>
+              {/* ── HOTTEST TAKE CARD ── */}
+              {hottestTake && (() => {
+                const htReactions: Record<string, number> = {};
+                for (const r of hottestTake.reactions) {
+                  htReactions[r.type] = (htReactions[r.type] || 0) + 1;
+                }
+                const htPhoto = hottestTake.listing.photos[0];
+                const htShortAddr = hottestTake.listing.address.split(",")[0];
+                const htNameParts = hottestTake.name.trim().split(/\s+/);
+                const htDisplayName = htNameParts.length > 1
+                  ? `${htNameParts[0]} ${htNameParts[htNameParts.length - 1][0]}.`
+                  : htNameParts[0];
+                const htLower = hottestTake.content.toLowerCase();
+                let htCredLabel = "Anon";
+                if (/\b(years?|lived here|moved|since)\b/.test(htLower)) htCredLabel = "Local";
+                else if (/\b(rent|tenant|lease)\b/.test(htLower)) htCredLabel = "Past Renter";
+                else if (/\b(neighbor|next door|block)\b/.test(htLower)) htCredLabel = "Neighbor";
 
-                {/* Card 2 — positive, tilt right, offset right and down */}
-                <div className="absolute top-6 right-0 sm:right-2 max-w-[300px] sm:max-w-[340px] rounded-xl border-l-4 border-l-green-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(1.5deg)' }}>
-                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
-                    &#x1F49A; Best block in the city. My kids walk to school. 11 years here.
-                  </p>
-                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
-                    &mdash; Local Since 2015
-                  </p>
-                </div>
-
-                {/* Card 3 — snarky, tilt left, bottom-left */}
-                <div className="absolute top-[130px] sm:top-[120px] left-2 sm:left-12 max-w-[310px] sm:max-w-[350px] rounded-xl border-l-4 border-l-amber bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(-1deg)' }}>
-                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
-                    &#x1F480; $800K for THAT kitchen?? no way lmao
-                  </p>
-                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
-                    &mdash; Drive-by Opinion
-                  </p>
-                </div>
-
-                {/* Card 4 — warning/suspicious, tilt right, bottom-right */}
-                <div className="absolute top-[200px] sm:top-[190px] right-4 sm:right-8 max-w-[320px] sm:max-w-[360px] rounded-xl border-l-4 border-l-yellow-500 bg-[#161616] border border-[#2A2A2A] p-4 shadow-lg" style={{ transform: 'rotate(2deg)' }}>
-                  <p className="text-[14px] sm:text-[15px] text-white/90 leading-snug font-medium mb-2">
-                    &#x26A0;&#xFE0F; They&apos;re hiding an un-permitted addition. I watched them build it.
-                  </p>
-                  <p className="text-[11px] text-white/30 font-semibold tracking-wide">
-                    &mdash; Past Renter
-                  </p>
-                </div>
-              </div>
+                return (
+                  <a href={`/listing/${hottestTake.listing.id}`} className="block group mb-10 sm:mb-14 rounded-2xl bg-surface border border-divider shadow-lg hover:shadow-xl hover:border-amber/30 transition-all duration-300 overflow-hidden">
+                    {/* Listing context */}
+                    <div className="flex items-center gap-3 p-4 pb-0">
+                      {htPhoto && (
+                        <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-elevated">
+                          <FallbackImage src={htPhoto} alt={htShortAddr} className="w-full h-full object-cover" loading="eager" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white truncate">{htShortAddr}</p>
+                        <p className="text-xs text-white/40">{fmtPrice(hottestTake.listing.price, hottestTake.listing.listingType)} &middot; {hottestTake.listing.city}, {hottestTake.listing.state}</p>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/15 text-amber border border-amber/20 shrink-0">#1 take</span>
+                    </div>
+                    {/* The take */}
+                    <div className="px-4 pt-3 pb-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm font-bold text-white/90">{htDisplayName}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400 border border-amber-700/40">{htCredLabel}</span>
+                      </div>
+                      <p className="text-lg font-bold text-white leading-snug">{hottestTake.content}</p>
+                    </div>
+                    {/* Reactions */}
+                    <div className="flex items-center gap-2 px-4 pb-4 flex-wrap">
+                      {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => {
+                        const count = htReactions[emoji] || 0;
+                        return (
+                          <span key={emoji} className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium ${
+                            count > 0 ? "bg-white/5 border-white/10 text-white/80" : "bg-white/[0.02] border-white/5 text-white/30"
+                          }`}>
+                            <span className="text-sm">{emoji}</span>
+                            <span className="tabular-nums">{count}</span>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </a>
+                );
+              })()}
 
               {/* ── SEARCH BAR ── */}
-              <div className="mb-8">
+              <div className="mb-6">
                 <Suspense>
                   <SearchBar />
                 </Suspense>
               </div>
+
+              {/* ── CTA BUTTON ── */}
+              <a
+                href="/?sort=comments"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-amber text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated mb-8"
+              >
+                Browse listings &rarr;
+              </a>
 
               {/* ── STATS BAR ── */}
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
@@ -515,6 +577,31 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             </div>
           </div>
 
+          {/* ═══ HOW IT WORKS — below hero ═══ */}
+          <div className="max-w-2xl mx-auto px-5 py-10">
+            <div className="rounded-2xl border border-divider bg-surface shadow-card overflow-hidden">
+              <div className="p-6 sm:p-8">
+                <p className="text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber mb-6">How it works</p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  {[
+                    { step: "01", emoji: "🏠", title: "Browse", desc: "Find any listing in the US" },
+                    { step: "02", emoji: "🍵", title: "Read the tea", desc: "See what the community really thinks" },
+                    { step: "03", emoji: "🗣️", title: "Drop your take", desc: "Share what you know (anonymously or not)" },
+                  ].map((s) => (
+                    <div key={s.step} className="text-center">
+                      <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft">
+                        {s.emoji}
+                      </div>
+                      <p className="text-[10px] font-bold text-amber mb-1 tracking-wider">{s.step}</p>
+                      <p className="text-sm text-ink font-bold leading-tight mb-1">{s.title}</p>
+                      <p className="text-xs text-tertiary leading-snug">{s.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
           <div className="max-w-2xl mx-auto px-5 py-6">
             <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
@@ -523,7 +610,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <a
                   key={cat.label}
                   href={cat.href}
-                  className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border border-divider text-sm font-semibold text-ink shadow-card hover:shadow-card-hover hover:border-amber/30 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
+                  className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border border-divider text-sm font-medium text-ink shadow-card hover:shadow-card-hover hover:border-amber/30 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
                 >
                   <span className="text-lg">{cat.emoji}</span>
                   <span className="whitespace-nowrap">{cat.label}</span>
@@ -571,14 +658,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     <div key={`take-${comment.id}`} className="rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
                       {/* Author row */}
                       <div className="flex items-center gap-2 px-5 pt-5 pb-2">
-                        <span className="text-[14px] font-bold text-ink">{formatName}</span>
+                        <span className="text-sm font-bold text-ink">{formatName}</span>
                         <span className="text-tertiary/40">&middot;</span>
-                        <span className="text-[12px] text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
+                        <span className="text-xs text-tertiary truncate">{comment.listing.city}, {comment.listing.state}</span>
                       </div>
                       {/* Credibility tag */}
                       <div className="px-5 pb-3">
                         {credTags.map((tag) => (
-                          <span key={tag} className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20 mr-1">
+                          <span key={tag} className="inline-flex items-center text-xs font-bold px-2 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20 mr-1">
                             {tag}
                           </span>
                         ))}
@@ -607,7 +694,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             </div>
                           )}
                         </div>
-                        <p className="text-[13px] text-secondary mt-2 truncate">
+                        <p className="text-sm text-secondary mt-2 truncate">
                           {shortAddr} &middot; {fmtPrice(comment.listing.price, comment.listing.listingType)} &middot; {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
                         </p>
                       </a>
@@ -684,11 +771,11 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           <p className="text-xs text-white/70 mt-1 truncate">{listing.address}, {listing.city}</p>
                         </div>
                         <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
+                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
                             {listing.listingType === "rent" ? "Rental" : "For Sale"}
                           </span>
                           {listing.status === "active" && (
-                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-green-500/80 backdrop-blur-md text-white">
+                            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-500/80 backdrop-blur-md text-white">
                               Active
                             </span>
                           )}
@@ -747,7 +834,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-tertiary" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M12 17v5" /><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
                         </svg>
-                        <span className="text-[11px] text-tertiary font-medium">Pinned</span>
+                        <span className="text-xs text-tertiary font-medium">Pinned</span>
                       </div>
 
                       <div className="p-5 pt-3">
@@ -757,9 +844,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-[15px] font-bold text-ink">Zachary Kaufman</span>
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber/15 text-amber font-bold">Founder</span>
+                              <span className="text-xs px-2 py-0.5 rounded-full bg-amber/15 text-amber font-bold">Founder</span>
                             </div>
-                            <span className="text-[12px] text-tertiary">@zach · Building Gwaky</span>
+                            <span className="text-xs text-tertiary">@zach · Building Gwaky</span>
                           </div>
                         </div>
 
@@ -795,7 +882,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   return (
                     <div key="how-it-works" className="rounded-2xl border border-divider bg-surface shadow-card overflow-hidden">
                       <div className="p-6 sm:p-8">
-                        <p className="text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber mb-5">How it works</p>
+                        <p className="text-xs font-extrabold tracking-[0.15em] uppercase text-amber mb-5">How it works</p>
                         <div className="grid grid-cols-3 gap-5">
                           {[
                             { step: "01", icon: "🏠", label: "Search any address or neighborhood" },
@@ -806,7 +893,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                               <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft">
                                 {s.icon}
                               </div>
-                              <p className="text-[10px] font-bold text-amber mb-1 tracking-wider">{s.step}</p>
+                              <p className="text-xs font-bold text-amber mb-1 tracking-wider">{s.step}</p>
                               <p className="text-xs text-ink font-semibold leading-tight">{s.label}</p>
                             </div>
                           ))}
@@ -881,7 +968,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       href={`/?${params.toString()}`}
                       className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                         isActive
-                          ? "bg-[#FF4D00] text-white font-medium"
+                          ? "bg-accent text-white font-medium"
                           : "text-secondary hover:bg-surface hover:text-ink"
                       }`}
                     >
@@ -923,7 +1010,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 Tip: Add a state abbreviation for best results (e.g. &ldquo;Austin, TX&rdquo;)
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="/" className="px-5 py-2.5 rounded-full bg-[#FF4D00] text-white text-sm font-medium hover:opacity-90 transition-opacity">
+                <a href="/" className="px-5 py-2.5 rounded-full bg-accent text-white text-sm font-medium hover:opacity-90 transition-opacity">
                   Browse all listings
                 </a>
                 <a href="/?sort=comments" className="px-5 py-2.5 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">
@@ -938,7 +1025,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                     <a
                       key={c}
                       href={`/?city=${encodeURIComponent(c.split(",")[0].trim())}`}
-                      className="px-3 py-1.5 rounded-full bg-highlight border border-divider text-xs text-secondary hover:text-ink hover:border-ink/20 transition-colors"
+                      className="px-3 py-1.5 rounded-full bg-highlight border border-divider text-xs text-secondary hover:text-ink hover:border-divider transition-colors"
                     >
                       {c}
                     </a>

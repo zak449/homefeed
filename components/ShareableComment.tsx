@@ -82,7 +82,7 @@ export default function ShareableComment({
       <button
         type="button"
         onClick={handleShare}
-        className="flex items-center gap-1 text-[11px] text-muted/50 hover:text-social transition-colors mt-1"
+        className="flex items-center gap-1 text-xs text-muted/50 hover:text-social transition-colors mt-1"
         title="Share this take"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -100,17 +100,17 @@ export default function ShareableComment({
             {/* The card */}
             <div
               ref={cardRef}
-              className="bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-modal"
+              className="bg-surface rounded-2xl overflow-hidden shadow-modal"
             >
               {/* Gradient header */}
-              <div className="bg-gradient-to-br from-[#0F0F0F] to-[#1a1a1a] px-5 pt-5 pb-4">
+              <div className="bg-gradient-to-br from-bg to-surface px-5 pt-5 pb-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-5 h-5 rounded-full bg-social flex items-center justify-center">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
                       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                     </svg>
                   </div>
-                  <span className="text-[11px] font-semibold text-white/70">Gwaky</span>
+                  <span className="text-xs font-semibold text-white/70">Gwaky</span>
                 </div>
                 <p className="text-white text-sm leading-relaxed font-medium">
                   &ldquo;{content}&rdquo;
@@ -120,12 +120,12 @@ export default function ShareableComment({
               {/* Author + listing info */}
               <div className="px-5 py-4">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-[#F5F5F5] text-[#0E0E0E] flex items-center justify-center text-[10px] font-semibold">
+                  <div className="w-8 h-8 rounded-full bg-ink text-bg flex items-center justify-center text-xs font-semibold">
                     {initials}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-ink">{formatName(name)}</p>
-                    <p className="text-[11px] text-muted">{timeAgo(createdAt)}</p>
+                    <p className="text-sm font-medium text-ink">{formatName(name)}</p>
+                    <p className="text-xs text-muted">{timeAgo(createdAt)}</p>
                   </div>
                   {totalReactions > 0 && topReaction && (
                     <span className="ml-auto text-xs bg-tag px-2 py-0.5 rounded-full">
@@ -141,7 +141,7 @@ export default function ShareableComment({
                   </svg>
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-ink truncate">{address}</p>
-                    <p className="text-[11px] text-muted">{price}</p>
+                    <p className="text-xs text-muted">{price}</p>
                   </div>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function ShareableComment({
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="flex-1 py-2.5 bg-[#1A1A1A] rounded-xl text-sm font-semibold text-white hover:bg-tag transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-surface rounded-xl text-sm font-semibold text-white hover:bg-tag transition-colors flex items-center justify-center gap-1.5"
               >
                 {copied ? (
                   <>
@@ -174,7 +174,7 @@ export default function ShareableComment({
               <button
                 type="button"
                 onClick={() => setShowCard(false)}
-                className="py-2.5 px-4 bg-[#1A1A1A]/80 rounded-xl text-sm font-medium text-muted hover:text-ink transition-colors"
+                className="py-2.5 px-4 bg-surface/80 rounded-xl text-sm font-medium text-muted hover:text-ink transition-colors"
               >
                 Close
               </button>

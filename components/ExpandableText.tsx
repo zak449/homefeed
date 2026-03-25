@@ -22,7 +22,7 @@ export default function ExpandableText({
         {expanded ? text : text.slice(0, maxLength).replace(/\s+\S*$/, "")}
       </p>
       {!expanded && (
-        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-[#0A0A0A] to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-t from-bg to-transparent pointer-events-none" />
       )}
       <button
         onClick={() => setExpanded(!expanded)}

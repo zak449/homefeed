@@ -172,7 +172,7 @@ export default function NeighborQA({
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors"
+          className="px-4 py-2 bg-ink text-bg text-caption font-medium rounded-button hover:bg-ink/90 transition-colors"
         >
           Ask a question
         </button>
@@ -204,7 +204,7 @@ export default function NeighborQA({
                     onClick={() => setNewCategory(cat.key as Category)}
                     className={`text-caption px-3 py-1.5 rounded-full border transition-colors ${
                       newCategory === cat.key
-                        ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
+                        ? "bg-ink text-bg border-ink"
                         : "bg-bg border-divider text-secondary hover:text-ink hover:border-tertiary/40"
                     }`}
                   >
@@ -235,7 +235,7 @@ export default function NeighborQA({
                 <button
                   type="submit"
                   disabled={posting || !newQuestion.trim()}
-                  className="px-5 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
+                  className="px-5 py-2 bg-ink text-bg text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
                 >
                   {posting ? "Posting..." : "Post question"}
                 </button>
@@ -258,14 +258,14 @@ export default function NeighborQA({
               onClick={() => setActiveCategory(cat.key)}
               className={`whitespace-nowrap text-caption px-3.5 py-1.5 rounded-full border transition-all shrink-0 ${
                 activeCategory === cat.key
-                  ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
+                  ? "bg-ink text-bg border-ink"
                   : "bg-surface border-divider text-secondary hover:text-ink hover:border-tertiary/40"
               }`}
             >
               {cat.icon}{cat.icon ? " " : ""}{cat.label}
               {count > 0 && (
                 <span
-                  className={`ml-1.5 text-[11px] ${
+                  className={`ml-1.5 text-xs ${
                     activeCategory === cat.key ? "text-white/70" : "text-tertiary"
                   }`}
                 >
@@ -341,7 +341,7 @@ export default function NeighborQA({
                         <path d="M12 19V5" />
                         <path d="M5 12l7-7 7 7" />
                       </svg>
-                      <span className="text-[12px] font-semibold">
+                      <span className="text-xs font-semibold">
                         {q.upvotes}
                       </span>
                     </button>
@@ -360,7 +360,7 @@ export default function NeighborQA({
                           {timeAgo(q.createdAt)}
                         </span>
                         <span
-                          className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+                          className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                             {
                               property: "bg-blue-900/30 text-blue-400 border border-blue-700/40",
                               block: "bg-purple-900/30 text-purple-400 border border-purple-700/40",
@@ -426,7 +426,7 @@ export default function NeighborQA({
                                 {a.authorName}
                               </span>
                               {a.isVerifiedLocal && (
-                                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-green-900/30 text-green-400 border border-green-700/40">
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-md bg-green-900/30 text-green-400 border border-green-700/40">
                                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                                   Verified Local
                                 </span>
@@ -567,7 +567,7 @@ function AnswerForm({
       <button
         type="submit"
         disabled={posting || !content.trim()}
-        className="shrink-0 px-4 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
+        className="shrink-0 px-4 py-2 bg-ink text-bg text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
       >
         {posting ? "..." : "Answer"}
       </button>

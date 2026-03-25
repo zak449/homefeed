@@ -277,7 +277,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             </svg>
           </div>
           <h3 className="font-display text-title text-ink tracking-tight">Imagine what it could be</h3>
-          <span className="ml-auto text-[10px] font-semibold tracking-wider uppercase text-amber bg-amber/8 px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-xs font-medium tracking-wider uppercase text-amber bg-amber/8 px-2 py-0.5 rounded-full">
             Beta
           </span>
         </div>
@@ -295,10 +295,10 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             </svg>
           </div>
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold text-ink">
+            <p className="text-xs font-semibold text-ink">
               Coming soon: AI-generated visualization
             </p>
-            <p className="text-[10px] text-secondary mt-0.5">
+            <p className="text-xs text-secondary mt-0.5">
               Full AI rendering is being developed. For now, browse renovation ideas and apply style filters to the listing photos.
             </p>
           </div>
@@ -307,7 +307,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
 
       {/* ── Dream prompt input ───────────────────────────────────────────── */}
       <div className="px-5 pb-4">
-        <label className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2 block">
+        <label className="text-xs font-medium tracking-wider uppercase text-tertiary mb-2 block">
           Describe your dream renovation...
         </label>
         <div className="relative">
@@ -324,7 +324,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             </svg>
           </div>
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber bg-amber/8 px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber bg-amber/8 px-2 py-0.5 rounded-full">
               <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -341,7 +341,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             {/* Category header */}
             <div className="px-5 mb-2 flex items-center gap-1.5">
               <span className="text-sm">{category.emoji}</span>
-              <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary">
+              <p className="text-xs font-medium tracking-wider uppercase text-tertiary">
                 {category.label}
               </p>
             </div>
@@ -357,17 +357,17 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                     className={`flex-shrink-0 w-[120px] rounded-xl border p-3 text-left transition-all duration-200 ${
                       isSelected
                         ? "bg-amber/5 border-amber/40 shadow-soft ring-1 ring-amber/20"
-                        : "bg-highlight/60 border-divider hover:border-ink/20 hover:shadow-soft"
+                        : "bg-highlight/60 border-divider hover:border-divider hover:shadow-soft"
                     }`}
                   >
                     <span className="text-xl block mb-1.5">{idea.emoji}</span>
-                    <p className="text-[12px] font-semibold text-ink leading-tight mb-1 line-clamp-2">
+                    <p className="text-xs font-semibold text-ink leading-tight mb-1 line-clamp-2">
                       {idea.name}
                     </p>
-                    <p className="text-[10px] font-semibold text-amber mb-0.5">
+                    <p className="text-xs font-semibold text-amber mb-0.5">
                       {idea.cost}
                     </p>
-                    <p className="text-[10px] text-emerald-600 font-medium">
+                    <p className="text-xs text-emerald-600 font-medium">
                       {idea.valueAdd}
                     </p>
                   </button>
@@ -384,18 +384,18 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
           <div className="flex items-start gap-3">
             <span className="text-2xl">{selectedIdea.emoji}</span>
             <div className="min-w-0 flex-1">
-              <p className="text-caption font-semibold text-ink">{selectedIdea.name}</p>
-              <p className="text-[11px] text-secondary mt-1 leading-relaxed">
+              <p className="text-caption font-medium text-ink">{selectedIdea.name}</p>
+              <p className="text-xs text-secondary mt-1 leading-relaxed">
                 {selectedIdea.description}
               </p>
               <div className="flex items-center gap-3 mt-2">
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-ink bg-ink/5 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-ink bg-ink/5 px-2 py-0.5 rounded-full">
                   <svg className="w-2.5 h-2.5 text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   Est. cost: {selectedIdea.cost}
                 </span>
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 bg-emerald-500/8 px-2 py-0.5 rounded-full">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-500/8 px-2 py-0.5 rounded-full">
                   <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                   </svg>
@@ -410,7 +410,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
       {/* ── Photo Selector Thumbnails ─────────────────────────────────────── */}
       {photos.length > 1 && (
         <div className="px-5 pb-3">
-          <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-2">
+          <p className="text-xs font-medium tracking-wider uppercase text-tertiary mb-2">
             Select a photo
           </p>
           <div className="flex gap-2 overflow-x-auto pb-1">
@@ -492,7 +492,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                 className={`absolute inset-0 bg-gradient-to-br ${STYLE_OVERLAYS[selectedStyle]}`}
               />
               {!showComparison && (
-                <div className="absolute top-3 right-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                <div className="absolute top-3 right-3 bg-ink/70 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
                   <svg className="w-3 h-3 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
                   </svg>
@@ -517,10 +517,10 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                   </svg>
                 </div>
               </div>
-              <div className="absolute top-3 left-3 bg-ink/70 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full z-[5]">
+              <div className="absolute top-3 left-3 bg-ink/70 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full z-[5]">
                 Original
               </div>
-              <div className="absolute top-3 right-3 bg-amber/90 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full z-[5]">
+              <div className="absolute top-3 right-3 bg-amber/90 backdrop-blur-sm text-white text-xs font-semibold px-2.5 py-1 rounded-full z-[5]">
                 {selectedStyle} Filter
               </div>
             </>
@@ -544,15 +544,15 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             <p className="text-caption font-medium text-ink">
               Style Preview (visual filter)
             </p>
-            <p className="text-[11px] text-tertiary">
+            <p className="text-xs text-tertiary">
               {STYLE_DESCRIPTIONS[selectedStyle]}
             </p>
           </div>
           <button
             onClick={toggleComparison}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-full border transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full border transition-all duration-200 ${
               showComparison
-                ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
+                ? "bg-ink text-bg border-ink"
                 : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
             }`}
           >
@@ -566,7 +566,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
 
       {/* ── Style Filter Section (secondary) ──────────────────────────────── */}
       <div className="px-5 py-4 border-t border-divider">
-        <p className="text-[11px] font-semibold tracking-wider uppercase text-tertiary mb-3">
+        <p className="text-xs font-medium tracking-wider uppercase text-tertiary mb-3">
           Style filters
         </p>
         <div className="flex flex-wrap gap-2">
@@ -578,7 +578,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                 onClick={() => handleStyleSelect(style)}
                 className={`px-4 py-2 text-caption font-medium rounded-full border transition-all duration-200 ${
                   isActive
-                    ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink shadow-soft"
+                    ? "bg-ink text-bg border-ink shadow-soft"
                     : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
                 }`}
               >
@@ -591,7 +591,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
 
       {/* ── Footer actions ────────────────────────────────────────────────── */}
       <div className="px-5 pb-5 flex items-center justify-between border-t border-divider pt-4">
-        <p className="text-[11px] text-tertiary truncate mr-3">
+        <p className="text-xs text-tertiary truncate mr-3">
           {address}
         </p>
         <button

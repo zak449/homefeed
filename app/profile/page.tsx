@@ -128,26 +128,26 @@ export default function ProfilePage() {
   // No email — show join CTA
   if (!email && !loading) {
     return (
-      <div className="min-h-screen bg-[#0E0E0E] flex items-center justify-center px-4">
+      <div className="min-h-screen bg-bg flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-6">🏡</div>
           <h1 className="text-white text-2xl font-extrabold mb-3 tracking-tight">
             Your Gwaky profile lives here
           </h1>
-          <p className="text-[#999] text-[15px] leading-relaxed mb-8 max-w-xs mx-auto">
+          <p className="text-secondary text-[15px] leading-relaxed mb-8 max-w-xs mx-auto">
             Drop a take on any listing to get started. Your takes, saved
             listings, and activity will show up here.
           </p>
           <Link
             href="/"
-            className="inline-block px-8 py-3.5 bg-[#FF4D00] text-white text-sm font-bold rounded-xl hover:bg-[#FF4D00]/90 transition-all shadow-lg shadow-[#FF4D00]/20"
+            className="inline-block px-8 py-3.5 bg-accent text-white text-sm font-bold rounded-xl hover:bg-accent/90 transition-all shadow-lg shadow-[#FF4D00]/20"
           >
             Browse Listings &rarr;
           </Link>
           <div className="mt-5">
             <Link
               href="/about"
-              className="text-[#666] text-sm hover:text-[#999] transition-colors underline underline-offset-4 decoration-[#333]"
+              className="text-tertiary text-sm hover:text-secondary transition-colors underline underline-offset-4 decoration-[#333]"
             >
               What is Gwaky?
             </Link>
@@ -158,11 +158,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0E0E0E]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* ── Header ── */}
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-full bg-[#FF4D00]/15 flex items-center justify-center text-lg font-bold text-[#FF4D00] shrink-0">
+          <div className="w-16 h-16 rounded-full bg-accent/15 flex items-center justify-center text-lg font-bold text-accent shrink-0">
             {name ? getInitials(name) : "?"}
           </div>
           <div className="min-w-0">
@@ -171,15 +171,15 @@ export default function ProfilePage() {
                 {name || "Anonymous"}
               </h1>
               {isVerified && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-green-900/30 text-green-400 border border-green-700/40">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-900/30 text-green-400 border border-green-700/40">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                   Verified
                 </span>
               )}
             </div>
-            <p className="text-[#666] text-sm truncate">{email}</p>
+            <p className="text-tertiary text-sm truncate">{email}</p>
             {zip && (
-              <p className="text-[#555] text-xs mt-0.5">ZIP: {zip}</p>
+              <p className="text-tertiary text-xs mt-0.5">ZIP: {zip}</p>
             )}
           </div>
         </div>
@@ -192,15 +192,15 @@ export default function ProfilePage() {
               onClick={() => setActiveTab(tab.key)}
               className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 activeTab === tab.key
-                  ? "bg-[#FF4D00] text-white"
-                  : "bg-[#1A1A1A] border border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"
+                  ? "bg-accent text-white"
+                  : "bg-surface border border-divider text-secondary hover:text-white hover:border-secondary/30"
               }`}
             >
               {tab.label}
               {tab.count > 0 && (
                 <span
                   className={`ml-1.5 text-xs ${
-                    activeTab === tab.key ? "text-white/70" : "text-[#555]"
+                    activeTab === tab.key ? "text-white/70" : "text-tertiary"
                   }`}
                 >
                   {tab.count}
@@ -216,10 +216,10 @@ export default function ProfilePage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 animate-pulse"
+                className="bg-surface border border-divider rounded-xl p-4 animate-pulse"
               >
-                <div className="h-4 w-3/4 bg-[#222] rounded mb-3" />
-                <div className="h-3 w-1/2 bg-[#222] rounded" />
+                <div className="h-4 w-3/4 bg-elevated rounded mb-3" />
+                <div className="h-3 w-1/2 bg-elevated rounded" />
               </div>
             ))}
           </div>
@@ -239,20 +239,20 @@ export default function ProfilePage() {
                     <Link
                       key={c.id}
                       href={c.listing ? `/listing/${c.listing.id}` : "/"}
-                      className="block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#444] transition-colors"
+                      className="block bg-surface border border-divider rounded-xl p-4 hover:border-secondary/30 transition-colors"
                     >
-                      <p className="text-[#E0E0E0] text-sm font-medium leading-relaxed mb-2">
+                      <p className="text-ink text-sm font-medium leading-relaxed mb-2">
                         {c.content}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-[#555]">
+                      <div className="flex items-center gap-2 text-xs text-tertiary">
                         {c.listing && (
                           <>
-                            <span className="text-[#888]">
+                            <span className="text-secondary">
                               {c.listing.address}
                             </span>
-                            <span className="text-[#333]">·</span>
+                            <span className="text-divider">·</span>
                             <span>{c.listing.city}</span>
-                            <span className="text-[#333]">·</span>
+                            <span className="text-divider">·</span>
                           </>
                         )}
                         <span>{timeAgo(c.createdAt)}</span>
@@ -279,20 +279,20 @@ export default function ProfilePage() {
                       href={
                         q.listingId ? `/listing/${q.listingId}` : "/"
                       }
-                      className="block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#444] transition-colors"
+                      className="block bg-surface border border-divider rounded-xl p-4 hover:border-secondary/30 transition-colors"
                     >
-                      <p className="text-[#E0E0E0] text-sm font-medium leading-relaxed mb-2">
+                      <p className="text-ink text-sm font-medium leading-relaxed mb-2">
                         {q.question}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-[#555]">
-                        <span className="px-2 py-0.5 rounded-full bg-[#1F1F1F] border border-[#2A2A2A] text-[#888] text-[10px]">
+                      <div className="flex items-center gap-2 text-xs text-tertiary">
+                        <span className="px-2 py-0.5 rounded-full bg-surface border border-divider text-secondary text-xs">
                           {q.category}
                         </span>
                         <span>
                           {q.answerCount} answer
                           {q.answerCount !== 1 ? "s" : ""}
                         </span>
-                        <span className="text-[#333]">·</span>
+                        <span className="text-divider">·</span>
                         <span>{timeAgo(q.createdAt)}</span>
                       </div>
                     </Link>
@@ -315,10 +315,10 @@ export default function ProfilePage() {
                     <Link
                       key={id}
                       href={`/listing/${id}`}
-                      className="block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#444] transition-colors"
+                      className="block bg-surface border border-divider rounded-xl p-4 hover:border-secondary/30 transition-colors"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#222] flex items-center justify-center text-[#555]">
+                        <div className="w-10 h-10 rounded-lg bg-elevated flex items-center justify-center text-tertiary">
                           <svg
                             width="18"
                             height="18"
@@ -331,10 +331,10 @@ export default function ProfilePage() {
                           </svg>
                         </div>
                         <div>
-                          <p className="text-[#E0E0E0] text-sm font-medium">
+                          <p className="text-ink text-sm font-medium">
                             Saved Listing
                           </p>
-                          <p className="text-[#555] text-xs">
+                          <p className="text-tertiary text-xs">
                             Tap to view →
                           </p>
                         </div>
@@ -361,15 +361,15 @@ export default function ProfilePage() {
                       href={
                         a.listingId ? `/listing/${a.listingId}` : "/"
                       }
-                      className="block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 hover:border-[#444] transition-colors"
+                      className="block bg-surface border border-divider rounded-xl p-4 hover:border-secondary/30 transition-colors"
                     >
-                      <p className="text-[#888] text-xs mb-1 italic">
+                      <p className="text-secondary text-xs mb-1 italic">
                         Q: {a.questionText}
                       </p>
-                      <p className="text-[#E0E0E0] text-sm font-medium leading-relaxed mb-2">
+                      <p className="text-ink text-sm font-medium leading-relaxed mb-2">
                         {a.content}
                       </p>
-                      <span className="text-[11px] text-[#555]">
+                      <span className="text-xs text-tertiary">
                         {timeAgo(a.createdAt)}
                       </span>
                     </Link>
@@ -397,7 +397,7 @@ function EmptyState({
     <div className="text-center py-16">
       <p className="text-2xl mb-2">{emoji}</p>
       <p className="text-white font-semibold text-lg">{title}</p>
-      <p className="text-[#666] text-sm mt-1">{description}</p>
+      <p className="text-tertiary text-sm mt-1">{description}</p>
     </div>
   );
 }

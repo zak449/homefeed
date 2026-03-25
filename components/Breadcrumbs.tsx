@@ -8,7 +8,7 @@ interface BreadcrumbItem {
 export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
     <nav aria-label="Breadcrumb" className="mb-4">
-      <ol className="flex items-center gap-1 text-[12px] text-muted">
+      <ol className="flex items-center gap-1 text-xs text-muted">
         {items.map((item, i) => (
           <li key={i} className="flex items-center gap-1">
             {i > 0 && <span className="text-muted/50">&gt;</span>}

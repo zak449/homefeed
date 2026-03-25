@@ -226,6 +226,11 @@ export default function IntelBox({
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // ── Toast state ──
+  const [showToast, setShowToast] = useState(false);
+  const [toastCopied, setToastCopied] = useState(false);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // ── Refs ──
   const scrollRef = useRef<HTMLDivElement>(null);
   const gwakyEndRef = useRef<HTMLDivElement>(null);
@@ -387,6 +392,11 @@ export default function IntelBox({
         } catch {
           // ignore
         }
+        // Show celebration toast
+        setShowToast(true);
+        setToastCopied(false);
+        if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setShowToast(false), 5000);
       } else {
         const err = await res.json();
         setPostError(err.error ?? "Failed to post");
@@ -618,23 +628,52 @@ export default function IntelBox({
 
   return (
     <div
-      className="relative flex flex-col border border-[#2A2A2A] rounded-2xl overflow-hidden"
+      className="relative flex flex-col border border-divider rounded-2xl overflow-hidden"
       style={{
-        background: "#0E0E0E",
+        background: "#09090B",
         minHeight: "600px",
         maxHeight: "80vh",
       }}
     >
+      {/* ════════ POST-TAKE CELEBRATION TOAST ════════ */}
+      {showToast && (
+        <div className="absolute top-3 left-3 right-3 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
+          <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-emerald-900/90 border border-emerald-700/50 backdrop-blur-sm shadow-lg">
+            <span className="text-sm font-semibold text-emerald-100">Your take is live! &#x1F389;</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                onClick={() => {
+                  const url = `${window.location.origin}/listing/${listingId}`;
+                  navigator.clipboard.writeText(url).then(() => {
+                    setToastCopied(true);
+                    setTimeout(() => setToastCopied(false), 2000);
+                  });
+                }}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-600/50 transition-colors"
+              >
+                {toastCopied ? "Copied!" : "Share"}
+              </button>
+              <button
+                onClick={() => setShowToast(false)}
+                className="text-emerald-300/60 hover:text-emerald-100 transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ════════ ZONE 1 — Fixed tab header (never scrolls) ════════ */}
-      <div className="shrink-0 z-10 bg-[#0E0E0E] border-b border-[#2A2A2A] px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      <div className="shrink-0 z-10 bg-bg border-b border-divider px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`whitespace-nowrap px-4 py-2 rounded-md text-sm font-medium transition-all ${
               activeTab === tab.key
-                ? "bg-[#FF4D00] text-white"
-                : "border border-[#2A2A2A] text-[#888888] hover:text-white hover:border-[#444]"
+                ? "bg-accent text-white"
+                : "border border-divider text-secondary hover:text-white hover:border-secondary/30"
             }`}
           >
             {tab.label}
@@ -651,10 +690,10 @@ export default function IntelBox({
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex gap-3 animate-pulse">
-                    <div className="w-10 h-10 rounded-full bg-[#222] shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-elevated shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3 w-24 bg-[#222] rounded" />
-                      <div className="h-14 bg-[#222] rounded-xl" />
+                      <div className="h-3 w-24 bg-elevated rounded" />
+                      <div className="h-14 bg-elevated rounded-xl" />
                     </div>
                   </div>
                 ))}
@@ -663,7 +702,7 @@ export default function IntelBox({
               <div className="text-center py-16">
                 <p className="text-2xl mb-2">🫖</p>
                 <p className="text-white font-semibold text-lg">No tea yet.</p>
-                <p className="text-[#666] text-sm mt-1">
+                <p className="text-tertiary text-sm mt-1">
                   Be the first to drop intel on this block.
                 </p>
               </div>
@@ -675,11 +714,11 @@ export default function IntelBox({
                   return (
                     <div
                       key={comment.id}
-                      className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4"
+                      className="bg-surface rounded-xl p-4"
                     >
                       {/* Header */}
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="w-9 h-9 rounded-full bg-[#FF4D00]/15 flex items-center justify-center text-[11px] font-bold text-[#FF4D00] shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-accent/15 flex items-center justify-center text-xs font-bold text-accent shrink-0">
                           {getInitials(comment.name)}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -687,23 +726,23 @@ export default function IntelBox({
                             {formatName(comment.name)}
                           </span>
                           <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${tag.className}`}
+                            className={`text-xs font-semibold px-2 py-0.5 rounded-full ${tag.className}`}
                           >
                             {tag.label}
                           </span>
                           {role && (
-                            <span className="text-[10px] px-2 py-0.5 rounded-full border border-white/20 text-white/60 font-medium">
+                            <span className="text-xs px-2 py-0.5 rounded-full border border-white/20 text-white/60 font-medium">
                               {role}
                             </span>
                           )}
                         </div>
-                        <span className="ml-auto text-[11px] text-[#555] shrink-0">
+                        <span className="ml-auto text-xs text-tertiary shrink-0">
                           {timeAgo(comment.createdAt)}
                         </span>
                       </div>
 
                       {/* Take */}
-                      <p className="text-[#E0E0E0] text-sm font-semibold leading-relaxed mb-3">
+                      <p className="text-ink text-sm font-semibold leading-relaxed mb-3">
                         {commentText}
                       </p>
 
@@ -717,10 +756,11 @@ export default function IntelBox({
                               onClick={() => handleReact(comment.id, emoji)}
                               disabled={!isJoined}
                               title={REACTION_LABELS[emoji]}
+                              aria-label={REACTION_LABELS[emoji]}
                               className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all ${
                                 count > 0
-                                  ? "bg-[#FF4D00]/10 border border-[#FF4D00]/30 text-[#FF4D00]"
-                                  : "bg-[#1F1F1F] border border-[#2A2A2A] text-[#555] hover:text-[#888] hover:border-[#444]"
+                                  ? "bg-accent/10 border border-accent/30 text-accent"
+                                  : "bg-surface border border-divider text-tertiary hover:text-secondary hover:border-secondary/30"
                               } disabled:opacity-40 disabled:cursor-not-allowed`}
                             >
                               <span>{emoji}</span>
@@ -744,7 +784,7 @@ export default function IntelBox({
               <div className="py-12 text-center">
                 <p className="text-2xl mb-3">✨</p>
                 <p className="text-white font-semibold text-lg mb-1">Ask Gwaky AI</p>
-                <p className="text-[#666] text-sm mb-6">
+                <p className="text-tertiary text-sm mb-6">
                   Brutally honest property insights powered by AI
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
@@ -754,7 +794,7 @@ export default function IntelBox({
                       onClick={() =>
                         sendAIMessage(prompt, setGwakyMessages, setGwakyInput, setGwakyLoading)
                       }
-                      className="text-xs px-3 py-2 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#999] hover:text-white hover:border-[#FF4D00]/40 transition-all"
+                      className="text-xs px-3 py-2 rounded-full bg-surface border border-divider text-secondary hover:text-white hover:border-accent/40 transition-all"
                     >
                       {prompt}
                     </button>
@@ -766,9 +806,9 @@ export default function IntelBox({
                 {gwakyMessages.map((msg) =>
                   msg.role === "user" ? (
                     <div key={msg.id} className="flex justify-end">
-                      <div className="max-w-[85%] bg-[#FF4D00] text-white rounded-2xl rounded-br-md px-4 py-2.5">
+                      <div className="max-w-[85%] bg-accent text-white rounded-2xl rounded-br-md px-4 py-2.5">
                         <p className="text-sm">{msg.content}</p>
-                        <p className="text-[10px] text-white/50 mt-1 text-right">
+                        <p className="text-xs text-white/50 mt-1 text-right">
                           {formatTime(msg.timestamp)}
                         </p>
                       </div>
@@ -776,28 +816,28 @@ export default function IntelBox({
                   ) : (
                     <div
                       key={msg.id}
-                      className="border-l-[3px] border-[#FF4D00] bg-[#1A1A1A] rounded-xl p-4"
+                      className="border-l-[3px] border-accent bg-surface rounded-xl p-4"
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-semibold text-[#FF4D00]">
+                        <span className="text-xs font-semibold text-accent">
                           ✨ Gwaky AI
                         </span>
                       </div>
-                      <p className="text-[#E0E0E0] text-sm leading-relaxed whitespace-pre-wrap">
+                      <p className="text-ink text-sm leading-relaxed whitespace-pre-wrap">
                         {msg.content}
                       </p>
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#2A2A2A]">
-                        <p className="text-[10px] text-[#555]">{formatTime(msg.timestamp)}</p>
+                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-divider">
+                        <p className="text-xs text-tertiary">{formatTime(msg.timestamp)}</p>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleCopy(msg, "Gwaky AI")}
-                            className="flex items-center gap-1 text-[11px] text-[#555] hover:text-white transition-colors"
+                            className="flex items-center gap-1 text-xs text-tertiary hover:text-white transition-colors"
                           >
                             {copiedId === msg.id ? "Copied!" : "Copy"}
                           </button>
                           <button
                             onClick={() => handleCopy(msg, "Gwaky AI")}
-                            className="flex items-center gap-1 text-[11px] text-[#555] hover:text-white transition-colors"
+                            className="flex items-center gap-1 text-xs text-tertiary hover:text-white transition-colors"
                           >
                             Share
                           </button>
@@ -807,14 +847,14 @@ export default function IntelBox({
                   )
                 )}
                 {gwakyLoading && (
-                  <div className="border-l-[3px] border-[#FF4D00]/40 rounded-xl p-4 bg-[#1A1A1A]">
+                  <div className="border-l-[3px] border-accent/40 rounded-xl p-4 bg-surface">
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:0ms]" />
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:150ms]" />
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:300ms]" />
+                        <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
+                        <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
+                        <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
                       </div>
-                      <span className="text-xs text-[#555]">Gwaky is thinking...</span>
+                      <span className="text-xs text-tertiary">Gwaky is thinking...</span>
                     </div>
                   </div>
                 )}
@@ -840,13 +880,13 @@ export default function IntelBox({
                     onClick={() => setActiveQCategory(cat.key)}
                     className={`whitespace-nowrap text-xs px-3 py-1.5 rounded-full border transition-all shrink-0 ${
                       activeQCategory === cat.key
-                        ? "bg-[#FF4D00] text-white border-[#FF4D00]"
-                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"
+                        ? "bg-accent text-white border-accent"
+                        : "bg-surface border-divider text-secondary hover:text-white hover:border-secondary/30"
                     }`}
                   >
                     {cat.icon}{cat.icon ? " " : ""}{cat.label}
                     {count > 0 && (
-                      <span className={`ml-1 text-[10px] ${activeQCategory === cat.key ? "text-white/70" : "text-[#555]"}`}>
+                      <span className={`ml-1 text-xs ${activeQCategory === cat.key ? "text-white/70" : "text-tertiary"}`}>
                         {count}
                       </span>
                     )}
@@ -858,9 +898,9 @@ export default function IntelBox({
             {questionsLoading ? (
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 animate-pulse">
-                    <div className="h-4 w-3/4 bg-[#222] rounded mb-3" />
-                    <div className="h-3 w-1/3 bg-[#222] rounded" />
+                  <div key={i} className="bg-surface rounded-xl p-4 animate-pulse">
+                    <div className="h-4 w-3/4 bg-elevated rounded mb-3" />
+                    <div className="h-3 w-1/3 bg-elevated rounded" />
                   </div>
                 ))}
               </div>
@@ -868,7 +908,7 @@ export default function IntelBox({
               <div className="text-center py-12">
                 <p className="text-2xl mb-3">💬</p>
                 <p className="text-white font-semibold text-lg mb-1">No questions yet</p>
-                <p className="text-[#666] text-sm">
+                <p className="text-tertiary text-sm">
                   Be the first to ask something about this neighborhood.
                 </p>
               </div>
@@ -881,7 +921,7 @@ export default function IntelBox({
                   return (
                     <div
                       key={q.id}
-                      className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden"
+                      className="bg-surface rounded-xl overflow-hidden"
                     >
                       <div className="p-4">
                         <div className="flex gap-3">
@@ -889,29 +929,30 @@ export default function IntelBox({
                           <button
                             onClick={() => handleUpvote(q.id)}
                             disabled={hasUpvoted}
+                            aria-label="Upvote question"
                             className={`flex flex-col items-center gap-0.5 pt-0.5 shrink-0 transition-colors ${
                               hasUpvoted
-                                ? "text-[#FF4D00] cursor-default"
-                                : "text-[#555] hover:text-white cursor-pointer"
+                                ? "text-accent cursor-default"
+                                : "text-tertiary hover:text-white cursor-pointer"
                             }`}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill={hasUpvoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 19V5" /><path d="M5 12l7-7 7 7" />
                             </svg>
-                            <span className="text-[11px] font-semibold">{q.upvotes}</span>
+                            <span className="text-xs font-semibold">{q.upvotes}</span>
                           </button>
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-[#E0E0E0] text-sm font-medium leading-snug">
+                            <p className="text-ink text-sm font-medium leading-snug">
                               {q.text}
                             </p>
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <span className="text-[11px] text-[#888]">{q.authorName}</span>
-                              <span className="text-[#444]">·</span>
-                              <span className="text-[11px] text-[#555]">{timeAgo(q.createdAt)}</span>
+                              <span className="text-xs text-secondary">{q.authorName}</span>
+                              <span className="text-tertiary">·</span>
+                              <span className="text-xs text-tertiary">{timeAgo(q.createdAt)}</span>
                               {catInfo && (
-                                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#1F1F1F] border border-[#2A2A2A] text-[#888]">
+                                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface border border-divider text-secondary">
                                   {catInfo.icon} {catInfo.label}
                                 </span>
                               )}
@@ -919,7 +960,7 @@ export default function IntelBox({
 
                             <button
                               onClick={() => setExpandedQId(isExpanded ? null : q.id)}
-                              className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#FF4D00] hover:text-[#FF4D00]/80 transition-colors"
+                              className="mt-2 flex items-center gap-1.5 text-xs font-medium text-accent hover:text-accent/80 transition-colors"
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -935,34 +976,34 @@ export default function IntelBox({
 
                       {/* Expanded answers */}
                       {isExpanded && (
-                        <div className="border-t border-[#2A2A2A] bg-[#151515]">
+                        <div className="border-t border-divider bg-surface">
                           {q.answers.length > 0 ? (
-                            <div className="divide-y divide-[#2A2A2A]">
+                            <div className="divide-y divide-divider">
                               {q.answers.map((a) => (
                                 <div key={a.id} className="px-4 py-3">
                                   <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-[11px] font-medium text-[#E0E0E0]">{a.authorName}</span>
+                                    <span className="text-xs font-medium text-ink">{a.authorName}</span>
                                     {a.isVerifiedLocal && (
                                       <span className="inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-green-900/30 text-green-400 border border-green-700/40">
                                         <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                                         Local
                                       </span>
                                     )}
-                                    <span className="text-[11px] text-[#555]">{timeAgo(a.createdAt)}</span>
+                                    <span className="text-xs text-tertiary">{timeAgo(a.createdAt)}</span>
                                   </div>
-                                  <p className="text-[#C0C0C0] text-sm leading-relaxed">{a.content}</p>
+                                  <p className="text-ink text-sm leading-relaxed">{a.content}</p>
                                 </div>
                               ))}
                             </div>
                           ) : (
                             <div className="px-4 py-6 text-center">
-                              <p className="text-[11px] text-[#555]">No answers yet. Be the first to help out!</p>
+                              <p className="text-xs text-tertiary">No answers yet. Be the first to help out!</p>
                             </div>
                           )}
 
                           {/* Inline answer form */}
                           {isJoined && (
-                            <div className="px-4 py-3 border-t border-[#2A2A2A]">
+                            <div className="px-4 py-3 border-t border-divider">
                               <InlineAnswerForm
                                 questionId={q.id}
                                 authorName={name}
@@ -998,16 +1039,16 @@ export default function IntelBox({
             {/* Step 1: Pick the room/area photo */}
             {photos && photos.length > 0 && (
               <div className="mb-4">
-                <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Select the room to remodel</p>
-                <div className="rounded-xl overflow-hidden border border-[#2A2A2A] relative">
+                <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Select the room to remodel</p>
+                <div className="rounded-xl overflow-hidden border border-divider relative">
                   <img src={photos[renoPhotoIndex % photos.length]} alt={listingAddress} className="w-full h-48 object-cover transition-all duration-300" />
                   {photoLabels[renoPhotoIndex % photos.length] && (
-                    <div className="absolute top-2 left-2 bg-black/70 text-white text-[11px] px-2.5 py-1 rounded-full font-medium backdrop-blur-sm">
+                    <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full font-medium backdrop-blur-sm">
                       {photoLabels[renoPhotoIndex % photos.length]}
                     </div>
                   )}
                   {labelsLoading && (
-                    <div className="absolute top-2 left-2 bg-black/70 text-white/60 text-[11px] px-2.5 py-1 rounded-full font-medium animate-pulse">
+                    <div className="absolute top-2 left-2 bg-black/70 text-white/60 text-xs px-2.5 py-1 rounded-full font-medium animate-pulse">
                       Detecting room...
                     </div>
                   )}
@@ -1037,79 +1078,79 @@ export default function IntelBox({
             )}
             {/* Step 2: Pick renovation type */}
             <div className="mb-3">
-              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Renovation Type</p>
+              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Renovation Type</p>
               <div className="flex flex-wrap gap-1.5">
                 {RENO_TYPES.map((t) => (
-                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); selectPhotoForType(t.key); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); selectPhotoForType(t.key); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-accent text-white border-accent" : "bg-surface border-divider text-secondary hover:text-white hover:border-secondary/30"}`}>
                     {t.label}
                   </button>
                 ))}
               </div>
             </div>
             <div className="mb-4">
-              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Style</p>
+              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Style</p>
               <div className="flex flex-wrap gap-1.5">
                 {RENO_STYLES.map((s) => (
-                  <button key={s.key} onClick={() => { setRenoStyle(s.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoStyle === s.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                  <button key={s.key} onClick={() => { setRenoStyle(s.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoStyle === s.key ? "bg-accent text-white border-accent" : "bg-surface border-divider text-secondary hover:text-white hover:border-secondary/30"}`}>
                     {s.label}
                   </button>
                 ))}
               </div>
             </div>
             <div className="mb-4">
-              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Your Notes (optional)</p>
+              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Your Notes (optional)</p>
               <textarea
                 value={renoNotes}
                 onChange={(e) => setRenoNotes(e.target.value)}
                 placeholder="Describe what you'd like... e.g. 'open concept with island, marble counters, matte black fixtures'"
-                className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 resize-none"
+                className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50 resize-none"
                 rows={3}
                 maxLength={500}
               />
-              <p className="text-[#444] text-[10px] mt-1 text-right">{renoNotes.length}/500</p>
+              <p className="text-tertiary text-xs mt-1 text-right">{renoNotes.length}/500</p>
             </div>
-            <button onClick={handleGenerateReno} disabled={renoLoading} className="w-full py-3 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-50 mb-4">
+            <button onClick={handleGenerateReno} disabled={renoLoading} className="w-full py-3 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-50 mb-4">
               {renoLoading ? "Generating..." : "Generate Vision \u2192"}
             </button>
             {renoError && <p className="text-red-400 text-sm mb-4">{renoError}</p>}
             {renoLoading && (
               <div className="space-y-3 animate-pulse">
-                <div className="h-48 bg-[#222] rounded-xl" />
-                <div className="h-5 w-1/2 bg-[#222] rounded" />
-                <div className="h-10 bg-[#222] rounded-lg" />
-                <div className="h-10 bg-[#222] rounded-lg" />
+                <div className="h-48 bg-elevated rounded-xl" />
+                <div className="h-5 w-1/2 bg-elevated rounded" />
+                <div className="h-10 bg-elevated rounded-lg" />
+                <div className="h-10 bg-elevated rounded-lg" />
               </div>
             )}
             {renoResult && !renoLoading && (
               <div className="space-y-4">
                 {renoResult.imageUrl && (
-                  <div className="rounded-xl overflow-hidden border border-[#2A2A2A]">
+                  <div className="rounded-xl overflow-hidden">
                     <img src={renoResult.imageUrl} alt={`${renoResult.style} ${renoResult.renovationType} vision`} className="w-full object-cover" />
                   </div>
                 )}
-                <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4">
-                  <p className="text-[#888] text-xs font-medium mb-1 uppercase tracking-wider">Estimated Cost Range</p>
+                <div className="bg-surface rounded-xl p-4">
+                  <p className="text-secondary text-xs font-medium mb-1 uppercase tracking-wider">Estimated Cost Range</p>
                   <p className="text-white text-2xl font-bold">${renoResult.estimateLow.toLocaleString()} – ${renoResult.estimateHigh.toLocaleString()}</p>
                 </div>
                 {renoResult.materials && renoResult.materials.length > 0 && (
-                  <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 border-b border-[#2A2A2A]">
-                      <p className="text-[#888] text-xs font-medium uppercase tracking-wider">Materials & Brands</p>
+                  <div className="bg-surface rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 pb-2">
+                      <p className="text-secondary text-xs font-medium uppercase tracking-wider">Materials & Brands</p>
                     </div>
                     {renoResult.materials.map((mat: any, i: number) => (
-                      <div key={i} className="px-4 py-3 flex items-center justify-between gap-3 border-b border-[#2A2A2A] last:border-0">
+                      <div key={i} className="px-4 py-3 flex items-center justify-between gap-3 border-b border-divider last:border-0">
                         <div className="min-w-0">
-                          <p className="text-[#E0E0E0] text-sm font-medium truncate">{mat.item}</p>
-                          <p className="text-[#666] text-xs">{mat.brand}</p>
+                          <p className="text-ink text-sm font-medium truncate">{mat.item}</p>
+                          <p className="text-tertiary text-xs">{mat.brand}</p>
                         </div>
-                        <span className="text-[#FF4D00] text-xs font-semibold whitespace-nowrap">{mat.priceRange}</span>
+                        <span className="text-accent text-xs font-semibold whitespace-nowrap">{mat.priceRange}</span>
                       </div>
                     ))}
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#2A2A2A] text-white text-sm font-medium rounded-lg hover:border-[#444] transition-all">Spill the Tea ☕</button>
-                  <button onClick={handleSaveRenoVision} className="flex-1 py-2.5 bg-[#1A1A1A] border border-[#FF4D00]/30 text-[#FF4D00] text-sm font-medium rounded-lg hover:bg-[#FF4D00]/10 transition-all">Save Vision</button>
+                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-surface border border-divider text-white text-sm font-medium rounded-lg hover:border-secondary/30 transition-all">Spill the Tea ☕</button>
+                  <button onClick={handleSaveRenoVision} className="flex-1 py-2.5 bg-surface border border-accent/30 text-accent text-sm font-medium rounded-lg hover:bg-accent/10 transition-all">Save Vision</button>
                 </div>
               </div>
             )}
@@ -1118,13 +1159,13 @@ export default function IntelBox({
       </div>
 
       {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}
-      <div className="shrink-0 bg-[#1A1A1A] border-t border-[#2A2A2A]">
+      <div className="shrink-0 bg-surface border-t border-divider">
         {/* ── Take input ── */}
         {activeTab === "take" && (
           <>
             {isLocked ? (
               <div className="px-4 py-3 text-center">
-                <p className="text-[#555] text-sm">
+                <p className="text-tertiary text-sm">
                   Comments locked — this listing is no longer active.
                 </p>
               </div>
@@ -1133,7 +1174,7 @@ export default function IntelBox({
                 <p className="text-white text-sm font-semibold">
                   Join the conversation
                 </p>
-                <p className="text-[#666] text-xs">
+                <p className="text-tertiary text-xs">
                   Drop your info to spill tea and react. Free, 10 seconds.
                 </p>
                 <input
@@ -1141,7 +1182,7 @@ export default function IntelBox({
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   required
                 />
                 <input
@@ -1149,7 +1190,7 @@ export default function IntelBox({
                   placeholder="Email (private)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   required
                 />
                 <input
@@ -1157,11 +1198,11 @@ export default function IntelBox({
                   placeholder="Zip code (optional — unlocks local badge)"
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
-                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                 />
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all"
+                  className="w-full py-3 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all"
                 >
                   Join &amp; unlock →
                 </button>
@@ -1174,10 +1215,10 @@ export default function IntelBox({
                       key={tag}
                       type="button"
                       onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                      className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-full transition-all ${
+                      className={`whitespace-nowrap text-xs px-2.5 py-1 rounded-full transition-all ${
                         selectedTag === tag
-                          ? "bg-[#FF4D00] text-white"
-                          : "bg-[#111111] border border-[#2A2A2A] text-[#666] hover:text-[#999]"
+                          ? "bg-accent text-white"
+                          : "bg-bg border border-divider text-tertiary hover:text-secondary"
                       }`}
                     >
                       {tag}
@@ -1191,12 +1232,12 @@ export default function IntelBox({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Spill the tea on this place..."
-                    className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   />
                   <button
                     type="submit"
                     disabled={posting || !content.trim()}
-                    className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {posting ? "..." : "Drop it →"}
                   </button>
@@ -1225,7 +1266,7 @@ export default function IntelBox({
                 }}
                 placeholder="Ask Gwaky AI anything about this property..."
                 disabled={gwakyLoading}
-                className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 disabled:opacity-50"
+                className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50 disabled:opacity-50"
               />
               <button
                 type="button"
@@ -1233,7 +1274,8 @@ export default function IntelBox({
                   sendAIMessage(gwakyInput, setGwakyMessages, setGwakyInput, setGwakyLoading)
                 }
                 disabled={gwakyLoading || !gwakyInput.trim()}
-                className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Send AI message"
+                className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ✨
               </button>
@@ -1245,7 +1287,7 @@ export default function IntelBox({
         {activeTab === "question" && (
           <div className="p-4">
             {!isJoined ? (
-              <p className="text-[#555] text-sm text-center py-1">
+              <p className="text-tertiary text-sm text-center py-1">
                 Join the conversation on the Take tab to ask questions.
               </p>
             ) : (
@@ -1257,10 +1299,10 @@ export default function IntelBox({
                       key={cat.key}
                       type="button"
                       onClick={() => setNewQCategory(cat.key)}
-                      className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-full transition-all ${
+                      className={`whitespace-nowrap text-xs px-2.5 py-1 rounded-full transition-all ${
                         newQCategory === cat.key
-                          ? "bg-[#FF4D00] text-white"
-                          : "bg-[#111111] border border-[#2A2A2A] text-[#666] hover:text-[#999]"
+                          ? "bg-accent text-white"
+                          : "bg-bg border border-divider text-tertiary hover:text-secondary"
                       }`}
                     >
                       {cat.icon} {cat.label}
@@ -1274,12 +1316,12 @@ export default function IntelBox({
                     onChange={(e) => setNewQuestion(e.target.value)}
                     placeholder="Ask the neighborhood..."
                     maxLength={500}
-                    className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   />
                   <button
                     type="submit"
                     disabled={postingQ || !newQuestion.trim()}
-                    className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {postingQ ? "..." : "Ask →"}
                   </button>
@@ -1342,12 +1384,12 @@ function InlineAnswerForm({
         onChange={(e) => setContent(e.target.value)}
         placeholder="Share what you know..."
         maxLength={500}
-        className="flex-1 min-w-0 px-3 py-2 bg-[#111111] border border-[#2A2A2A] rounded-lg text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+        className="flex-1 min-w-0 px-3 py-2 bg-bg border border-divider rounded-lg text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
       />
       <button
         type="submit"
         disabled={posting || !content.trim()}
-        className="shrink-0 px-3 py-2 bg-[#FF4D00] text-white text-xs font-bold rounded-lg hover:bg-[#FF4D00]/90 transition-all disabled:opacity-40"
+        className="shrink-0 px-3 py-2 bg-accent text-white text-xs font-bold rounded-lg hover:bg-accent/90 transition-all disabled:opacity-40"
       >
         {posting ? "..." : "Answer"}
       </button>

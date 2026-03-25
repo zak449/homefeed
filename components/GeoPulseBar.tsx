@@ -26,7 +26,7 @@ export default function GeoPulseBar({
         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
         <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
       </span>
-      <span className="text-[11px] text-tertiary">
+      <span className="text-xs text-tertiary">
         {hasLocation
           ? `${commentCount.toLocaleString()} takes near you`
           : `${commentCount.toLocaleString()} takes shared across ${listingCount.toLocaleString()} listings`}

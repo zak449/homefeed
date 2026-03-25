@@ -60,7 +60,7 @@ export default function LocationBanner() {
                 <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
               </svg>
             </div>
-            <span className="text-[13px] text-muted truncate">
+            <span className="text-sm text-muted truncate">
               Showing listings near{" "}
               <span className="font-semibold text-ink">{location.city}{location.state ? `, ${location.state}` : ""}</span>
             </span>
@@ -68,13 +68,13 @@ export default function LocationBanner() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleSearchNearby}
-              className="text-[12px] font-semibold text-social hover:text-social/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-social/5"
+              className="text-xs font-semibold text-social hover:text-social/80 transition-colors px-2.5 py-1 rounded-lg hover:bg-social/5"
             >
               Search nearby
             </button>
             <button
               onClick={handleEnableLocation}
-              className="text-[11px] text-muted hover:text-ink transition-colors px-2 py-1 rounded-lg hover:bg-tag"
+              className="text-xs text-muted hover:text-ink transition-colors px-2 py-1 rounded-lg hover:bg-tag"
             >
               Update
             </button>
@@ -90,14 +90,14 @@ export default function LocationBanner() {
                 <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
               </svg>
             </div>
-            <span className="text-[13px] text-muted">
+            <span className="text-sm text-muted">
               Enable location for personalized results
             </span>
           </div>
           <button
             onClick={handleEnableLocation}
             disabled={requesting}
-            className="text-[12px] font-semibold text-ink bg-ink/5 hover:bg-ink/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
+            className="text-xs font-semibold text-ink bg-ink/5 hover:bg-ink/10 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1.5 shrink-0"
           >
             {requesting ? (
               <>

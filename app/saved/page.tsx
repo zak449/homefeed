@@ -164,7 +164,7 @@ export default function SavedPage() {
           </a>
 
           {/* Subtle hint */}
-          <p className="text-[11px] text-tertiary mt-6">
+          <p className="text-xs text-tertiary mt-6">
             Saved listings stay in this browser only
           </p>
         </div>

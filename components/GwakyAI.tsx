@@ -148,9 +148,9 @@ export default function GwakyAI({
           {messages.map((msg) =>
             msg.role === "user" ? (
               <div key={msg.id} className="flex justify-end">
-                <div className="max-w-[85%] bg-[#F5F5F5] text-[#0E0E0E] rounded-2xl rounded-br-md px-4 py-2.5">
+                <div className="max-w-[85%] bg-ink text-bg rounded-2xl rounded-br-md px-4 py-2.5">
                   <p className="text-body">{msg.content}</p>
-                  <p className="text-[10px] text-white/50 mt-1 text-right">
+                  <p className="text-xs text-white/50 mt-1 text-right">
                     {formatTime(msg.timestamp)}
                   </p>
                 </div>
@@ -161,12 +161,12 @@ export default function GwakyAI({
                 className={`border-l-[3px] rounded-xl p-4 ${
                   msg.isMock
                     ? "border-tertiary/40 bg-highlight"
-                    : "border-[#FF4D00] bg-gradient-to-br from-[#FF4D00]/[0.04] to-surface"
+                    : "border-accent bg-gradient-to-br from-[#FF4D00]/[0.04] to-surface"
                 }`}
               >
                 {/* Header */}
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-caption font-semibold text-[#FF4D00]">
+                  <span className="text-caption font-semibold text-accent">
                     {msg.isMock ? "Gwaky AI (Preview)" : "Gwaky AI"}
                   </span>
                 </div>
@@ -178,7 +178,7 @@ export default function GwakyAI({
 
                 {/* Footer */}
                 <div className="flex items-center justify-between mt-3 pt-2 border-t border-divider/50">
-                  <p className="text-[10px] text-tertiary">
+                  <p className="text-xs text-tertiary">
                     {formatTime(msg.timestamp)}
                   </p>
                   <button
@@ -235,12 +235,12 @@ export default function GwakyAI({
 
           {/* Loading state */}
           {loading && (
-            <div className="border-l-[3px] border-[#FF4D00]/40 rounded-xl p-4 bg-highlight">
+            <div className="border-l-[3px] border-accent/40 rounded-xl p-4 bg-highlight">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:0ms]" />
-                  <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:150ms]" />
-                  <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:300ms]" />
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:0ms]" />
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:150ms]" />
+                  <span className="w-2 h-2 rounded-full bg-accent/60 animate-bounce [animation-delay:300ms]" />
                 </div>
                 <span className="text-caption text-tertiary">
                   Gwaky is thinking...
@@ -274,7 +274,7 @@ export default function GwakyAI({
           type="button"
           onClick={() => sendMessage(input)}
           disabled={loading || !input.trim()}
-          className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-[#FF4D00] text-white hover:bg-[#FF4D00]/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          className="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-accent text-white hover:bg-accent/90 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <svg
             width="16"

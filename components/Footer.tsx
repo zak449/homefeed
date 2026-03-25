@@ -91,14 +91,14 @@ export default function Footer() {
   }
 
   return (
-    <footer className="mt-20 bg-[#0D0D0D] text-white">
+    <footer className="mt-20 bg-bg text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Main footer content */}
         <div className="py-12 sm:py-16 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
           {/* Brand column */}
           <div className="md:col-span-4 space-y-4">
             <p className="text-lg font-bold tracking-tight">
-              Gwak<span className="text-[#FF4D00]">y</span>
+              Gwak<span className="text-accent">y</span>
             </p>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               the comment section real estate never had
@@ -111,7 +111,7 @@ export default function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="text-white/40 hover:text-[#FF4D00] transition-colors"
+                  className="text-white/40 hover:text-accent transition-colors"
                 >
                   {social.icon}
                 </a>
@@ -123,7 +123,7 @@ export default function Footer() {
           <div className="md:col-span-4 grid grid-cols-3 gap-6">
             {NAV_COLUMNS.map((col) => (
               <div key={col.title}>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40 mb-3">
+                <p className="text-xs font-medium uppercase tracking-[0.15em] text-white/40 mb-3">
                   {col.title}
                 </p>
                 <ul className="space-y-2.5">
@@ -144,7 +144,7 @@ export default function Footer() {
 
           {/* Newsletter */}
           <div className="md:col-span-4 space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-white/40">
+            <p className="text-xs font-medium uppercase tracking-[0.15em] text-white/40">
               Stay in the loop
             </p>
             <p className="text-sm text-white/60">
@@ -161,18 +161,18 @@ export default function Footer() {
                   setEmail(e.target.value);
                   if (status !== "idle") setStatus("idle");
                 }}
-                className="flex-1 min-w-0 px-3.5 py-2.5 text-sm rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] text-white placeholder:text-[#666] focus:outline-none focus:border-[#FF4D00]/50 transition-colors"
+                className="flex-1 min-w-0 px-3.5 py-2.5 text-sm rounded-lg bg-surface border border-divider text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50 transition-colors"
               />
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="shrink-0 px-4 py-2.5 text-sm font-semibold rounded-full bg-[#FF4D00] text-white hover:bg-[#FF4D00]/90 transition-colors disabled:opacity-50"
+                className="shrink-0 px-4 py-2.5 text-sm font-semibold rounded-full bg-accent text-white hover:bg-accent/90 transition-colors disabled:opacity-50"
               >
                 {status === "loading" ? "..." : "Subscribe"}
               </button>
             </form>
             {status === "success" && (
-              <p className="text-xs text-[#FF4D00]">You&apos;re subscribed!</p>
+              <p className="text-xs text-accent">You&apos;re subscribed!</p>
             )}
             {status === "error" && (
               <p className="text-xs text-red-400">Something went wrong. Try again.</p>

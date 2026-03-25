@@ -60,7 +60,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
   return (
     <Link
       href={`/listing/${comment.listing.id}`}
-      className="group block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden hover:shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-300"
+      className="group block bg-surface border border-divider rounded-xl overflow-hidden hover:shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-300"
     >
       {/* 1. Property photo — full width, 4/3 aspect, the hook */}
       <div className="relative w-full aspect-[4/3] overflow-hidden">
@@ -86,7 +86,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
-              <p className="text-sm font-medium text-[#6B6B6B]">
+              <p className="text-sm font-medium text-tertiary">
                 {comment.listing.address}
               </p>
             </div>
@@ -95,7 +95,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
 
         {/* 2a. Listing type badge — top right of photo */}
         <div className="absolute top-3 right-3">
-          <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white border border-white/10">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-sm text-white border border-white/10">
             {isRent ? "For Rent" : "For Sale"}
           </span>
         </div>
@@ -103,7 +103,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
         {/* 2b. Price + location overlay — bottom of photo */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-4 pb-3.5 pt-10">
           <p className="text-lg font-bold text-white leading-tight">{price}</p>
-          <p className="text-[13px] text-white/70 mt-0.5 truncate">
+          <p className="text-sm text-white/70 mt-0.5 truncate">
             {comment.listing.address}, {comment.listing.city}
           </p>
         </div>
@@ -117,16 +117,16 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
             <span className="text-xs font-bold text-white leading-none">{initials}</span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[14px] font-semibold text-white truncate">
+            <span className="text-sm font-semibold text-white truncate">
               {comment.name}
             </span>
-            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">
+            <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">
               <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" className="shrink-0">
                 <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.41 5.41L7 9.83 4.59 7.41 3.17 8.83 7 12.66l5.83-5.83-1.42-1.42z" />
               </svg>
               Verified local
             </span>
-            <span className="text-[12px] text-[#999999] shrink-0">{timeAgo(comment.createdAt)}</span>
+            <span className="text-xs text-secondary shrink-0">{timeAgo(comment.createdAt)}</span>
           </div>
         </div>
 
@@ -146,7 +146,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
                 e.stopPropagation();
                 setExpanded(true);
               }}
-              className="text-[13px] font-medium text-[#6B6B6B] hover:text-white mt-1 transition-colors"
+              className="text-sm font-medium text-tertiary hover:text-white mt-1 transition-colors"
             >
               Read more
             </button>
@@ -159,20 +159,20 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
             Object.entries(reactionCounts).map(([emoji, count]) => (
               <span
                 key={emoji}
-                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-white shrink-0 hover:border-[#D4763C]/30 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-surface border border-divider text-white shrink-0 hover:border-[#D4763C]/30 transition-colors cursor-pointer"
               >
                 <span className="text-sm leading-none">{emoji}</span>
-                <span className="font-medium text-[12px]">{count}</span>
+                <span className="font-medium text-xs">{count}</span>
               </span>
             ))
           ) : (
-            <span className="text-[13px] text-[#999999]">Be the first to react</span>
+            <span className="text-sm text-secondary">Be the first to react</span>
           )}
         </div>
 
         {/* 6. Action row — CTA */}
-        <div className="flex items-center justify-end pt-3 border-t border-[#2A2A2A]/70">
-          <span className="text-[13px] font-semibold text-[#D4763C] group-hover:translate-x-0.5 transition-transform duration-200">
+        <div className="flex items-center justify-end pt-3 border-t border-divider/70">
+          <span className="text-sm font-semibold text-[#D4763C] group-hover:translate-x-0.5 transition-transform duration-200">
             {totalReactions > 0
               ? `See ${totalReactions} more takes`
               : "Join the conversation"}{" "}

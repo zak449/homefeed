@@ -69,7 +69,7 @@ export default function SplitMapLayout({ listings, children }: SplitMapLayoutPro
         {/* Map toggle FAB */}
         <button
           onClick={() => setShowMobileMap(!showMobileMap)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-[#F5F5F5] text-[#0E0E0E] text-sm font-bold shadow-elevated hover:opacity-90 active:scale-95 transition-all"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2 px-5 py-3 rounded-full bg-ink text-bg text-sm font-bold shadow-elevated hover:opacity-90 active:scale-95 transition-all"
         >
           {showMobileMap ? (
             <>

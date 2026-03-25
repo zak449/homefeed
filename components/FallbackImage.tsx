@@ -60,7 +60,7 @@ export default function FallbackImage({
               strokeLinejoin="round"
             />
           </svg>
-          <p className="text-[10px] text-stone-400 mt-1 font-medium">
+          <p className="text-xs text-stone-400 mt-1 font-medium">
             No photo
           </p>
         </div>
