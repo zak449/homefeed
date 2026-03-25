@@ -34,7 +34,7 @@ export default function ListingViewTracker({
   listingType,
 }: ListingViewTrackerProps) {
   useEffect(() => {
-    trackEvent("listing_view", { listingId, city });
+    trackEvent("listing_view", { listingId, city, address });
 
     // Save to localStorage for recently viewed
     try {
