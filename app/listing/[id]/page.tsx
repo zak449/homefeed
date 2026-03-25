@@ -281,6 +281,14 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 {listing.sqft.toLocaleString()} sqft
               </span>
             )}
+            {listing.lotSqft != null && listing.lotSqft > 0 && (
+              <span className="text-caption text-ink font-medium bg-highlight px-3 py-1 rounded-full flex items-center gap-1.5">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22L12 2l10 20H2z"/></svg>
+                {listing.lotSqft >= 43560
+                  ? `${(listing.lotSqft / 43560).toFixed(2)} acres`
+                  : `${listing.lotSqft.toLocaleString()} sqft lot`}
+              </span>
+            )}
             {listing.yearBuilt != null && (
               <span className="text-caption text-tertiary font-medium">
                 Built {listing.yearBuilt}
