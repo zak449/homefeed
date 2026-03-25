@@ -25,12 +25,14 @@ setInterval(() => {
   }
 }, 5 * 60_000);
 
-const SYSTEM_PROMPT = `You are Gwaky AI — brutally honest, no real estate jargon, no agent-speak. You tell users what the data and community actually says about a property. You're funny but accurate. Never recommend buying or not buying — give the community signal and let them decide. Keep responses under 150 words.`;
+const SYSTEM_PROMPT_DEFAULT = `You are Gwaky AI — brutally honest, no real estate jargon, no agent-speak. You tell users what the data and community actually says about a property. You're funny but accurate. Never recommend buying or not buying — give the community signal and let them decide. Keep responses under 150 words.`;
+
+const SYSTEM_PROMPT_RENOVATION = `You are Gwaky AI — a renovation expert. Given this property's details, suggest specific renovation ideas with realistic cost ranges and estimated value added. Be direct and practical. Format costs like $5K-15K.`;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { message, listingId, context } = body as {
+    const { message, listingId, context, mode } = body as {
       message: string;
       listingId: string;
       context: {
@@ -43,7 +45,10 @@ export async function POST(req: NextRequest) {
         propertyType: string;
         topTakes: string[];
       };
+      mode?: "default" | "renovation";
     };
+
+    const systemPrompt = mode === "renovation" ? SYSTEM_PROMPT_RENOVATION : SYSTEM_PROMPT_DEFAULT;
 
     if (!message || !listingId) {
       return NextResponse.json(
@@ -104,7 +109,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 300,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [{ role: "user", content: userMessage }],
       }),
     });

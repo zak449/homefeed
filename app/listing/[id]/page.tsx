@@ -1,19 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import CommentSection from "@/components/CommentSection";
 import ListingViewTracker from "@/components/ListingViewTracker";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import SaveButton from "@/components/SaveButton";
 import ShareButton from "@/components/ShareButton";
-import EmailCapture from "@/components/EmailCapture";
 import FallbackImage from "@/components/FallbackImage";
 import MortgageCalculator from "@/components/MortgageCalculator";
 import { enrichListingDetail } from "@/lib/data-adapters/detail";
 import MapPreview from "@/components/MapPreview";
-import AIReimagineTool from "@/components/AIReimagineTool";
-import DecisionComparison from "@/components/DecisionComparison";
-import NeighborQA from "@/components/NeighborQA";
+import IntelBox from "@/components/IntelBox";
 import ExpandableText from "@/components/ExpandableText";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -66,16 +62,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     }
   })();
 
-  const [listing, commentCount, reactionCount, topComments] = await Promise.all([
+  const [listing, commentCount, reactionCount] = await Promise.all([
     prisma.listing.findUnique({ where: { id } }),
     prisma.comment.count({ where: { listingId: id } }),
     prisma.reaction.count({ where: { comment: { listingId: id } } }),
-    prisma.comment.findMany({
-      where: { listingId: id },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      select: { name: true, content: true, createdAt: true },
-    }),
   ]);
   if (!listing) notFound();
 
@@ -302,38 +292,9 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           </span>
         </Link>
 
-        {/* ── REIMAGINE — right after price, before conversation ── */}
-        {listing.photos.length > 0 && (
-          <div className="mb-6 rounded-2xl border border-amber/20 bg-gradient-to-br from-amber/[0.03] to-surface overflow-hidden shadow-soft">
-            <div className="p-5">
-              <AIReimagineTool photos={listing.photos} address={listing.address} />
-            </div>
-          </div>
-        )}
-
-        {/* ── NEIGHBOR INTEL — what the community knows ── */}
-        <div className="mb-6 rounded-2xl border border-divider bg-surface overflow-hidden shadow-soft">
-          <div className="p-5">
-            <div className="flex items-center gap-2.5 mb-3">
-              <span className="text-lg">🔍</span>
-              <h2 className="text-title text-ink font-bold">The real tea on this place</h2>
-            </div>
-            <DecisionComparison
-              comments={topComments.map(c => ({
-                name: c.name,
-                content: c.content,
-                createdAt: c.createdAt.toISOString(),
-              }))}
-              description={listing.description}
-              address={listing.address}
-              commentCount={commentCount}
-            />
-          </div>
-        </div>
-
-        {/* ── THE CONVERSATION ── */}
+        {/* ── INTELBOX — unified intel terminal ── */}
         <div className="mb-8">
-          <CommentSection
+          <IntelBox
             listingId={listing.id}
             isLocked={isLocked}
             listingAddress={listing.address}
@@ -349,31 +310,6 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               propertyType: listing.propertyType,
             }}
           />
-        </div>
-
-        {/* ── Ask the neighborhood ── */}
-        <div className="mb-8 rounded-2xl border border-divider bg-surface overflow-hidden shadow-soft">
-          <div className="p-5">
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="text-lg">🏘️</span>
-              <h2 className="text-title text-ink font-bold">Ask the neighborhood</h2>
-            </div>
-            <p className="text-caption text-secondary mb-3">
-              Got questions? Verified locals have answers.
-            </p>
-            <NeighborQA zipCode={listing.zip} listingId={listing.id} />
-          </div>
-        </div>
-
-        {/* ── Email capture ── */}
-        <div className="mb-8 bg-ink rounded-2xl p-5 text-center">
-          <p className="text-[15px] text-white font-bold mb-1">
-            Don&apos;t miss the tea ☕
-          </p>
-          <p className="text-caption text-white/60 mb-3">
-            Get notified when new takes drop on this listing.
-          </p>
-          <EmailCapture variant="inline" source={`listing-${listing.id}`} />
         </div>
 
         {/* ── Description ── */}
