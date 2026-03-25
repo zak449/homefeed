@@ -126,7 +126,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   });
 
   return (
-    <div className="min-h-screen bg-[#FAFAF8]">
+    <div className="min-h-screen bg-[#0A0A0A]">
       {/* Track listing view */}
       <ListingViewTracker
         listingId={listing.id}
@@ -193,7 +193,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <div className="mb-4">
           {/* Price row */}
           <div className="flex items-baseline gap-3 flex-wrap">
-            <h1 className="font-display text-[3rem] sm:text-[3.75rem] text-ink leading-none tracking-[-0.04em] font-extrabold">
+            <h1 className="font-display text-[3rem] sm:text-[3.75rem] text-ink leading-none tracking-[-0.04em] font-extrabold" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.5)' }}>
               {price}
             </h1>
             {pricePerSqft && (
@@ -245,10 +245,10 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* ── Save + Share ── */}
         <div className="flex items-center justify-between mb-6 pb-5 border-b border-divider">
           <div className="flex items-center gap-3">
-            <div className="[&_button]:bg-surface [&_button]:border [&_button]:border-divider [&_button]:rounded-full [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-ink/20 [&_button]:hover:shadow-soft [&_button]:transition-all">
+            <div className="[&_button]:bg-[#1A1A1A] [&_button]:text-[#F5F5F5] [&_button]:border [&_button]:border-[#3A3A3A] [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-[#FF4D00]/40 [&_button]:hover:shadow-soft [&_button]:transition-all">
               <SaveButton listingId={listing.id} />
             </div>
-            <div className="[&_button]:bg-ink [&_button]:text-white [&_button]:border [&_button]:border-ink [&_button]:rounded-full [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:bg-ink/90 [&_button]:transition-all">
+            <div className="[&_button]:bg-[#1A1A1A] [&_button]:text-[#F5F5F5] [&_button]:border [&_button]:border-[#3A3A3A] [&_button]:rounded-lg [&_button]:px-4 [&_button]:py-2 [&_button]:text-caption [&_button]:font-medium [&_button]:hover:border-[#FF4D00]/40 [&_button]:transition-all">
               <ShareButton
                 listingId={listing.id}
                 address={listing.address}
@@ -276,7 +276,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         {/* ── RAP SHEET CTA ── */}
         <Link
           href={`/rap-sheet/${listing.id}`}
-          className="group mb-6 flex items-center justify-between bg-gradient-to-r from-[#D4763C]/10 to-[#D4763C]/5 border border-[#D4763C]/25 rounded-card px-5 py-3.5 hover:border-[#D4763C]/50 hover:shadow-glow-amber transition-all"
+          className="group mb-6 flex items-center justify-between bg-[#1A1A1A] border border-[#FF4D00] rounded-lg px-5 py-3.5 hover:bg-[#222222] hover:shadow-[0_0_20px_rgba(255,77,0,0.15)] transition-all"
         >
           <div className="flex items-center gap-3">
             <span className="text-lg">{"\uD83D\uDCCB"}</span>
@@ -287,7 +287,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </span>
             </div>
           </div>
-          <span className="text-[#D4763C] font-semibold text-body group-hover:translate-x-0.5 transition-transform">
+          <span className="text-[#FF4D00] font-semibold text-body group-hover:translate-x-0.5 transition-transform">
             &rarr;
           </span>
         </Link>
