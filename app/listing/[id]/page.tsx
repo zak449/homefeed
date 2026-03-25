@@ -207,21 +207,15 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
         {/* Breadcrumbs */}
         <nav className="flex items-center gap-1.5 text-caption text-tertiary pt-5 pb-3">
-          <Link href="/" className="hover:text-amber transition-colors font-medium flex items-center gap-1">
+          <a
+            href={`/?city=${encodeURIComponent(listing.city)}`}
+            className="hover:text-accent transition-colors font-medium flex items-center gap-1"
+          >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-50">
               <path d="M19 12H5" /><polyline points="12 19 5 12 12 5" />
             </svg>
-            Gwaky
-          </Link>
-          <span className="text-divider">/</span>
-          <a
-            href={`/?city=${encodeURIComponent(listing.city)}`}
-            className="hover:text-amber transition-colors"
-          >
             {listing.city}
           </a>
-          <span className="text-divider">/</span>
-          <span className="text-secondary truncate max-w-[200px]">{listing.address}</span>
         </nav>
 
         {/* Status banner */}

@@ -685,7 +685,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       <div className="flex items-center justify-end px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
                         <a
                           href={`/listing/${comment.listing.id}#comment-form`}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-amber hover:underline shrink-0"
+                          className="inline-flex items-center gap-1 px-4 py-2 bg-accent/10 text-accent text-sm font-semibold rounded-full hover:bg-accent/20 transition-all shrink-0"
                         >
                           Drop your take &rarr;
                         </a>
@@ -765,7 +765,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           <span className="text-xs text-tertiary font-medium">
                             {commentCount_l > 0 ? `${commentCount_l} take${commentCount_l !== 1 ? "s" : ""}` : "No takes yet"}
                           </span>
-                          <span className="text-xs font-bold text-amber group-hover:underline">
+                          <span className="inline-flex items-center gap-1 px-4 py-2 bg-accent/10 text-accent text-sm font-semibold rounded-full group-hover:bg-accent/20 transition-all">
                             {commentCount_l > 0 ? "Read all takes" : "Drop your take"} &rarr;
                           </span>
                         </div>

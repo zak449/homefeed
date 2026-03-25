@@ -679,7 +679,14 @@ export default function IntelBox({
                 : "border border-divider text-secondary hover:text-white hover:border-secondary/30"
             }`}
           >
-            {tab.label}
+            {tab.key === "take" ? (
+              tab.label
+            ) : (
+              <>
+                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
+              </>
+            )}
           </button>
         ))}
       </div>
@@ -930,13 +937,13 @@ export default function IntelBox({
                               disabled={!isJoined}
                               title={REACTION_LABELS[emoji]}
                               aria-label={REACTION_LABELS[emoji]}
-                              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs transition-all ${
+                              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-sm transition-all ${
                                 count > 0
                                   ? "bg-accent/10 border border-accent/30 text-accent"
                                   : "bg-surface border border-divider text-tertiary hover:text-secondary hover:border-secondary/30"
                               } disabled:opacity-40 disabled:cursor-not-allowed`}
                             >
-                              <span>{emoji}</span>
+                              <span className="text-base">{emoji}</span>
                               <span className="font-medium">{count}</span>
                             </button>
                           );

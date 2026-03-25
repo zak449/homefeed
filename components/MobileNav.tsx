@@ -22,7 +22,7 @@ export default function MobileNav() {
   const tabs = [
     {
       href: "/",
-      label: "My Block",
+      label: "Feed",
       active: isHome,
       accent: false,
       icon: (active: boolean) => (
