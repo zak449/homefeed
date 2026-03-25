@@ -10,6 +10,7 @@ interface IntelBoxProps {
   listingAddress: string;
   listingPrice: string;
   photos?: string[];
+  zipCode?: string;
   listingContext?: {
     address: string;
     city: string;
@@ -37,7 +38,26 @@ type AIMessage = {
   isMock?: boolean;
 };
 
-type Tab = "intel" | "gwaky" | "renovation";
+type Question = {
+  id: string;
+  text: string;
+  category: string;
+  authorName: string;
+  createdAt: string;
+  upvotes: number;
+  answerCount: number;
+  answers: Answer[];
+};
+
+type Answer = {
+  id: string;
+  content: string;
+  authorName: string;
+  isVerifiedLocal: boolean;
+  createdAt: string;
+};
+
+type Tab = "take" | "ai" | "question";
 
 const REACTIONS = ["🚩", "💸", "👀", "🔥", "💀"];
 const REACTION_LABELS: Record<string, string> = {
@@ -57,11 +77,13 @@ const GWAKY_PROMPTS = [
   "Compare to similar listings nearby",
 ];
 
-const RENOVATION_CATEGORIES = [
-  { label: "Curb Appeal", emoji: "🏡" },
-  { label: "Backyard Dreams", emoji: "🏖️" },
-  { label: "Interior Refresh", emoji: "✨" },
-  { label: "Smart Upgrades", emoji: "💰" },
+const Q_CATEGORIES = [
+  { key: "all", label: "All", icon: "" },
+  { key: "property", label: "Property", icon: "🏠" },
+  { key: "block", label: "Block", icon: "🏘️" },
+  { key: "area", label: "Area", icon: "📍" },
+  { key: "schools", label: "Schools", icon: "🎒" },
+  { key: "safety", label: "Safety", icon: "🔒" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -119,10 +141,11 @@ export default function IntelBox({
   listingAddress,
   listingPrice,
   photos,
+  zipCode,
   listingContext,
 }: IntelBoxProps) {
   // ── Tab state ──
-  const [activeTab, setActiveTab] = useState<Tab>("intel");
+  const [activeTab, setActiveTab] = useState<Tab>("take");
 
   // ── Intel Feed state ──
   const [comments, setComments] = useState<Comment[]>([]);
@@ -139,23 +162,28 @@ export default function IntelBox({
   const [zip, setZip] = useState("");
   const [reactingEmail, setReactingEmail] = useState("");
 
-  // ── AI chat state (shared structure for gwaky + renovation) ──
+  // ── AI chat state ──
   const [gwakyMessages, setGwakyMessages] = useState<AIMessage[]>([]);
   const [gwakyInput, setGwakyInput] = useState("");
   const [gwakyLoading, setGwakyLoading] = useState(false);
 
-  const [renovationMessages, setRenovationMessages] = useState<AIMessage[]>([]);
-  const [renovationInput, setRenovationInput] = useState("");
-  const [renovationLoading, setRenovationLoading] = useState(false);
+  // ── Question state ──
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [activeQCategory, setActiveQCategory] = useState("all");
+  const [expandedQId, setExpandedQId] = useState<string | null>(null);
+  const [upvoted, setUpvoted] = useState<Set<string>>(new Set());
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newQCategory, setNewQCategory] = useState("area");
+  const [postingQ, setPostingQ] = useState(false);
+  const [postQError, setPostQError] = useState("");
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // ── Refs ──
   const scrollRef = useRef<HTMLDivElement>(null);
   const gwakyEndRef = useRef<HTMLDivElement>(null);
-  const renovationEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // ── Restore saved identity ──
   useEffect(() => {
@@ -187,6 +215,23 @@ export default function IntelBox({
       .catch(() => setCommentsLoading(false));
   }, [listingId]);
 
+  // ── Fetch questions ──
+  useEffect(() => {
+    if (!zipCode) {
+      setQuestionsLoading(false);
+      return;
+    }
+    const params = new URLSearchParams({ zipCode });
+    params.set("listingId", listingId);
+    fetch(`/api/community/questions?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setQuestions(data);
+        setQuestionsLoading(false);
+      })
+      .catch(() => setQuestionsLoading(false));
+  }, [zipCode, listingId]);
+
   // ── Sorted comments (newest first) ──
   const sortedComments = useMemo(() => {
     return [...comments].sort(
@@ -194,14 +239,16 @@ export default function IntelBox({
     );
   }, [comments]);
 
+  // ── Filtered questions ──
+  const filteredQuestions = useMemo(() => {
+    if (activeQCategory === "all") return questions;
+    return questions.filter((q) => q.category === activeQCategory);
+  }, [questions, activeQCategory]);
+
   // ── Auto-scroll AI messages ──
   useEffect(() => {
     gwakyEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [gwakyMessages]);
-
-  useEffect(() => {
-    renovationEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [renovationMessages]);
 
   // ── Join handler ──
   function handleJoin(e: React.FormEvent) {
@@ -287,10 +334,71 @@ export default function IntelBox({
     [reactingEmail, email, name]
   );
 
-  // ── Send AI message (shared for gwaky + renovation) ──
+  // ── Upvote question ──
+  const handleUpvote = useCallback(
+    async (questionId: string) => {
+      if (upvoted.has(questionId)) return;
+      setUpvoted((prev) => new Set(prev).add(questionId));
+      setQuestions((prev) =>
+        prev.map((q) =>
+          q.id === questionId ? { ...q, upvotes: q.upvotes + 1 } : q
+        )
+      );
+      try {
+        await fetch(`/api/community/questions/${questionId}/upvote`, {
+          method: "POST",
+        });
+      } catch {
+        setUpvoted((prev) => {
+          const next = new Set(prev);
+          next.delete(questionId);
+          return next;
+        });
+        setQuestions((prev) =>
+          prev.map((q) =>
+            q.id === questionId ? { ...q, upvotes: q.upvotes - 1 } : q
+          )
+        );
+      }
+    },
+    [upvoted]
+  );
+
+  // ── Post question ──
+  async function handlePostQuestion(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newQuestion.trim() || postingQ) return;
+    setPostingQ(true);
+    setPostQError("");
+    try {
+      const res = await fetch("/api/community/questions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          zipCode,
+          listingId,
+          text: newQuestion.trim(),
+          category: newQCategory,
+          authorName: name || "Anonymous",
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to post");
+      }
+      const created = await res.json();
+      setQuestions((prev) => [created, ...prev]);
+      setNewQuestion("");
+    } catch (err: any) {
+      setPostQError(err.message);
+    } finally {
+      setPostingQ(false);
+    }
+  }
+
+  // ── Send AI message ──
   async function sendAIMessage(
     text: string,
-    mode: "default" | "renovation",
     setMessages: React.Dispatch<React.SetStateAction<AIMessage[]>>,
     setInput: React.Dispatch<React.SetStateAction<string>>,
     setLoading: React.Dispatch<React.SetStateAction<boolean>>
@@ -307,7 +415,7 @@ export default function IntelBox({
     setLoading(true);
 
     try {
-      const res = await fetch("/api/ai-chat", {
+      const res = await fetch("/api/gwaky-ai", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -316,7 +424,6 @@ export default function IntelBox({
           context: listingContext
             ? { ...listingContext, topTakes: comments.slice(0, 5).map((c) => c.content) }
             : undefined,
-          mode,
         }),
       });
       const data = await res.json();
@@ -353,9 +460,9 @@ export default function IntelBox({
   // ─── Tabs config ──────────────────────────────────────────────────────────
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: "intel", label: "🫖 Intel Feed" },
-    { key: "gwaky", label: "✨ Ask Gwaky AI" },
-    { key: "renovation", label: "💡 Renovation AI" },
+    { key: "take", label: "🫖 Take" },
+    { key: "ai", label: "✨ Ask AI" },
+    { key: "question", label: "❓ Question" },
   ];
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -364,13 +471,13 @@ export default function IntelBox({
     <div
       className="relative flex flex-col border border-[#2A2A2A] rounded-2xl overflow-hidden"
       style={{
-        background: "#111111",
+        background: "#0E0E0E",
         minHeight: "600px",
         maxHeight: "80vh",
       }}
     >
       {/* ════════ ZONE 1 — Sticky tab header ════════ */}
-      <div className="sticky top-0 z-10 bg-[#111111] border-b border-[#2A2A2A] px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      <div className="sticky top-0 z-10 bg-[#0E0E0E] border-b border-[#2A2A2A] px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -388,8 +495,8 @@ export default function IntelBox({
 
       {/* ════════ ZONE 2 — Scrollable content area ════════ */}
       <div ref={scrollRef} className="flex-grow overflow-y-auto">
-        {/* ──── TAB 1: Intel Feed ──── */}
-        {activeTab === "intel" && (
+        {/* ──── TAB 1: Take (Intel Feed) ──── */}
+        {activeTab === "take" && (
           <div className="p-4">
             {commentsLoading ? (
               <div className="space-y-4">
@@ -477,8 +584,8 @@ export default function IntelBox({
           </div>
         )}
 
-        {/* ──── TAB 2: Ask Gwaky AI ──── */}
-        {activeTab === "gwaky" && (
+        {/* ──── TAB 2: Ask AI ──── */}
+        {activeTab === "ai" && (
           <div className="p-4">
             {gwakyMessages.length === 0 ? (
               <div className="py-12 text-center">
@@ -492,7 +599,7 @@ export default function IntelBox({
                     <button
                       key={prompt}
                       onClick={() =>
-                        sendAIMessage(prompt, "default", setGwakyMessages, setGwakyInput, setGwakyLoading)
+                        sendAIMessage(prompt, setGwakyMessages, setGwakyInput, setGwakyLoading)
                       }
                       className="text-xs px-3 py-2 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#999] hover:text-white hover:border-[#FF4D00]/40 transition-all"
                     >
@@ -564,96 +671,169 @@ export default function IntelBox({
           </div>
         )}
 
-        {/* ──── TAB 3: Renovation AI ──── */}
-        {activeTab === "renovation" && (
+        {/* ──── TAB 3: Question ──── */}
+        {activeTab === "question" && (
           <div className="p-4">
-            {/* Category chips */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              {RENOVATION_CATEGORIES.map((cat) => (
-                <button
-                  key={cat.label}
-                  onClick={() =>
-                    sendAIMessage(
-                      `Give me specific renovation ideas for "${cat.label}" for this property with cost ranges and estimated value added.`,
-                      "renovation",
-                      setRenovationMessages,
-                      setRenovationInput,
-                      setRenovationLoading
-                    )
-                  }
-                  className="text-xs px-3 py-2 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-[#999] hover:text-white hover:border-[#FF4D00]/40 transition-all"
-                >
-                  {cat.emoji} {cat.label}
-                </button>
-              ))}
+            {/* Category filter pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-3 mb-4 scrollbar-hide">
+              {Q_CATEGORIES.map((cat) => {
+                const count =
+                  cat.key === "all"
+                    ? questions.length
+                    : questions.filter((q) => q.category === cat.key).length;
+                return (
+                  <button
+                    key={cat.key}
+                    onClick={() => setActiveQCategory(cat.key)}
+                    className={`whitespace-nowrap text-xs px-3 py-1.5 rounded-full border transition-all shrink-0 ${
+                      activeQCategory === cat.key
+                        ? "bg-[#FF4D00] text-white border-[#FF4D00]"
+                        : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"
+                    }`}
+                  >
+                    {cat.icon}{cat.icon ? " " : ""}{cat.label}
+                    {count > 0 && (
+                      <span className={`ml-1 text-[10px] ${activeQCategory === cat.key ? "text-white/70" : "text-[#555]"}`}>
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
-            {renovationMessages.length === 0 ? (
-              <div className="py-8 text-center">
-                <p className="text-2xl mb-3">💡</p>
-                <p className="text-white font-semibold text-lg mb-1">Renovation AI</p>
+            {questionsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl p-4 animate-pulse">
+                    <div className="h-4 w-3/4 bg-[#222] rounded mb-3" />
+                    <div className="h-3 w-1/3 bg-[#222] rounded" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredQuestions.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-2xl mb-3">💬</p>
+                <p className="text-white font-semibold text-lg mb-1">No questions yet</p>
                 <p className="text-[#666] text-sm">
-                  Tap a category or ask about specific upgrades for this property
+                  Be the first to ask something about this neighborhood.
                 </p>
               </div>
             ) : (
               <div className="space-y-3">
-                {renovationMessages.map((msg) =>
-                  msg.role === "user" ? (
-                    <div key={msg.id} className="flex justify-end">
-                      <div className="max-w-[85%] bg-[#FF4D00] text-white rounded-2xl rounded-br-md px-4 py-2.5">
-                        <p className="text-sm">{msg.content}</p>
-                        <p className="text-[10px] text-white/50 mt-1 text-right">
-                          {formatTime(msg.timestamp)}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
+                {filteredQuestions.map((q) => {
+                  const isExpanded = expandedQId === q.id;
+                  const hasUpvoted = upvoted.has(q.id);
+                  const catInfo = Q_CATEGORIES.find((c) => c.key === q.category);
+                  return (
                     <div
-                      key={msg.id}
-                      className="border-l-[3px] border-[#FF4D00] bg-[#1A1A1A] rounded-xl p-4"
+                      key={q.id}
+                      className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden"
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-semibold text-[#FF4D00]">
-                          💡 Renovation AI
-                        </span>
-                      </div>
-                      <p className="text-[#E0E0E0] text-sm leading-relaxed whitespace-pre-wrap">
-                        {msg.content}
-                      </p>
-                      <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#2A2A2A]">
-                        <p className="text-[10px] text-[#555]">{formatTime(msg.timestamp)}</p>
-                        <div className="flex items-center gap-2">
+                      <div className="p-4">
+                        <div className="flex gap-3">
+                          {/* Upvote */}
                           <button
-                            onClick={() => handleCopy(msg, "Renovation AI")}
-                            className="flex items-center gap-1 text-[11px] text-[#555] hover:text-white transition-colors"
+                            onClick={() => handleUpvote(q.id)}
+                            disabled={hasUpvoted}
+                            className={`flex flex-col items-center gap-0.5 pt-0.5 shrink-0 transition-colors ${
+                              hasUpvoted
+                                ? "text-[#FF4D00] cursor-default"
+                                : "text-[#555] hover:text-white cursor-pointer"
+                            }`}
                           >
-                            {copiedId === msg.id ? "Copied!" : "Copy"}
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill={hasUpvoted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M12 19V5" /><path d="M5 12l7-7 7 7" />
+                            </svg>
+                            <span className="text-[11px] font-semibold">{q.upvotes}</span>
                           </button>
-                          <button
-                            onClick={() => handleCopy(msg, "Renovation AI")}
-                            className="flex items-center gap-1 text-[11px] text-[#555] hover:text-white transition-colors"
-                          >
-                            Share
-                          </button>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[#E0E0E0] text-sm font-medium leading-snug">
+                              {q.text}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              <span className="text-[11px] text-[#888]">{q.authorName}</span>
+                              <span className="text-[#444]">·</span>
+                              <span className="text-[11px] text-[#555]">{timeAgo(q.createdAt)}</span>
+                              {catInfo && (
+                                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#1F1F1F] border border-[#2A2A2A] text-[#888]">
+                                  {catInfo.icon} {catInfo.label}
+                                </span>
+                              )}
+                            </div>
+
+                            <button
+                              onClick={() => setExpandedQId(isExpanded ? null : q.id)}
+                              className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#FF4D00] hover:text-[#FF4D00]/80 transition-colors"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                              </svg>
+                              {q.answerCount} answer{q.answerCount !== 1 ? "s" : ""}
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className={`transition-transform ${isExpanded ? "rotate-180" : ""}`}>
+                                <path d="M6 9l6 6 6-6" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       </div>
+
+                      {/* Expanded answers */}
+                      {isExpanded && (
+                        <div className="border-t border-[#2A2A2A] bg-[#151515]">
+                          {q.answers.length > 0 ? (
+                            <div className="divide-y divide-[#2A2A2A]">
+                              {q.answers.map((a) => (
+                                <div key={a.id} className="px-4 py-3">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[11px] font-medium text-[#E0E0E0]">{a.authorName}</span>
+                                    {a.isVerifiedLocal && (
+                                      <span className="inline-flex items-center gap-1 text-[9px] font-semibold px-1.5 py-0.5 rounded-md bg-green-900/30 text-green-400 border border-green-700/40">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                        Local
+                                      </span>
+                                    )}
+                                    <span className="text-[11px] text-[#555]">{timeAgo(a.createdAt)}</span>
+                                  </div>
+                                  <p className="text-[#C0C0C0] text-sm leading-relaxed">{a.content}</p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="px-4 py-6 text-center">
+                              <p className="text-[11px] text-[#555]">No answers yet. Be the first to help out!</p>
+                            </div>
+                          )}
+
+                          {/* Inline answer form */}
+                          {isJoined && (
+                            <div className="px-4 py-3 border-t border-[#2A2A2A]">
+                              <InlineAnswerForm
+                                questionId={q.id}
+                                authorName={name}
+                                onAnswered={(answer) => {
+                                  setQuestions((prev) =>
+                                    prev.map((question) =>
+                                      question.id === q.id
+                                        ? {
+                                            ...question,
+                                            answerCount: question.answerCount + 1,
+                                            answers: [...question.answers, answer],
+                                          }
+                                        : question
+                                    )
+                                  );
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  )
-                )}
-                {renovationLoading && (
-                  <div className="border-l-[3px] border-[#FF4D00]/40 rounded-xl p-4 bg-[#1A1A1A]">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:0ms]" />
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:150ms]" />
-                        <span className="w-2 h-2 rounded-full bg-[#FF4D00]/60 animate-bounce [animation-delay:300ms]" />
-                      </div>
-                      <span className="text-xs text-[#555]">Thinking about renovations...</span>
-                    </div>
-                  </div>
-                )}
-                <div ref={renovationEndRef} />
+                  );
+                })}
               </div>
             )}
           </div>
@@ -661,9 +841,9 @@ export default function IntelBox({
       </div>
 
       {/* ════════ ZONE 3 — Sticky bottom input bar ════════ */}
-      <div className="sticky bottom-0 bg-[#0E0E0E] border-t border-[#2A2A2A]">
-        {/* ── Intel Feed input ── */}
-        {activeTab === "intel" && (
+      <div className="sticky bottom-0 bg-[#1A1A1A] border-t border-[#2A2A2A]">
+        {/* ── Take input ── */}
+        {activeTab === "take" && (
           <>
             {isLocked ? (
               <div className="px-4 py-3 text-center">
@@ -672,7 +852,6 @@ export default function IntelBox({
                 </p>
               </div>
             ) : !isJoined ? (
-              /* Join gate */
               <form onSubmit={handleJoin} className="p-4 space-y-3">
                 <p className="text-white text-sm font-semibold">
                   Join the conversation
@@ -685,7 +864,7 @@ export default function IntelBox({
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
                   required
                 />
                 <input
@@ -693,7 +872,7 @@ export default function IntelBox({
                   placeholder="Email (private)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
                   required
                 />
                 <input
@@ -701,7 +880,7 @@ export default function IntelBox({
                   placeholder="Zip code (optional — unlocks local badge)"
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
-                  className="w-full rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  className="w-full rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
                 />
                 <button
                   type="submit"
@@ -711,9 +890,7 @@ export default function IntelBox({
                 </button>
               </form>
             ) : (
-              /* Compose input */
               <form onSubmit={handlePost} className="p-4 space-y-3">
-                {/* Context tags */}
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
                   {CONTEXT_TAGS.map((tag) => (
                     <button
@@ -723,7 +900,7 @@ export default function IntelBox({
                       className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-full transition-all ${
                         selectedTag === tag
                           ? "bg-[#FF4D00] text-white"
-                          : "bg-[#1A1A1A] border border-[#2A2A2A] text-[#666] hover:text-[#999]"
+                          : "bg-[#111111] border border-[#2A2A2A] text-[#666] hover:text-[#999]"
                       }`}
                     >
                       {tag}
@@ -737,7 +914,7 @@ export default function IntelBox({
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                     placeholder="Spill the tea on this place..."
-                    className="flex-1 min-w-0 rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                    className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
                   />
                   <button
                     type="submit"
@@ -755,8 +932,8 @@ export default function IntelBox({
           </>
         )}
 
-        {/* ── Gwaky AI input ── */}
-        {activeTab === "gwaky" && (
+        {/* ── Ask AI input ── */}
+        {activeTab === "ai" && (
           <div className="p-4">
             <div className="flex items-center gap-2">
               <input
@@ -766,17 +943,17 @@ export default function IntelBox({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
-                    sendAIMessage(gwakyInput, "default", setGwakyMessages, setGwakyInput, setGwakyLoading);
+                    sendAIMessage(gwakyInput, setGwakyMessages, setGwakyInput, setGwakyLoading);
                   }
                 }}
                 placeholder="Ask Gwaky AI anything about this property..."
                 disabled={gwakyLoading}
-                className="flex-1 min-w-0 rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 disabled:opacity-50"
+                className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() =>
-                  sendAIMessage(gwakyInput, "default", setGwakyMessages, setGwakyInput, setGwakyLoading)
+                  sendAIMessage(gwakyInput, setGwakyMessages, setGwakyInput, setGwakyLoading)
                 }
                 disabled={gwakyLoading || !gwakyInput.trim()}
                 className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
@@ -787,50 +964,116 @@ export default function IntelBox({
           </div>
         )}
 
-        {/* ── Renovation AI input ── */}
-        {activeTab === "renovation" && (
+        {/* ── Question input ── */}
+        {activeTab === "question" && (
           <div className="p-4">
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={renovationInput}
-                onChange={(e) => setRenovationInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    sendAIMessage(
-                      renovationInput,
-                      "renovation",
-                      setRenovationMessages,
-                      setRenovationInput,
-                      setRenovationLoading
-                    );
-                  }
-                }}
-                placeholder="Ask about renovations, costs, ROI..."
-                disabled={renovationLoading}
-                className="flex-1 min-w-0 rounded-lg bg-[#1A1A1A] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50 disabled:opacity-50"
-              />
-              <button
-                type="button"
-                onClick={() =>
-                  sendAIMessage(
-                    renovationInput,
-                    "renovation",
-                    setRenovationMessages,
-                    setRenovationInput,
-                    setRenovationLoading
-                  )
-                }
-                disabled={renovationLoading || !renovationInput.trim()}
-                className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                ✨
-              </button>
-            </div>
+            {!isJoined ? (
+              <p className="text-[#555] text-sm text-center py-1">
+                Join the conversation on the Take tab to ask questions.
+              </p>
+            ) : (
+              <form onSubmit={handlePostQuestion} className="space-y-2">
+                {/* Category selector */}
+                <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+                  {Q_CATEGORIES.filter((c) => c.key !== "all").map((cat) => (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => setNewQCategory(cat.key)}
+                      className={`whitespace-nowrap text-[11px] px-2.5 py-1 rounded-full transition-all ${
+                        newQCategory === cat.key
+                          ? "bg-[#FF4D00] text-white"
+                          : "bg-[#111111] border border-[#2A2A2A] text-[#666] hover:text-[#999]"
+                      }`}
+                    >
+                      {cat.icon} {cat.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newQuestion}
+                    onChange={(e) => setNewQuestion(e.target.value)}
+                    placeholder="Ask the neighborhood..."
+                    maxLength={500}
+                    className="flex-1 min-w-0 rounded-lg bg-[#111111] border border-[#2A2A2A] px-3 py-2.5 text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+                  />
+                  <button
+                    type="submit"
+                    disabled={postingQ || !newQuestion.trim()}
+                    className="shrink-0 px-4 py-2.5 bg-[#FF4D00] text-white text-sm font-bold rounded-lg hover:bg-[#FF4D00]/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {postingQ ? "..." : "Ask →"}
+                  </button>
+                </div>
+                {postQError && (
+                  <p className="text-red-400 text-xs">{postQError}</p>
+                )}
+              </form>
+            )}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+/** Inline answer form for questions */
+function InlineAnswerForm({
+  questionId,
+  authorName,
+  onAnswered,
+}: {
+  questionId: string;
+  authorName: string;
+  onAnswered: (answer: Answer) => void;
+}) {
+  const [content, setContent] = useState("");
+  const [posting, setPosting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim()) return;
+    setPosting(true);
+    try {
+      const res = await fetch(
+        `/api/community/questions/${questionId}/answer`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ content: content.trim(), authorName }),
+        }
+      );
+      if (res.ok) {
+        const answer = await res.json();
+        onAnswered(answer);
+        setContent("");
+      }
+    } catch {
+      // silently fail
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="flex gap-2">
+      <input
+        type="text"
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
+        placeholder="Share what you know..."
+        maxLength={500}
+        className="flex-1 min-w-0 px-3 py-2 bg-[#111111] border border-[#2A2A2A] rounded-lg text-sm text-white placeholder:text-[#555] focus:outline-none focus:border-[#FF4D00]/50"
+      />
+      <button
+        type="submit"
+        disabled={posting || !content.trim()}
+        className="shrink-0 px-3 py-2 bg-[#FF4D00] text-white text-xs font-bold rounded-lg hover:bg-[#FF4D00]/90 transition-all disabled:opacity-40"
+      >
+        {posting ? "..." : "Answer"}
+      </button>
+    </form>
   );
 }

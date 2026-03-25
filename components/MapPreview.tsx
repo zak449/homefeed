@@ -3,8 +3,8 @@
 import { useState } from "react";
 
 /**
- * MapPreview — lightweight static map preview using OpenStreetMap tiles.
- * No API key needed. Uses the free staticmap.openstreetmap.de service.
+ * MapPreview — Google Maps embed iframe (no API key required).
+ * Falls back to address + Google Maps link if iframe fails.
  */
 export default function MapPreview({
   latitude,
@@ -19,30 +19,34 @@ export default function MapPreview({
   zoom?: number;
   className?: string;
 }) {
-  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const mapUrl = `https://staticmap.openstreetmap.de/staticmap.php?center=${latitude},${longitude}&zoom=${zoom}&size=600x300&maptype=mapnik&markers=${latitude},${longitude},red-pushpin`;
+  // Build query from address if available, otherwise use coordinates
+  const query = address
+    ? encodeURIComponent(address)
+    : `${latitude},${longitude}`;
 
-  // Google Maps directions link
-  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+  const embedUrl = `https://maps.google.com/maps?q=${query}&output=embed&z=${zoom}`;
+  const directionsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address || `${latitude},${longitude}`)}`;
 
   if (failed) {
     return (
-      <div className={`rounded-xl bg-tag flex items-center justify-center ${className ?? ""}`} style={{ minHeight: 160 }}>
-        <div className="text-center py-6">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="mx-auto text-muted/30 mb-2">
+      <div className={`rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] flex items-center justify-center ${className ?? ""}`} style={{ minHeight: 200 }}>
+        <div className="text-center py-8">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="mx-auto text-[#555] mb-3">
             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" strokeWidth="1.5" />
             <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="1.5" />
           </svg>
-          <p className="text-[11px] text-muted">Map unavailable</p>
+          {address && (
+            <p className="text-sm text-[#E0E0E0] mb-2 px-4">{address}</p>
+          )}
           <a
             href={directionsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-social font-semibold hover:underline mt-1 inline-block"
+            className="text-sm text-[#FF4D00] font-semibold hover:text-[#FF4D00]/80 transition-colors inline-block"
           >
-            Open in Google Maps
+            Open in Google Maps →
           </a>
         </div>
       </div>
@@ -50,38 +54,26 @@ export default function MapPreview({
   }
 
   return (
-    <div className={`relative rounded-xl overflow-hidden ${className ?? ""}`}>
-      {/* Skeleton while loading */}
-      {!loaded && (
-        <div className="absolute inset-0 skeleton" style={{ minHeight: 160 }} />
-      )}
-
-      {/* Map image */}
+    <div className={`relative rounded-xl overflow-hidden bg-[#1A1A1A] ${className ?? ""}`}>
+      <iframe
+        src={embedUrl}
+        width="100%"
+        height="300"
+        style={{ border: 0, borderRadius: "12px", display: "block" }}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+        allowFullScreen
+        onError={() => setFailed(true)}
+        title={address ? `Map of ${address}` : "Property location map"}
+      />
+      {/* Fallback link below the map */}
       <a
         href={directionsUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="block group"
+        className="block text-center py-2 text-xs text-[#888] hover:text-[#FF4D00] transition-colors"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={mapUrl}
-          alt={address ? `Map of ${address}` : "Property location map"}
-          className={`w-full h-auto rounded-xl transition-opacity duration-500 ${
-            loaded ? "opacity-100" : "opacity-0"
-          }`}
-          loading="lazy"
-          onLoad={() => setLoaded(true)}
-          onError={() => setFailed(true)}
-          style={{ minHeight: 160 }}
-        />
-
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/10 transition-colors duration-200 rounded-xl flex items-center justify-center">
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 backdrop-blur-sm text-ink text-[12px] font-semibold px-3 py-1.5 rounded-lg shadow-sm">
-            Open in Maps
-          </span>
-        </div>
+        Open in Google Maps →
       </a>
     </div>
   );

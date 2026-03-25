@@ -107,7 +107,7 @@ export default function CareersPage() {
 
       {/* Founder quote */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-14">
-        <div className="relative bg-ink rounded-2xl p-6 sm:p-10 overflow-hidden">
+        <div className="relative bg-[#111111] rounded-2xl p-6 sm:p-10 overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-amber/[0.06] rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="relative">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" className="text-amber/30 mb-4">

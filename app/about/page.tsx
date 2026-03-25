@@ -55,7 +55,7 @@ export default async function AboutPage() {
       ═══════════════════════════════════════════════════════════ */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
         {/* Big pull quote */}
-        <div className="relative bg-ink rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden">
+        <div className="relative bg-[#111111] rounded-3xl p-8 sm:p-12 mb-10 overflow-hidden">
           <div className="absolute top-[-30px] right-[-30px] w-[180px] h-[180px] rounded-full bg-amber/[0.08] blur-[60px] pointer-events-none" />
           <div className="relative flex flex-col sm:flex-row items-start gap-6 sm:gap-10">
             {/* Photo placeholder */}
@@ -125,7 +125,7 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 3 — THE MISSION
       ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-ink">
+      <section className="bg-[#111111]">
         <div className="max-w-4xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
           <p className="text-[11px] font-bold text-amber tracking-[0.2em] uppercase mb-5">
             Our mission
@@ -370,7 +370,7 @@ export default async function AboutPage() {
       {/* ═══════════════════════════════════════════════════════════
           SECTION 7 — THE DATA
       ═══════════════════════════════════════════════════════════ */}
-      <section className="bg-ink relative overflow-hidden">
+      <section className="bg-[#111111] relative overflow-hidden">
         {/* Ambient glow behind numbers */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-amber/[0.04] blur-[100px] pointer-events-none" />
 

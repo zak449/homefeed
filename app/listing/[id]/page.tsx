@@ -87,12 +87,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   // Property type color map
   const typeColorMap: Record<string, string> = {
-    apartment: "bg-blue-50 text-blue-700 border-blue-200",
-    house: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    condo: "bg-violet-50 text-violet-700 border-violet-200",
-    townhouse: "bg-orange-50 text-orange-700 border-orange-200",
-    multi_family: "bg-rose-50 text-rose-700 border-rose-200",
-    land: "bg-amber-50 text-amber-700 border-amber-200",
+    apartment: "bg-blue-900/30 text-blue-400 border-blue-700/40",
+    house: "bg-emerald-900/30 text-emerald-400 border-emerald-700/40",
+    condo: "bg-violet-900/30 text-violet-400 border-violet-700/40",
+    townhouse: "bg-orange-900/30 text-orange-400 border-orange-700/40",
+    multi_family: "bg-rose-900/30 text-rose-400 border-rose-700/40",
+    land: "bg-amber-900/30 text-amber-400 border-amber-700/40",
   };
   const typeColor = typeColorMap[listing.propertyType] ?? "bg-highlight text-secondary border-divider";
 
@@ -300,6 +300,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             listingAddress={listing.address}
             listingPrice={price}
             photos={listing.photos as string[]}
+            zipCode={listing.zip}
             listingContext={{
               address: listing.address,
               city: listing.city,

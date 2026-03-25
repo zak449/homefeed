@@ -220,7 +220,7 @@ export default async function TrendingPage() {
         </Link>
 
         {/* Hero header */}
-        <div className="relative mb-10 overflow-hidden rounded-2xl bg-ink px-6 py-8 sm:px-8 sm:py-10">
+        <div className="relative mb-10 overflow-hidden rounded-2xl bg-[#111111] px-6 py-8 sm:px-8 sm:py-10">
           {/* Background glow orbs */}
           <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-amber/20 blur-3xl amber-shimmer pointer-events-none" />
           <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-amber/10 blur-3xl glow-pulse pointer-events-none" />

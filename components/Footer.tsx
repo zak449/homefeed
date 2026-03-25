@@ -91,14 +91,14 @@ export default function Footer() {
   }
 
   return (
-    <footer className="mt-20 bg-ink text-white">
+    <footer className="mt-20 bg-[#0D0D0D] text-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Main footer content */}
         <div className="py-12 sm:py-16 grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-8">
           {/* Brand column */}
           <div className="md:col-span-4 space-y-4">
             <p className="text-lg font-bold tracking-tight">
-              Gwak<span className="text-[#E8A87C]">y</span>
+              Gwak<span className="text-[#FF4D00]">y</span>
             </p>
             <p className="text-sm text-white/60 leading-relaxed max-w-xs">
               the comment section real estate never had
@@ -111,7 +111,7 @@ export default function Footer() {
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="text-white/40 hover:text-[#E8A87C] transition-colors"
+                  className="text-white/40 hover:text-[#FF4D00] transition-colors"
                 >
                   {social.icon}
                 </a>
@@ -166,13 +166,13 @@ export default function Footer() {
               <button
                 type="submit"
                 disabled={status === "loading"}
-                className="shrink-0 px-4 py-2.5 text-sm font-medium rounded-lg bg-[#E8A87C] text-ink hover:bg-[#E8A87C]/90 transition-colors disabled:opacity-50"
+                className="shrink-0 px-4 py-2.5 text-sm font-semibold rounded-full bg-[#FF4D00] text-white hover:bg-[#FF4D00]/90 transition-colors disabled:opacity-50"
               >
                 {status === "loading" ? "..." : "Subscribe"}
               </button>
             </form>
             {status === "success" && (
-              <p className="text-xs text-[#E8A87C]">You&apos;re subscribed!</p>
+              <p className="text-xs text-[#FF4D00]">You&apos;re subscribed!</p>
             )}
             {status === "error" && (
               <p className="text-xs text-red-400">Something went wrong. Try again.</p>

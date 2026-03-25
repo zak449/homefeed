@@ -1,412 +1,134 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — Gwaky",
-  description:
-    "Terms and conditions governing your use of Gwaky, the social commentary platform for real estate.",
+  title: "Terms of Service \u2014 Gwaky",
+  description: "Terms governing your use of Gwaky.",
 };
 
 export default function TermsPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
-      {/* Back link */}
-      <a
-        href="/"
-        className="inline-flex items-center gap-1 text-sm font-medium text-muted hover:text-ink transition-colors mb-8"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 12H5" />
-          <path d="M12 19l-7-7 7-7" />
-        </svg>
-        Back to Gwaky
-      </a>
-
-      {/* Header */}
-      <div className="mb-10">
-        <h1 className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tighter">
+    <div className="min-h-screen bg-[#0D0D0D]">
+      <div className="max-w-[720px] mx-auto px-5 py-16 sm:py-24">
+        <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
           Terms of Service
         </h1>
-        <p className="text-sm text-muted mt-2">Effective: March 2026</p>
-        <p className="text-base text-muted mt-4 leading-relaxed">
-          Welcome to{" "}
-          <span className="font-display font-semibold text-ink">
-            Gwak<span className="social-gradient">y</span>
-          </span>
-          . By accessing or using our platform, you agree to be bound by these
-          Terms of Service. Please read them carefully.
-        </p>
-      </div>
+        <p className="text-white/40 text-xs mb-10">Last updated: March 2026</p>
 
-      {/* Sections */}
-      <div className="space-y-10">
-        {/* 1. Acceptance of Terms */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            1. Acceptance of Terms
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+        <div className="space-y-8 text-white/70 text-sm leading-relaxed">
+          <Section title="1. Acceptance of Terms">
             <p>
-              By accessing or using Gwaky (the &ldquo;Platform&rdquo;), you
-              agree to comply with and be bound by these Terms of Service
-              (&ldquo;Terms&rdquo;). If you do not agree to these Terms, you may
-              not access or use the Platform.
+              By accessing or using Gwaky, you agree to be bound by these
+              Terms of Service. If you do not agree, do not use the service.
             </p>
-            <p>
-              These Terms constitute a legally binding agreement between you and
-              Gwaky. Your continued use of the Platform following any
-              modifications to these Terms constitutes acceptance of those
-              changes.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 2. Description of Service */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            2. Description of Service
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
+          <Section title="2. Eligibility">
             <p>
-              Gwaky is a social commentary platform for real estate. The
-              Platform aggregates publicly available real estate listings and
-              allows users to view, comment on, react to, and discuss
-              properties. Gwaky does not own, manage, sell, or lease any
-              properties displayed on the Platform.
+              You must be at least 18 years old to use Gwaky. By using the
+              service, you represent that you meet this requirement.
             </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 3. User-Generated Content */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            3. User-Generated Content
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+          <Section title="3. User-Generated Content">
             <p>
-              The Platform allows you to post comments, reactions, and other
-              content (&ldquo;User Content&rdquo;). You are solely responsible
-              for your User Content and the consequences of posting it.
+              Takes, questions, and answers are user-generated content. You
+              are solely responsible for content you post. You agree not to
+              post defamatory, harassing, threatening, or knowingly false
+              content. Gwaky reserves the right to remove any content that
+              violates these terms.
             </p>
-            <p>
-              By submitting User Content, you grant Gwaky a non-exclusive,
-              worldwide, royalty-free, perpetual, irrevocable, sublicensable
-              license to use, reproduce, modify, adapt, publish, display,
-              distribute, and create derivative works from your User Content in
-              connection with the Platform and Gwaky&rsquo;s business
-              operations.
-            </p>
-            <p>
-              You represent and warrant that you own or have the necessary
-              rights, licenses, and permissions to submit your User Content and
-              to grant the above license.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 4. Prohibited Content and Conduct */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            4. Prohibited Content and Conduct
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+          <Section title="4. Prohibited Conduct">
             <p>
-              You agree not to use the Platform to post, upload, or transmit any
-              content that:
+              You may not: impersonate another person; post spam or
+              unsolicited promotions; attempt to manipulate community
+              reactions; use the service for any unlawful purpose; scrape or
+              harvest data from the platform; or circumvent any security or
+              access controls.
             </p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>
-                <span className="font-semibold text-ink">Hate speech:</span>{" "}
-                Content that promotes violence, discrimination, or hostility
-                against any individual or group based on race, ethnicity,
-                national origin, sex, gender identity, sexual orientation,
-                religion, disability, or age.
-              </li>
-              <li>
-                <span className="font-semibold text-ink">Harassment:</span>{" "}
-                Content that threatens, intimidates, bullies, or targets another
-                person with the intent to cause harm or distress, including
-                doxxing (publishing private personal information).
-              </li>
-              <li>
-                <span className="font-semibold text-ink">Spam:</span>{" "}
-                Unsolicited or repetitive content, including but not limited to
-                commercial solicitations, advertisements, promotional materials,
-                chain messages, or automated/scripted content.
-              </li>
-              <li>
-                <span className="font-semibold text-ink">
-                  Misleading information:
-                </span>{" "}
-                Content that is intentionally false, deceptive, or designed to
-                mislead other users, particularly regarding property details,
-                pricing, or market conditions.
-              </li>
-              <li>
-                <span className="font-semibold text-ink">
-                  Illegal content:
-                </span>{" "}
-                Content that violates any applicable law, regulation, or
-                third-party rights, including intellectual property,
-                defamation, and privacy laws.
-              </li>
-              <li>
-                <span className="font-semibold text-ink">
-                  Explicit or harmful material:
-                </span>{" "}
-                Sexually explicit content, graphic violence, or any content that
-                could be harmful to minors.
-              </li>
-              <li>
-                <span className="font-semibold text-ink">
-                  Impersonation:
-                </span>{" "}
-                Content that misrepresents your identity or affiliation, or
-                falsely implies endorsement by any person or entity.
-              </li>
-            </ul>
-            <p>
-              Gwaky reserves the right to remove any content that violates
-              these Terms and to restrict or terminate access for users who
-              engage in prohibited conduct, at our sole discretion and without
-              prior notice.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 5. Intellectual Property */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            5. Intellectual Property
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+          <Section title="5. Intellectual Property">
             <p>
-              The Platform, including its design, features, branding, logos,
-              code, and all non-user content, is owned by Gwaky and is
-              protected by copyright, trademark, and other intellectual property
-              laws. You may not copy, modify, distribute, sell, or lease any
-              part of the Platform without our prior written consent.
+              The Gwaky brand, logo, design, and code are the property of
+              Gwaky. User-generated content remains the property of its
+              authors, with a license granted to Gwaky to display and
+              distribute it within the platform.
             </p>
-            <p>
-              Real estate listing data displayed on the Platform may be sourced
-              from third-party providers and is subject to their respective
-              terms and conditions. Gwaky does not claim ownership of
-              third-party listing content.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 6. Disclaimer — Not Real Estate Advice */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            6. Disclaimer — Not Real Estate Advice
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
-            <div className="bg-social-light border border-social/10 rounded-xl p-5">
-              <p className="font-semibold text-ink mb-2">
-                Important: Gwaky is not a licensed real estate broker, agent,
-                or advisor.
-              </p>
-              <p>
-                Nothing on the Platform constitutes professional real estate
-                advice, financial advice, investment advice, or legal advice.
-                All content on Gwaky, including user comments and reactions,
-                is provided for informational and entertainment purposes only.
-              </p>
-            </div>
+          <Section title="6. Disclaimers">
             <p>
-              Listing information, including prices, property details, and
-              availability, may be inaccurate, outdated, or incomplete. You
-              should independently verify all property information before making
-              any real estate decisions. Always consult with qualified
-              professionals (real estate agents, attorneys, financial advisors)
-              before buying, selling, or renting property.
+              Takes and community content are opinions, not professional real
+              estate advice. Gwaky does not verify the accuracy of
+              user-generated content. Always conduct your own due diligence
+              before making real estate decisions. Gwaky is not a licensed
+              real estate broker or agent.
             </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 7. Limitation of Liability */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            7. Limitation of Liability
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+          <Section title="7. Limitation of Liability">
             <p>
-              TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, GWAKY AND
-              ITS OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, AND AFFILIATES SHALL
-              NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL,
-              CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING WITHOUT LIMITATION
-              LOSS OF PROFITS, DATA, USE, OR GOODWILL, ARISING OUT OF OR IN
-              CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE PLATFORM.
+              Gwaky is provided &ldquo;as is&rdquo; without warranties. To
+              the maximum extent permitted by law, Gwaky shall not be liable
+              for any indirect, incidental, or consequential damages arising
+              from your use of the service.
             </p>
-            <p>
-              IN NO EVENT SHALL GWAKY&rsquo;S TOTAL LIABILITY TO YOU FOR ALL
-              CLAIMS ARISING OUT OF OR RELATING TO THE PLATFORM EXCEED ONE
-              HUNDRED DOLLARS ($100.00).
-            </p>
-            <p>
-              THE PLATFORM IS PROVIDED ON AN &ldquo;AS IS&rdquo; AND &ldquo;AS
-              AVAILABLE&rdquo; BASIS WITHOUT WARRANTIES OF ANY KIND, WHETHER
-              EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES
-              OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
-              NON-INFRINGEMENT.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 8. Indemnification */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            8. Indemnification
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
+          <Section title="8. Dispute Resolution">
             <p>
-              You agree to indemnify, defend, and hold harmless Gwaky, its
-              officers, directors, employees, agents, and affiliates from and
-              against any and all claims, damages, losses, liabilities, costs,
-              and expenses (including reasonable attorneys&rsquo; fees) arising
-              out of or in connection with: (a) your use of the Platform; (b)
-              your User Content; (c) your violation of these Terms; or (d) your
-              violation of any law or the rights of any third party.
+              Any disputes arising from these terms shall be resolved through
+              binding arbitration in accordance with the rules of the
+              American Arbitration Association. You agree to resolve disputes
+              individually and waive any right to a class action.
             </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 9. Governing Law */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            9. Governing Law and Dispute Resolution
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
+          <Section title="9. Changes to Terms">
             <p>
-              These Terms shall be governed by and construed in accordance with
-              the laws of the State of California, United States, without regard
-              to its conflict of law provisions.
+              We may update these terms from time to time. Continued use of
+              the service after changes constitutes acceptance of the revised
+              terms.
             </p>
-            <p>
-              Any dispute arising out of or relating to these Terms or the
-              Platform shall be resolved exclusively in the state or federal
-              courts located in California. You consent to the personal
-              jurisdiction of and venue in such courts and waive any objection
-              as to inconvenient forum.
-            </p>
-          </div>
-        </section>
+          </Section>
 
-        {/* 10. Modifications to Terms */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            10. Modifications to Terms
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
+          <Section title="10. Contact">
             <p>
-              Gwaky reserves the right to modify these Terms at any time.
-              When we make changes, we will update the effective date at the top
-              of this page and, for material changes, may provide additional
-              notice (such as a banner on the Platform or an email to
-              subscribers). Your continued use of the Platform after any
-              modifications constitutes your acceptance of the revised Terms. If
-              you do not agree to the updated Terms, you must discontinue use of
-              the Platform.
-            </p>
-          </div>
-        </section>
-
-        {/* 11. Termination */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            11. Termination
-          </h2>
-          <div className="space-y-3 text-[15px] text-muted leading-relaxed">
-            <p>
-              Gwaky may terminate or suspend your access to the Platform at
-              any time, with or without cause, and with or without notice. Upon
-              termination, your right to use the Platform will immediately
-              cease.
-            </p>
-            <p>
-              You may stop using the Platform at any time. Sections of these
-              Terms that by their nature should survive termination (including,
-              without limitation, intellectual property, limitation of
-              liability, indemnification, and governing law) will survive.
-            </p>
-          </div>
-        </section>
-
-        {/* 12. Severability */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            12. Severability
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
-            <p>
-              If any provision of these Terms is found to be invalid,
-              unenforceable, or illegal by a court of competent jurisdiction, the
-              remaining provisions shall continue in full force and effect. The
-              invalid provision shall be modified to the minimum extent
-              necessary to make it valid and enforceable while preserving its
-              original intent.
-            </p>
-          </div>
-        </section>
-
-        {/* 13. Entire Agreement */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            13. Entire Agreement
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
-            <p>
-              These Terms, together with our{" "}
+              Questions about these terms? Reach us at{" "}
               <a
-                href="/privacy"
-                className="text-social hover:text-social/80 font-medium transition-colors"
+                href="mailto:hello@gwaky.com"
+                className="text-[#FF4D00] hover:underline"
               >
-                Privacy Policy
+                hello@gwaky.com
+              </a>{" "}
+              or through our{" "}
+              <a href="/contact" className="text-[#FF4D00] hover:underline">
+                contact page
               </a>
-              , constitute the entire agreement between you and Gwaky
-              regarding your use of the Platform and supersede any prior
-              agreements, communications, or understandings, whether written or
-              oral.
+              .
             </p>
-          </div>
-        </section>
-
-        {/* 14. Contact */}
-        <section>
-          <h2 className="font-display text-xl font-semibold text-ink tracking-tight mb-3">
-            14. Contact
-          </h2>
-          <div className="text-[15px] text-muted leading-relaxed">
-            <p>
-              If you have any questions about these Terms of Service, please
-              contact us:
-            </p>
-            <div className="mt-4 bg-tag rounded-xl p-5 space-y-2">
-              <p className="font-display font-semibold text-ink">
-                Gwak<span className="social-gradient">y</span>
-              </p>
-              <p>
-                Email:{" "}
-                <a
-                  href="mailto:support@gwaky.com"
-                  className="text-social hover:text-social/80 font-medium transition-colors"
-                >
-                  support@gwaky.com
-                </a>
-              </p>
-            </div>
-          </div>
-        </section>
+          </Section>
+        </div>
       </div>
     </div>
+  );
+}
+
+function Section({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section>
+      <h2 className="text-[#FF4D00] text-base font-semibold mb-3">
+        {title}
+      </h2>
+      {children}
+    </section>
   );
 }
