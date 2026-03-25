@@ -116,6 +116,7 @@ export function parseSearchQuery(raw: string): { city: string; state?: string } 
 export async function autoSyncCity(city: string, state?: string): Promise<void> {
   if (!API_KEY) return; // No API key, skip silently
 
+  try {
   // Parse the query to extract a usable city/state for the API
   const parsed = parseSearchQuery(city);
   if (state) parsed.state = state.toUpperCase();
@@ -194,4 +195,8 @@ export async function autoSyncCity(city: string, state?: string): Promise<void> 
   }
 
   console.log(`[AutoSync] ${normalizedCity}: ${totalSale} for sale + ${totalRent} for rent`);
+  } catch (e) {
+    console.error("[AutoSync] Fatal error (swallowed):", e);
+    // Never crash the page for a sync failure
+  }
 }
