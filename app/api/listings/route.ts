@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { enrichBatch } from "@/lib/enrich-batch";
+import { fetchRealtorListings } from "@/lib/data-adapters/realtor";
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
 
@@ -246,6 +247,45 @@ export async function GET(req: NextRequest) {
     const all = [...withDistance, ...noCoords];
     total = all.length;
     listings = all.slice((page - 1) * perPage, page * perPage);
+  }
+
+  // ── Auto-sync: if city search returned 0 results, fetch from Realtor API ──
+  if (city && total === 0 && listings.length === 0 && !isGeoSearch && page === 1) {
+    try {
+      // Parse state code from city string (e.g. "Beaumont, CA" → stateCode "CA")
+      const parts = city.split(",").map(s => s.trim());
+      const cityName = parts[0];
+      const stateCode = parts[1]?.length === 2 ? parts[1].toUpperCase() : undefined;
+
+      const [saleCount, rentCount] = await Promise.all([
+        fetchRealtorListings({ city: cityName, stateCode, listingType: "sale", limit: 20 }),
+        fetchRealtorListings({ city: cityName, stateCode, listingType: "rent", limit: 20 }),
+      ]);
+
+      if (saleCount + rentCount > 0) {
+        // Re-query now that we have data
+        const freshListings = await prisma.listing.findMany({
+          where,
+          orderBy,
+          skip: 0,
+          take: perPage,
+          select: selectFields,
+        });
+        const freshTotal = await prisma.listing.count({ where });
+
+        const freshWithComments = freshListings.map((l) => ({
+          ...l,
+          topComment: l.comments?.[0] ?? null,
+        }));
+
+        return NextResponse.json(
+          { listings: freshWithComments, hasMore: freshTotal > perPage, total: freshTotal, synced: saleCount + rentCount },
+          { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+        );
+      }
+    } catch (e) {
+      console.error("[Auto-sync] Error fetching listings for", city, e);
+    }
   }
 
   const hasMore = page * perPage < total;

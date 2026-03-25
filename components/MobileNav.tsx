@@ -119,7 +119,7 @@ export default function MobileNav() {
         className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg/95 backdrop-blur-sm border-t border-divider"
         style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+        <div className="flex items-end justify-evenly h-16 max-w-md mx-auto px-1">
           {tabs.map((tab) => {
             const isAccent = tab.accent;
             const content = (
@@ -153,7 +153,7 @@ export default function MobileNav() {
               </>
             );
 
-            const className = `relative flex flex-col items-center gap-0.5 px-3 py-1.5 min-w-[44px] min-h-[44px] transition-colors rounded-xl ${
+            const className = `relative flex flex-col items-center gap-0.5 py-1.5 flex-1 min-h-[44px] transition-colors rounded-xl ${
               isAccent
                 ? ""
                 : tab.active

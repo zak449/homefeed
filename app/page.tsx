@@ -832,10 +832,10 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
                         {/* The take — big text like a tweet */}
                         <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed mb-3">
-                          I bought my place and my neighbors immediately told me things my realtor never mentioned. Un-permitted additions. Flooding history. Neighbor disputes that went on for years.
+                          When I moved in, meeting my neighbors changed everything. They told me which contractor to trust, warned me about a drainage issue I needed to fix before winter, and showed me the hiking trail nobody knows about.
                         </p>
                         <p className="text-[16px] sm:text-[18px] text-ink leading-relaxed font-semibold mb-5">
-                          If Gwaky existed, I would have had second thoughts. That&apos;s why I built it.
+                          That&apos;s when I realized — the best intel about any home comes from the people who actually live on the block. I built Gwaky so every buyer gets that before they sign.
                         </p>
 
                         {/* Engagement row */}
