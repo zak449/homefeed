@@ -7,8 +7,8 @@ import KlaviyoScript from "@/components/KlaviyoScript";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gwaky — what your neighbors really think about the homes around you",
-  description: "The community-powered real estate platform where verified neighbors share honest takes on every listing. No agents. No spin. Just the truth about your neighborhood.",
+  title: "Gwaky — the comment section real estate never had",
+  description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing. No agents. No spin. Just the truth.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -19,9 +19,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Gwaky",
     locale: "en_US",
+    title: "Gwaky — the comment section real estate never had",
+    description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing.",
   },
   twitter: {
     card: "summary_large_image",
+    title: "Gwaky — the comment section real estate never had",
+    description: "Real takes from real people. No agents. No spin. Just the truth.",
   },
 };
 

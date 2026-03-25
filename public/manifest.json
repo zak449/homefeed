@@ -4,8 +4,8 @@
   "description": "Browse real estate listings. Read the comments. Call out the BS.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FAFAF7",
-  "theme_color": "#1A1A2E",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
   "orientation": "portrait-primary",
   "icons": [
     {
