@@ -49,7 +49,7 @@ export default function GeoNeighborhoodSpotlight({ commentCount }: { commentCoun
             <span className="text-xs text-secondary">{commentCount > 0 ? `${commentCount} takes shared` : "Join the conversation"}</span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <a href={communityHref} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-bg text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
+            <a href="/hot-takes" className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-bg text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
               Join the conversation &rarr;
             </a>
             <a href={cityHref} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-amber/30 text-amber text-sm font-semibold hover:bg-amber/10 active:scale-[0.97] transition-all">

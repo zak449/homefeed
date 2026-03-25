@@ -52,6 +52,7 @@ export default async function HotTakesPage() {
     FROM "Comment" c
     LEFT JOIN "Reaction" r ON r."commentId" = c.id
     GROUP BY c.id
+    HAVING COUNT(r.id) > 0
     ORDER BY COUNT(r.id) DESC
     LIMIT 50
   `;

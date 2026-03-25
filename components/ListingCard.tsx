@@ -217,6 +217,17 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           {listing.address}, {listing.city}
         </p>
 
+        {/* Takes count — the value prop */}
+        <div className="flex items-center gap-1.5 mt-2 text-xs">
+          {commentCount > 0 ? (
+            <span className="flex items-center gap-1 text-accent font-semibold">
+              <span>🔥</span> {commentCount} take{commentCount !== 1 ? "s" : ""}
+            </span>
+          ) : (
+            <span className="text-tertiary">👻 No intel yet</span>
+          )}
+        </div>
+
         {/* Comment / social layer */}
         {listing.topComment ? (
           <div className="mt-3 pt-3 border-t border-divider">

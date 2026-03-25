@@ -614,7 +614,7 @@ export default function IntelBox({
       </div>
 
       {/* ════════ ZONE 2 — Scrollable content area ════════ */}
-      <div ref={scrollRef} className="flex-grow sm:overflow-y-auto">
+      <div ref={scrollRef} className="relative flex-grow sm:overflow-y-auto">
         {/* ──── TAB 1: Take (Intel Feed) ──── */}
         {activeTab === "take" && (
           <div className="p-4">
@@ -1206,6 +1206,9 @@ export default function IntelBox({
             )}
           </div>
         )}
+
+        {/* Scroll affordance — fade at bottom */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-bg to-transparent sm:from-surface" />
       </div>
 
       {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}
