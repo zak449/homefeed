@@ -869,7 +869,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                       href={`/?${params.toString()}`}
                       className={`px-3 py-1.5 rounded-full text-xs transition-all ${
                         isActive
-                          ? "bg-ink text-surface font-medium"
+                          ? "bg-[#FF4D00] text-white font-medium"
                           : "text-secondary hover:bg-surface hover:text-ink"
                       }`}
                     >
@@ -911,7 +911,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 Tip: Add a state abbreviation for best results (e.g. &ldquo;Austin, TX&rdquo;)
               </p>
               <div className="flex items-center justify-center gap-3 flex-wrap">
-                <a href="/" className="px-5 py-2.5 rounded-full bg-ink text-surface text-sm font-medium hover:opacity-90 transition-opacity">
+                <a href="/" className="px-5 py-2.5 rounded-full bg-[#FF4D00] text-white text-sm font-medium hover:opacity-90 transition-opacity">
                   Browse all listings
                 </a>
                 <a href="/?sort=comments" className="px-5 py-2.5 rounded-full border border-divider text-sm text-secondary hover:text-ink hover:border-ink/40 transition-colors">

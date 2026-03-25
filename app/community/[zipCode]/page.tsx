@@ -376,7 +376,7 @@ export default async function CommunityPage({
                           )}
                           {/* Type badge */}
                           <div className="absolute top-2 left-2">
-                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/90 text-ink backdrop-blur-sm">
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#1A1A1A]/90 text-white backdrop-blur-sm">
                               {listing.listingType === "rent" ? "Rent" : "Sale"}
                             </span>
                           </div>

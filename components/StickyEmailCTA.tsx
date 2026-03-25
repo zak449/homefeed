@@ -130,7 +130,7 @@ export default function StickyEmailCTA() {
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-48 sm:w-56 px-3.5 py-2 text-sm rounded-xl border border-border bg-white text-ink placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
+                    className="w-48 sm:w-56 px-3.5 py-2 text-sm rounded-xl border border-border bg-[#1A1A1A] text-white placeholder:text-muted/50 focus:outline-none focus:ring-2 focus:ring-social/30 focus:border-social transition-colors"
                   />
                   <button
                     type="submit"

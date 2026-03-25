@@ -132,7 +132,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goPrev}
-              className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
               aria-label="Previous"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
@@ -140,7 +140,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goNext}
-              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-[#1A1A1A]/90 text-white shadow-soft opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#2A2A2A]"
               aria-label="Next"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -167,7 +167,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {/* Single small badge — top left only */}
         <div className="absolute top-2.5 left-2.5">
           <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-sm ${
-            isRent ? "bg-blue-500/90 text-white" : "bg-white/90 text-ink shadow-sm"
+            isRent ? "bg-blue-500/90 text-white" : "bg-[#1A1A1A]/90 text-white shadow-sm"
           }`}>
             {isRent ? "Rent" : "Sale"}
           </span>
