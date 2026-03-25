@@ -81,15 +81,35 @@ export default function MobileNav() {
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
     if (isListingPage) {
+      // On listing page — open SpillSheet with listing context
       const listingId = pathname.split("/listing/")[1] || undefined;
       const address = document.querySelector("h1")?.textContent?.split(",")[0] || undefined;
       setSpillListingId(listingId);
       setSpillAddress(address);
+      setIsSpillOpen(true);
     } else {
-      setSpillListingId(undefined);
-      setSpillAddress(undefined);
+      // On homepage — try to navigate to the first listing card
+      const listingLink = document.querySelector("a[href^='/listing/']") as HTMLAnchorElement;
+      if (listingLink) {
+        // Navigate to that listing so the user lands on a real property
+        router.push(listingLink.getAttribute("href") || "/");
+      } else {
+        // No listing cards visible — open search
+        const searchInput = document.querySelector("input[placeholder*='address'], input[placeholder*='search'], input[type='search']") as HTMLInputElement;
+        if (searchInput) {
+          searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => {
+            searchInput.focus();
+            searchInput.setAttribute("placeholder", "Search an address to spill tea on...");
+          }, 300);
+        } else {
+          // Fallback: open SpillSheet anyway
+          setSpillListingId(undefined);
+          setSpillAddress(undefined);
+          setIsSpillOpen(true);
+        }
+      }
     }
-    setIsSpillOpen(true);
   }
 
   return (

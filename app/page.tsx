@@ -584,18 +584,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 <p className="text-[11px] font-extrabold tracking-[0.15em] uppercase text-amber mb-6">How it works</p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                   {[
-                    { step: "01", emoji: "🏠", title: "Browse", desc: "Find any listing in the US" },
-                    { step: "02", emoji: "🍵", title: "Read the tea", desc: "See what the community really thinks" },
-                    { step: "03", emoji: "🗣️", title: "Drop your take", desc: "Share what you know (anonymously or not)" },
+                    { step: "01", emoji: "🏠", title: "Browse", desc: "Find any listing in the US", href: "/?city=" },
+                    { step: "02", emoji: "🍵", title: "Read the tea", desc: "See what the community really thinks", href: "/?sort=comments" },
+                    { step: "03", emoji: "🗣️", title: "Drop your take", desc: "Share what you know (anonymously or not)", href: "/?sort=comments#spill" },
                   ].map((s) => (
-                    <div key={s.step} className="text-center">
-                      <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft">
+                    <a key={s.step} href={s.href} className="text-center group cursor-pointer">
+                      <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft group-hover:border-accent/40 group-hover:shadow-accent/10 group-hover:scale-105 transition-all">
                         {s.emoji}
                       </div>
                       <p className="text-[10px] font-bold text-amber mb-1 tracking-wider">{s.step}</p>
-                      <p className="text-sm text-ink font-bold leading-tight mb-1">{s.title}</p>
+                      <p className="text-sm text-ink font-bold leading-tight mb-1 group-hover:text-accent transition-colors">{s.title}</p>
                       <p className="text-xs text-tertiary leading-snug">{s.desc}</p>
-                    </div>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -865,17 +865,17 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                         <p className="text-xs font-extrabold tracking-[0.15em] uppercase text-amber mb-5">How it works</p>
                         <div className="grid grid-cols-3 gap-5">
                           {[
-                            { step: "01", icon: "🏠", label: "Search any address or neighborhood" },
-                            { step: "02", icon: "💬", label: "Read real takes from verified neighbors" },
-                            { step: "03", icon: "🗣️", label: "Verify your zip and share what you know" },
+                            { step: "01", icon: "🏠", label: "Search any address or neighborhood", href: "/?city=" },
+                            { step: "02", icon: "💬", label: "Read real takes from verified neighbors", href: "/?sort=comments" },
+                            { step: "03", icon: "🗣️", label: "Verify your zip and share what you know", href: "/?sort=comments#spill" },
                           ].map((s) => (
-                            <div key={s.step} className="text-center">
-                              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft">
+                            <a key={s.step} href={s.href} className="text-center group cursor-pointer">
+                              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-highlight border border-divider flex items-center justify-center text-2xl shadow-soft group-hover:border-accent/40 group-hover:scale-105 transition-all">
                                 {s.icon}
                               </div>
                               <p className="text-xs font-bold text-amber mb-1 tracking-wider">{s.step}</p>
-                              <p className="text-xs text-ink font-semibold leading-tight">{s.label}</p>
-                            </div>
+                              <p className="text-xs text-ink font-semibold leading-tight group-hover:text-accent transition-colors">{s.label}</p>
+                            </a>
                           ))}
                         </div>
                       </div>
