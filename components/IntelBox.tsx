@@ -221,6 +221,18 @@ export default function IntelBox({
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // ── Estimates state ──
+  type EstimateItem = { label: string; emoji: string; low: number; high: number; note: string };
+  const [estimatesData, setEstimatesData] = useState<{
+    estimates: EstimateItem[];
+    afterRenoValueLow: number;
+    afterRenoValueHigh: number;
+    marketNote: string;
+    source: string;
+  } | null>(null);
+  const [estimatesLoading, setEstimatesLoading] = useState(false);
+  const estimatesFetched = useRef(false);
+
   // ── Toast state ──
   const [showToast, setShowToast] = useState(false);
   const [toastCopied, setToastCopied] = useState(false);
@@ -230,6 +242,33 @@ export default function IntelBox({
   const scrollRef = useRef<HTMLDivElement>(null);
   const gwakyEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // ── Fetch estimates when tab opens ──
+  useEffect(() => {
+    if (activeTab !== "reno" || estimatesFetched.current || estimatesLoading) return;
+    estimatesFetched.current = true;
+    setEstimatesLoading(true);
+    fetch("/api/remodel-estimates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        listingId,
+        address: listingContext?.address || listingAddress,
+        city: listingContext?.city || "",
+        sqft: listingContext?.sqft,
+        bedrooms: listingContext?.bedrooms,
+        bathrooms: listingContext?.bathrooms,
+        propertyType: listingContext?.propertyType,
+        price: listingContext?.price,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        setEstimatesData(data);
+        setEstimatesLoading(false);
+      })
+      .catch(() => setEstimatesLoading(false));
+  }, [activeTab, listingId, listingAddress, listingContext, estimatesLoading]);
 
   // ── Restore saved identity ──
   useEffect(() => {
@@ -948,67 +987,88 @@ export default function IntelBox({
           </div>
         )}
 
-        {/* ──── TAB 4: Estimates ──── */}
-        {activeTab === "reno" && (() => {
-          const sqft = listingContext?.sqft || 1500;
-          const beds = listingContext?.bedrooms || 3;
-          const baths = listingContext?.bathrooms || 2;
-          const price = listingContext?.price || 500000;
-
-          const estimates = [
-            { label: "Kitchen Remodel", emoji: "\uD83C\uDF73", low: Math.round(sqft * 5), high: Math.round(sqft * 15), note: "Based on " + sqft + " sqft" },
-            { label: "Bathroom Remodel", emoji: "\uD83D\uDEBF", low: 8000 * baths, high: 25000 * baths, note: baths + " bathroom(s)" },
-            { label: "Full Interior Paint", emoji: "\uD83C\uDFA8", low: Math.round(sqft * 2), high: Math.round(sqft * 5), note: sqft + " sqft interior" },
-            { label: "New Flooring", emoji: "\uD83E\uDEB5", low: Math.round(sqft * 3), high: Math.round(sqft * 12), note: "Hardwood/LVP throughout" },
-            { label: "Roof Replacement", emoji: "\uD83C\uDFE0", low: 8000, high: 25000, note: "Depends on material" },
-            { label: "Landscaping", emoji: "\uD83C\uDF3F", low: 5000, high: 30000, note: "Front + backyard" },
-            { label: "ADU / Guest House", emoji: "\uD83C\uDFE1", low: 80000, high: 250000, note: "400-800 sqft detached" },
-            { label: "Full Gut Renovation", emoji: "\uD83D\uDD28", low: Math.round(sqft * 75), high: Math.round(sqft * 200), note: "Complete interior rebuild" },
-          ];
-
-          const afterRenoLow = Math.round(price * 1.15);
-          const afterRenoHigh = Math.round(price * 1.35);
-
-          return (
-            <div className="p-4 space-y-4">
-              {/* ROI Estimate */}
-              <div className="bg-surface border border-divider rounded-xl p-4">
-                <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">ROI Estimate</p>
-                <div className="space-y-1">
-                  <p className="text-white text-sm font-semibold">
-                    Estimated After-Reno Value: <span className="text-accent">${formatMoney(afterRenoLow)} – ${formatMoney(afterRenoHigh)}</span>
-                  </p>
-                  <p className="text-tertiary text-sm">Current listing: ${formatMoney(price)}</p>
-                  <p className="text-tertiary text-sm">Potential equity gain: 15–35%</p>
-                </div>
+        {/* ──── TAB 4: Estimates (AI-powered) ──── */}
+        {activeTab === "reno" && (
+          <div className="p-4 space-y-4">
+            {estimatesLoading && !estimatesData && (
+              <div className="flex flex-col items-center justify-center py-12 gap-3">
+                <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                <p className="text-secondary text-sm">Crunching {listingContext?.city || "local"} market rates...</p>
               </div>
+            )}
 
-              {/* Section header */}
-              <div>
-                <p className="text-white font-semibold text-sm mb-1">Remodel Cost Calculator</p>
-                <p className="text-tertiary text-xs mb-3">Estimates based on national averages and listing data</p>
-              </div>
-
-              {/* Estimate cards */}
-              <div className="grid gap-3">
-                {estimates.map((est) => (
-                  <div key={est.label} className="bg-surface border border-divider rounded-xl p-4">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{est.emoji}</span>
-                        <span className="text-sm font-semibold text-white">{est.label}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <span className="text-accent font-bold">${formatMoney(est.low)} – ${formatMoney(est.high)}</span>
-                    </div>
-                    <p className="text-xs text-tertiary mt-1">{est.note}</p>
+            {estimatesData && (
+              <>
+                {/* ROI Estimate */}
+                <div className="bg-surface border border-accent/20 rounded-xl p-4">
+                  <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">ROI Estimate</p>
+                  <div className="space-y-1">
+                    <p className="text-white text-sm font-semibold">
+                      After-Reno Value: <span className="text-accent">${formatMoney(estimatesData.afterRenoValueLow)} – ${formatMoney(estimatesData.afterRenoValueHigh)}</span>
+                    </p>
+                    <p className="text-tertiary text-sm">Current: ${formatMoney(listingContext?.price || 0)}</p>
+                    {estimatesData.afterRenoValueLow > 0 && listingContext?.price && (
+                      <p className="text-green-400 text-sm font-medium">
+                        +${formatMoney(estimatesData.afterRenoValueLow - listingContext.price)} – ${formatMoney(estimatesData.afterRenoValueHigh - listingContext.price)} potential equity
+                      </p>
+                    )}
                   </div>
-                ))}
+                </div>
+
+                {/* Market note */}
+                {estimatesData.marketNote && (
+                  <p className="text-secondary text-xs italic px-1">{estimatesData.marketNote}</p>
+                )}
+
+                {/* Section header */}
+                <div>
+                  <p className="text-white font-semibold text-sm mb-1">Remodel Estimates</p>
+                  <p className="text-tertiary text-xs mb-3">
+                    {estimatesData.source === "ai"
+                      ? `AI-generated for ${listingContext?.city || "this area"} market rates`
+                      : "Based on national averages"}
+                  </p>
+                </div>
+
+                {/* Estimate cards */}
+                <div className="grid gap-3">
+                  {estimatesData.estimates.map((est) => (
+                    <div key={est.label} className="bg-surface border border-divider rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{est.emoji}</span>
+                          <span className="text-sm font-semibold text-white">{est.label}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-baseline gap-1 mt-1">
+                        <span className="text-accent font-bold">${formatMoney(est.low)} – ${formatMoney(est.high)}</span>
+                      </div>
+                      <p className="text-xs text-tertiary mt-1">{est.note}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Source badge */}
+                <p className="text-center text-tertiary text-xs pt-2">
+                  {estimatesData.source === "ai" ? "✨ Powered by AI · Estimates only" : "📊 National averages · Estimates only"}
+                </p>
+              </>
+            )}
+
+            {!estimatesLoading && !estimatesData && (
+              <div className="text-center py-12">
+                <p className="text-secondary text-sm">Failed to load estimates.</p>
+                <button
+                  type="button"
+                  onClick={() => { estimatesFetched.current = false; setEstimatesLoading(false); }}
+                  className="text-accent text-sm mt-2 hover:underline"
+                >
+                  Try again
+                </button>
               </div>
-            </div>
-          );
-        })()}
+            )}
+          </div>
+        )}
       </div>
 
       {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}
