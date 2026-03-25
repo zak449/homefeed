@@ -637,20 +637,19 @@ export default function IntelBox({
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "take", label: "🫖 Take" },
-    { key: "reno", label: "✨ Vision" },
+    { key: "reno", label: "🎨 Reimagine" },
     { key: "ai", label: "🤖 Ask AI" },
-    { key: "question", label: "❓ Question" },
+    { key: "question", label: "👥 Ask Neighbors" },
   ];
 
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div
-      className="relative flex flex-col border border-divider rounded-2xl overflow-hidden"
+      className="relative flex flex-col border border-divider rounded-2xl overflow-hidden max-h-none sm:max-h-[80vh]"
       style={{
         background: "#09090B",
-        minHeight: "600px",
-        maxHeight: "80vh",
+        minHeight: "400px",
       }}
     >
       {/* ════════ POST-TAKE CELEBRATION TOAST ════════ */}
@@ -700,7 +699,7 @@ export default function IntelBox({
       </div>
 
       {/* ════════ ZONE 2 — Scrollable content area ════════ */}
-      <div ref={scrollRef} className="flex-grow overflow-y-auto">
+      <div ref={scrollRef} className="flex-grow sm:overflow-y-auto">
         {/* ──── TAB 1: Take (Intel Feed) ──── */}
         {activeTab === "take" && (
           <div className="p-4">
@@ -1324,6 +1323,10 @@ export default function IntelBox({
                         className="w-full rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                       />
                     )}
+                    <label className="flex items-center gap-2 text-xs text-secondary cursor-pointer">
+                      <input type="checkbox" defaultChecked className="accent-accent" />
+                      Email me when someone reacts to my take
+                    </label>
                     <div className="flex items-center justify-between">
                       {!showZipField && (
                         <button

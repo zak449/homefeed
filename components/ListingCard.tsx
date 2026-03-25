@@ -156,7 +156,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goPrev}
-              className="flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
+              className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
               aria-label="Previous"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
@@ -164,7 +164,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             <button
               type="button"
               onClick={goNext}
-              className="flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
+              className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-8 h-8 items-center justify-center rounded-full bg-surface/90 text-white shadow-soft sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-elevated"
               aria-label="Next"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
@@ -178,9 +178,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {(photos.length <= 5 ? photos : photos.slice(0, 5)).map((_, i) => (
               <span
                 key={i}
-                className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${
+                className={`w-1.5 h-1.5 sm:w-1.5 sm:h-1.5 rounded-full transition-all ${
                   (photos.length <= 5 ? i === currentIndex : (i < 4 ? i === currentIndex : currentIndex >= 4))
-                    ? "bg-white !w-1.5 sm:!w-2 shadow-sm"
+                    ? "bg-white !w-2 sm:!w-2 shadow-sm"
                     : "bg-white/50"
                 }`}
               />
