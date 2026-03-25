@@ -22,8 +22,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ labels: cache.get(cacheKey) });
     }
 
-    // Limit to 20 photos max
-    const photoSubset = photos.slice(0, 20);
+    // Limit to 10 photos to control cost (each image costs tokens)
+    const photoSubset = photos.slice(0, 10);
 
     if (!anthropic) {
       // Fallback: use URL-based heuristics when no API key
@@ -47,14 +47,34 @@ export async function POST(req: Request) {
     const content: Anthropic.Messages.ContentBlockParam[] = [
       {
         type: "text",
-        text: `Classify each of these ${photoSubset.length} real estate listing photos. For each photo (numbered 0 to ${photoSubset.length - 1}), provide a SHORT room label (e.g. "Kitchen", "Master Bathroom", "Exterior Front", "Backyard", "Living Room", "Bedroom", "Dining Room", "Garage", "Pool", "Laundry Room", "Staircase", "Entry", "Office"). Respond ONLY with a JSON object like: {"0": "Kitchen", "1": "Exterior Front", "2": "Master Bathroom", ...}. No explanation.`,
+        text: `Classify each of these real estate listing photos. The photos are numbered in order. For each photo, provide a SHORT room/area label (e.g. "Kitchen", "Master Bathroom", "Exterior Front", "Backyard", "Living Room", "Bedroom", "Dining Room", "Garage", "Pool", "Laundry Room", "Staircase", "Entry", "Office"). Respond ONLY with a JSON object mapping the photo index to its label, like: {"0": "Kitchen", "1": "Exterior Front", "2": "Master Bathroom", ...}. No explanation, just the JSON.`,
       },
     ];
 
-    for (let i = 0; i < photoSubset.length; i++) {
+    // Download images and convert to base64 (Claude API can't fetch URLs blocked by robots.txt)
+    const imagePromises = photoSubset.map(async (url: string, i: number) => {
+      try {
+        const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        if (!res.ok) return null;
+        const buf = Buffer.from(await res.arrayBuffer());
+        const contentType = res.headers.get("content-type") || "image/jpeg";
+        const mediaType = contentType.includes("png") ? "image/png" : contentType.includes("webp") ? "image/webp" : "image/jpeg";
+        return { index: i, data: buf.toString("base64"), mediaType };
+      } catch {
+        return null;
+      }
+    });
+
+    const images = (await Promise.all(imagePromises)).filter(Boolean) as { index: number; data: string; mediaType: string }[];
+
+    if (images.length === 0) {
+      return NextResponse.json({ labels: {} });
+    }
+
+    for (const img of images) {
       content.push({
         type: "image",
-        source: { type: "url", url: photoSubset[i] },
+        source: { type: "base64", media_type: img.mediaType, data: img.data },
       } as any);
     }
 
