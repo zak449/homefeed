@@ -59,33 +59,6 @@ type Answer = {
 
 type Tab = "take" | "ai" | "question" | "reno";
 
-type RenoResult = {
-  imageUrl: string | null;
-  estimateLow: number;
-  estimateHigh: number;
-  materials: { item: string; brand: string; priceRange: string }[];
-  renovationType: string;
-  style: string;
-  isMock?: boolean;
-};
-
-const RENO_TYPES = [
-  { key: "kitchen", label: "Kitchen" },
-  { key: "exterior", label: "Exterior" },
-  { key: "master-bath", label: "Master Bath" },
-  { key: "landscaping", label: "Landscaping" },
-  { key: "adu", label: "ADU" },
-  { key: "full-gut", label: "Full Gut" },
-] as const;
-
-const RENO_STYLES = [
-  { key: "modern", label: "Modern" },
-  { key: "mediterranean", label: "Mediterranean" },
-  { key: "coastal", label: "Coastal" },
-  { key: "mid-century", label: "Mid-Century" },
-  { key: "farmhouse", label: "Farmhouse" },
-] as const;
-
 const REACTIONS = ["🚩", "💸", "👀", "🔥", "💀"];
 const REACTION_LABELS: Record<string, string> = {
   "🚩": "Red Flag",
@@ -184,6 +157,8 @@ function getCredibilityTag(content: string): { label: string; className: string 
   return { label: "Anon", className: "bg-gray-700/40 text-gray-500 border border-gray-600/40" };
 }
 
+function formatMoney(n: number) { return n.toLocaleString(); }
+
 function formatTime(date: Date): string {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
@@ -244,17 +219,6 @@ export default function IntelBox({
   const [postingQ, setPostingQ] = useState(false);
   const [postQError, setPostQError] = useState("");
 
-  // ── Reno state ──
-  const [renoType, setRenoType] = useState("kitchen");
-  const [renoStyle, setRenoStyle] = useState("modern");
-  const [renoLoading, setRenoLoading] = useState(false);
-  const [renoResult, setRenoResult] = useState<RenoResult | null>(null);
-  const [renoError, setRenoError] = useState("");
-  const [renoNotes, setRenoNotes] = useState("");
-  const [renoPhotoIndex, setRenoPhotoIndex] = useState(0);
-  const [photoLabels, setPhotoLabels] = useState<Record<number, string>>({});
-  const [labelsLoading, setLabelsLoading] = useState(false);
-
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // ── Toast state ──
@@ -285,63 +249,6 @@ export default function IntelBox({
       // ignore
     }
   }, []);
-
-  // ── Classify listing photos for Vision tab ──
-  useEffect(() => {
-    if (!photos || photos.length === 0) return;
-    setLabelsLoading(true);
-    fetch("/api/classify-photos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ photos: photos.slice(0, 25) }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.labels) setPhotoLabels(data.labels);
-        setLabelsLoading(false);
-      })
-      .catch(() => setLabelsLoading(false));
-  }, [photos]);
-
-  // ── Auto-select best photo when reno type changes ──
-  const [photoMatchHint, setPhotoMatchHint] = useState("");
-
-  const selectPhotoForType = useCallback(
-    (type: string) => {
-      if (!photos || Object.keys(photoLabels).length === 0) {
-        setPhotoMatchHint("");
-        return;
-      }
-      const typeKeywords: Record<string, string[]> = {
-        kitchen: ["kitchen", "cooking", "cabinet", "countertop", "stove", "oven"],
-        exterior: ["exterior", "front", "facade", "outside", "curb", "driveway"],
-        "master-bath": ["bathroom", "bath", "shower", "tub", "vanity", "toilet", "master bath"],
-        landscaping: ["yard", "garden", "patio", "pool", "landscape", "outdoor", "backyard"],
-        adu: ["garage", "guest", "detached", "unit", "studio", "casita"],
-        "full-gut": ["living", "main", "interior", "foyer", "entry", "great room"],
-      };
-      const typeLabel = RENO_TYPES.find((t) => t.key === type)?.label ?? type;
-      const keywords = typeKeywords[type] || [];
-      for (const [idx, label] of Object.entries(photoLabels)) {
-        const lbl = label.toLowerCase();
-        if (keywords.some((kw) => lbl.includes(kw))) {
-          setRenoPhotoIndex(Number(idx));
-          setPhotoMatchHint("");
-          return;
-        }
-      }
-      // No match found
-      setPhotoMatchHint(`No ${typeLabel.toLowerCase()} photo found — use arrows to pick one`);
-    },
-    [photos, photoLabels]
-  );
-
-  // ── Auto-select photo when labels arrive or Vision tab opens ──
-  useEffect(() => {
-    if (activeTab === "reno" && Object.keys(photoLabels).length > 0) {
-      selectPhotoForType(renoType);
-    }
-  }, [activeTab, photoLabels, renoType, selectPhotoForType]);
 
   // ── Fetch comments ──
   useEffect(() => {
@@ -602,71 +509,11 @@ export default function IntelBox({
     });
   }
 
-  // ── Generate reno vision ──
-  async function handleGenerateReno() {
-    if (renoLoading) return;
-    setRenoLoading(true);
-    setRenoError("");
-    setRenoResult(null);
-    try {
-      const res = await fetch("/api/reno-vision", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          listingId,
-          renovationType: renoType,
-          style: renoStyle,
-          listingAddress,
-          listingPhoto: photos?.[0] ?? null,
-          listingPrice,
-          notes: renoNotes || undefined,
-        }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Failed to generate vision");
-      }
-      const result: RenoResult = await res.json();
-      setRenoResult(result);
-    } catch (err: unknown) {
-      setRenoError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setRenoLoading(false);
-    }
-  }
-
-  function handleSaveRenoVision() {
-    if (!renoResult) return;
-    try {
-      const saved = localStorage.getItem("gwaky_saved_reno_visions");
-      const visions = saved ? JSON.parse(saved) : [];
-      visions.push({
-        ...renoResult,
-        listingId,
-        listingAddress,
-        savedAt: new Date().toISOString(),
-      });
-      localStorage.setItem("gwaky_saved_reno_visions", JSON.stringify(visions));
-    } catch {
-      // ignore
-    }
-  }
-
-  function handlePostRenoAsTake() {
-    if (!renoResult) return;
-    const low = renoResult.estimateLow.toLocaleString();
-    const high = renoResult.estimateHigh.toLocaleString();
-    const label = RENO_TYPES.find((t) => t.key === renoResult.renovationType)?.label ?? renoResult.renovationType;
-    const styleLabel = RENO_STYLES.find((s) => s.key === renoResult.style)?.label ?? renoResult.style;
-    setContent(`[Reno Vision] ${styleLabel} ${label} reno would cost $${low}–$${high}. Top materials: ${renoResult.materials.slice(0, 3).map((m) => `${m.brand} ${m.item}`).join(", ")}.`);
-    setActiveTab("take");
-  }
-
   // ─── Tabs config ──────────────────────────────────────────────────────────
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "take", label: "🫖 Take" },
-    { key: "reno", label: "🎨 Reimagine" },
+    { key: "reno", label: "💰 Estimates" },
     { key: "ai", label: "🤖 Ask AI" },
     { key: "question", label: "👥 Ask Neighbors" },
   ];
@@ -1101,133 +948,67 @@ export default function IntelBox({
           </div>
         )}
 
-        {/* ──── TAB 4: Reno Vision ──── */}
-        {activeTab === "reno" && (
-          <div className="p-4">
-            {/* Step 1: Pick the room/area photo */}
-            {photos && photos.length > 0 && (
-              <div className="mb-4">
-                <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Select the room to remodel</p>
-                <div className="rounded-xl overflow-hidden border border-divider relative">
-                  <img src={photos[renoPhotoIndex % photos.length]} alt={listingAddress} className="w-full h-48 object-cover transition-all duration-300" />
-                  {photoLabels[renoPhotoIndex % photos.length] && (
-                    <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full font-medium backdrop-blur-sm">
-                      {photoLabels[renoPhotoIndex % photos.length]}
-                    </div>
-                  )}
-                  {labelsLoading && (
-                    <div className="absolute top-2 left-2 bg-black/70 text-white/60 text-xs px-2.5 py-1 rounded-full font-medium animate-pulse">
-                      Detecting room...
-                    </div>
-                  )}
-                  {photos.length > 1 && (
-                    <>
-                      <button
-                        onClick={() => setRenoPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 active:scale-95 transition-all text-base font-bold"
-                        aria-label="Previous photo"
-                      >
-                        ‹
-                      </button>
-                      <button
-                        onClick={() => setRenoPhotoIndex((prev) => (prev + 1) % photos.length)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 active:scale-95 transition-all text-base font-bold"
-                        aria-label="Next photo"
-                      >
-                        ›
-                      </button>
-                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full font-medium">
-                        {(renoPhotoIndex % photos.length) + 1} / {photos.length}
-                      </div>
-                    </>
-                  )}
+        {/* ──── TAB 4: Estimates ──── */}
+        {activeTab === "reno" && (() => {
+          const sqft = listingContext?.sqft || 1500;
+          const beds = listingContext?.bedrooms || 3;
+          const baths = listingContext?.bathrooms || 2;
+          const price = listingContext?.price || 500000;
+
+          const estimates = [
+            { label: "Kitchen Remodel", emoji: "\uD83C\uDF73", low: Math.round(sqft * 5), high: Math.round(sqft * 15), note: "Based on " + sqft + " sqft" },
+            { label: "Bathroom Remodel", emoji: "\uD83D\uDEBF", low: 8000 * baths, high: 25000 * baths, note: baths + " bathroom(s)" },
+            { label: "Full Interior Paint", emoji: "\uD83C\uDFA8", low: Math.round(sqft * 2), high: Math.round(sqft * 5), note: sqft + " sqft interior" },
+            { label: "New Flooring", emoji: "\uD83E\uDEB5", low: Math.round(sqft * 3), high: Math.round(sqft * 12), note: "Hardwood/LVP throughout" },
+            { label: "Roof Replacement", emoji: "\uD83C\uDFE0", low: 8000, high: 25000, note: "Depends on material" },
+            { label: "Landscaping", emoji: "\uD83C\uDF3F", low: 5000, high: 30000, note: "Front + backyard" },
+            { label: "ADU / Guest House", emoji: "\uD83C\uDFE1", low: 80000, high: 250000, note: "400-800 sqft detached" },
+            { label: "Full Gut Renovation", emoji: "\uD83D\uDD28", low: Math.round(sqft * 75), high: Math.round(sqft * 200), note: "Complete interior rebuild" },
+          ];
+
+          const afterRenoLow = Math.round(price * 1.15);
+          const afterRenoHigh = Math.round(price * 1.35);
+
+          return (
+            <div className="p-4 space-y-4">
+              {/* ROI Estimate */}
+              <div className="bg-surface border border-divider rounded-xl p-4">
+                <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">ROI Estimate</p>
+                <div className="space-y-1">
+                  <p className="text-white text-sm font-semibold">
+                    Estimated After-Reno Value: <span className="text-accent">${formatMoney(afterRenoLow)} – ${formatMoney(afterRenoHigh)}</span>
+                  </p>
+                  <p className="text-tertiary text-sm">Current listing: ${formatMoney(price)}</p>
+                  <p className="text-tertiary text-sm">Potential equity gain: 15–35%</p>
                 </div>
               </div>
-            )}
-            {/* Hint when no photo matches the selected type */}
-            {photoMatchHint && (
-              <p className="text-accent text-xs mb-3 -mt-2">{photoMatchHint}</p>
-            )}
-            {/* Step 2: Pick renovation type */}
-            <div className="mb-3">
-              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Renovation Type</p>
-              <div className="flex flex-wrap gap-1.5">
-                {RENO_TYPES.map((t) => (
-                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); selectPhotoForType(t.key); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-accent text-white border-accent" : "bg-surface border-divider text-secondary hover:text-white hover:border-secondary/30"}`}>
-                    {t.label}
-                  </button>
+
+              {/* Section header */}
+              <div>
+                <p className="text-white font-semibold text-sm mb-1">Remodel Cost Calculator</p>
+                <p className="text-tertiary text-xs mb-3">Estimates based on national averages and listing data</p>
+              </div>
+
+              {/* Estimate cards */}
+              <div className="grid gap-3">
+                {estimates.map((est) => (
+                  <div key={est.label} className="bg-surface border border-divider rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{est.emoji}</span>
+                        <span className="text-sm font-semibold text-white">{est.label}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-accent font-bold">${formatMoney(est.low)} – ${formatMoney(est.high)}</span>
+                    </div>
+                    <p className="text-xs text-tertiary mt-1">{est.note}</p>
+                  </div>
                 ))}
               </div>
             </div>
-            <div className="mb-4">
-              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Style</p>
-              <div className="flex flex-wrap gap-1.5">
-                {RENO_STYLES.map((s) => (
-                  <button key={s.key} onClick={() => { setRenoStyle(s.key); setRenoResult(null); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoStyle === s.key ? "bg-accent text-white border-accent" : "bg-surface border-divider text-secondary hover:text-white hover:border-secondary/30"}`}>
-                    {s.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="mb-4">
-              <p className="text-secondary text-xs font-medium mb-2 uppercase tracking-wider">Your Notes (optional)</p>
-              <textarea
-                value={renoNotes}
-                onChange={(e) => setRenoNotes(e.target.value)}
-                placeholder="Describe what you'd like... e.g. 'open concept with island, marble counters, matte black fixtures'"
-                className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50 resize-none"
-                rows={3}
-                maxLength={500}
-              />
-              <p className="text-tertiary text-xs mt-1 text-right">{renoNotes.length}/500</p>
-            </div>
-            <button onClick={handleGenerateReno} disabled={renoLoading} className="w-full py-3 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-50 mb-4">
-              {renoLoading ? "Generating..." : "Generate Vision \u2192"}
-            </button>
-            {renoError && <p className="text-red-400 text-sm mb-4">{renoError}</p>}
-            {renoLoading && (
-              <div className="space-y-3 animate-pulse">
-                <div className="h-48 bg-elevated rounded-xl" />
-                <div className="h-5 w-1/2 bg-elevated rounded" />
-                <div className="h-10 bg-elevated rounded-lg" />
-                <div className="h-10 bg-elevated rounded-lg" />
-              </div>
-            )}
-            {renoResult && !renoLoading && (
-              <div className="space-y-4">
-                {renoResult.imageUrl && (
-                  <div className="rounded-xl overflow-hidden">
-                    <img src={renoResult.imageUrl} alt={`${renoResult.style} ${renoResult.renovationType} vision`} className="w-full object-cover" />
-                  </div>
-                )}
-                <div className="bg-surface rounded-xl p-4">
-                  <p className="text-secondary text-xs font-medium mb-1 uppercase tracking-wider">Estimated Cost Range</p>
-                  <p className="text-white text-2xl font-bold">${renoResult.estimateLow.toLocaleString()} – ${renoResult.estimateHigh.toLocaleString()}</p>
-                </div>
-                {renoResult.materials && renoResult.materials.length > 0 && (
-                  <div className="bg-surface rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 pb-2">
-                      <p className="text-secondary text-xs font-medium uppercase tracking-wider">Materials & Brands</p>
-                    </div>
-                    {renoResult.materials.map((mat: any, i: number) => (
-                      <div key={i} className="px-4 py-3 flex items-center justify-between gap-3 border-b border-divider last:border-0">
-                        <div className="min-w-0">
-                          <p className="text-ink text-sm font-medium truncate">{mat.item}</p>
-                          <p className="text-tertiary text-xs">{mat.brand}</p>
-                        </div>
-                        <span className="text-accent text-xs font-semibold whitespace-nowrap">{mat.priceRange}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div className="flex gap-2">
-                  <button onClick={handlePostRenoAsTake} className="flex-1 py-2.5 bg-surface border border-divider text-white text-sm font-medium rounded-lg hover:border-secondary/30 transition-all">Spill the Tea ☕</button>
-                  <button onClick={handleSaveRenoVision} className="flex-1 py-2.5 bg-surface border border-accent/30 text-accent text-sm font-medium rounded-lg hover:bg-accent/10 transition-all">Save Vision</button>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}

@@ -57,6 +57,15 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: "desc" },
         include: {
           _count: { select: { answers: true } },
+          answers: {
+            take: 10,
+            orderBy: { createdAt: "desc" },
+            include: {
+              answeredBy: {
+                select: { name: true, badge: true },
+              },
+            },
+          },
         },
       }),
       prisma.verifiedResident.findUnique({
@@ -96,6 +105,13 @@ export async function GET(request: NextRequest) {
         createdAt: q.createdAt,
         answerCount: q._count.answers,
         listingId: q.listingId,
+        answers: q.answers.map((a) => ({
+          id: a.id,
+          content: a.content,
+          authorName: a.answeredBy.name,
+          isVerifiedLocal: a.answeredBy.badge !== "newcomer",
+          createdAt: a.createdAt,
+        })),
       })),
       answers: (resident?.answers ?? []).map((a) => ({
         id: a.id,

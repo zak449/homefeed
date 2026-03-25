@@ -29,6 +29,11 @@ const ROLE_PROMPTS: Record<string, string[]> = {
     "Is this block trending up or down?",
     "What do the neighbors actually think about this place?",
   ],
+  other: [
+    "What's something nobody's saying about this place?",
+    "Drop your unfiltered take...",
+    "What would you want to know before signing?",
+  ],
 };
 
 interface SpillSheetProps {
@@ -64,12 +69,12 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId 
     } catch {}
   }, []);
 
-  // Focus textarea when sheet opens and role is selected
+  // Focus textarea when sheet opens
   useEffect(() => {
-    if (isOpen && selectedRole && textareaRef.current) {
+    if (isOpen && textareaRef.current) {
       setTimeout(() => textareaRef.current?.focus(), 300);
     }
-  }, [isOpen, selectedRole]);
+  }, [isOpen]);
 
   // Reset state when sheet closes
   useEffect(() => {
@@ -151,6 +156,7 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId 
     { key: "drove by", emoji: "🚗", label: "Drove By" },
     { key: "almost bought", emoji: "💔", label: "Almost Bought" },
     { key: "local", emoji: "📍", label: "Local" },
+    { key: "other", emoji: "💬", label: "Other" },
   ];
 
   return (
@@ -195,10 +201,35 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId 
               )}
             </div>
 
-            {/* Step 1: Role selector — FIRST, before textarea */}
+            {/* Textarea — always enabled, the CTA */}
+            <div className="mb-4">
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder={selectedRole ? displayPrompt : "What do you know about this place?"}
+                className="w-full h-32 rounded-xl bg-surface border border-divider px-4 py-3 text-white text-base placeholder:text-tertiary/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 resize-none"
+                autoFocus
+              />
+              <div className="flex justify-between items-center mt-1.5">
+                <span className="text-xs text-tertiary">{content.length}/500</span>
+                {content.length > 0 && (
+                  <span className="text-xs text-accent">Ready to spill</span>
+                )}
+              </div>
+            </div>
+
+            {/* Role-specific prompt hint — subtle, between textarea and role selector */}
+            {selectedRole && displayPrompt && (
+              <p className="text-accent/70 text-sm italic mb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                {displayPrompt}
+              </p>
+            )}
+
+            {/* Role selector */}
             <div className="mb-5">
               <p className="text-xs text-secondary uppercase tracking-wider font-semibold mb-3">Your relationship to this place</p>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              <div className="grid grid-cols-2 gap-2">
                 {roles.map((role) => (
                   <button
                     key={role.key}
@@ -217,29 +248,6 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId 
                     {role.label}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Step 2: Textarea with role-specific prompt */}
-            <div className="mb-4">
-              {selectedRole && displayPrompt && (
-                <p className="text-accent text-sm font-semibold mb-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                  {displayPrompt}
-                </p>
-              )}
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={selectedRole ? displayPrompt : "Select your role above to unlock the prompt..."}
-                className="w-full h-32 rounded-xl bg-surface border border-divider px-4 py-3 text-white text-base placeholder:text-tertiary/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 resize-none"
-                disabled={!selectedRole}
-              />
-              <div className="flex justify-between items-center mt-1.5">
-                <span className="text-xs text-tertiary">{content.length}/500</span>
-                {content.length > 0 && (
-                  <span className="text-xs text-accent">Ready to spill</span>
-                )}
               </div>
             </div>
 
@@ -281,7 +289,7 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId 
               <button
                 type="button"
                 onClick={handleSpill}
-                disabled={!content.trim() || !selectedRole || posting}
+                disabled={!content.trim() || posting}
                 className="w-full py-4 bg-accent text-white text-lg font-extrabold rounded-2xl active:scale-[0.97] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-accent/20 hover:shadow-accent/40"
               >
                 {posting ? (

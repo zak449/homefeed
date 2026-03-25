@@ -22,6 +22,13 @@ type ProfileQuestion = {
   createdAt: string;
   answerCount: number;
   listingId: string | null;
+  answers: {
+    id: string;
+    content: string;
+    authorName: string;
+    isVerifiedLocal: boolean;
+    createdAt: string;
+  }[];
 };
 
 type ProfileAnswer = {
@@ -67,6 +74,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState<TabKey>("takes");
+  const [expandedQId, setExpandedQId] = useState<string | null>(null);
 
   // Load localStorage data
   useEffect(() => {
@@ -274,28 +282,51 @@ export default function ProfilePage() {
                   />
                 ) : (
                   questions.map((q) => (
-                    <Link
+                    <div
                       key={q.id}
-                      href={
-                        q.listingId ? `/listing/${q.listingId}` : "/"
-                      }
-                      className="block bg-surface border border-divider rounded-xl p-4 hover:border-secondary/30 transition-colors"
+                      className="bg-surface border border-divider rounded-xl overflow-hidden"
                     >
-                      <p className="text-ink text-sm font-medium leading-relaxed mb-2">
-                        {q.question}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-tertiary">
-                        <span className="px-2 py-0.5 rounded-full bg-surface border border-divider text-secondary text-xs">
-                          {q.category}
-                        </span>
-                        <span>
-                          {q.answerCount} answer
-                          {q.answerCount !== 1 ? "s" : ""}
-                        </span>
-                        <span className="text-divider">·</span>
-                        <span>{timeAgo(q.createdAt)}</span>
-                      </div>
-                    </Link>
+                      <button
+                        onClick={() => setExpandedQId(expandedQId === q.id ? null : q.id)}
+                        className="w-full text-left p-4 hover:bg-elevated/50 transition-colors"
+                      >
+                        <p className="text-ink text-sm font-medium leading-relaxed mb-2">
+                          {q.question}
+                        </p>
+                        <div className="flex items-center gap-2 text-xs text-tertiary">
+                          <span className="px-2 py-0.5 rounded-full bg-surface border border-divider text-secondary">
+                            {q.category}
+                          </span>
+                          <span>{q.answerCount} answer{q.answerCount !== 1 ? "s" : ""}</span>
+                          <span>·</span>
+                          <span>{timeAgo(q.createdAt)}</span>
+                          {q.answerCount > 0 && (
+                            <span className="ml-auto text-accent text-xs">
+                              {expandedQId === q.id ? "▲" : "▼"}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                      {expandedQId === q.id && q.answers.length > 0 && (
+                        <div className="border-t border-divider bg-bg/50 px-4 py-3 space-y-3">
+                          {q.answers.map((a) => (
+                            <div key={a.id} className="flex gap-3">
+                              <div className="w-0.5 bg-accent/30 rounded-full shrink-0" />
+                              <div>
+                                <p className="text-ink text-sm leading-relaxed">{a.content}</p>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-tertiary">
+                                  <span>{a.authorName}</span>
+                                  {a.isVerifiedLocal && (
+                                    <span className="text-green-400 text-xs">✓ Verified</span>
+                                  )}
+                                  <span>· {timeAgo(a.createdAt)}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))
                 )}
               </div>
