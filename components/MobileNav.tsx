@@ -40,15 +40,12 @@ export default function MobileNav() {
       ),
     },
     {
-      href: "#take",
-      label: "+Take",
+      href: "#spill",
+      label: "Spill",
       active: false,
       accent: true,
       icon: (_active: boolean) => (
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          <path d="M12 8v4M10 10h4" />
-        </svg>
+        <span className="text-[20px] leading-none">🫖</span>
       ),
     },
     {
@@ -79,17 +76,30 @@ export default function MobileNav() {
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
     if (isListingPage) {
-      // On listing pages, scroll to the comment form
-      const el = document.getElementById("comment-form");
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      // On listing pages, scroll to IntelBox and activate the Take tab
+      const intelBox = document.querySelector("[data-intel-box]") || document.getElementById("comment-form");
+      if (intelBox) {
+        intelBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Click the Take tab if it exists
+        const takeTab = intelBox.querySelector("[data-tab='take']") as HTMLElement | null;
+        if (takeTab) setTimeout(() => takeTab.click(), 400);
         // Focus the first input in the form
-        const input = el.querySelector("textarea, input[type='text']") as HTMLElement | null;
-        if (input) setTimeout(() => input.focus(), 400);
+        const input = intelBox.querySelector("textarea, input[type='text']") as HTMLElement | null;
+        if (input) setTimeout(() => input.focus(), 600);
         return;
       }
     }
-    // On all other pages, go to search/browse view
+    // On homepage or other pages, scroll to search bar and focus it
+    const searchInput = document.querySelector("input[type='search'], input[type='text'][placeholder*='Search'], input[placeholder*='search'], input[placeholder*='address']") as HTMLInputElement | null;
+    if (searchInput) {
+      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        searchInput.focus();
+        searchInput.setAttribute("placeholder", "Find a listing to spill tea on...");
+      }, 400);
+      return;
+    }
+    // Fallback: navigate to search view
     router.push("/?city=");
   }
 

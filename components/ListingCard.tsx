@@ -124,7 +124,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden bg-surface border border-divider hover:shadow-card-hover hover:border-amber/20 transition-all duration-300"
+      className="group block rounded-2xl overflow-hidden bg-surface border border-divider hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 cursor-pointer"
     >
       {/* ── CLEAN IMAGE — no text overlays except minimal badge ── */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -206,14 +206,14 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {price}
           </p>
           {specs && (
-            <p className="text-xs sm:text-xs text-tertiary font-medium shrink-0">
+            <p className="text-xs sm:text-xs text-secondary font-medium shrink-0">
               {specs}
             </p>
           )}
         </div>
 
         {/* Address */}
-        <p className="text-sm sm:text-sm text-secondary truncate leading-tight">
+        <p className="text-sm sm:text-sm text-ink/80 truncate leading-tight">
           {listing.address}, {listing.city}
         </p>
 

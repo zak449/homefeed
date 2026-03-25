@@ -196,6 +196,8 @@ export default function IntelBox({
   const [email, setEmail] = useState("");
   const [zip, setZip] = useState("");
   const [reactingEmail, setReactingEmail] = useState("");
+  const [showInlineAuth, setShowInlineAuth] = useState(false);
+  const [showZipField, setShowZipField] = useState(false);
 
   // ── AI chat state ──
   const [gwakyMessages, setGwakyMessages] = useState<AIMessage[]>([]);
@@ -752,7 +754,10 @@ export default function IntelBox({
                             </span>
                           )}
                         </div>
-                        <span className="ml-auto text-xs text-tertiary shrink-0">
+                        <span
+                          className="ml-auto text-xs text-tertiary shrink-0"
+                          title={new Date(comment.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        >
                           {timeAgo(comment.createdAt)}
                         </span>
                       </div>
@@ -784,6 +789,25 @@ export default function IntelBox({
                             </button>
                           );
                         })}
+                      </div>
+
+                      {/* Helpful button */}
+                      <div className="mt-2">
+                        <button
+                          onClick={() => handleReact(comment.id, "\u2705")}
+                          disabled={!isJoined}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs transition-all ${
+                            (comment.reactions["\u2705"] || 0) > 0
+                              ? "bg-emerald-900/20 border border-emerald-700/30 text-emerald-400"
+                              : "bg-surface border border-divider text-tertiary hover:text-emerald-400 hover:border-emerald-700/30"
+                          } disabled:opacity-40 disabled:cursor-not-allowed`}
+                        >
+                          <span className="text-sm">&#x2713;</span>
+                          <span className="font-medium">Helpful</span>
+                          {(comment.reactions["\u2705"] || 0) > 0 && (
+                            <span className="font-medium tabular-nums">{comment.reactions["\u2705"]}</span>
+                          )}
+                        </button>
                       </div>
                     </div>
                   );
@@ -966,7 +990,7 @@ export default function IntelBox({
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <span className="text-xs text-secondary">{q.authorName}</span>
                               <span className="text-tertiary">·</span>
-                              <span className="text-xs text-tertiary">{timeAgo(q.createdAt)}</span>
+                              <span className="text-xs text-tertiary" title={new Date(q.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}>{timeAgo(q.createdAt)}</span>
                               {catInfo && (
                                 <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-surface border border-divider text-secondary">
                                   {catInfo.icon} {catInfo.label}
@@ -1005,7 +1029,7 @@ export default function IntelBox({
                                         Local
                                       </span>
                                     )}
-                                    <span className="text-xs text-tertiary">{timeAgo(a.createdAt)}</span>
+                                    <span className="text-xs text-tertiary" title={new Date(a.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}>{timeAgo(a.createdAt)}</span>
                                   </div>
                                   <p className="text-ink text-sm leading-relaxed">{a.content}</p>
                                 </div>
@@ -1189,46 +1213,9 @@ export default function IntelBox({
                   Comments locked — this listing is no longer active.
                 </p>
               </div>
-            ) : !isJoined ? (
-              <form onSubmit={handleJoin} className="p-4 space-y-3">
-                <p className="text-white text-sm font-semibold">
-                  Join the conversation
-                </p>
-                <p className="text-tertiary text-xs">
-                  Drop your info to spill tea and react. Free, 10 seconds.
-                </p>
-                <input
-                  type="text"
-                  placeholder="Your name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                  required
-                />
-                <input
-                  type="email"
-                  placeholder="Email (private)"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Zip code (optional — unlocks local badge)"
-                  value={zip}
-                  onChange={(e) => setZip(e.target.value)}
-                  className="w-full rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                />
-                <button
-                  type="submit"
-                  className="w-full py-3 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all"
-                >
-                  Join &amp; unlock →
-                </button>
-              </form>
             ) : (
-              <form onSubmit={handlePost} className="p-4 space-y-3">
+              <div className="p-4 space-y-3">
+                {/* Context tags — always visible */}
                 <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
                   {CONTEXT_TAGS.map((tag) => (
                     <button
@@ -1245,27 +1232,123 @@ export default function IntelBox({
                     </button>
                   ))}
                 </div>
+
+                {/* Input row — always visible */}
                 <div className="flex items-center gap-2">
                   <input
                     ref={inputRef}
                     type="text"
                     value={content}
-                    onChange={(e) => setContent(e.target.value)}
+                    onChange={(e) => {
+                      setContent(e.target.value);
+                      // Hide inline auth if user clears their take
+                      if (!e.target.value.trim()) setShowInlineAuth(false);
+                    }}
                     placeholder="Spill the tea on this place..."
                     className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
                   />
                   <button
-                    type="submit"
+                    type="button"
                     disabled={posting || !content.trim()}
+                    onClick={(e) => {
+                      if (isJoined) {
+                        handlePost(e as unknown as React.FormEvent);
+                      } else {
+                        // Show inline auth — user has typed but isn't identified yet
+                        setShowInlineAuth(true);
+                      }
+                    }}
                     className="shrink-0 px-4 py-2.5 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {posting ? "..." : "Drop it →"}
                   </button>
                 </div>
+
+                {/* Inline auth — only shows after user tries to post without being joined */}
+                {showInlineAuth && !isJoined && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (!name.trim() || !email.trim()) return;
+                      // Join the user
+                      setIsJoined(true);
+                      setShowInlineAuth(false);
+                      try {
+                        localStorage.setItem("hf_commenter", JSON.stringify({ name, email, zip }));
+                      } catch {
+                        // ignore
+                      }
+                      fetch("/api/subscribe", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, source: `join-community-${listingId}`, name, zip: zip || undefined }),
+                      }).catch(() => {});
+                      fetch("/api/analytics", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ type: "community_join", data: { listingId, hasZip: !!zip, source: "intelbox_inline" } }),
+                      }).catch(() => {});
+                      // Immediately post the take
+                      handlePost(e);
+                    }}
+                    className="rounded-lg border border-accent/30 bg-accent/5 p-3 space-y-2"
+                  >
+                    <p className="text-white text-sm font-semibold">
+                      Almost there — add your name to post
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Your name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                        required
+                        autoFocus
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email (private)"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                        required
+                      />
+                    </div>
+                    {showZipField && (
+                      <input
+                        type="text"
+                        placeholder="Zip code (unlocks local badge)"
+                        value={zip}
+                        onChange={(e) => setZip(e.target.value)}
+                        className="w-full rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                      />
+                    )}
+                    <div className="flex items-center justify-between">
+                      {!showZipField && (
+                        <button
+                          type="button"
+                          onClick={() => setShowZipField(true)}
+                          className="text-xs text-tertiary hover:text-secondary transition-colors"
+                        >
+                          + Add zip for local badge
+                        </button>
+                      )}
+                      <button
+                        type="submit"
+                        disabled={!name.trim() || !email.trim()}
+                        className="ml-auto px-4 py-2 bg-accent text-white text-sm font-bold rounded-lg hover:bg-accent/90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Post take →
+                      </button>
+                    </div>
+                  </form>
+                )}
+
                 {postError && (
                   <p className="text-red-400 text-xs">{postError}</p>
                 )}
-              </form>
+              </div>
             )}
           </>
         )}
@@ -1308,7 +1391,7 @@ export default function IntelBox({
           <div className="p-4">
             {!isJoined ? (
               <p className="text-tertiary text-sm text-center py-1">
-                Join the conversation on the Take tab to ask questions.
+                Drop a take first to unlock questions.
               </p>
             ) : (
               <form onSubmit={handlePostQuestion} className="space-y-2">

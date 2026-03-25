@@ -604,18 +604,22 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
           {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
           <div className="max-w-2xl mx-auto px-5 py-6">
-            <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1">
-              <GeoCategoryPill />
-              {categories.map((cat) => (
-                <a
-                  key={cat.label}
-                  href={cat.href}
-                  className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border border-divider text-sm font-medium text-ink shadow-card hover:shadow-card-hover hover:border-amber/30 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
-                >
-                  <span className="text-lg">{cat.emoji}</span>
-                  <span className="whitespace-nowrap">{cat.label}</span>
-                </a>
-              ))}
+            <div className="relative">
+              <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1 pr-8">
+                <GeoCategoryPill />
+                {categories.map((cat) => (
+                  <a
+                    key={cat.label}
+                    href={cat.href}
+                    className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border border-divider text-sm font-medium text-ink shadow-card hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
+                  >
+                    <span className="text-lg">{cat.emoji}</span>
+                    <span className="whitespace-nowrap">{cat.label}</span>
+                  </a>
+                ))}
+              </div>
+              {/* Fade gradient indicating more scrollable content */}
+              <div className="absolute right-0 top-0 bottom-0 w-10 pointer-events-none bg-gradient-to-l from-bg to-transparent" />
             </div>
           </div>
 
@@ -655,7 +659,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   const shortAddr = comment.listing.address.split(",")[0];
 
                   return (
-                    <div key={`take-${comment.id}`} className="rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+                    <div key={`take-${comment.id}`} className="rounded-2xl bg-surface border border-divider shadow-card hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 overflow-hidden cursor-pointer">
                       {/* Author row */}
                       <div className="flex items-center gap-2 px-5 pt-5 pb-2">
                         <span className="text-sm font-bold text-ink">{formatName}</span>
@@ -694,33 +698,18 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                             </div>
                           )}
                         </div>
-                        <p className="text-sm text-secondary mt-2 truncate">
+                        <p className="text-sm text-ink/80 mt-2 truncate">
                           {shortAddr} &middot; {fmtPrice(comment.listing.price, comment.listing.listingType)} &middot; {comment.listing.listingType === "rent" ? "Rental" : "For Sale"}
                         </p>
                       </a>
 
-                      {/* Reactions row + CTA */}
-                      <div className="flex items-center justify-between px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => {
-                            const count = reactionCounts[emoji] || 0;
-                            return (
-                              <span key={emoji} className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium ${
-                                count > 0
-                                  ? "bg-highlight border-divider/60 text-ink"
-                                  : "bg-highlight/50 border-divider/30 text-tertiary"
-                              }`}>
-                                <span className="text-sm">{emoji}</span>
-                                <span className="tabular-nums">{count}</span>
-                              </span>
-                            );
-                          })}
-                        </div>
+                      {/* CTA */}
+                      <div className="flex items-center justify-end px-5 pb-4 pt-1 border-t border-divider mx-5 mb-1">
                         <a
                           href={`/listing/${comment.listing.id}#comment-form`}
                           className="inline-flex items-center gap-1.5 text-xs font-bold text-amber hover:underline shrink-0"
                         >
-                          Add your take &rarr;
+                          Drop your take &rarr;
                         </a>
                       </div>
                     </div>
@@ -734,7 +723,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   const commentCount_l = listing._count?.comments ?? 0;
 
                   return (
-                    <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
+                    <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 overflow-hidden cursor-pointer">
                       {/* Top comment — HEADLINE above photo */}
                       {listing.topComment && (
                         <div className="px-5 pt-5 pb-3">
@@ -793,15 +782,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           {listing.bathrooms != null && <span className="font-medium">{listing.bathrooms} ba</span>}
                           {listing.sqft != null && <span className="font-medium">{listing.sqft.toLocaleString()} sqft</span>}
                           {listing.propertyType && <span className="text-tertiary capitalize">{listing.propertyType}</span>}
-                        </div>
-                        {/* Reaction row — always visible */}
-                        <div className="flex items-center gap-2 flex-wrap mb-3">
-                          {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
-                            <span key={emoji} className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
-                              <span className="text-sm">{emoji}</span>
-                              <span className="tabular-nums">0</span>
-                            </span>
-                          ))}
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-tertiary font-medium">
@@ -946,36 +926,40 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   {city ? city : sort === "comments" ? "Trending" : "Explore"}
                 </h2>
               </div>
-              <div className="flex items-center gap-1">
-                {[
-                  { key: "newest", label: "New" },
-                  { key: "comments", label: "\uD83D\uDD25 Trending" },
-                  { key: "price-low", label: "$ Low" },
-                  { key: "price-high", label: "$ High" },
-                ].map((s) => {
-                  const params = new URLSearchParams(
-                    Object.fromEntries(
-                      Object.entries(sp)
-                        .filter(([, v]) => typeof v === "string") as [string, string][]
-                    )
-                  );
-                  params.set("sort", s.key);
-                  params.delete("page");
-                  const isActive = sort === s.key;
-                  return (
-                    <a
-                      key={s.key}
-                      href={`/?${params.toString()}`}
-                      className={`px-3 py-1.5 rounded-full text-xs transition-all ${
-                        isActive
-                          ? "bg-accent text-white font-medium"
-                          : "text-secondary hover:bg-surface hover:text-ink"
-                      }`}
-                    >
-                      {s.label}
-                    </a>
-                  );
-                })}
+              <div className="relative">
+                <div className="flex items-center gap-1 overflow-x-auto scrollbar-none pr-6">
+                  {[
+                    { key: "newest", label: "New" },
+                    { key: "comments", label: "\uD83D\uDD25 Trending" },
+                    { key: "price-low", label: "$ Low" },
+                    { key: "price-high", label: "$ High" },
+                  ].map((s) => {
+                    const params = new URLSearchParams(
+                      Object.fromEntries(
+                        Object.entries(sp)
+                          .filter(([, v]) => typeof v === "string") as [string, string][]
+                      )
+                    );
+                    params.set("sort", s.key);
+                    params.delete("page");
+                    const isActive = sort === s.key;
+                    return (
+                      <a
+                        key={s.key}
+                        href={`/?${params.toString()}`}
+                        className={`shrink-0 px-3 py-1.5 rounded-full text-xs transition-all ${
+                          isActive
+                            ? "bg-accent text-white font-medium"
+                            : "text-secondary hover:bg-surface hover:text-ink"
+                        }`}
+                      >
+                        {s.label}
+                      </a>
+                    );
+                  })}
+                </div>
+                {/* Fade gradient indicating more scrollable content */}
+                <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none bg-gradient-to-l from-bg to-transparent" />
               </div>
             </div>
           </div>
