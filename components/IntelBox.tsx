@@ -221,6 +221,8 @@ export default function IntelBox({
   const [renoError, setRenoError] = useState("");
   const [renoNotes, setRenoNotes] = useState("");
   const [renoPhotoIndex, setRenoPhotoIndex] = useState(0);
+  const [photoLabels, setPhotoLabels] = useState<Record<number, string>>({});
+  const [labelsLoading, setLabelsLoading] = useState(false);
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
@@ -247,6 +249,47 @@ export default function IntelBox({
       // ignore
     }
   }, []);
+
+  // ── Classify listing photos for Vision tab ──
+  useEffect(() => {
+    if (!photos || photos.length === 0) return;
+    setLabelsLoading(true);
+    fetch("/api/classify-photos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ photos: photos.slice(0, 25) }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.labels) setPhotoLabels(data.labels);
+        setLabelsLoading(false);
+      })
+      .catch(() => setLabelsLoading(false));
+  }, [photos]);
+
+  // ── Auto-select best photo when reno type changes ──
+  const selectPhotoForType = useCallback(
+    (type: string) => {
+      if (!photos || Object.keys(photoLabels).length === 0) return;
+      const typeKeywords: Record<string, string[]> = {
+        kitchen: ["kitchen", "cooking", "cabinet", "countertop", "stove", "oven"],
+        exterior: ["exterior", "front", "facade", "outside", "curb", "driveway"],
+        "master-bath": ["bathroom", "bath", "shower", "tub", "vanity", "toilet"],
+        landscaping: ["yard", "garden", "patio", "pool", "landscape", "outdoor", "backyard"],
+        adu: ["garage", "guest", "detached", "unit", "studio", "casita"],
+        "full-gut": ["living", "main", "interior", "foyer", "entry", "great room"],
+      };
+      const keywords = typeKeywords[type] || [];
+      for (const [idx, label] of Object.entries(photoLabels)) {
+        const lbl = label.toLowerCase();
+        if (keywords.some((kw) => lbl.includes(kw))) {
+          setRenoPhotoIndex(Number(idx));
+          return;
+        }
+      }
+    },
+    [photos, photoLabels]
+  );
 
   // ── Fetch comments ──
   useEffect(() => {
@@ -582,8 +625,8 @@ export default function IntelBox({
         maxHeight: "80vh",
       }}
     >
-      {/* ════════ ZONE 1 — Sticky tab header ════════ */}
-      <div className="sticky top-0 z-10 bg-[#0E0E0E] border-b border-[#2A2A2A] px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      {/* ════════ ZONE 1 — Fixed tab header (never scrolls) ════════ */}
+      <div className="shrink-0 z-10 bg-[#0E0E0E] border-b border-[#2A2A2A] px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -954,45 +997,52 @@ export default function IntelBox({
         {/* ──── TAB 4: Reno Vision ──── */}
         {activeTab === "reno" && (
           <div className="p-4">
+            {/* Step 1: Pick the room/area photo */}
             {photos && photos.length > 0 && (
-              <div className="mb-4 rounded-xl overflow-hidden border border-[#2A2A2A] relative">
-                <img src={photos[renoPhotoIndex % photos.length]} alt={listingAddress} className="w-full h-40 object-cover transition-all duration-500" />
-                {photos.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setRenoPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-all text-sm"
-                      aria-label="Previous photo"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      onClick={() => setRenoPhotoIndex((prev) => (prev + 1) % photos.length)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-all text-sm"
-                      aria-label="Next photo"
-                    >
-                      ›
-                    </button>
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                      {photos.map((_: string, i: number) => (
-                        <span
-                          key={i}
-                          className={`w-1.5 h-1.5 rounded-full transition-all ${i === renoPhotoIndex % photos.length ? "bg-white" : "bg-white/40"}`}
-                        />
-                      ))}
+              <div className="mb-4">
+                <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Select the room to remodel</p>
+                <div className="rounded-xl overflow-hidden border border-[#2A2A2A] relative">
+                  <img src={photos[renoPhotoIndex % photos.length]} alt={listingAddress} className="w-full h-48 object-cover transition-all duration-300" />
+                  {photoLabels[renoPhotoIndex % photos.length] && (
+                    <div className="absolute top-2 left-2 bg-black/70 text-white text-[11px] px-2.5 py-1 rounded-full font-medium backdrop-blur-sm">
+                      {photoLabels[renoPhotoIndex % photos.length]}
                     </div>
-                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded-full">
-                      {(renoPhotoIndex % photos.length) + 1}/{photos.length}
+                  )}
+                  {labelsLoading && (
+                    <div className="absolute top-2 left-2 bg-black/70 text-white/60 text-[11px] px-2.5 py-1 rounded-full font-medium animate-pulse">
+                      Detecting room...
                     </div>
-                  </>
-                )}
+                  )}
+                  {photos.length > 1 && (
+                    <>
+                      <button
+                        onClick={() => setRenoPhotoIndex((prev) => (prev - 1 + photos.length) % photos.length)}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 active:scale-95 transition-all text-base font-bold"
+                        aria-label="Previous photo"
+                      >
+                        ‹
+                      </button>
+                      <button
+                        onClick={() => setRenoPhotoIndex((prev) => (prev + 1) % photos.length)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black/90 active:scale-95 transition-all text-base font-bold"
+                        aria-label="Next photo"
+                      >
+                        ›
+                      </button>
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2.5 py-1 rounded-full font-medium">
+                        {(renoPhotoIndex % photos.length) + 1} / {photos.length}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             )}
+            {/* Step 2: Pick renovation type */}
             <div className="mb-3">
-              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Type</p>
+              <p className="text-[#888] text-xs font-medium mb-2 uppercase tracking-wider">Renovation Type</p>
               <div className="flex flex-wrap gap-1.5">
                 {RENO_TYPES.map((t) => (
-                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); setRenoPhotoIndex((prev) => prev + 1); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
+                  <button key={t.key} onClick={() => { setRenoType(t.key); setRenoResult(null); selectPhotoForType(t.key); }} className={`text-xs px-3 py-1.5 rounded-full border transition-all ${renoType === t.key ? "bg-[#FF4D00] text-white border-[#FF4D00]" : "bg-[#1A1A1A] border-[#2A2A2A] text-[#888] hover:text-white hover:border-[#444]"}`}>
                     {t.label}
                   </button>
                 ))}
@@ -1069,8 +1119,8 @@ export default function IntelBox({
         )}
       </div>
 
-      {/* ════════ ZONE 3 — Sticky bottom input bar ════════ */}
-      <div className="sticky bottom-0 bg-[#1A1A1A] border-t border-[#2A2A2A]">
+      {/* ════════ ZONE 3 — Fixed bottom input bar (never scrolls) ════════ */}
+      <div className="shrink-0 bg-[#1A1A1A] border-t border-[#2A2A2A]">
         {/* ── Take input ── */}
         {activeTab === "take" && (
           <>
