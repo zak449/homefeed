@@ -65,7 +65,7 @@ export default function RecentlyViewed() {
             <Link
               key={item.id}
               href={`/listing/${item.id}`}
-              className="flex-shrink-0 w-[140px] bg-white border border-border rounded-lg overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
+              className="flex-shrink-0 w-[140px] bg-[#1A1A1A] border border-border rounded-lg overflow-hidden hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200 group"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-tag">
                 {item.photo ? (

@@ -63,7 +63,7 @@ export default function CareersWaitlist() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="px-5 py-2.5 text-sm font-semibold bg-white text-social rounded-lg hover:bg-white/90 transition-colors disabled:opacity-50 whitespace-nowrap"
+          className="px-5 py-2.5 text-sm font-semibold bg-[#1A1A1A] text-white rounded-lg hover:bg-[#1A1A1A]/90 transition-colors disabled:opacity-50 whitespace-nowrap"
         >
           {status === "loading" ? "Joining..." : "Join Waitlist"}
         </button>

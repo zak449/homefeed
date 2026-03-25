@@ -100,7 +100,7 @@ export default function ShareableComment({
             {/* The card */}
             <div
               ref={cardRef}
-              className="bg-white rounded-2xl overflow-hidden shadow-modal"
+              className="bg-[#1A1A1A] rounded-2xl overflow-hidden shadow-modal"
             >
               {/* Gradient header */}
               <div className="bg-gradient-to-br from-[#0F0F0F] to-[#1a1a1a] px-5 pt-5 pb-4">
@@ -152,7 +152,7 @@ export default function ShareableComment({
               <button
                 type="button"
                 onClick={handleCopyText}
-                className="flex-1 py-2.5 bg-white rounded-xl text-sm font-semibold text-ink hover:bg-tag transition-colors flex items-center justify-center gap-1.5"
+                className="flex-1 py-2.5 bg-[#1A1A1A] rounded-xl text-sm font-semibold text-white hover:bg-tag transition-colors flex items-center justify-center gap-1.5"
               >
                 {copied ? (
                   <>
@@ -174,7 +174,7 @@ export default function ShareableComment({
               <button
                 type="button"
                 onClick={() => setShowCard(false)}
-                className="py-2.5 px-4 bg-white/80 rounded-xl text-sm font-medium text-muted hover:text-ink transition-colors"
+                className="py-2.5 px-4 bg-[#1A1A1A]/80 rounded-xl text-sm font-medium text-muted hover:text-ink transition-colors"
               >
                 Close
               </button>

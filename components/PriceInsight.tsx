@@ -42,7 +42,7 @@ export default function PriceInsight({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-white p-4 animate-fade-in">
+    <div className="rounded-xl border border-border bg-[#1A1A1A] p-4 animate-fade-in">
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-medium text-muted">Price per sqft in {city}</p>
         <span

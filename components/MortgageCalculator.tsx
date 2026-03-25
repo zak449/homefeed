@@ -101,7 +101,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
   const incomeNeeded = Math.round((calc.totalMonthly / 0.28) * 12);
 
   return (
-    <div className="rounded-xl border border-border bg-white overflow-hidden animate-fade-in">
+    <div className="rounded-xl border border-border bg-[#1A1A1A] overflow-hidden animate-fade-in">
       {/* Toggle header */}
       <button
         type="button"
@@ -206,7 +206,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 30
                       ? "bg-[#F5F5F5] text-[#0E0E0E]"
-                      : "bg-white text-muted hover:text-ink hover:bg-tag"
+                      : "bg-[#1A1A1A] text-[#888] hover:text-ink hover:bg-tag"
                   }`}
                 >
                   30 years
@@ -217,7 +217,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 15
                       ? "bg-[#F5F5F5] text-[#0E0E0E]"
-                      : "bg-white text-muted hover:text-ink hover:bg-tag"
+                      : "bg-[#1A1A1A] text-[#888] hover:text-ink hover:bg-tag"
                   }`}
                 >
                   15 years

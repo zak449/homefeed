@@ -60,7 +60,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
   return (
     <Link
       href={`/listing/${comment.listing.id}`}
-      className="group block bg-[#FFFFFF] border border-[#E8E6E3] rounded-xl overflow-hidden hover:shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-300"
+      className="group block bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl overflow-hidden hover:shadow-[0_2px_16px_rgba(0,0,0,0.06)] transition-all duration-300"
     >
       {/* 1. Property photo — full width, 4/3 aspect, the hook */}
       <div className="relative w-full aspect-[4/3] overflow-hidden">
@@ -117,7 +117,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
             <span className="text-xs font-bold text-white leading-none">{initials}</span>
           </div>
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[14px] font-semibold text-[#1A1A1A] truncate">
+            <span className="text-[14px] font-semibold text-white truncate">
               {comment.name}
             </span>
             <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full shrink-0">
@@ -133,7 +133,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
         {/* 4. The take — hero text */}
         <div className="mb-3">
           <p
-            className={`text-[15px] text-[#1A1A1A] leading-[1.55] ${
+            className={`text-[15px] text-white leading-[1.55] ${
               expanded ? "" : "line-clamp-3"
             }`}
           >
@@ -146,7 +146,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
                 e.stopPropagation();
                 setExpanded(true);
               }}
-              className="text-[13px] font-medium text-[#6B6B6B] hover:text-[#1A1A1A] mt-1 transition-colors"
+              className="text-[13px] font-medium text-[#6B6B6B] hover:text-white mt-1 transition-colors"
             >
               Read more
             </button>
@@ -159,7 +159,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
             Object.entries(reactionCounts).map(([emoji, count]) => (
               <span
                 key={emoji}
-                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-[#F5F3F0] border border-[#E8E6E3] text-[#1A1A1A] shrink-0 hover:border-[#D4763C]/30 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-full bg-[#1A1A1A] border border-[#2A2A2A] text-white shrink-0 hover:border-[#D4763C]/30 transition-colors cursor-pointer"
               >
                 <span className="text-sm leading-none">{emoji}</span>
                 <span className="font-medium text-[12px]">{count}</span>
@@ -171,7 +171,7 @@ function TakeCard({ comment }: { comment: CommentFeedItem }) {
         </div>
 
         {/* 6. Action row — CTA */}
-        <div className="flex items-center justify-end pt-3 border-t border-[#E8E6E3]/70">
+        <div className="flex items-center justify-end pt-3 border-t border-[#2A2A2A]/70">
           <span className="text-[13px] font-semibold text-[#D4763C] group-hover:translate-x-0.5 transition-transform duration-200">
             {totalReactions > 0
               ? `See ${totalReactions} more takes`

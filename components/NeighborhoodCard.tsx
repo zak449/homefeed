@@ -117,7 +117,7 @@ function NeighborhoodCard({ neighborhood: n }: { neighborhood: NeighborhoodData 
   return (
     <Link
       href={`/?city=${encodeURIComponent(n.city)}`}
-      className="group bg-white border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
+      className="group bg-[#1A1A1A] border border-border rounded-xl p-4 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200"
     >
       {/* City name + state */}
       <div className="flex items-start justify-between gap-2 mb-3">

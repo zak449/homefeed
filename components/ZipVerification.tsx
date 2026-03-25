@@ -911,7 +911,7 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
           style={{
             width: i === current ? 24 : 8,
             height: 8,
-            backgroundColor: i <= current ? "#D4763C" : "#E8E6E3",
+            backgroundColor: i <= current ? "#D4763C" : "#2A2A2A",
           }}
         />
       ))}
@@ -1140,7 +1140,7 @@ export default function ZipVerification({
           width: 100%;
           padding: 12px 16px;
           background: #FAFAF8;
-          border: 1.5px solid #E8E6E3;
+          border: 1.5px solid #2A2A2A;
           border-radius: 12px;
           font-size: 0.875rem;
           color: #1A1A1A;

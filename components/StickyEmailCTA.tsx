@@ -98,7 +98,7 @@ export default function StickyEmailCTA() {
             visible ? "translate-y-0" : "translate-y-full"
           }`}
         >
-          <div className="bg-white border-t border-border shadow-modal">
+          <div className="bg-[#1A1A1A] border-t border-border shadow-modal">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-col sm:flex-row items-center gap-3">
               {/* Copy */}
               <p className="text-sm text-ink font-medium text-center sm:text-left flex-1 min-w-0">

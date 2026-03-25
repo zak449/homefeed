@@ -449,7 +449,7 @@ export default async function AboutPage() {
           SECTION 9 — CTA: JOIN YOUR NEIGHBORHOOD
       ═══════════════════════════════════════════════════════════ */}
       <section className="max-w-4xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
-        <div className="relative bg-gradient-to-br from-ink to-ink/95 rounded-3xl p-8 sm:p-14 text-center overflow-hidden">
+        <div className="relative bg-gradient-to-br from-[#111111] to-[#111111]/95 rounded-3xl p-8 sm:p-14 text-center overflow-hidden">
           {/* Ambient amber glow */}
           <div className="absolute top-[-40px] right-[-40px] w-[200px] h-[200px] rounded-full bg-amber/[0.08] blur-[80px] pointer-events-none" />
           <div className="absolute bottom-[-40px] left-[-40px] w-[160px] h-[160px] rounded-full bg-amber/[0.06] blur-[60px] pointer-events-none" />
