@@ -598,7 +598,7 @@ export default async function CommunityPage({
                   },
                 ].map((item) => (
                   <div key={item.step} className="flex items-start gap-3">
-                    <div className="w-7 h-7 rounded-full bg-ink text-white flex items-center justify-center text-[12px] font-bold shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-[#F5F5F5] text-[#0E0E0E] flex items-center justify-center text-[12px] font-bold shrink-0">
                       {item.step}
                     </div>
                     <div>

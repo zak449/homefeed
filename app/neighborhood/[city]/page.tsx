@@ -341,7 +341,7 @@ export default async function NeighborhoodPage({ params }: { params: Promise<{ c
         </p>
         <Link
           href={`/?city=${encodeURIComponent(cityDecoded)}`}
-          className="inline-block px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-xl hover:bg-ink/90 transition-colors"
+          className="inline-block px-5 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold rounded-xl hover:bg-ink/90 transition-colors"
         >
           Browse all listings
         </Link>

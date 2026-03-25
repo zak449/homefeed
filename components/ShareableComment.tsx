@@ -120,7 +120,7 @@ export default function ShareableComment({
               {/* Author + listing info */}
               <div className="px-5 py-4">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-8 h-8 rounded-full bg-ink text-white flex items-center justify-center text-[10px] font-semibold">
+                  <div className="w-8 h-8 rounded-full bg-[#F5F5F5] text-[#0E0E0E] flex items-center justify-center text-[10px] font-semibold">
                     {initials}
                   </div>
                   <div>

@@ -172,7 +172,7 @@ export default function NeighborQA({
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-ink text-white text-caption font-medium rounded-button hover:bg-ink/90 transition-colors"
+          className="px-4 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors"
         >
           Ask a question
         </button>
@@ -204,7 +204,7 @@ export default function NeighborQA({
                     onClick={() => setNewCategory(cat.key as Category)}
                     className={`text-caption px-3 py-1.5 rounded-full border transition-colors ${
                       newCategory === cat.key
-                        ? "bg-ink text-white border-ink"
+                        ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
                         : "bg-bg border-divider text-secondary hover:text-ink hover:border-tertiary/40"
                     }`}
                   >
@@ -235,7 +235,7 @@ export default function NeighborQA({
                 <button
                   type="submit"
                   disabled={posting || !newQuestion.trim()}
-                  className="px-5 py-2 bg-ink text-white text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
+                  className="px-5 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
                 >
                   {posting ? "Posting..." : "Post question"}
                 </button>
@@ -258,7 +258,7 @@ export default function NeighborQA({
               onClick={() => setActiveCategory(cat.key)}
               className={`whitespace-nowrap text-caption px-3.5 py-1.5 rounded-full border transition-all shrink-0 ${
                 activeCategory === cat.key
-                  ? "bg-ink text-white border-ink"
+                  ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
                   : "bg-surface border-divider text-secondary hover:text-ink hover:border-tertiary/40"
               }`}
             >
@@ -567,7 +567,7 @@ function AnswerForm({
       <button
         type="submit"
         disabled={posting || !content.trim()}
-        className="shrink-0 px-4 py-2 bg-ink text-white text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
+        className="shrink-0 px-4 py-2 bg-[#F5F5F5] text-[#0E0E0E] text-caption font-medium rounded-button hover:bg-ink/90 transition-colors disabled:opacity-50"
       >
         {posting ? "..." : "Answer"}
       </button>

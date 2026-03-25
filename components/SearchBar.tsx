@@ -490,7 +490,7 @@ export default function SearchBar() {
               }}
               className={`px-4 py-2.5 sm:px-3 sm:py-1 min-h-[44px] sm:min-h-0 rounded-full text-caption transition-colors ${
                 type === t.key
-                  ? "bg-ink text-white"
+                  ? "bg-[#F5F5F5] text-[#0E0E0E]"
                   : "bg-surface text-ink hover:bg-active"
               }`}
             >

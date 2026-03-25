@@ -552,7 +552,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
             onClick={toggleComparison}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold rounded-full border transition-all duration-200 ${
               showComparison
-                ? "bg-ink text-white border-ink"
+                ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink"
                 : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
             }`}
           >
@@ -578,7 +578,7 @@ export default function AIReimagineTool({ photos, address }: AIReimagineToolProp
                 onClick={() => handleStyleSelect(style)}
                 className={`px-4 py-2 text-caption font-medium rounded-full border transition-all duration-200 ${
                   isActive
-                    ? "bg-ink text-white border-ink shadow-soft"
+                    ? "bg-[#F5F5F5] text-[#0E0E0E] border-ink shadow-soft"
                     : "bg-surface text-secondary border-divider hover:border-ink/30 hover:text-ink"
                 }`}
               >

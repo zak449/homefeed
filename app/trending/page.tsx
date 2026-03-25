@@ -322,7 +322,7 @@ function EmptyStateHero() {
 
         <Link
           href="/"
-          className="inline-flex items-center gap-2.5 bg-ink text-white text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
+          className="inline-flex items-center gap-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />

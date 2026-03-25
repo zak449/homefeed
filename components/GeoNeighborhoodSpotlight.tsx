@@ -39,12 +39,12 @@ export default function GeoNeighborhoodSpotlight({ commentCount }: { commentCoun
           <div className="flex items-center gap-3 mb-4">
             <div className="flex -space-x-2">
               {["ZK", "ML", "JR", "AS"].map((init) => (
-                <div key={init} className="w-7 h-7 rounded-full bg-ink text-white text-[10px] font-bold flex items-center justify-center border-2 border-surface">{init}</div>
+                <div key={init} className="w-7 h-7 rounded-full bg-[#F5F5F5] text-[#0E0E0E] text-[10px] font-bold flex items-center justify-center border-2 border-surface">{init}</div>
               ))}
             </div>
             <span className="text-xs text-secondary">{commentCount > 0 ? `${commentCount} takes shared` : "Join the conversation"}</span>
           </div>
-          <a href={communityHref} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink text-white text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
+          <a href={communityHref} className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold hover:opacity-90 active:scale-[0.97] transition-all">
             Join the conversation &rarr;
           </a>
         </div>

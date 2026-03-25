@@ -792,7 +792,7 @@ function EmptyState() {
         </p>
         <Link
           href="/"
-          className="inline-flex items-center gap-2 bg-ink text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all"
+          className="inline-flex items-center gap-2 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8" />

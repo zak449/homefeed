@@ -205,7 +205,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   onClick={() => setLoanTerm(30)}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 30
-                      ? "bg-ink text-white"
+                      ? "bg-[#F5F5F5] text-[#0E0E0E]"
                       : "bg-white text-muted hover:text-ink hover:bg-tag"
                   }`}
                 >
@@ -216,7 +216,7 @@ export default function MortgageCalculator({ price }: { price: number }) {
                   onClick={() => setLoanTerm(15)}
                   className={`flex-1 py-2 text-sm font-medium transition-colors ${
                     loanTerm === 15
-                      ? "bg-ink text-white"
+                      ? "bg-[#F5F5F5] text-[#0E0E0E]"
                       : "bg-white text-muted hover:text-ink hover:bg-tag"
                   }`}
                 >

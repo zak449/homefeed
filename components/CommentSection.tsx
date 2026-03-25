@@ -471,7 +471,7 @@ export default function CommentSection({
             <div className="flex items-center gap-2 pt-1">
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-ink text-white text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
+                className="px-6 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all"
               >
                 Get in
               </button>
@@ -625,7 +625,7 @@ export default function CommentSection({
               onClick={() => setInputMode("take")}
               className={`px-4 py-1.5 text-caption font-medium rounded-full transition-all ${
                 inputMode === "take"
-                  ? "bg-ink text-white shadow-sm"
+                  ? "bg-[#F5F5F5] text-[#0E0E0E] shadow-sm"
                   : "text-tertiary hover:text-ink"
               }`}
             >
@@ -805,7 +805,7 @@ export default function CommentSection({
               <button
                 type="submit"
                 disabled={posting}
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-ink text-white text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-body font-semibold rounded-full hover:bg-ink/90 active:scale-[0.97] transition-all disabled:opacity-50"
               >
                 {posting && (
                   <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
@@ -852,7 +852,7 @@ export default function CommentSection({
                 <button
                   type="submit"
                   disabled={replyStatus === "loading"}
-                  className="shrink-0 px-4 py-2 text-body font-medium rounded-button bg-ink text-white hover:bg-ink/90 transition-colors disabled:opacity-50"
+                  className="shrink-0 px-4 py-2 text-body font-medium rounded-button bg-[#F5F5F5] text-[#0E0E0E] hover:bg-ink/90 transition-colors disabled:opacity-50"
                 >
                   {replyStatus === "loading" ? "..." : "Notify me"}
                 </button>

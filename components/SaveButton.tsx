@@ -102,7 +102,7 @@ export default function SaveButton({ listingId }: { listingId: string }) {
 
       {/* Subscribe tooltip after 3rd save */}
       {showTooltip && (
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-ink text-white text-xs font-medium px-3 py-2 rounded-lg shadow-modal animate-fade-in z-50">
+        <div className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#F5F5F5] text-[#0E0E0E] text-xs font-medium px-3 py-2 rounded-lg shadow-modal animate-fade-in z-50">
           Want alerts when prices drop? Subscribe!
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-ink rotate-45" />
         </div>

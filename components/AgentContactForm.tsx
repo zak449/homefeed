@@ -107,7 +107,7 @@ export default function AgentContactForm({
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full py-2.5 bg-ink text-white text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+              className="w-full py-2.5 bg-[#F5F5F5] text-[#0E0E0E] text-sm font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
             >
               {status === "sending" ? "Sending..." : "Send Message"}
             </button>
