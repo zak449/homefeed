@@ -255,7 +255,28 @@ export async function GET(req: NextRequest) {
       // Parse state code from city string (e.g. "Beaumont, CA" → stateCode "CA")
       const parts = city.split(",").map(s => s.trim());
       const cityName = parts[0];
-      const stateCode = parts[1]?.length === 2 ? parts[1].toUpperCase() : undefined;
+      let stateCode = parts[1]?.length === 2 ? parts[1].toUpperCase() : undefined;
+
+      // If no state code, try with search_location (freeform) first,
+      // then fallback to CA since most users are in California
+      if (!stateCode) {
+        // Try freeform search first
+        const freeformCount = await fetchRealtorListings({ city: cityName, listingType: "sale", limit: 20, useSearchLocation: true });
+        const freeformRentCount = await fetchRealtorListings({ city: cityName, listingType: "rent", limit: 10, useSearchLocation: true });
+        if (freeformCount + freeformRentCount > 0) {
+          // Re-query with fresh data
+          const freshListings = await prisma.listing.findMany({ where, orderBy, skip: 0, take: perPage, select: selectFields });
+          const freshTotal = await prisma.listing.count({ where });
+          if (freshTotal > 0) {
+            return NextResponse.json(
+              { listings: freshListings.map(l => ({ ...l, topComment: l.comments?.[0] ?? null })), hasMore: freshTotal > perPage, total: freshTotal, synced: freeformCount + freeformRentCount },
+              { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+            );
+          }
+        }
+        // Still nothing — try CA as default state
+        stateCode = "CA";
+      }
 
       const [saleCount, rentCount] = await Promise.all([
         fetchRealtorListings({ city: cityName, stateCode, listingType: "sale", limit: 20 }),
