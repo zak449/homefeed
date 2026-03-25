@@ -273,28 +273,44 @@ export default function IntelBox({
   }, [photos]);
 
   // ── Auto-select best photo when reno type changes ──
+  const [photoMatchHint, setPhotoMatchHint] = useState("");
+
   const selectPhotoForType = useCallback(
     (type: string) => {
-      if (!photos || Object.keys(photoLabels).length === 0) return;
+      if (!photos || Object.keys(photoLabels).length === 0) {
+        setPhotoMatchHint("");
+        return;
+      }
       const typeKeywords: Record<string, string[]> = {
         kitchen: ["kitchen", "cooking", "cabinet", "countertop", "stove", "oven"],
         exterior: ["exterior", "front", "facade", "outside", "curb", "driveway"],
-        "master-bath": ["bathroom", "bath", "shower", "tub", "vanity", "toilet"],
+        "master-bath": ["bathroom", "bath", "shower", "tub", "vanity", "toilet", "master bath"],
         landscaping: ["yard", "garden", "patio", "pool", "landscape", "outdoor", "backyard"],
         adu: ["garage", "guest", "detached", "unit", "studio", "casita"],
         "full-gut": ["living", "main", "interior", "foyer", "entry", "great room"],
       };
+      const typeLabel = RENO_TYPES.find((t) => t.key === type)?.label ?? type;
       const keywords = typeKeywords[type] || [];
       for (const [idx, label] of Object.entries(photoLabels)) {
         const lbl = label.toLowerCase();
         if (keywords.some((kw) => lbl.includes(kw))) {
           setRenoPhotoIndex(Number(idx));
+          setPhotoMatchHint("");
           return;
         }
       }
+      // No match found
+      setPhotoMatchHint(`No ${typeLabel.toLowerCase()} photo found — use arrows to pick one`);
     },
     [photos, photoLabels]
   );
+
+  // ── Auto-select photo when labels arrive or Vision tab opens ──
+  useEffect(() => {
+    if (activeTab === "reno" && Object.keys(photoLabels).length > 0) {
+      selectPhotoForType(renoType);
+    }
+  }, [activeTab, photoLabels, renoType, selectPhotoForType]);
 
   // ── Fetch comments ──
   useEffect(() => {
@@ -1075,6 +1091,10 @@ export default function IntelBox({
                   )}
                 </div>
               </div>
+            )}
+            {/* Hint when no photo matches the selected type */}
+            {photoMatchHint && (
+              <p className="text-accent text-xs mb-3 -mt-2">{photoMatchHint}</p>
             )}
             {/* Step 2: Pick renovation type */}
             <div className="mb-3">

@@ -22,8 +22,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ labels: cache.get(cacheKey) });
     }
 
-    // Limit to 10 photos to control cost (each image costs tokens)
-    const photoSubset = photos.slice(0, 10);
+    // Classify all photos (up to 20) so every room type can be matched
+    const photoSubset = photos.slice(0, 20);
 
     if (!anthropic) {
       // Fallback: use URL-based heuristics when no API key
