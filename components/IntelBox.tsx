@@ -585,84 +585,41 @@ export default function IntelBox({
         minHeight: "400px",
       }}
     >
-      {/* ════════ POST-TAKE CELEBRATION TOAST ════════ */}
+      {/* ════════ POST-TAKE CELEBRATION MODAL ════════ */}
       {showToast && (
-        <div className="absolute top-3 left-3 right-3 z-50 animate-in slide-in-from-top-2 fade-in duration-300">
-          {email ? (
-            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-emerald-900/90 border border-emerald-700/50 backdrop-blur-sm shadow-lg">
-              <span className="text-sm font-semibold text-emerald-100">Your take is live! We&apos;ll email you when someone reacts.</span>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/listing/${listingId}`;
-                    navigator.clipboard.writeText(url).then(() => {
-                      setToastCopied(true);
-                      setTimeout(() => setToastCopied(false), 2000);
-                    });
-                  }}
-                  className="text-xs font-bold px-3 py-1.5 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-emerald-100 border border-emerald-600/50 transition-colors"
-                >
-                  {toastCopied ? "Copied!" : "Share"}
-                </button>
-                <button
-                  onClick={() => setShowToast(false)}
-                  className="text-emerald-300/60 hover:text-emerald-100 transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-surface border border-accent rounded-xl p-4 shadow-xl backdrop-blur-sm">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-white text-sm font-semibold">Take dropped!</p>
-                <button
-                  onClick={() => setShowToast(false)}
-                  className="text-tertiary hover:text-white transition-colors"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-                </button>
-              </div>
-              <p className="text-secondary text-xs mb-3">Want to know when someone reacts? Drop your email.</p>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Name"
-                  value={toastName}
-                  onChange={(e) => setToastName(e.target.value)}
-                  className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                />
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={toastEmail}
-                  onChange={(e) => setToastEmail(e.target.value)}
-                  className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                />
-              </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface border border-divider rounded-2xl p-6 mx-4 max-w-sm w-full text-center shadow-xl animate-in zoom-in-95 duration-300">
+            <div className="text-5xl mb-3">🫖</div>
+            <h3 className="text-xl font-bold text-white mb-1">Take dropped!</h3>
+            <p className="text-secondary text-sm mb-5">
+              {email ? "We'll email you when someone reacts." : "Your take is live on this listing."}
+            </p>
+            <div className="flex gap-3">
               <button
                 onClick={() => {
-                  if (!toastName.trim() || !toastEmail.trim()) return;
-                  setName(toastName.trim());
-                  setEmail(toastEmail.trim());
-                  setIsJoined(true);
-                  try {
-                    localStorage.setItem("hf_commenter", JSON.stringify({ name: toastName.trim(), email: toastEmail.trim() }));
-                  } catch {}
-                  fetch("/api/subscribe", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: toastEmail.trim(), source: "post-take-toast", name: toastName.trim() }),
-                  }).catch(() => {});
-                  setShowToast(false);
+                  if (navigator.share) {
+                    navigator.share({
+                      title: `Hot take on ${listingAddress}`,
+                      text: `Check out what people are saying about ${listingAddress} on Gwaky`,
+                      url: window.location.href,
+                    }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    setToastCopied(true);
+                  }
                 }}
-                disabled={!toastName.trim() || !toastEmail.trim()}
-                className="w-full mt-2 py-2 bg-accent text-white text-sm font-bold rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
+                className="flex-1 py-3 bg-accent text-white font-bold rounded-xl active:scale-[0.97] transition-all"
               >
-                Notify me →
+                {toastCopied ? "Link copied!" : "Share this listing 🔥"}
+              </button>
+              <button
+                onClick={() => setShowToast(false)}
+                className="px-4 py-3 border border-divider text-secondary rounded-xl hover:text-white transition-colors"
+              >
+                Done
               </button>
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -678,14 +635,7 @@ export default function IntelBox({
                 : "border border-divider text-secondary hover:text-white hover:border-secondary/30"
             }`}
           >
-            {tab.key === "take" ? (
-              tab.label
-            ) : (
-              <>
-                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
-                <span className="hidden sm:inline">{tab.label}</span>
-              </>
-            )}
+            {tab.label}
           </button>
         ))}
       </div>

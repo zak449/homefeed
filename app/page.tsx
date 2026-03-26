@@ -477,14 +477,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
             {/* Subtle amber glow orb */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #FF4D00, transparent 70%)' }} />
 
-            <div className="relative max-w-3xl mx-auto px-5 pt-16 pb-14 sm:pt-24 sm:pb-20">
+            <div className="relative max-w-3xl mx-auto px-5 pt-8 pb-6 sm:pt-12 sm:pb-10">
               {/* Big heading */}
               <h1 className="text-[clamp(2rem,7vw,3.5rem)] font-extrabold tracking-tighter font-display leading-[1.05] mb-4 text-white">
                 Real estate finally has a <span className="text-amber">comment section.</span>
               </h1>
 
               {/* Subtext */}
-              <p className="text-[clamp(0.95rem,2.5vw,1.2rem)] text-white/50 font-medium tracking-tight mb-10 sm:mb-14 max-w-xl">
+              <p className="text-[clamp(0.95rem,2.5vw,1.2rem)] text-white/50 font-medium tracking-tight mb-6 sm:mb-8 max-w-xl">
                 See what neighbors, past renters, and drive-by experts are really saying.
               </p>
 
@@ -507,7 +507,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                 else if (/\b(neighbor|next door|block)\b/.test(htLower)) htCredLabel = "Neighbor";
 
                 return (
-                  <a href={`/listing/${hottestTake.listing.id}`} className="block group mb-10 sm:mb-14 rounded-2xl bg-surface border border-divider shadow-lg hover:shadow-xl hover:border-amber/30 transition-all duration-300 overflow-hidden">
+                  <a href={`/listing/${hottestTake.listing.id}`} className="block group mb-6 sm:mb-8 rounded-2xl bg-surface border border-divider shadow-lg hover:shadow-xl hover:border-amber/30 transition-all duration-300 overflow-hidden">
                     {/* Listing context */}
                     <div className="flex items-center gap-3 p-4 pb-0">
                       {htPhoto && (
@@ -557,7 +557,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               {/* ── CTA BUTTON ── */}
               <a
                 href="/?sort=comments"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-amber text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated mb-8"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-amber text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated mb-4"
               >
                 Browse listings &rarr;
               </a>
@@ -581,7 +581,8 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           </div>
 
           {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
-          <div className="max-w-2xl mx-auto px-5 py-6">
+          <div className="sticky top-12 z-20 bg-bg border-b border-divider/0 backdrop-blur-sm" style={{ borderBottomColor: 'rgba(255,255,255,0.06)' }}>
+          <div className="max-w-2xl mx-auto px-5 py-4">
             <div className="relative">
               <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1 pr-8">
                 <GeoCategoryPill />
@@ -599,6 +600,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               {/* Fade gradient indicating more scrollable content */}
               <div className="absolute right-0 top-0 bottom-0 w-10 pointer-events-none bg-gradient-to-l from-bg to-transparent" />
             </div>
+          </div>
           </div>
 
           {/* Geo pulse — live activity */}
