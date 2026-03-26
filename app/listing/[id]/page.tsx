@@ -85,6 +85,28 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   ]);
   if (!listing) notFound();
 
+  const relatedListings = await prisma.listing.findMany({
+    where: {
+      city: listing.city,
+      id: { not: id },
+      status: "active",
+    },
+    orderBy: { comments: { _count: "desc" } },
+    take: 3,
+    select: {
+      id: true,
+      address: true,
+      city: true,
+      price: true,
+      photos: true,
+      listingType: true,
+      bedrooms: true,
+      bathrooms: true,
+      sqft: true,
+      _count: { select: { comments: true } },
+    },
+  });
+
   const isRent = listing.listingType === "rent";
   const isSold = listing.status === "sold" || listing.status === "off_market";
   const isLocked = isSold;
@@ -370,6 +392,38 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             }}
           />
         </div>
+
+        {/* ── More intel nearby ── */}
+        {relatedListings.length > 0 && (
+          <div className="mb-8">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-4">More intel in {listing.city}</h3>
+            <div className="grid gap-3">
+              {relatedListings.map((rl) => (
+                <Link
+                  key={rl.id}
+                  href={`/listing/${rl.id}`}
+                  className="flex items-center gap-3 bg-surface border border-divider rounded-xl p-3 hover:border-accent/30 transition-all group"
+                >
+                  {rl.photos[0] ? (
+                    <img src={rl.photos[0]} alt={rl.address} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg bg-elevated shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-white font-semibold truncate">{rl.address}</p>
+                    <p className="text-xs text-secondary">
+                      ${rl.price.toLocaleString()} · {rl.bedrooms}bd/{rl.bathrooms}ba
+                    </p>
+                    <p className="text-xs text-accent font-semibold mt-0.5">
+                      {rl._count.comments > 0 ? `🔥 ${rl._count.comments} takes` : "👻 No intel yet"}
+                    </p>
+                  </div>
+                  <span className="text-accent opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── Description ── */}
         {listing.description && (

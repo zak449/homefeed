@@ -815,9 +815,9 @@ export default function IntelBox({
             ) : sortedComments.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-2xl mb-2">🫖</p>
-                <p className="text-white font-semibold text-lg">No tea yet.</p>
+                <p className="text-white font-semibold text-lg">👻 No one's talked yet.</p>
                 <p className="text-tertiary text-sm mt-1">
-                  Be the first to drop intel on this block.
+                  Be the first to spill — first takes get pinned.
                 </p>
               </div>
             ) : (
@@ -867,6 +867,9 @@ export default function IntelBox({
                           title={new Date(comment.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                         >
                           {timeAgo(comment.createdAt)}
+                          {Object.values(comment.reactions).reduce((sum, n) => sum + (n as number), 0) >= 3 && (
+                            <span className="text-xs text-accent font-bold ml-1">🔥 Hot</span>
+                          )}
                         </span>
                       </div>
 
@@ -897,6 +900,22 @@ export default function IntelBox({
                             </button>
                           );
                         })}
+                        {/* Share this take */}
+                        <button
+                          onClick={() => {
+                            const takeText = `"${commentText}" — ${formatName(comment.name)}, ${role || tag.label} on ${listingAddress}`;
+                            if (navigator.share) {
+                              navigator.share({ text: takeText, url: window.location.href }).catch(() => {});
+                            } else {
+                              navigator.clipboard.writeText(takeText + "\n" + window.location.href);
+                            }
+                          }}
+                          className="ml-auto text-xs text-tertiary hover:text-accent transition-colors flex items-center gap-1"
+                          title="Share this take"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                          Share
+                        </button>
                       </div>
 
                     </div>
