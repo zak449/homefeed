@@ -387,9 +387,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   if (isDefaultLanding) {
     const takes = [...commentsFeedData];
     const listings_pool = [...sortedListings];
-    // Pattern: take, take, listing, take, founder, listing, listing, then remaining
+    // Pattern: take, take, neighborhood, listing, take, founder, listing, listing, then remaining
     const pattern: FeedItem["type"][] = [
-      "take", "take", "listing", "take", "founder",
+      "take", "take", "neighborhood", "listing", "take", "founder",
       "listing", "listing",
     ];
 

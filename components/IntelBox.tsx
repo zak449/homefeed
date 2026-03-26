@@ -573,7 +573,6 @@ export default function IntelBox({
     { key: "take", label: "🫖 Take" },
     { key: "reno", label: "💰 Estimates" },
     { key: "ai", label: "🤖 Ask AI" },
-    { key: "question", label: "👥 Ask Neighbors" },
   ];
 
   // ─── Render ───────────────────────────────────────────────────────────────
