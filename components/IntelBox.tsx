@@ -667,14 +667,14 @@ export default function IntelBox({
       )}
 
       {/* ════════ ZONE 1 — Fixed tab header (never scrolls) ════════ */}
-      <div className="shrink-0 z-10 bg-bg border-b border-divider px-4 py-3 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      <div className="shrink-0 z-10 bg-bg border-b border-divider px-4 py-3 flex items-center gap-3 justify-evenly">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`whitespace-nowrap px-4 py-2 rounded-md text-sm font-medium transition-all ${
+            className={`flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-sm font-medium transition-all text-center ${
               activeTab === tab.key
-                ? "bg-accent text-white"
+                ? "bg-accent text-white shadow-md shadow-accent/20"
                 : "border border-divider text-secondary hover:text-white hover:border-secondary/30"
             }`}
           >
