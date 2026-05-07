@@ -10,11 +10,25 @@ export const metadata: Metadata = {
 };
 
 export default async function AboutPage() {
-  const [listingCount, commentCount, reactionCount] = await Promise.all([
-    prisma.listing.count({ where: { status: "active" } }),
-    prisma.comment.count(),
-    prisma.reaction.count(),
-  ]);
+  // Build-time DB resilience: the /about page used to crash builds whenever
+  // Neon was suspended. Wrap the count calls in allSettled with sensible
+  // fallbacks so the site keeps loading even when the DB is unreachable.
+  let listingCount = 0;
+  let commentCount = 0;
+  let reactionCount = 0;
+  try {
+    const results = await Promise.allSettled([
+      prisma.listing.count({ where: { status: "active" } }),
+      prisma.comment.count(),
+      prisma.reaction.count(),
+    ]);
+    listingCount = results[0].status === "fulfilled" ? results[0].value : 0;
+    commentCount = results[1].status === "fulfilled" ? results[1].value : 0;
+    reactionCount = results[2].status === "fulfilled" ? results[2].value : 0;
+  } catch (err) {
+    // Database unreachable (e.g. Neon compute suspended). Fall back silently.
+    console.warn("[about] count queries failed, rendering with zeros:", err);
+  }
 
   return (
     <div className="bg-bg min-h-screen">
