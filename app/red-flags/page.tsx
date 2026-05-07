@@ -255,11 +255,28 @@ export default async function RedFlagsPage() {
           })}
 
           {sortedFlagged.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-xl font-semibold text-ink mb-2">No red flags yet</p>
-              <p className="text-sm text-secondary mb-6">The community hasn&apos;t flagged any takes yet. Browse listings and react with the flag emoji to warn others.</p>
-              <Link href="/" className="px-5 py-2.5 rounded-full bg-amber text-white text-sm font-medium hover:opacity-90 transition-opacity">
-                Browse listings
+            <div className="text-center py-16 max-w-md mx-auto">
+              <p className="font-display text-display text-ink mb-2">All clear.</p>
+              <p className="text-body text-secondary mb-6">No red flags raised today — the block is quiet. If you spot something off, drop a 🚩 on the take and warn your neighbors.</p>
+              <Link href="/hot-takes" className="tea-button inline-flex items-center gap-2 px-6 py-3">
+                🔥 Read what&apos;s hot instead
+              </Link>
+            </div>
+          )}
+
+          {sortedFlagged.length > 0 && (
+            <div className="mt-10 grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+              <Link href="/hot-takes" className="next-up-cta block">
+                <span className="flex items-center gap-3">
+                  <span aria-hidden>🔥</span>
+                  <span><span className="block text-tag uppercase tracking-wider text-tea-300">Heat check</span><span className="block text-body text-ink">Today&apos;s hot takes</span></span>
+                </span>
+              </Link>
+              <Link href="/" className="next-up-cta block">
+                <span className="flex items-center gap-3">
+                  <span aria-hidden>🔍</span>
+                  <span><span className="block text-tag uppercase tracking-wider text-tea-300">Find a place</span><span className="block text-body text-ink">Browse listings</span></span>
+                </span>
               </Link>
             </div>
           )}
