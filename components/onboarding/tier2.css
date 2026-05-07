@@ -1,0 +1,133 @@
+/* Tier 2 banner + modal — separate stylesheet so the home page only
+ * imports what it needs. Inherits the same design tokens as the wizard. */
+
+.of-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-lg, 14px);
+  background: var(--color-surface, #fff);
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+.of-banner__text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+.of-banner__title {
+  font-size: 15px;
+  color: var(--color-fg, #111);
+}
+.of-banner__sub {
+  font-size: 13px;
+  color: var(--color-fg-muted, #555);
+}
+.of-banner__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.of-btn--sm {
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+/* modal */
+.of-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.of-modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: var(--color-surface, #fff);
+  border-radius: var(--radius-lg, 14px);
+  padding: 20px 18px 18px;
+  box-shadow: 0 24px 48px -12px rgba(0,0,0,0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.of-modal__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-fg-muted, #555);
+}
+.of-modal__close:hover, .of-modal__close:focus-visible {
+  background: color-mix(in srgb, var(--color-fg, #111) 8%, transparent);
+}
+.of-modal__title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.of-modal__title:focus { outline: none; }
+.of-modal__body { display: flex; flex-direction: column; gap: 12px; }
+.of-modal__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.of-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.of-radio {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-md, 10px);
+  cursor: pointer;
+  min-height: 48px;
+  font-size: 15px;
+  background: var(--color-surface, #fff);
+  transition: border-color 120ms, background-color 120ms;
+}
+.of-radio.is-selected {
+  border-color: var(--color-accent, #1f6feb);
+  background: color-mix(in srgb, var(--color-accent, #1f6feb) 10%, var(--color-surface, #fff));
+}
+.of-radio input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--color-accent, #1f6feb);
+  cursor: pointer;
+}
+
+@media (min-width: 600px) {
+  .of-modal__backdrop { align-items: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .of-radio { transition: none; }
+}

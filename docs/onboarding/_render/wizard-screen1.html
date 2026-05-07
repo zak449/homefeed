@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Onboarding — screen 1</title>
+<style>
+  :root {
+    --color-bg: #fafafa;
+    --color-surface: #ffffff;
+    --color-fg: #111111;
+    --color-fg-muted: #555555;
+    --color-border: #d1d5db;
+    --color-accent: #1f6feb;
+    --color-accent-fg: #ffffff;
+    --color-error: #b00020;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--color-bg); color: var(--color-fg); font-family: -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif; }
+</style>
+<style>
+  /* === inlined onboarding.css (subset, screen 1 only) === */
+  .of-wizard { width: 100%; max-width: 480px; margin: 0 auto; padding: 24px 20px 32px; min-height: 100vh; display: flex; flex-direction: column; gap: 20px; }
+  .of-dots { display: flex; gap: 8px; margin-bottom: 4px; }
+  .of-dot { width: 28px; height: 4px; border-radius: 2px; background: var(--color-border); }
+  .of-dot.is-active { background: var(--color-accent); }
+  .of-step { display: flex; flex-direction: column; gap: 18px; }
+  .of-title { margin: 0; font-size: 28px; line-height: 1.15; font-weight: 700; letter-spacing: -0.01em; }
+  .of-subtitle { margin: 0; font-size: 16px; color: var(--color-fg-muted); line-height: 1.45; }
+  .of-field { display: flex; flex-direction: column; gap: 6px; }
+  .of-label { font-weight: 600; font-size: 15px; }
+  .of-helper { margin: 0; font-size: 13px; color: var(--color-fg-muted); line-height: 1.4; }
+  .of-input { width: 100%; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 12px 14px; font: inherit; font-size: 16px; color: var(--color-fg); min-height: 48px; }
+  .of-input-prefix { display: flex; align-items: stretch; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); }
+  .of-input-prefix__text { display: flex; align-items: center; padding: 0 12px; color: var(--color-fg-muted); font-size: 14px; border-right: 1px solid var(--color-border); background: rgba(0,0,0,0.02); border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); }
+  .of-input--prefixed { border: 0; border-radius: 0; background: transparent; }
+  select.of-input { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%23555' d='M6 8 0 0h12z'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
+  .of-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .of-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 18px; border-radius: var(--radius-md); font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+  .of-btn--primary { background: var(--color-accent); color: var(--color-accent-fg); }
+</style>
+</head>
+<body>
+  <div class="of-wizard">
+    <div class="of-dots" aria-hidden="true">
+      <span class="of-dot is-active"></span>
+      <span class="of-dot"></span>
+    </div>
+    <form class="of-step" novalidate>
+      <h1 class="of-title">Make it yours</h1>
+      <p class="of-subtitle">Two quick screens. We&apos;ll tailor your feed.</p>
+
+      <div class="of-field">
+        <label class="of-label" for="dn">Your name</label>
+        <p class="of-helper">Shown on your posts and comments.</p>
+        <input id="dn" class="of-input" type="text" value="Casey Rivera" autocomplete="name" />
+      </div>
+
+      <div class="of-field">
+        <label class="of-label" for="un">Username</label>
+        <p class="of-helper">Lowercase letters, numbers, and underscores. People @-mention you with this.</p>
+        <div class="of-input-prefix">
+          <span class="of-input-prefix__text">gwaky.com/@</span>
+          <input id="un" class="of-input of-input--prefixed" type="text" value="casey_rivera" />
+        </div>
+      </div>
+
+      <div class="of-field">
+        <label class="of-label" for="role">I&apos;m a…</label>
+        <p class="of-helper">Shapes what you see. You can change this anytime.</p>
+        <select id="role" class="of-input">
+          <option>Renter</option>
+          <option>Buyer</option>
+          <option>Seller</option>
+          <option>Agent</option>
+        </select>
+      </div>
+
+      <div class="of-actions">
+        <button type="button" class="of-btn of-btn--primary">Continue</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

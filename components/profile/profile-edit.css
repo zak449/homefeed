@@ -1,0 +1,143 @@
+/* /profile/edit additions — scoped CSS for the onboarding-owned
+ * sections. Inherits design tokens. */
+
+.of-profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-border, #d1d5db);
+}
+.of-profile-section:first-child { border-top: 0; }
+
+.of-profile-h {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.of-profile-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.of-profile-row__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.of-profile-row__label {
+  font-size: 14px;
+}
+
+.of-profile-row__field {
+  margin-top: 4px;
+}
+
+.of-readonly {
+  margin: 0;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--color-fg, #111) 4%, transparent);
+  border-radius: var(--radius-md, 10px);
+  font-size: 15px;
+}
+
+.of-privacy-pill {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border, #d1d5db);
+  background: var(--color-surface, #fff);
+  color: var(--color-fg-muted, #555);
+  cursor: pointer;
+  min-height: 28px;
+}
+.of-privacy-pill.is-toggleable:hover {
+  background: color-mix(in srgb, var(--color-fg, #111) 6%, transparent);
+}
+.of-privacy-pill:disabled { cursor: default; }
+
+.of-switch {
+  width: 44px;
+  height: 26px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--color-border, #d1d5db);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 120ms;
+}
+.of-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  transition: transform 120ms;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.of-switch:checked {
+  background: var(--color-accent, #1f6feb);
+}
+.of-switch:checked::after { transform: translateX(18px); }
+.of-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent, #1f6feb) 30%, transparent);
+}
+
+.of-saved {
+  font-size: 12px;
+  color: var(--color-accent, #1f6feb);
+  align-self: flex-end;
+}
+
+.of-helper--block { display: block; }
+
+/* Privacy & Data cards */
+.of-data-card {
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: var(--radius-lg, 14px);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--color-surface, #fff);
+}
+.of-data-card--danger { border-color: color-mix(in srgb, var(--color-error, #b00020) 40%, var(--color-border, #d1d5db)); }
+.of-data-card__title { font-size: 15px; }
+.of-data-card__status {
+  font-size: 13px;
+  color: var(--color-fg-muted, #555);
+  background: color-mix(in srgb, var(--color-accent, #1f6feb) 8%, transparent);
+  padding: 8px 10px;
+  border-radius: var(--radius-md, 10px);
+  margin: 4px 0;
+}
+
+.of-btn--danger {
+  background: var(--color-error, #b00020);
+  color: #fff;
+}
+.of-btn--danger:hover { filter: brightness(1.05); }
+
+.of-confirm {
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: var(--radius-md, 10px);
+  background: color-mix(in srgb, var(--color-error, #b00020) 6%, transparent);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.of-confirm__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
