@@ -10,8 +10,8 @@ node_modules/
 .next/
 out/
 
-# Prisma
-prisma/migrations/
+# Prisma — migrations are committed; only the local lockfile is ignored
+prisma/migrations/migration_lock.toml
 
 # OS
 .DS_Store
