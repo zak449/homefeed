@@ -11,6 +11,8 @@ import { enrichListingDetail } from "@/lib/data-adapters/detail";
 import MapPreview from "@/components/MapPreview";
 import IntelBox from "@/components/IntelBox";
 import ExpandableText from "@/components/ExpandableText";
+import TeaTemperature from "@/components/TeaTemperature";
+import WatchingNow from "@/components/WatchingNow";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -79,12 +81,37 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
     }
   })();
 
-  const [listing, commentCount, reactionCount] = await Promise.all([
+  // Pull the metrics that feed Tea Temperature in parallel with the listing fetch.
+  // - recentCount: comments in last 7 days (recency / momentum signal)
+  // - redFlagCount: comments toggled as red flags
+  // - hotCount: comments above the like threshold (≥10) — surfaces as 🔥 Hot Take
+  // - uniqueCommenters: distinct authors (source diversity — solo voices don't boil)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const HOT_THRESHOLD = 10;
+  const [
+    listing,
+    commentCount,
+    reactionCount,
+    recentCount,
+    redFlagCount,
+    hotCount,
+    uniqueAuthorRows,
+  ] = await Promise.all([
     prisma.listing.findUnique({ where: { id } }),
     prisma.comment.count({ where: { listingId: id } }),
     prisma.reaction.count({ where: { comment: { listingId: id } } }),
+    prisma.comment.count({ where: { listingId: id, createdAt: { gte: sevenDaysAgo } } }),
+    prisma.comment.count({ where: { listingId: id, isRedFlag: true } }),
+    prisma.comment.count({ where: { listingId: id, likeCount: { gte: HOT_THRESHOLD } } }),
+    prisma.comment.findMany({
+      where: { listingId: id },
+      select: { email: true },
+      distinct: ["email"],
+      take: 200,
+    }),
   ]);
   if (!listing) notFound();
+  const uniqueCommenters = uniqueAuthorRows.length;
 
   const relatedListings = await prisma.listing.findMany({
     where: {
@@ -322,6 +349,26 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
             </span>
           </div>
         </div>
+
+        {/* ── Tea Temperature — the hero "power tool" ── */}
+        {!isLocked && (
+          <div className="mb-6">
+            <TeaTemperature
+              listingAddress={listing.address}
+              commentCount={commentCount}
+              hotCount={hotCount}
+              redFlagCount={redFlagCount}
+              recentCount={recentCount}
+              uniqueCommenters={uniqueCommenters}
+            />
+            {/* Live presence — server-seeded count, gentle simulation client-side */}
+            {commentCount > 0 && (
+              <div className="mt-2 px-1">
+                <WatchingNow count={Math.max(2, Math.min(48, Math.round(reactionCount * 0.4 + commentCount * 0.6 + 3)))} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── Save + Share ── */}
         <div className="flex items-center justify-between mb-6 pb-5 border-b border-divider">
