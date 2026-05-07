@@ -2,6 +2,7 @@
 
 import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
+import { NotificationBell } from "./notifications/NotificationBell";
 
 export default function NavLinks() {
   const searchParams = useSearchParams();
@@ -50,6 +51,7 @@ export default function NavLinks() {
       >
         Profile
       </Link>
+      <NotificationBell />
       <Link
         href="/?city="
         className="ml-1 p-2 rounded-full text-secondary hover:text-ink hover:bg-surface transition-all"
