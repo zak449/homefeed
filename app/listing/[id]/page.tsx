@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { ThreadedComments } from "@/components/comments/ThreadedComments";
 import { prisma } from "@/lib/prisma";
 import ListingViewTracker from "@/components/ListingViewTracker";
 import PhotoLightbox from "@/components/PhotoLightbox";
@@ -351,6 +352,11 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               </span>
             )}
           </div>
+        </div>
+
+        {/* ── THREADED TAKES (auth-aware comments with replies + likes) ── */}
+        <div className="mb-8">
+          <ThreadedComments listingId={listing.id} />
         </div>
 
         {/* ── RAP SHEET CTA ── */}
