@@ -147,9 +147,9 @@ export const tier1Schema = {
   },
 
   /** Pick a subset of keys (mirrors zod's `.pick()` minimally). */
-  pick<K extends (keyof Tier1Input)[]>(keys: { [P in K[number]]: true }) {
+  pick<K extends keyof Tier1Input>(keys: { [P in K]: true }) {
     return {
-      safeParse(raw: unknown): ParseResult<Pick<Tier1Input, K[number]>> {
+      safeParse(raw: unknown): ParseResult<Pick<Tier1Input, K>> {
         const issues: Array<{ path: (string | number)[]; message: string }> = [];
         const r = (raw ?? {}) as Partial<Tier1Input>;
         const out: Partial<Tier1Input> = {};
