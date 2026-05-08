@@ -80,12 +80,16 @@ export default function MobileNav() {
 
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
+    // Haptic tap to make the press feel substantial
+    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
     if (isListingPage) {
       const listingId = pathname.split("/listing/")[1] || undefined;
       const address = document.querySelector("h1")?.textContent?.split(",")[0] || undefined;
       setSpillListingId(listingId);
       setSpillAddress(address);
     } else {
+      // No listing context — SpillSheet will open in Target Picker mode.
+      // No more dead-end blank textareas.
       setSpillListingId(undefined);
       setSpillAddress(undefined);
     }
@@ -97,7 +101,7 @@ export default function MobileNav() {
       {/* Bottom tab bar — fixed, always visible on mobile */}
       <nav
         className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg/95 backdrop-blur-sm border-t border-divider"
-        style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ boxShadow: "0 -1px 24px rgba(255, 46, 147, 0.12)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex items-end justify-evenly h-16 max-w-md mx-auto px-1">
           {tabs.map((tab) => {
@@ -107,14 +111,17 @@ export default function MobileNav() {
                 {/* Active amber dot indicator above icon */}
                 {tab.active && !isAccent && (
                   <span
-                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
+                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FF52A6]"
                     aria-hidden="true"
                   />
                 )}
 
-                {/* Amber accent button for +Take */}
+                {/* Tea Magenta CTA button for Spill */}
                 {isAccent ? (
-                  <span className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
+                  <span
+                    className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-tea-gradient text-steam shadow-glow-tea border-4 border-bg"
+                    aria-label="Spill the tea"
+                  >
                     {tab.icon(false)}
                   </span>
                 ) : tab.label === "Profile" ? (
@@ -125,9 +132,9 @@ export default function MobileNav() {
 
                 <span className={`text-xs font-medium ${
                   isAccent
-                    ? "text-amber font-bold"
+                    ? "text-tea-300 font-bold"
                     : tab.active
-                      ? "text-[#E8A87C]"
+                      ? "text-[#FF52A6]"
                       : "text-tertiary"
                 }`}>
                   {tab.label}
@@ -139,7 +146,7 @@ export default function MobileNav() {
               isAccent
                 ? ""
                 : tab.active
-                  ? "text-[#E8A87C]"
+                  ? "text-[#FF52A6]"
                   : "text-secondary hover:text-ink"
             }`;
 

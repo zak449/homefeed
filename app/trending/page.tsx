@@ -314,21 +314,14 @@ function EmptyStateHero() {
         </div>
 
         <h2 className="font-display text-2xl font-extrabold text-ink tracking-tight mb-3">
-          Be the first voice
+          Cold pot.
         </h2>
         <p className="text-[15px] text-secondary leading-relaxed max-w-sm mx-auto mb-8">
-          No one&rsquo;s started talking yet. Search any listing and drop your take to kick things off.
+          Nobody&apos;s spilled here yet — the first take sets the temperature for the whole block. Pick a listing and start the boil.
         </p>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2.5 bg-ink text-bg text-sm font-semibold px-7 py-3.5 rounded-xl hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          Search listings
+        <Link href="/" className="tea-button inline-flex items-center gap-2.5 px-7 py-3.5">
+          🫖 Pick a listing to spill on
         </Link>
       </div>
     </div>

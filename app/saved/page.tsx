@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ListingCard from "@/components/ListingCard";
+import NextUpCta from "@/components/NextUpCta";
 
 const STORAGE_KEY = "hf_saved_listings";
 
@@ -74,13 +75,13 @@ export default function SavedPage() {
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-glow flex items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4763C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF2E93" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
               </svg>
             </div>
             <div>
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight">
-                Saved Listings
+                Your watchlist
               </h1>
             </div>
             {savedIds.length > 0 && (
@@ -99,7 +100,7 @@ export default function SavedPage() {
           )}
         </div>
         <p className="text-sm text-secondary mt-2 ml-[52px]">
-          Listings you&apos;ve saved are stored locally in this browser.
+          Saved spots — heated by takes from neighbors, past renters, and almost-buyers.
         </p>
       </div>
 
@@ -130,7 +131,7 @@ export default function SavedPage() {
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="#D4763C"
+                stroke="#FF2E93"
                 strokeWidth={1.5}
                 className="w-10 h-10"
               >
@@ -145,27 +146,25 @@ export default function SavedPage() {
 
           {/* Copy */}
           <h2 className="font-display text-xl sm:text-2xl font-bold text-ink tracking-tight mb-2 text-center">
-            No saved listings yet
+            Watchlist is empty
           </h2>
           <p className="text-sm sm:text-base text-secondary max-w-md mx-auto text-center leading-relaxed mb-8">
-            Tap the heart on any listing to save it here. Your favorites are stored locally so you can come back anytime.
+            Heart any listing to add it here. We&apos;ll heat it up for you — Tea Temp moves whenever neighbors drop new takes on places you&apos;re watching.
           </p>
 
-          {/* CTA */}
-          <a
-            href="/"
-            className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-bold text-white bg-amber rounded-xl shadow-glow hover:shadow-glow-amber transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98]"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-            </svg>
-            Browse Listings
-          </a>
+          {/* Two-up next-step grid — every dead end is now two doors */}
+          <div className="w-full max-w-md grid sm:grid-cols-2 gap-3">
+            <NextUpCta href="/" emoji="🔍" eyebrow="Find your block">
+              Browse listings
+            </NextUpCta>
+            <NextUpCta href="/hot-takes" emoji="🔥" eyebrow="What's boiling">
+              Today&apos;s hot takes
+            </NextUpCta>
+          </div>
 
           {/* Subtle hint */}
           <p className="text-xs text-tertiary mt-6">
-            Saved listings stay in this browser only
+            Saved listings stay in this browser only — heart one to start the watchlist.
           </p>
         </div>
       )}
@@ -179,19 +178,15 @@ export default function SavedPage() {
         </div>
       )}
 
-      {/* Back link */}
+      {/* Next up — every page ends with traction, never a footer */}
       {!loading && listings.length > 0 && (
-        <div className="text-center mt-12">
-          <a
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-amber hover:text-amber/80 transition-colors"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
+        <div className="mt-12 grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+          <NextUpCta href="/hot-takes" emoji="🔥" eyebrow="Heat check">
+            See what&apos;s boiling today
+          </NextUpCta>
+          <NextUpCta href="/" emoji="🔍" eyebrow="Add to watchlist">
             Browse more listings
-          </a>
+          </NextUpCta>
         </div>
       )}
     </div>

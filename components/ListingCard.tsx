@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import FallbackImage from "@/components/FallbackImage";
+import { TeaTempPill } from "@/components/TeaTemperature";
 
 type Listing = {
   id: string;
@@ -217,14 +218,13 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           {listing.address}, {listing.city}
         </p>
 
-        {/* Takes count — the value prop */}
-        <div className="flex items-center gap-1.5 mt-2 text-xs">
-          {commentCount > 0 ? (
-            <span className="flex items-center gap-1 text-accent font-semibold">
-              <span>🔥</span> {commentCount} take{commentCount !== 1 ? "s" : ""}
+        {/* Tea Temperature — the brand metric, surfaced on every card */}
+        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+          <TeaTempPill commentCount={commentCount} />
+          {commentCount > 0 && (
+            <span className="text-tag uppercase tracking-wider text-tertiary">
+              {commentCount} take{commentCount !== 1 ? "s" : ""}
             </span>
-          ) : (
-            <span className="text-tertiary">👻 No intel yet</span>
           )}
         </div>
 

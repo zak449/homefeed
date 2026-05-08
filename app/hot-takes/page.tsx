@@ -183,11 +183,29 @@ export default async function HotTakesPage() {
           })}
 
           {sortedComments.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-xl font-semibold text-ink mb-2">No takes yet</p>
-              <p className="text-sm text-secondary mb-6">Be the first to drop a take on a listing.</p>
-              <Link href="/" className="px-5 py-2.5 rounded-full bg-amber text-white text-sm font-medium hover:opacity-90 transition-opacity">
-                Browse listings
+            <div className="text-center py-16 max-w-md mx-auto">
+              <p className="font-display text-display text-ink mb-2">Cold pot.</p>
+              <p className="text-body text-secondary mb-6">Nobody&apos;s spilled here yet — the first take sets the temperature for the whole block.</p>
+              <Link href="/" className="tea-button inline-flex items-center gap-2 px-6 py-3">
+                🫖 Pick a listing to spill on
+              </Link>
+            </div>
+          )}
+
+          {/* Next-up — every page ends with traction */}
+          {sortedComments.length > 0 && (
+            <div className="mt-10 grid sm:grid-cols-2 gap-3 max-w-2xl mx-auto">
+              <Link href="/red-flags" className="next-up-cta block">
+                <span className="flex items-center gap-3">
+                  <span aria-hidden>🚩</span>
+                  <span><span className="block text-tag uppercase tracking-wider text-tea-300">Watch out</span><span className="block text-body text-ink">What neighbors are flagging</span></span>
+                </span>
+              </Link>
+              <Link href="/saved" className="next-up-cta block">
+                <span className="flex items-center gap-3">
+                  <span aria-hidden>🌡️</span>
+                  <span><span className="block text-tag uppercase tracking-wider text-tea-300">Track your block</span><span className="block text-body text-ink">Add listings to your watchlist</span></span>
+                </span>
               </Link>
             </div>
           )}
