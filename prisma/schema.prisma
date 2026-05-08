@@ -54,14 +54,27 @@ model Comment {
   id        String   @id @default(cuid())
   listingId String
   listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  // Anonymous fields (kept for legacy comments). New comments use userId.
   name      String
   email     String
   content   String   @db.Text
   createdAt DateTime @default(now())
+  // accounts-comments-notifications additions:
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  parentId  String?
+  parent    Comment? @relation("CommentThread", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentThread")
+  likeCount Int      @default(0)
+  isRedFlag Boolean  @default(false)
+  editedAt  DateTime?
+  likes     CommentLike[]
 
   reactions Reaction[]
 
   @@index([listingId, createdAt])
+  @@index([parentId])
+  @@index([userId])
 }
 
 model Reaction {
@@ -239,4 +252,114 @@ model CitySync {
 
   @@unique([city, state])
   @@index([lastSync])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// accounts-comments-notifications: User accounts, sessions, profiles,
+// notifications, saved listings, and per-user comment likes.
+// ───────────────────────────────────────────────────────────────────────────
+
+model User {
+  id              String    @id @default(cuid())
+  name            String?
+  username        String?   @unique
+  email           String?   @unique
+  emailVerified   DateTime?
+  image           String?
+  bio             String?
+  avatarUrl       String?
+  streakCount     Int       @default(0)
+  streakUpdatedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  comments      Comment[]
+  likes         CommentLike[]
+  notifications Notification[]
+  savedListings SavedListing[]
+
+  @@index([username])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "comment_reply" | "comment_like" | "mention" | "saved_listing_update" | "system"
+  title     String
+  body      String?  @db.Text
+  link      String?
+  read      Boolean  @default(false)
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, read])
+}
+
+model SavedListing {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+  @@index([userId, createdAt])
+  @@index([listingId])
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  userId    String
+  commentId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@index([commentId])
+  @@index([userId])
 }

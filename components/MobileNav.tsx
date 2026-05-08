@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import SpillSheet from "./SpillSheet";
+import { MobileTabBadge } from "./notifications/MobileTabBadge";
 
 export default function MobileNav() {
   const searchParams = useSearchParams();
@@ -116,6 +117,8 @@ export default function MobileNav() {
                   <span className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
                     {tab.icon(false)}
                   </span>
+                ) : tab.label === "Profile" ? (
+                  <span className="relative inline-flex">{tab.icon(tab.active)}<MobileTabBadge /></span>
                 ) : (
                   tab.icon(tab.active)
                 )}

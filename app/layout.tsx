@@ -5,6 +5,7 @@ import NavLinks from "@/components/NavLinks";
 import Footer from "@/components/Footer";
 import KlaviyoScript from "@/components/KlaviyoScript";
 import PostHogProvider from "@/components/PostHogProvider";
+import { SessionProvider } from "@/components/auth/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -54,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#0A0A0A" />
       </head>
       <body className="min-h-screen flex flex-col bg-bg pb-0 sm:pb-0">
-        <PostHogProvider>
+        <SessionProvider><PostHogProvider>
         {/* Top nav — minimal, dark */}
         <header className="sticky top-0 z-50 bg-bg/80 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">
@@ -87,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
 
         <KlaviyoScript />
-        </PostHogProvider>
+        </PostHogProvider></SessionProvider>
       </body>
     </html>
   );
