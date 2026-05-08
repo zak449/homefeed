@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Tier 2 modal</title>
+<style>
+  :root {
+    --color-bg: #fafafa;
+    --color-surface: #ffffff;
+    --color-fg: #111111;
+    --color-fg-muted: #555555;
+    --color-border: #d1d5db;
+    --color-accent: #1f6feb;
+    --color-accent-fg: #ffffff;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--color-bg); color: var(--color-fg); font-family: -apple-system, "Segoe UI", system-ui, "Helvetica Neue", Arial, sans-serif; min-height: 100vh; }
+  /* feed-ish background */
+  .feed { padding: 16px 20px; max-width: 480px; margin: 0 auto; opacity: 0.45; filter: blur(0.5px); }
+  .feed h1 { font-size: 24px; margin: 0 0 12px; }
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .card .title { font-weight: 600; font-size: 15px; }
+  .card .meta { color: #777; font-size: 12px; }
+  .card .body { font-size: 14px; color: #333; }
+
+  .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: flex-end; justify-content: center; padding: 16px; }
+  .modal { width: 100%; max-width: 460px; background: var(--color-surface); border-radius: var(--radius-lg); padding: 22px 18px 18px; box-shadow: 0 24px 48px -12px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 16px; position: relative; }
+  .close { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border-radius: 999px; background: transparent; border: 0; font-size: 22px; line-height: 1; color: var(--color-fg-muted); cursor: pointer; }
+  .dots { display: flex; gap: 8px; }
+  .dot { width: 28px; height: 4px; border-radius: 2px; background: var(--color-border); }
+  .dot.is-active { background: var(--color-accent); }
+  .title2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.005em; }
+  .helper { margin: 0; font-size: 13px; color: var(--color-fg-muted); line-height: 1.4; }
+  .group { display: flex; flex-direction: column; gap: 8px; }
+  .radio { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; min-height: 48px; font-size: 15px; background: var(--color-surface); }
+  .radio input { width: 20px; height: 20px; accent-color: var(--color-accent); }
+  .radio.sel { border-color: var(--color-accent); background: rgba(31,111,235,0.08); }
+  .actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 18px; border-radius: var(--radius-md); font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+  .btn--p { background: var(--color-accent); color: var(--color-accent-fg); }
+  .btn--g { background: transparent; color: var(--color-fg-muted); text-decoration: underline; text-underline-offset: 4px; }
+</style>
+</head>
+<body>
+  <div class="feed" aria-hidden="true">
+    <h1>Brooklyn</h1>
+    <div class="card"><div class="title">3 sketchy listings near the J train</div><div class="meta">128 comments · 2h</div><div class="body">A thread for showing up to open houses where the broker won't tell you why the rent is so low…</div></div>
+    <div class="card"><div class="title">Did anyone else notice 215 Eastern Pkwy is back on the market?</div><div class="meta">42 comments · 5h</div><div class="body">Third time in 8 months. Heat is suspiciously included…</div></div>
+    <div class="card"><div class="title">Crown Heights price softening, finally</div><div class="meta">89 comments · 1d</div><div class="body">Tracking a few buildings on the watchlist…</div></div>
+  </div>
+
+  <div class="backdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="t2h">
+      <button class="close" aria-label="Close">×</button>
+      <div class="dots" aria-label="Step 1 of 4">
+        <span class="dot is-active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      <h2 id="t2h" class="title2">What brings you here?</h2>
+      <p class="helper">Honest answer. We won&apos;t show this on your profile.</p>
+      <div class="group" role="radiogroup" aria-label="What brings you here?">
+        <label class="radio sel"><input type="radio" name="t2" checked /> Looking to rent</label>
+        <label class="radio"><input type="radio" name="t2" /> Looking to buy</label>
+        <label class="radio"><input type="radio" name="t2" /> Selling something</label>
+        <label class="radio"><input type="radio" name="t2" /> Just keeping tabs</label>
+      </div>
+      <div class="actions">
+        <button class="btn btn--g">Skip</button>
+        <button class="btn btn--p">Next</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

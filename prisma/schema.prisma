@@ -273,12 +273,51 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
+  // ── onboarding additions (Tier 1) ─────────────────────────
+  role                        Role?      // null until onboarding completes
+  markets                     String[]   @default([]) // metro codes, e.g. ["nyc","sf"]
+  neighborhoods               String[]   @default([]) // free-text neighborhood names
+  onboardingCompletedAt       DateTime?
+
+  // ── onboarding additions (Tier 2) ─────────────────────────
+  buyRentIntent               BuyRentIntent?
+  intentTimeline              IntentTimeline?
+  budgetBand                  String?    // bucketed string, e.g. "rent_2k_3k", "buy_500k_750k"
+  referralSource              ReferralSource?
+
+  // ── consent (granular) ────────────────────────────────────
+  tosAcceptedAt               DateTime?
+  privacyPolicyAcceptedAt     DateTime?
+  marketingConsent            Boolean    @default(false)
+  marketingConsentAt          DateTime?
+  personalizationConsent      Boolean    @default(true)
+  personalizationConsentAt    DateTime?
+  pushConsent                 Boolean    @default(false)
+  pushConsentAt               DateTime?
+  dataProcessingConsentedAt   DateTime?
+
+  // ── privacy toggles (per-field public/private) ────────────
+  showRolePublicly            Boolean    @default(true)
+  showMarketsPublicly         Boolean    @default(true)
+  showWatchlistPublicly       Boolean    @default(false)
+  // budgetBand has NO public toggle — never shown publicly.
+
+  // ── notification prefs ────────────────────────────────────
+  emailDigestCadence          DigestCadence @default(WEEKLY)
+
+  // ── relations (existing) ──────────────────────────────────
   accounts      Account[]
   sessions      Session[]
   comments      Comment[]
   likes         CommentLike[]
   notifications Notification[]
   savedListings SavedListing[]
+
+  // ── relations (onboarding) ────────────────────────────────
+  watchlist                WatchlistItem[]
+  consentLogs              ConsentLog[]
+  dataExportRequests       DataExportRequest[]
+  accountDeletionRequest   AccountDeletionRequest?
 
   @@index([username])
 }
@@ -362,4 +401,119 @@ model CommentLike {
   @@unique([userId, commentId])
   @@index([commentId])
   @@index([userId])
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// Onboarding: enums + GDPR/CCPA models
+// ───────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  RENTER
+  BUYER
+  SELLER
+  AGENT
+  BROKER
+  INVESTOR
+  PROPERTY_MANAGER
+  JOURNALIST
+  CURIOUS
+}
+
+enum BuyRentIntent {
+  RENTING
+  BUYING
+  SELLING
+  BROWSING
+}
+
+enum IntentTimeline {
+  WITHIN_30_DAYS
+  WITHIN_6_MONTHS
+  JUST_BROWSING
+}
+
+enum ReferralSource {
+  TIKTOK
+  X_TWITTER
+  REDDIT
+  FRIEND
+  ARTICLE
+  SEARCH
+  OTHER
+}
+
+enum DigestCadence {
+  OFF
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ConsentType {
+  TOS
+  PRIVACY_POLICY
+  MARKETING
+  PERSONALIZATION
+  PUSH
+  DATA_PROCESSING
+}
+
+/// Canonical audit log of every consent action a user takes.
+/// Required for GDPR/CCPA defensibility. We write a row on signup,
+/// on every toggle in /profile/edit, and on revocations.
+model ConsentLog {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        ConsentType
+  value       Boolean     // true = granted, false = revoked/declined
+  context     String?     // "signup_wizard", "profile_edit", "tier2_modal"
+  ipAddress   String?     // hashed at write time, see lib/consent/hashIp.ts
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  @@index([userId, type, createdAt])
+}
+
+/// User's saved buildings/addresses. Private by default.
+model WatchlistItem {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  buildingId    String?  // FK to Building when we have one; nullable for free-text addresses
+  freeTextLabel String?  // user-typed address before we have a Building row
+  isPublic      Boolean  @default(false) // per-item privacy toggle
+  note          String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([buildingId])
+}
+
+/// User-initiated GDPR/CCPA data export request. Worker job picks
+/// these up and emails a download link.
+model DataExportRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status      String    @default("PENDING") // PENDING | RUNNING | READY | FAILED
+  downloadUrl String?
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@index([userId, createdAt])
+}
+
+/// Soft-deletion request with a 30-day grace period before hard delete.
+model AccountDeletionRequest {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requestedAt  DateTime  @default(now())
+  scheduledFor DateTime  // requestedAt + 30 days
+  reason       String?
+  cancelledAt  DateTime?
+
+  @@index([scheduledFor])
 }
