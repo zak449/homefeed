@@ -184,7 +184,7 @@ function Step1({
       }}
       noValidate
     >
-      <h1 ref={titleRef} tabIndex={-1} className="of-title">{c.title}</h1>
+      <h1 ref={titleRef as React.RefObject<HTMLHeadingElement>} tabIndex={-1} className="of-title">{c.title}</h1>
       <p className="of-subtitle">{c.subtitle}</p>
 
       {/* Display name */}
@@ -300,7 +300,7 @@ function Step2({
         ← Back
       </button>
 
-      <h1 ref={titleRef} tabIndex={-1} className="of-title">{c.title}</h1>
+      <h1 ref={titleRef as React.RefObject<HTMLHeadingElement>} tabIndex={-1} className="of-title">{c.title}</h1>
       <p className="of-subtitle">{c.subtitle}</p>
 
       <div className="of-field">
