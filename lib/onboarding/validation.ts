@@ -179,7 +179,7 @@ export const tier1Schema = {
         }
 
         if (issues.length > 0) return { success: false, error: { issues } };
-        return { success: true, data: out as Pick<Tier1Input, K[number]> };
+        return { success: true, data: out as Pick<Tier1Input, K> };
       },
     };
   },
