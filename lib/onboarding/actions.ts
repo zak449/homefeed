@@ -36,7 +36,7 @@ type ActionResult<T = void> =
 async function requireUserId(): Promise<string> {
   const session = await auth();
   const id = session?.user?.id;
-  if (!id) redirect("/login?from=/onboarding");
+  if (!id) redirect("/?signin=1&returnTo=/onboarding");
   return id;
 }
 
