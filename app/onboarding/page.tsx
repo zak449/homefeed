@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function OnboardingPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/login?from=/onboarding");
+  if (!session?.user?.id) redirect("/?signin=1&returnTo=/onboarding");
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
