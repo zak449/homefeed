@@ -49,13 +49,15 @@ export default function Image() {
         >
           <div
             style={{
+              display: "flex",
               fontSize: 44,
               fontWeight: 800,
               color: "#FFFFFF",
               letterSpacing: "-0.03em",
             }}
           >
-            Gwak<span style={{ color: "#FF4D00" }}>y</span>
+            <span>Gwak</span>
+            <span style={{ color: "#FF4D00" }}>y</span>
           </div>
         </div>
 
@@ -70,6 +72,8 @@ export default function Image() {
         >
           <div
             style={{
+              display: "flex",
+              flexWrap: "wrap",
               fontSize: 84,
               fontWeight: 800,
               color: "#FFFFFF",
@@ -78,7 +82,7 @@ export default function Image() {
               maxWidth: 1000,
             }}
           >
-            Real estate finally has a{" "}
+            <span>Real estate finally has a&nbsp;</span>
             <span style={{ color: "#FF4D00" }}>comment section.</span>
           </div>
           <div
