@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import ListingCard from "@/components/ListingCard";
 import type { FeedSection, RankedFeed } from "@/lib/feed-ranker";
 
@@ -16,6 +16,21 @@ type Props = {
 export default function SmartListingFeed({ feed }: Props) {
   const [revealed, setRevealed] = useState(1);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  // Local sort state — driven by the FeedFilterChips `feed:filter` event.
+  // We only re-order sections client-side; section identity is preserved
+  // so the IntersectionObserver reveal logic keeps working.
+  const [activeSort, setActiveSort] = useState<string>("all");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    function onFilter(e: Event) {
+      const detail = (e as CustomEvent<{ sort?: string }>).detail;
+      if (detail?.sort) setActiveSort(detail.sort);
+    }
+    window.addEventListener("feed:filter", onFilter as EventListener);
+    return () =>
+      window.removeEventListener("feed:filter", onFilter as EventListener);
+  }, []);
 
   // IntersectionObserver to reveal the next section when the user is near
   // the end of the current one.
@@ -36,10 +51,26 @@ export default function SmartListingFeed({ feed }: Props) {
     return () => observer.disconnect();
   }, [revealed, feed.sections.length]);
 
-  const visible = useMemo(
-    () => feed.sections.slice(0, revealed),
-    [feed.sections, revealed],
-  );
+  const visible = useMemo(() => {
+    const slice = feed.sections.slice(0, revealed);
+    if (activeSort === "all") return slice;
+
+    // Light-touch resort: bubble the matching section to the top by key match.
+    // If no section matches, the feed is unchanged — chip just updates the URL
+    // and a future PR can wire deeper filtering. Behavior intentionally
+    // non-destructive so nothing breaks.
+    const matchers: Record<string, (key: string) => boolean> = {
+      hot: (k) => /trend|hot|popular/i.test(k),
+      new: (k) => /new|recent|just|drop/i.test(k),
+      "red-flags": (k) => /flag|controv|red/i.test(k),
+      "price-check": (k) => /price|deal|value/i.test(k),
+    };
+    const m = matchers[activeSort];
+    if (!m) return slice;
+    const hit = slice.findIndex((s) => m(s.key));
+    if (hit <= 0) return slice;
+    return [slice[hit], ...slice.slice(0, hit), ...slice.slice(hit + 1)];
+  }, [feed.sections, revealed, activeSort]);
 
   if (feed.sections.length === 0) {
     return (
@@ -94,12 +125,13 @@ function SectionBlock({ section }: { section: FeedSection }) {
       {isCarousel ? (
         <div className="relative -mx-4 sm:mx-0">
           <div className="flex gap-4 overflow-x-auto scrollbar-none px-4 sm:px-0 pb-2 snap-x snap-mandatory">
-            {section.listings.map((listing) => (
+            {section.listings.map((listing, idx) => (
               <div
                 key={listing.id}
                 className="snap-start shrink-0 w-[78vw] sm:w-[320px]"
+                style={{ "--card-index": idx } as CSSProperties}
               >
-                <ListingCard listing={normalizeForCard(listing)} />
+                <ListingCard listing={normalizeForCard(listing)} index={idx} />
               </div>
             ))}
           </div>
@@ -108,8 +140,13 @@ function SectionBlock({ section }: { section: FeedSection }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {section.listings.map((listing) => (
-            <ListingCard key={listing.id} listing={normalizeForCard(listing)} />
+          {section.listings.map((listing, idx) => (
+            <div
+              key={listing.id}
+              style={{ "--card-index": idx } as CSSProperties}
+            >
+              <ListingCard listing={normalizeForCard(listing)} index={idx} />
+            </div>
           ))}
         </div>
       )}

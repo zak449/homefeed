@@ -24,12 +24,13 @@ export const metadata: Metadata = {
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
 import GeoFeedEnhancer from "@/components/GeoFeedEnhancer";
-import GeoCategoryPill from "@/components/GeoCategoryPill";
 import GeoNeighborhoodSpotlight from "@/components/GeoNeighborhoodSpotlight";
 import GeoStickyBottomCTA from "@/components/GeoStickyBottomCTA";
 import GeoPulseBar from "@/components/GeoPulseBar";
 import ListingFeed from "@/components/ListingFeed";
 import SmartListingFeed from "@/components/SmartListingFeed";
+import HeroLive from "@/components/HeroLive";
+import FeedFilterChips from "@/components/FeedFilterChips";
 import FallbackImage from "@/components/FallbackImage";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
@@ -58,15 +59,28 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const minSqft     = sp.minSqft  ? Number(sp.minSqft)  : undefined;
   const maxSqft     = sp.maxSqft  ? Number(sp.maxSqft)  : undefined;
   const sort        = str(sp.sort) ?? "newest";
+  const marketParam = str(sp.market) ?? null;
   const perPage     = 12;
 
   const searchMode = "city" in sp; // User explicitly opened search (even with empty query)
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
-  const isDefaultLanding = !hasFilters && sort === "newest" && !searchMode;
+  // Chip-driven sorts (handled client-side by FeedFilterChips + SmartListingFeed)
+  // must not push the page into the filtered/search view. Treat them as
+  // landing-compatible — the chip emits a `feed:filter` event for the local
+  // re-sort and only updates the URL via router.replace.
+  const chipSorts = new Set(["hot", "new", "red-flags", "price-check", "all"]);
+  const isDefaultLanding = !hasFilters && (sort === "newest" || chipSorts.has(sort)) && !searchMode;
 
   // Smart feed: ranked sections for the default landing. Fetches the
   // logged-in user (for markets + interaction history) and a candidate pool.
   let smartFeed: ReturnType<typeof rankFeedForUser> | null = null;
+  // Resolve the user's market for HeroLive. Precedence:
+  //   explicit ?market=la  > auth.user.markets[0]  > null (picker state).
+  // An *empty* ?market= (used by HeroLive's "pick another city" link) forces
+  // the picker to render regardless of the user's saved market.
+  const marketParamPresent = "market" in sp;
+  let userMarketResolved: string | null =
+    marketParam && marketParam.length > 0 ? marketParam : null;
   if (isDefaultLanding) {
     const session = await auth().catch(() => null);
     const userId = session?.user?.id ?? null;
@@ -144,6 +158,12 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         select: rankerSelect,
       }),
     ]);
+
+    // Fall back to the user's saved market only if neither a market param
+    // nor an empty `?market=` (picker-force) is present in the URL.
+    if (!userMarketResolved && !marketParamPresent && userRow?.markets?.[0]) {
+      userMarketResolved = userRow.markets[0];
+    }
 
     const rankerListings: RankerListing[] = pool.map((l) => ({
       id: l.id,
@@ -627,15 +647,6 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
     return content.replace(/^\[([^\]]+)\]\s*/, "");
   }
 
-  /* ── Category pills — each links to a real filtered view ── */
-  const categories = [
-    { label: "Most Unhinged", emoji: "🔥", href: "/?sort=comments" },
-    { label: "Just Dropped", emoji: "🆕", href: "/?sort=newest" },
-    { label: "Red Flags", emoji: "🚩", href: "/?sort=comments&type=sale" },
-    { label: "Price Check", emoji: "💀", href: "/?sort=price-low" },
-    { label: "For Rent", emoji: "🔑", href: "/?type=rent&sort=newest" },
-  ];
-
   return (
     <div className="min-h-screen bg-bg">
       {/* Geolocation context provider — wraps entire page for geo-aware components */}
@@ -648,139 +659,64 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* Auto-enhance feed with geo when location is available */}
           <GeoFeedEnhancer />
 
-          {/* ═══ HERO — HOTTEST TAKE SHOWCASE ═══ */}
-          <div className="relative overflow-hidden" style={{ background: '#0A0A0A' }}>
-            {/* Subtle amber glow orb */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-[120px]" style={{ background: 'radial-gradient(circle, #FF4D00, transparent 70%)' }} />
+          {/* ═══ HERO — GEO-PERSONALIZED LIVE ═══ */}
+          <HeroLive userMarket={userMarketResolved} />
 
-            <div className="relative max-w-3xl mx-auto px-5 pt-8 pb-6 sm:pt-12 sm:pb-10">
-              {/* Big heading */}
-              <h1 className="text-[clamp(2rem,7vw,3.5rem)] font-extrabold tracking-tighter font-display leading-[1.05] mb-4 text-white">
-                Real estate finally has a <span className="text-amber">comment section.</span>
-              </h1>
+          {/* ── Featured top take — kept, but visually demoted under the hero ── */}
+          {hottestTake && (() => {
+            const htPhoto = hottestTake.listing.photos[0];
+            const htShortAddr = hottestTake.listing.address.split(",")[0];
+            const htNameParts = hottestTake.name.trim().split(/\s+/);
+            const htDisplayName = htNameParts.length > 1
+              ? `${htNameParts[0]} ${htNameParts[htNameParts.length - 1][0]}.`
+              : htNameParts[0];
+            const htLower = hottestTake.content.toLowerCase();
+            let htCredLabel = "Anon";
+            if (/\b(years?|lived here|moved|since)\b/.test(htLower)) htCredLabel = "Local";
+            else if (/\b(rent|tenant|lease)\b/.test(htLower)) htCredLabel = "Past Renter";
+            else if (/\b(neighbor|next door|block)\b/.test(htLower)) htCredLabel = "Neighbor";
 
-              {/* Subtext */}
-              <p className="text-[clamp(0.95rem,2.5vw,1.2rem)] text-white/50 font-medium tracking-tight mb-6 sm:mb-8 max-w-xl">
-                See what neighbors, past renters, and drive-by experts are really saying.
-              </p>
-
-              {/* ── HOTTEST TAKE CARD ── */}
-              {hottestTake && (() => {
-                const htReactions: Record<string, number> = {};
-                for (const r of hottestTake.reactions) {
-                  htReactions[r.type] = (htReactions[r.type] || 0) + 1;
-                }
-                const htPhoto = hottestTake.listing.photos[0];
-                const htShortAddr = hottestTake.listing.address.split(",")[0];
-                const htNameParts = hottestTake.name.trim().split(/\s+/);
-                const htDisplayName = htNameParts.length > 1
-                  ? `${htNameParts[0]} ${htNameParts[htNameParts.length - 1][0]}.`
-                  : htNameParts[0];
-                const htLower = hottestTake.content.toLowerCase();
-                let htCredLabel = "Anon";
-                if (/\b(years?|lived here|moved|since)\b/.test(htLower)) htCredLabel = "Local";
-                else if (/\b(rent|tenant|lease)\b/.test(htLower)) htCredLabel = "Past Renter";
-                else if (/\b(neighbor|next door|block)\b/.test(htLower)) htCredLabel = "Neighbor";
-
-                return (
-                  <a href={`/listing/${hottestTake.listing.id}`} className="block group mb-6 sm:mb-8 rounded-2xl bg-surface border border-divider shadow-lg hover:shadow-xl hover:border-amber/30 transition-all duration-300 overflow-hidden">
-                    {/* Listing context */}
-                    <div className="flex items-center gap-3 p-4 pb-0">
-                      {htPhoto && (
-                        <div className="w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-elevated">
-                          <FallbackImage src={htPhoto} alt={htShortAddr} className="w-full h-full object-cover" loading="eager" />
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-white truncate">{htShortAddr}</p>
-                        <p className="text-xs text-white/40">{fmtPrice(hottestTake.listing.price, hottestTake.listing.listingType)} &middot; {hottestTake.listing.city}, {hottestTake.listing.state}</p>
+            return (
+              <div className="max-w-3xl mx-auto px-5 pt-5 pb-3">
+                <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-tertiary mb-2">
+                  Today&apos;s #1 take
+                </p>
+                <a
+                  href={`/listing/${hottestTake.listing.id}`}
+                  className="block group rounded-xl bg-surface/70 border border-white/[0.06] hover:border-amber/25 transition-colors overflow-hidden"
+                >
+                  <div className="flex items-stretch gap-3 p-3">
+                    {htPhoto && (
+                      <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-elevated">
+                        <FallbackImage src={htPhoto} alt={htShortAddr} className="w-full h-full object-cover" loading="lazy" />
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber/15 text-amber border border-amber/20 shrink-0">#1 take</span>
-                    </div>
-                    {/* The take */}
-                    <div className="px-4 pt-3 pb-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-sm font-bold text-white/90">{htDisplayName}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-900/30 text-amber-400 border border-amber-700/40">{htCredLabel}</span>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-xs font-bold text-white/90">{htDisplayName}</span>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber/10 text-amber border border-amber/20">{htCredLabel}</span>
                       </div>
-                      <p className="text-lg font-bold text-white leading-snug">{hottestTake.content}</p>
+                      <p className="text-sm font-semibold text-white leading-snug line-clamp-2">{hottestTake.content}</p>
+                      <p className="text-[11px] text-white/40 mt-1 truncate">{htShortAddr} &middot; {fmtPrice(hottestTake.listing.price, hottestTake.listing.listingType)}</p>
                     </div>
-                    {/* Reactions */}
-                    <div className="flex items-center gap-2 px-4 pb-4 flex-wrap">
-                      {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => {
-                        const count = htReactions[emoji] || 0;
-                        return (
-                          <span key={emoji} className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full border font-medium ${
-                            count > 0 ? "bg-white/5 border-white/10 text-white/80" : "bg-white/[0.02] border-white/5 text-white/30"
-                          }`}>
-                            <span className="text-sm">{emoji}</span>
-                            <span className="tabular-nums">{count}</span>
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </a>
-                );
-              })()}
-
-              {/* ── SEARCH BAR ── */}
-              <div className="mb-6">
-                <Suspense>
-                  <SearchBar />
-                </Suspense>
+                  </div>
+                </a>
               </div>
+            );
+          })()}
 
-              {/* ── CTA BUTTON ── */}
-              <a
-                href="/?sort=comments"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-amber text-white rounded-2xl text-sm font-bold hover:opacity-90 active:scale-[0.97] transition-all shadow-elevated mb-4"
-              >
-                Browse listings &rarr;
-              </a>
-
-              {/* ── STATS BAR ── */}
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-sm font-semibold text-white/80 tabular-nums">{listingCount.toLocaleString()}</span>
-                  <span className="text-sm text-white/30">listings</span>
-                </div>
-                <span className="text-white/10">&middot;</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white/80 tabular-nums">{commentCount.toLocaleString()}</span>
-                  <span className="text-sm text-white/30">takes</span>
-                </div>
-                <span className="text-white/10">&middot;</span>
-                <span className="text-sm text-white/30">any city in the US</span>
-              </div>
-            </div>
+          {/* ── Search bar — secondary now, sits under the hero ── */}
+          <div className="max-w-3xl mx-auto px-5 pb-3">
+            <Suspense>
+              <SearchBar />
+            </Suspense>
           </div>
 
-          {/* ═══ CATEGORY PILLS — tactile, visual ═══ */}
-          <div className="sticky top-12 z-20 bg-bg border-b border-divider/0 backdrop-blur-sm" style={{ borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-          <div className="max-w-2xl mx-auto px-5 py-4">
-            <div className="relative">
-              <div className="flex gap-3 overflow-x-auto scrollbar-none pb-1 pr-8">
-                <GeoCategoryPill />
-                {categories.map((cat) => (
-                  <a
-                    key={cat.label}
-                    href={cat.href}
-                    className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-surface border border-divider text-sm font-medium text-ink shadow-card hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
-                  >
-                    <span className="text-lg">{cat.emoji}</span>
-                    <span className="whitespace-nowrap">{cat.label}</span>
-                  </a>
-                ))}
-              </div>
-              {/* Fade gradient indicating more scrollable content */}
-              <div className="absolute right-0 top-0 bottom-0 w-10 pointer-events-none bg-gradient-to-l from-bg to-transparent" />
-            </div>
-          </div>
-          </div>
+          {/* ═══ FEED FILTER CHIPS — sticky, in-place filtering ═══ */}
+          <FeedFilterChips />
 
           {/* Geo pulse — live activity */}
-          <div className="max-w-2xl mx-auto px-5 pb-4">
+          <div className="max-w-2xl mx-auto px-5 pt-4 pb-4">
             <GeoPulseBar commentCount={commentCount} listingCount={listingCount} />
           </div>
 
