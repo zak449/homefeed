@@ -1,5 +1,26 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
+
+export const metadata: Metadata = {
+  title: "Gwaky — the comment section real estate never had",
+  description:
+    "Real takes from real people. Neighbors, past renters, and almost-buyers drop honest intel on every listing. Browse homes for sale and rent across the US — and see what locals are really saying.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: "Gwaky — the comment section real estate never had",
+    description:
+      "Real takes from real people on every listing. No agents. No spin. Just the truth.",
+    url: "https://gwaky.com",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gwaky — the comment section real estate never had",
+    description:
+      "Real takes from real people on every listing. No agents. No spin. Just the truth.",
+  },
+};
 import SearchBar from "@/components/SearchBar";
 import GeoProvider from "@/components/GeoProvider";
 import GeoFeedEnhancer from "@/components/GeoFeedEnhancer";
@@ -8,6 +29,7 @@ import GeoNeighborhoodSpotlight from "@/components/GeoNeighborhoodSpotlight";
 import GeoStickyBottomCTA from "@/components/GeoStickyBottomCTA";
 import GeoPulseBar from "@/components/GeoPulseBar";
 import ListingFeed from "@/components/ListingFeed";
+import SmartListingFeed from "@/components/SmartListingFeed";
 import FallbackImage from "@/components/FallbackImage";
 import { Prisma } from "@prisma/client";
 import { autoSyncCity } from "@/lib/auto-sync";
@@ -15,6 +37,8 @@ import { type CommentFeedItem } from "@/components/CommentsFeed";
 import { lookupAddress } from "@/lib/address-lookup";
 import { enrichBatch } from "@/lib/enrich-batch";
 import SplitMapLayout from "@/components/SplitMapLayout";
+import { auth } from "@/lib/auth";
+import { rankFeedForUser, type RankerListing } from "@/lib/feed-ranker";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -39,6 +63,153 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
   const searchMode = "city" in sp; // User explicitly opened search (even with empty query)
   const hasFilters = !!(city || listingType || propertyType || minPrice || maxPrice || minBeds || minBaths || minSqft || maxSqft);
   const isDefaultLanding = !hasFilters && sort === "newest" && !searchMode;
+
+  // Smart feed: ranked sections for the default landing. Fetches the
+  // logged-in user (for markets + interaction history) and a candidate pool.
+  let smartFeed: ReturnType<typeof rankFeedForUser> | null = null;
+  if (isDefaultLanding) {
+    const session = await auth().catch(() => null);
+    const userId = session?.user?.id ?? null;
+
+    const rankerSelect = {
+      id: true,
+      address: true,
+      city: true,
+      state: true,
+      zip: true,
+      neighborhood: true,
+      latitude: true,
+      longitude: true,
+      price: true,
+      listingType: true,
+      propertyType: true,
+      bedrooms: true,
+      bathrooms: true,
+      sqft: true,
+      status: true,
+      photos: true,
+      agentName: true,
+      createdAt: true,
+      _count: { select: { comments: true } },
+      comments: {
+        take: 10,
+        orderBy: { createdAt: "desc" as const },
+        select: { name: true, content: true },
+      },
+    } as const;
+
+    // Candidate pool — wide enough to cover all sections without being huge.
+    const [userRow, pool] = await Promise.all([
+      userId
+        ? prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+              id: true,
+              markets: true,
+              neighborhoods: true,
+              savedListings: {
+                select: {
+                  listing: {
+                    select: {
+                      id: true,
+                      city: true,
+                      state: true,
+                      zip: true,
+                      neighborhood: true,
+                      latitude: true,
+                      longitude: true,
+                      price: true,
+                      listingType: true,
+                      propertyType: true,
+                      bedrooms: true,
+                      bathrooms: true,
+                      sqft: true,
+                      comments: { take: 10, orderBy: { createdAt: "desc" as const }, select: { content: true } },
+                    },
+                  },
+                },
+                take: 20,
+              },
+              comments: {
+                select: {
+                  listing: {
+                    select: {
+                      id: true,
+                      city: true,
+                      state: true,
+                      zip: true,
+                      neighborhood: true,
+                      latitude: true,
+                      longitude: true,
+                      price: true,
+                      listingType: true,
+                      propertyType: true,
+                      bedrooms: true,
+                      bathrooms: true,
+                      sqft: true,
+                      comments: { take: 10, orderBy: { createdAt: "desc" as const }, select: { content: true } },
+                    },
+                  },
+                },
+                take: 20,
+              },
+            },
+          })
+        : Promise.resolve(null),
+      prisma.listing.findMany({
+        where: { status: "active" },
+        orderBy: { createdAt: "desc" },
+        take: 180,
+        select: rankerSelect,
+      }),
+    ]);
+
+    const rankerListings: RankerListing[] = pool.map((l) => ({
+      id: l.id,
+      address: l.address,
+      city: l.city,
+      state: l.state,
+      zip: l.zip,
+      neighborhood: l.neighborhood,
+      latitude: l.latitude,
+      longitude: l.longitude,
+      price: l.price,
+      listingType: l.listingType,
+      propertyType: l.propertyType,
+      bedrooms: l.bedrooms,
+      bathrooms: l.bathrooms,
+      sqft: l.sqft,
+      status: l.status,
+      photos: l.photos,
+      agentName: l.agentName,
+      createdAt: l.createdAt,
+      _count: l._count,
+      comments: l.comments?.map((c) => ({ content: c.content })) ?? [],
+      topComment: l.comments?.[0]
+        ? { name: l.comments[0].name, content: l.comments[0].content }
+        : null,
+    }));
+
+    const interactionListings = userRow
+      ? [
+          ...userRow.savedListings.map((s) => s.listing),
+          ...userRow.comments.map((c) => c.listing),
+        ]
+      : [];
+
+    smartFeed = rankFeedForUser({
+      user: userRow
+        ? {
+            id: userRow.id,
+            markets: userRow.markets,
+            neighborhoods: userRow.neighborhoods,
+            interactionListings,
+          }
+        : null,
+      listings: rankerListings,
+      limit: 48,
+    });
+  }
 
   // Community stats + comments feed -- only on default landing
   const [listingCount, commentCount, latestCommentsFeed, hottestTakeRaw] = isDefaultLanding
@@ -841,6 +1012,13 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               })}
             </div>
           </div>
+
+          {/* ── SMART FEED — ranked sections (Near you, Trending, etc.) ── */}
+          {smartFeed && smartFeed.sections.length > 0 && (
+            <div className="max-w-2xl mx-auto px-5 pt-2 pb-4">
+              <SmartListingFeed feed={smartFeed} />
+            </div>
+          )}
 
           {/* ── Load more / see all listings ── */}
           {(sortedListings.length > 0 || commentsFeedData.length > 0) && (

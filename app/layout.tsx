@@ -5,23 +5,63 @@ import NavLinks from "@/components/NavLinks";
 import Footer from "@/components/Footer";
 import KlaviyoScript from "@/components/KlaviyoScript";
 import PostHogProvider from "@/components/PostHogProvider";
+import AnalyticsProvider from "@/components/AnalyticsProvider";
 import { SessionProvider } from "@/components/auth/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gwaky.com"),
-  title: "Gwaky — the comment section real estate never had",
+  title: {
+    default: "Gwaky — the comment section real estate never had",
+    template: "%s | Gwaky",
+  },
   description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing. No agents. No spin. Just the truth.",
+  applicationName: "Gwaky",
+  keywords: [
+    "real estate",
+    "real estate reviews",
+    "home reviews",
+    "neighborhood reviews",
+    "property comments",
+    "listing comments",
+    "homes for sale",
+    "homes for rent",
+    "neighbor intel",
+    "real estate community",
+    "buy a home",
+    "rent a home",
+    "real estate transparency",
+    "Gwaky",
+  ],
+  authors: [{ name: "Gwaky", url: "https://gwaky.com" }],
+  creator: "Gwaky",
+  publisher: "Gwaky",
+  category: "real estate",
   manifest: "/manifest.json",
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Gwaky",
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     type: "website",
     siteName: "Gwaky",
     locale: "en_US",
+    url: "https://gwaky.com",
     title: "Gwaky — the comment section real estate never had",
     description: "Real takes from real people. Neighbors, past renters, almost-buyers — dropping honest intel on every listing.",
     images: [
@@ -35,9 +75,48 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@gwakyapp",
+    creator: "@gwakyapp",
     title: "Gwaky — the comment section real estate never had",
     description: "Real takes from real people. No agents. No spin. Just the truth.",
     images: ["/og-image.png"],
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Gwaky",
+  alternateName: "Gwaky App",
+  url: "https://gwaky.com",
+  logo: "https://gwaky.com/icons/icon-512.png",
+  description:
+    "Gwaky is the comment section real estate never had — a community-powered platform where neighbors, past renters, and locals share honest intel on every listing.",
+  sameAs: ["https://x.com/gwakyapp"],
+  foundingDate: "2024",
+  founder: {
+    "@type": "Person",
+    name: "Zachary Kaufman",
+  },
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Gwaky",
+  url: "https://gwaky.com",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: {
+      "@type": "EntryPoint",
+      urlTemplate: "https://gwaky.com/?city={search_term_string}",
+    },
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -53,9 +132,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192.png" />
         <meta name="theme-color" content="#0A0A0A" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
       </head>
       <body className="min-h-screen flex flex-col bg-bg pb-0 sm:pb-0">
         <SessionProvider><PostHogProvider>
+        <Suspense fallback={null}><AnalyticsProvider /></Suspense>
         {/* Top nav — minimal, dark */}
         <header className="sticky top-0 z-50 bg-bg/80 backdrop-blur-md">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 h-12 flex items-center justify-between">

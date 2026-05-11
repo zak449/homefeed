@@ -7,6 +7,7 @@ import {
   requestDataExport,
 } from "@/lib/onboarding/actions";
 import { COPY } from "@/lib/onboarding/copy";
+import { track } from "@/lib/analytics";
 
 type Props = {
   scheduledDeletionAt: string | null;
@@ -28,7 +29,7 @@ export function PrivacyDataSection({ scheduledDeletionAt, pendingExportId }: Pro
   function exportNow() {
     startTransition(async () => {
       const res = await requestDataExport();
-      if (res.ok) setExportPending(true);
+      if (res.ok) { track.dataExportRequested(); setExportPending(true); }
     });
   }
 
