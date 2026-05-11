@@ -4,9 +4,32 @@ import { prisma } from "@/lib/prisma";
 import JoinNeighborhood from "./JoinNeighborhood";
 
 export const metadata: Metadata = {
-  title: "About — Gwaky",
+  title: "About Gwaky — Why we built the comment section for real estate",
   description:
-    "We built Gwaky because buying blind shouldn't be normal. The community-powered real estate platform rebuilding neighborhood trust.",
+    "We built Gwaky because buying blind shouldn't be normal. The community-powered real estate platform rebuilding neighborhood trust — one honest take at a time.",
+  keywords: [
+    "about Gwaky",
+    "real estate transparency",
+    "neighborhood community",
+    "real estate reviews",
+    "founder story",
+    "Zachary Kaufman",
+  ],
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About Gwaky — Why we built the comment section for real estate",
+    description:
+      "We built Gwaky because buying blind shouldn't be normal. The community-powered real estate platform rebuilding neighborhood trust.",
+    url: "https://gwaky.com/about",
+    type: "article",
+    siteName: "Gwaky",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Gwaky",
+    description:
+      "Why we built the comment section real estate never had.",
+  },
 };
 
 export default async function AboutPage() {

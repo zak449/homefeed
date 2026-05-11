@@ -13,9 +13,42 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { username } = await params;
+
+  let displayName: string | null = null;
+  let bio: string | null = null;
+  try {
+    const user = await prisma.user.findUnique({
+      where: { username },
+      select: { name: true, bio: true },
+    });
+    displayName = user?.name ?? null;
+    bio = user?.bio ?? null;
+  } catch {
+    /* fall back to generic metadata */
+  }
+
+  const title = displayName ? `${displayName} (@${username})` : `@${username}`;
+  const description =
+    bio ??
+    `${displayName ?? `@${username}`}'s takes on real estate listings — honest neighbor intel on homes for sale and rent.`;
+  const canonicalPath = `/u/${username}`;
+
   return {
-    title: `@${username} — Gwaky`,
-    description: `${username}'s takes on real estate listings.`,
+    title,
+    description,
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      title: `${title} | Gwaky`,
+      description,
+      url: `https://gwaky.com${canonicalPath}`,
+      type: "profile",
+      siteName: "Gwaky",
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} | Gwaky`,
+      description,
+    },
   };
 }
 
@@ -70,8 +103,23 @@ export default async function PublicProfile({ params }: PageProps) {
     /* ignore */
   }
 
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: user.name ?? `@${user.username}`,
+    alternateName: user.username ? `@${user.username}` : undefined,
+    description: user.bio ?? undefined,
+    image: user.avatarUrl ?? undefined,
+    url: `https://gwaky.com/u/${user.username}`,
+    identifier: user.username ?? undefined,
+  };
+
   return (
     <div className="max-w-2xl mx-auto px-5 sm:px-8 py-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
       <div className="flex items-center gap-4">
         <Avatar src={user.avatarUrl} seed={user.id} label={user.name ?? user.username ?? "User"} size={80} />
         <div>

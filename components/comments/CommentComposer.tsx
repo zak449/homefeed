@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { track } from "@/lib/analytics";
 
 interface Props {
   listingId: string;
@@ -33,6 +34,7 @@ export function CommentComposer({ listingId, parentId = null, placeholder, onPos
       }
       if (!res.ok) throw new Error(await res.text());
       const json = await res.json();
+      track.commentPosted({ listingId, hasMedia: false });
       onPosted({ id: json.id, content, parentId });
       setContent("");
     } catch (err) {

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import FallbackImage from "@/components/FallbackImage";
-import { TeaTempPill } from "@/components/TeaTemperature";
 
 type Listing = {
   id: string;
@@ -23,6 +22,8 @@ type Listing = {
   createdAt?: Date | string;
   _count?: { comments: number };
   topComment?: { name: string; content: string } | null;
+  /** Map of reaction emoji → count. When absent, the row hides for zero-state. */
+  reactionCounts?: Record<string, number>;
 };
 
 function formatName(name: string): string {
@@ -40,7 +41,14 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(seconds / 604800)}w`;
 }
 
-export default function ListingCard({ listing }: { listing: Listing }) {
+export default function ListingCard({
+  listing,
+  index = 0,
+}: {
+  listing: Listing;
+  /** Position in the feed — drives staggered entry animation (Improvement #9). */
+  index?: number;
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -48,6 +56,14 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   const hasMultiple = photos.length > 1;
   const isRent = listing.listingType === "rent";
   const commentCount = listing._count?.comments ?? 0;
+  // Only show reactions when there's actual signal — kills the "all-zeros" wallpaper effect.
+  const reactionEntries = Object.entries(listing.reactionCounts ?? {})
+    .filter(([, n]) => n > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
+  const hasReactions = reactionEntries.length > 0;
+  // Cap the stagger so we don't get a 30-card waterfall.
+  const staggerMs = Math.min(index, 7) * 60;
 
   const price = isRent
     ? `$${listing.price.toLocaleString()}/mo`
@@ -125,7 +141,8 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   return (
     <Link
       href={`/listing/${listing.id}`}
-      className="group block rounded-2xl overflow-hidden bg-surface border border-divider hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 cursor-pointer"
+      className="card-rise group block rounded-2xl overflow-hidden bg-surface border border-divider hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 cursor-pointer"
+      style={{ "--card-rise-delay": `${staggerMs}ms` } as CSSProperties}
     >
       {/* ── CLEAN IMAGE — no text overlays except minimal badge ── */}
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
@@ -218,17 +235,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           {listing.address}, {listing.city}
         </p>
 
-        {/* Tea Temperature — the brand metric, surfaced on every card */}
-        <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-          <TeaTempPill commentCount={commentCount} />
-          {commentCount > 0 && (
-            <span className="text-tag uppercase tracking-wider text-tertiary">
-              {commentCount} take{commentCount !== 1 ? "s" : ""}
-            </span>
-          )}
-        </div>
-
-        {/* Comment / social layer */}
+        {/* Comment / social layer — single CTA, hides zero-state reactions */}
         {listing.topComment ? (
           <div className="mt-3 pt-3 border-t border-divider">
             <p className="text-sm text-ink leading-snug line-clamp-2 font-bold">
@@ -236,37 +243,64 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             </p>
             <p className="text-xs text-secondary mt-1.5">
               &mdash; {formatName(listing.topComment.name)}
-              {commentCount > 1 && <span className="text-secondary ml-1">+ {commentCount - 1} more</span>}
+              {commentCount > 1 && (
+                <span className="text-secondary ml-1">+ {commentCount - 1} more</span>
+              )}
             </p>
-            {/* Reaction row — always visible */}
-            <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
-              {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
-                <span key={emoji} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
-                  <span>{emoji}</span>
-                  <span className="tabular-nums">0</span>
-                </span>
-              ))}
-            </div>
-            <div className="mt-3 w-full py-2.5 bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
-              🫖 Spill the tea &rarr;
+            {/* Reactions: only render when there's actual signal */}
+            {hasReactions && (
+              <div className="flex items-center gap-1.5 flex-wrap mt-2.5">
+                {reactionEntries.map(([emoji, count]) => (
+                  <span
+                    key={emoji}
+                    className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-highlight/70 border border-divider/40 text-ink/85 font-medium"
+                  >
+                    <span aria-hidden="true">{emoji}</span>
+                    <span className="tabular-nums">{count}</span>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="mt-3 w-full py-2.5 min-h-[44px] flex items-center justify-center bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+              <span aria-hidden="true" className="mr-1">🫖</span>
+              {commentCount > 0
+                ? `Spill the tea · ${commentCount} take${commentCount !== 1 ? "s" : ""}`
+                : "Spill the tea"}
+              <span className="ml-1">&rarr;</span>
             </div>
           </div>
         ) : (
           <div className="mt-3 pt-3 border-t border-divider">
-            {/* Reaction row — always visible */}
-            <div className="flex items-center gap-1.5 flex-wrap mb-3">
-              {["🚩", "💸", "👀", "🔥", "💀"].map((emoji) => (
-                <span key={emoji} className="inline-flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full bg-highlight/50 border border-divider/30 text-tertiary font-medium">
-                  <span>{emoji}</span>
-                  <span className="tabular-nums">0</span>
-                </span>
-              ))}
-            </div>
-            <div className="w-full py-2.5 bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
-              🫖 Spill the tea &rarr;
+            <p className="text-xs text-tertiary mb-2.5">
+              <span aria-hidden="true">👻</span> No intel on this block yet
+            </p>
+            <div className="w-full py-2.5 min-h-[44px] flex items-center justify-center bg-amber text-white text-sm font-bold rounded-lg text-center group-hover:bg-amber/90 transition-colors">
+              <span aria-hidden="true" className="mr-1">🫖</span>
+              Be first to spill the tea
+              <span className="ml-1">&rarr;</span>
             </div>
           </div>
         )}
+
+        {/* Dive-deeper hint — pulls the eye to the next card */}
+        <div
+          className="flex items-center justify-center mt-2 pt-1 text-tertiary"
+          aria-hidden="true"
+        >
+          <svg
+            className="dive-hint"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
       </div>
     </Link>
   );
