@@ -57,7 +57,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    const cities = [...new Set(listings.map((l) => l.city).filter(Boolean))];
+    const cities = Array.from(
+      new Set(
+        listings
+          .map((l) => l.city)
+          .filter((c): c is string => typeof c === "string" && c.length > 0),
+      ),
+    );
     cityUrls = cities.map((city) => ({
       url: `${BASE_URL}/city/${encodeURIComponent(city.toLowerCase().replace(/\s+/g, "-"))}`,
       lastModified: now,
@@ -65,14 +71,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     }));
 
-    userUrls = users
-      .filter((u): u is { username: string; updatedAt: Date } => !!u.username)
-      .map((u) => ({
-        url: `${BASE_URL}/u/${encodeURIComponent(u.username)}`,
-        lastModified: u.updatedAt,
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      }));
+    userUrls = users.flatMap((u) =>
+      u.username
+        ? [
+            {
+              url: `${BASE_URL}/u/${encodeURIComponent(u.username)}`,
+              lastModified: u.updatedAt,
+              changeFrequency: "weekly" as const,
+              priority: 0.5,
+            },
+          ]
+        : [],
+    );
 
     zipUrls = zipCommunities.map((z) => ({
       url: `${BASE_URL}/community/${encodeURIComponent(z.zipCode)}`,
