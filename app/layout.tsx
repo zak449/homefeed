@@ -7,6 +7,8 @@ import KlaviyoScript from "@/components/KlaviyoScript";
 import PostHogProvider from "@/components/PostHogProvider";
 import AnalyticsProvider from "@/components/AnalyticsProvider";
 import { SessionProvider } from "@/components/auth/SessionProvider";
+import { AutoSignInModal } from "@/components/auth/AutoSignInModal";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -176,6 +178,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
 
         <KlaviyoScript />
+
+        {/* Auth modal triggered by ?signin=1 redirect from protected pages. */}
+        <Suspense fallback={null}>
+          <AutoSignInModal />
+        </Suspense>
+
+        {/* GDPR/CCPA cookie consent — appears on first visit only. */}
+        <CookieConsentBanner />
         </PostHogProvider></SessionProvider>
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import SpillSheet from "./SpillSheet";
+import SpillPortal from "./SpillPortal";
 import { MobileTabBadge } from "./notifications/MobileTabBadge";
 
 export default function MobileNav() {
@@ -11,6 +12,7 @@ export default function MobileNav() {
   const pathname = usePathname();
   const currentSort = searchParams.get("sort");
   const [isSpillOpen, setIsSpillOpen] = useState(false);
+  const [portalActive, setPortalActive] = useState(false);
   const [spillAddress, setSpillAddress] = useState<string | undefined>(undefined);
   const [spillListingId, setSpillListingId] = useState<string | undefined>(undefined);
 
@@ -80,20 +82,28 @@ export default function MobileNav() {
 
   function handleTakeClick(e: React.MouseEvent) {
     e.preventDefault();
-    // Haptic tap to make the press feel substantial
-    if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(8);
     if (isListingPage) {
       const listingId = pathname.split("/listing/")[1] || undefined;
       const address = document.querySelector("h1")?.textContent?.split(",")[0] || undefined;
       setSpillListingId(listingId);
       setSpillAddress(address);
     } else {
-      // No listing context — SpillSheet will open in Target Picker mode.
-      // No more dead-end blank textareas.
       setSpillListingId(undefined);
       setSpillAddress(undefined);
     }
+    // Fire the cinematic portal first — the sheet's rise animation is
+    // gated on `portalActive`, so the order matters. Both flip in the
+    // same tick so React batches them into a single render.
+    setPortalActive(true);
     setIsSpillOpen(true);
+  }
+
+  function handleSpillClose() {
+    // Sheet drops (its translate-y fallback handles the slide-down) at
+    // the same instant the portal begins its 600ms reverse. The portal
+    // unmounts itself once the close-out completes.
+    setIsSpillOpen(false);
+    setPortalActive(false);
   }
 
   return (
@@ -101,7 +111,7 @@ export default function MobileNav() {
       {/* Bottom tab bar — fixed, always visible on mobile */}
       <nav
         className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg/95 backdrop-blur-sm border-t border-divider"
-        style={{ boxShadow: "0 -1px 24px rgba(255, 46, 147, 0.12)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex items-end justify-evenly h-16 max-w-md mx-auto px-1">
           {tabs.map((tab) => {
@@ -111,17 +121,14 @@ export default function MobileNav() {
                 {/* Active amber dot indicator above icon */}
                 {tab.active && !isAccent && (
                   <span
-                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#FF52A6]"
+                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
                     aria-hidden="true"
                   />
                 )}
 
-                {/* Tea Magenta CTA button for Spill */}
+                {/* Amber accent button for +Take */}
                 {isAccent ? (
-                  <span
-                    className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-tea-gradient text-steam shadow-glow-tea border-4 border-bg"
-                    aria-label="Spill the tea"
-                  >
+                  <span className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
                     {tab.icon(false)}
                   </span>
                 ) : tab.label === "Profile" ? (
@@ -132,9 +139,9 @@ export default function MobileNav() {
 
                 <span className={`text-xs font-medium ${
                   isAccent
-                    ? "text-tea-300 font-bold"
+                    ? "text-amber font-bold"
                     : tab.active
-                      ? "text-[#FF52A6]"
+                      ? "text-[#E8A87C]"
                       : "text-tertiary"
                 }`}>
                   {tab.label}
@@ -146,7 +153,7 @@ export default function MobileNav() {
               isAccent
                 ? ""
                 : tab.active
-                  ? "text-[#FF52A6]"
+                  ? "text-[#E8A87C]"
                   : "text-secondary hover:text-ink"
             }`;
 
@@ -178,10 +185,15 @@ export default function MobileNav() {
       <div className="sm:hidden h-16" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }} />
       <SpillSheet
         isOpen={isSpillOpen}
-        onClose={() => setIsSpillOpen(false)}
+        onClose={handleSpillClose}
         listingAddress={spillAddress}
         listingId={spillListingId}
+        portalRevealing={portalActive}
       />
+      {/* Cinematic teapot pour — sits between the sheet's backdrop and the
+          sheet itself. Renders nothing while inactive. Reduced-motion
+          users get an instant sheet (handled inside SpillPortal/CSS). */}
+      <SpillPortal open={portalActive} />
     </>
   );
 }
