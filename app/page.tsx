@@ -108,26 +108,7 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
               markets: true,
               neighborhoods: true,
               savedListings: {
-                select: {
-                  listing: {
-                    select: {
-                      id: true,
-                      city: true,
-                      state: true,
-                      zip: true,
-                      neighborhood: true,
-                      latitude: true,
-                      longitude: true,
-                      price: true,
-                      listingType: true,
-                      propertyType: true,
-                      bedrooms: true,
-                      bathrooms: true,
-                      sqft: true,
-                      comments: { take: 10, orderBy: { createdAt: "desc" as const }, select: { content: true } },
-                    },
-                  },
-                },
+                select: { listingId: true },
                 take: 20,
               },
               comments: {
@@ -190,10 +171,34 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
         : null,
     }));
 
+    // Build the list of listings the user has interacted with.
+    // SavedListing has no `listing` relation in the schema (only listingId),
+    // so we hydrate saved listings against the candidate pool. Commented
+    // listings come straight off the Comment.listing relation.
     const interactionListings = userRow
       ? [
-          ...userRow.savedListings.map((s) => s.listing),
-          ...userRow.comments.map((c) => c.listing),
+          ...rankerListings.filter((l) =>
+            userRow.savedListings.some((s) => s.listingId === l.id),
+          ),
+          ...userRow.comments
+            .map((c) => c.listing)
+            .filter((l): l is NonNullable<typeof l> => l != null)
+            .map((l) => ({
+              id: l.id,
+              city: l.city,
+              state: l.state,
+              zip: l.zip,
+              neighborhood: l.neighborhood,
+              latitude: l.latitude,
+              longitude: l.longitude,
+              price: l.price,
+              listingType: l.listingType,
+              propertyType: l.propertyType,
+              bedrooms: l.bedrooms,
+              bathrooms: l.bathrooms,
+              sqft: l.sqft,
+              comments: l.comments?.map((c) => ({ content: c.content })) ?? [],
+            })),
         ]
       : [];
 
