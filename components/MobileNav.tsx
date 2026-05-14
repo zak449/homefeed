@@ -7,6 +7,16 @@ import SpillSheet from "./SpillSheet";
 import SpillPortal from "./SpillPortal";
 import { MobileTabBadge } from "./notifications/MobileTabBadge";
 
+// TODO(drama-pulse): parent should pass a `hasNewHotTake: boolean` so the
+// purple pulse-dot on the Drama tab is data-driven. For now we render it
+// statically — visual rebrand only, no wire-up.
+const HAS_NEW_HOT_TAKE_PLACEHOLDER = true;
+
+// Brand-bright active color — bumped from #E8A87C (dim amber) to the
+// product's on-brand accent orange. This is the single source of truth so
+// active text + the indicator dot stay in sync.
+const ACTIVE_COLOR = "#FF4D00";
+
 export default function MobileNav() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -25,9 +35,10 @@ export default function MobileNav() {
   const tabs = [
     {
       href: "/",
-      label: "Feed",
+      label: "Streets",
       active: isHome,
       accent: false,
+      pulse: false,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
@@ -37,9 +48,10 @@ export default function MobileNav() {
     },
     {
       href: "/hot-takes",
-      label: "Hot Takes",
+      label: "Drama",
       active: isTrending,
       accent: false,
+      pulse: HAS_NEW_HOT_TAKE_PLACEHOLDER,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
           <path d="M12 23c-3.866 0-7-3.134-7-7 0-3 2-6 4-8 0 3 2 4 3 4 0-4 2-8 5-10-1 3 1 5 3 6 2 1.5 3 3.5 3 6 0 4.5-3.5 9-11 9z" />
@@ -51,15 +63,17 @@ export default function MobileNav() {
       label: "Spill",
       active: false,
       accent: true,
+      pulse: false,
       icon: (_active: boolean) => (
         <span className="text-[20px] leading-none">🫖</span>
       ),
     },
     {
       href: "/saved",
-      label: "Saved",
+      label: "Stash",
       active: isSaved,
       accent: false,
+      pulse: false,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -68,9 +82,10 @@ export default function MobileNav() {
     },
     {
       href: "/profile",
-      label: "Profile",
+      label: "Me",
       active: isProfile,
       accent: false,
+      pulse: false,
       icon: (active: boolean) => (
         <svg width="22" height="22" viewBox="0 0 24 24" fill={active ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.5">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -108,42 +123,75 @@ export default function MobileNav() {
 
   return (
     <>
+      {/* Inline pulse keyframe so the Drama dot can throb without touching
+          globals.css. Honors reduced-motion. */}
+      <style>{`
+        @keyframes mn-drama-pulse {
+          0%, 100% { transform: scale(1);   opacity: 1; }
+          50%      { transform: scale(1.55); opacity: 0.55; }
+        }
+        .mn-drama-dot { animation: mn-drama-pulse 1.8s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .mn-drama-dot { animation: none !important; }
+        }
+      `}</style>
       {/* Bottom tab bar — fixed, always visible on mobile */}
       <nav
         className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg/95 backdrop-blur-sm border-t border-divider"
-        style={{ boxShadow: "0 -1px 16px rgba(232,168,124,0.07)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        style={{ boxShadow: "0 -1px 16px rgba(255,77,0,0.08)", paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="flex items-end justify-evenly h-16 max-w-md mx-auto px-1">
           {tabs.map((tab) => {
             const isAccent = tab.accent;
             const content = (
               <>
-                {/* Active amber dot indicator above icon */}
+                {/* Active brand-bright dot indicator above icon */}
                 {tab.active && !isAccent && (
                   <span
-                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#E8A87C]"
+                    className="absolute top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
+                    style={{ backgroundColor: ACTIVE_COLOR }}
                     aria-hidden="true"
                   />
                 )}
 
-                {/* Amber accent button for +Take */}
+                {/* Brand accent button for +Take */}
                 {isAccent ? (
                   <span className="flex items-center justify-center w-12 h-12 -mt-4 rounded-full bg-amber text-white shadow-lg shadow-amber/30 border-4 border-bg">
                     {tab.icon(false)}
                   </span>
-                ) : tab.label === "Profile" ? (
-                  <span className="relative inline-flex">{tab.icon(tab.active)}<MobileTabBadge /></span>
+                ) : tab.label === "Me" ? (
+                  <span className="relative inline-flex">
+                    {tab.icon(tab.active)}
+                    <MobileTabBadge />
+                  </span>
+                ) : tab.pulse ? (
+                  <span className="relative inline-flex">
+                    {tab.icon(tab.active)}
+                    {/* Drama-tab pulse-dot — purple to differentiate from the
+                        amber active indicator. TODO: wire to real data. */}
+                    <span
+                      aria-hidden="true"
+                      className="mn-drama-dot absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
+                      style={{
+                        backgroundColor: "#B14BFF",
+                        boxShadow: "0 0 6px rgba(177,75,255,0.7)",
+                      }}
+                    />
+                  </span>
                 ) : (
                   tab.icon(tab.active)
                 )}
 
-                <span className={`text-xs font-medium ${
-                  isAccent
-                    ? "text-amber font-bold"
-                    : tab.active
-                      ? "text-[#E8A87C]"
-                      : "text-tertiary"
-                }`}>
+                <span
+                  className={`text-xs font-medium ${
+                    isAccent
+                      ? "text-amber font-bold"
+                      : tab.active
+                        ? "font-bold"
+                        : "text-tertiary"
+                  }`}
+                  style={tab.active && !isAccent ? { color: ACTIVE_COLOR } : undefined}
+                >
                   {tab.label}
                 </span>
               </>
@@ -153,9 +201,15 @@ export default function MobileNav() {
               isAccent
                 ? ""
                 : tab.active
-                  ? "text-[#E8A87C]"
+                  ? ""
                   : "text-secondary hover:text-ink"
             }`;
+
+            // Set color on the wrapper so the SVG icons (stroke=currentColor)
+            // pick up the brand-bright active orange. Non-active links keep
+            // the existing text-secondary hover via the className.
+            const linkStyle: React.CSSProperties | undefined =
+              tab.active && !isAccent ? { color: ACTIVE_COLOR } : undefined;
 
             if (isAccent) {
               return (
@@ -174,6 +228,7 @@ export default function MobileNav() {
                 key={tab.href + tab.label}
                 href={tab.href}
                 className={className}
+                style={linkStyle}
               >
                 {content}
               </Link>

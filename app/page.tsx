@@ -32,6 +32,10 @@ import ListingCard from "@/components/ListingCard";
 import SmartListingFeed from "@/components/SmartListingFeed";
 import HeroLive from "@/components/HeroLive";
 import LivePulseTicker from "@/components/LivePulseTicker";
+import PinnedSpill from "@/components/PinnedSpill";
+import AgentVsNeighborFeedCard from "@/components/AgentVsNeighbor";
+import TempSpikeEvent from "@/components/TempSpikeEvent";
+import { computeTeaTemp } from "@/components/TeaTemperature";
 import { computeLivePulses } from "@/lib/livePulse";
 import FeedFilterChips from "@/components/FeedFilterChips";
 import FallbackImage from "@/components/FallbackImage";
@@ -668,6 +672,14 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
           {/* ═══ LIVE PULSE TICKER — fresh activity strip ═══ */}
           <LivePulseTicker pulses={await computeLivePulses({ userCity: userMarketResolved ?? undefined })} />
 
+          {/* ═══ PINNED SPILL — slot for the curated "🔥 pinned this week" card.
+              Seeded null until an editorial pin source exists; the component
+              also self-guards, so passing an empty payload is safe. ═══ */}
+          {/* TODO: replace with a real fetch (e.g. featured-take seed table). */}
+          <div className="max-w-2xl mx-auto px-5 pt-4 empty:hidden">
+            <PinnedSpill />
+          </div>
+
           {/* ── Featured top take — kept, but visually demoted under the hero ── */}
           {hottestTake && (() => {
             const htPhoto = hottestTake.listing.photos[0];
@@ -815,9 +827,91 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                   );
                 }
 
-                /* ── LISTING CARD — delegated to the shared <ListingCard /> ── */
+                /* ── LISTING CARD — delegated to the shared <ListingCard />,
+                       with two visual-rhythm injections at positions 8 and 12.
+                       Each variant self-guards on data; if its data isn't
+                       present we fall back to the normal listing card. ── */
                 if (item.type === "listing" && item.data) {
                   const listing = item.data as (typeof sortedListings)[number];
+
+                  // Optional injections — every 8th item, the agent-vs-neighbor
+                  // split; every 12th, the temp-spike event card. The (idx+1)
+                  // offset means we don't fire on the very first listing.
+                  const slot = idx + 1;
+                  const isAvnSlot = slot % 8 === 0;
+                  const isTempSpikeSlot = slot % 12 === 0;
+
+                  // AgentVsNeighbor — requires both an agent description
+                  // and a top neighbor take. The listing select doesn't
+                  // currently include `description` (the agent blurb), so
+                  // this resolves to undefined and the component renders
+                  // null. Safe placeholder until the field is exposed.
+                  const agentBlurb = (listing as { description?: string | null })
+                    .description ?? null;
+
+                  if (
+                    isAvnSlot &&
+                    agentBlurb &&
+                    listing.topComment &&
+                    listing.topComment.content
+                  ) {
+                    return (
+                      <div
+                        key={`avn-${listing.id}`}
+                        style={{ "--card-index": idx } as CSSProperties}
+                      >
+                        <AgentVsNeighborFeedCard
+                          listing={{
+                            id: listing.id,
+                            address: listing.address,
+                            price: listing.price,
+                            listingType: listing.listingType,
+                            description: agentBlurb,
+                            photos: listing.photos,
+                          }}
+                          topComment={{
+                            author: listing.topComment.name,
+                            content: listing.topComment.content,
+                          }}
+                        />
+                      </div>
+                    );
+                  }
+
+                  // TempSpikeEvent — we don't have time-windowed counts in
+                  // this selection, so we use the total comment count as a
+                  // proxy and derive a temperature via the shared
+                  // computeTeaTemp(). The component re-guards on its own
+                  // floor (currentTemp ≥ 50, takesInWindow ≥ 3).
+                  if (isTempSpikeSlot) {
+                    const cc = listing._count?.comments ?? 0;
+                    const temp = computeTeaTemp({
+                      commentCount: cc,
+                      recentCount: cc,
+                    }).tempF;
+                    if (temp >= 50 && cc >= 3) {
+                      return (
+                        <div
+                          key={`temp-${listing.id}`}
+                          style={{ "--card-index": idx } as CSSProperties}
+                        >
+                          <TempSpikeEvent
+                            listing={{
+                              id: listing.id,
+                              address: listing.address,
+                              price: listing.price,
+                              listingType: listing.listingType,
+                              photos: listing.photos,
+                            }}
+                            currentTemp={temp}
+                            takesInWindow={cc}
+                            windowLabel="today"
+                          />
+                        </div>
+                      );
+                    }
+                  }
+
                   return (
                     <div
                       key={`listing-${listing.id}`}
