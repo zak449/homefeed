@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
@@ -28,6 +28,7 @@ import GeoNeighborhoodSpotlight from "@/components/GeoNeighborhoodSpotlight";
 import GeoStickyBottomCTA from "@/components/GeoStickyBottomCTA";
 import GeoPulseBar from "@/components/GeoPulseBar";
 import ListingFeed from "@/components/ListingFeed";
+import ListingCard from "@/components/ListingCard";
 import SmartListingFeed from "@/components/SmartListingFeed";
 import HeroLive from "@/components/HeroLive";
 import FeedFilterChips from "@/components/FeedFilterChips";
@@ -801,90 +802,45 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
                           href={`/listing/${comment.listing.id}#comment-form`}
                           className="inline-flex items-center gap-1 px-4 py-2 bg-accent/10 text-accent text-sm font-semibold rounded-full hover:bg-accent/20 transition-all shrink-0"
                         >
-                          Drop your take &rarr;
+                          <span aria-hidden="true" className="mr-0.5">🫖</span>
+                          Spill the tea &rarr;
                         </a>
                       </div>
                     </div>
                   );
                 }
 
-                /* ── LISTING CARD (in feed) — top comment is the main content ── */
+                /* ── LISTING CARD — delegated to the shared <ListingCard /> ── */
                 if (item.type === "listing" && item.data) {
                   const listing = item.data as (typeof sortedListings)[number];
-                  const photo = listing.photos[0];
-                  const commentCount_l = listing._count?.comments ?? 0;
-
                   return (
-                    <a key={`listing-${listing.id}`} href={`/listing/${listing.id}`} className="block group rounded-2xl bg-surface border border-divider shadow-card hover:border-accent/30 hover:shadow-lg hover:shadow-accent/5 transition-all duration-200 overflow-hidden cursor-pointer">
-                      {/* Top comment — HEADLINE above photo */}
-                      {listing.topComment && (
-                        <div className="px-5 pt-5 pb-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-7 h-7 rounded-full bg-amber/10 border border-amber/20 flex items-center justify-center shrink-0">
-                              <span className="text-[9px] font-bold text-amber">
-                                {listing.topComment.name.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2)}
-                              </span>
-                            </div>
-                            <span className="text-sm font-bold text-ink">{formatName(listing.topComment.name)}</span>
-                          </div>
-                          <p className="text-[16px] sm:text-[17px] text-ink leading-snug font-semibold">
-                            {parseRoleTag(listing.topComment.content)}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Photo */}
-                      <div className="relative w-full aspect-[2.2/1] overflow-hidden bg-highlight">
-                        {photo ? (
-                          <FallbackImage
-                            src={photo}
-                            alt={listing.address}
-                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-tertiary/20 bg-highlight">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></svg>
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 pb-3 pt-12">
-                          <p className="text-xl font-extrabold text-white leading-none tracking-tight">{fmtPrice(listing.price, listing.listingType)}</p>
-                          <p className="text-xs text-white/70 mt-1 truncate">{listing.address}, {listing.city}</p>
-                        </div>
-                        <div className="absolute top-3 left-3 flex items-center gap-2">
-                          <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white border border-white/10">
-                            {listing.listingType === "rent" ? "Rental" : "For Sale"}
-                          </span>
-                          {listing.status === "active" && (
-                            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-500/80 backdrop-blur-md text-white">
-                              Active
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Details */}
-                      <div className="p-5">
-                        {!listing.topComment && (
-                          <p className="text-[15px] text-tertiary italic mb-4">Be the first to drop intel on this block.</p>
-                        )}
-
-                        <div className="flex items-center gap-4 text-xs text-secondary mb-3 pb-3 border-b border-divider">
-                          {listing.bedrooms != null && <span className="font-medium">{listing.bedrooms} bd</span>}
-                          {listing.bathrooms != null && <span className="font-medium">{listing.bathrooms} ba</span>}
-                          {listing.sqft != null && <span className="font-medium">{listing.sqft.toLocaleString()} sqft</span>}
-                          {listing.propertyType && <span className="text-tertiary capitalize">{listing.propertyType}</span>}
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-tertiary font-medium">
-                            {commentCount_l > 0 ? `${commentCount_l} take${commentCount_l !== 1 ? "s" : ""}` : "No takes yet"}
-                          </span>
-                          <span className="inline-flex items-center gap-1 px-4 py-2 bg-accent/10 text-accent text-sm font-semibold rounded-full group-hover:bg-accent/20 transition-all">
-                            {commentCount_l > 0 ? "Read all takes" : "Drop your take"} &rarr;
-                          </span>
-                        </div>
-                      </div>
-                    </a>
+                    <div
+                      key={`listing-${listing.id}`}
+                      style={{ "--card-index": idx } as CSSProperties}
+                    >
+                      <ListingCard
+                        listing={{
+                          id: listing.id,
+                          address: listing.address,
+                          city: listing.city,
+                          state: listing.state,
+                          neighborhood: listing.neighborhood,
+                          price: listing.price,
+                          listingType: listing.listingType,
+                          propertyType: listing.propertyType ?? "",
+                          status: listing.status,
+                          bedrooms: listing.bedrooms,
+                          bathrooms: listing.bathrooms,
+                          sqft: listing.sqft,
+                          photos: listing.photos,
+                          agentName: listing.agentName ?? null,
+                          createdAt: listing.createdAt,
+                          _count: listing._count,
+                          topComment: listing.topComment,
+                        }}
+                        index={idx}
+                      />
+                    </div>
                   );
                 }
 
