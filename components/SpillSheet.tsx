@@ -1,45 +1,38 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useId } from "react";
 
-// Role-specific prompts — the key to unlocking specific receipts
-const ROLE_PROMPTS: Record<string, string[]> = {
-  neighbor: [
-    "What does the seller NOT want buyers to know?",
-    "What's the real noise situation after 10pm?",
-    "What happened to the last family that lived here?",
-  ],
-  "past renter": [
-    "What broke first? What were they slow to fix?",
-    "Would you rent here again knowing what you know?",
-    "What did the landlord hide during your tour?",
-  ],
-  "drove by": [
-    "What's the vibe on that block at 11pm?",
-    "Does the listing photos match reality?",
-    "What did you notice that the photos don't show?",
-  ],
-  "almost bought": [
-    "What made you walk?",
-    "What did the inspection reveal?",
-    "What did your agent say off the record?",
-  ],
-  local: [
-    "What's the one thing Zillow can't tell you about this area?",
-    "Is this block trending up or down?",
-    "What do the neighbors actually think about this place?",
-  ],
-  other: [
-    "What's something nobody's saying about this place?",
-    "Drop your unfiltered take...",
-    "What would you want to know before signing?",
-  ],
-};
+// Rotating cold-open prompts. Picked once per fresh open so the user
+// doesn't see the placeholder shuffle while they're thinking.
+const COLD_PROMPTS = [
+  "What's the truth about this place?",
+  "What would you tell a buyer here?",
+  "Spill what nobody's saying.",
+  "What's the real story?",
+];
+
+// Compact tag set — relationship to the place. Surfaces only after the
+// user has started writing.
+const TAGS = [
+  { key: "neighbor", label: "Neighbor" },
+  { key: "past renter", label: "Past renter" },
+  { key: "drove by", label: "Drove by" },
+  { key: "almost bought", label: "Almost bought" },
+  { key: "local", label: "Local" },
+  { key: "other", label: "Other" },
+];
+
+// A tag becomes available once the body has at least this many characters.
+// Keeps the picker out of the way until the user has committed to writing.
+const TAG_REVEAL_THRESHOLD = 3;
+
+const MAX_LEN = 500;
 
 interface SpillSheetProps {
   isOpen: boolean;
   onClose: () => void;
-  listingAddress?: string; // Pre-filled if on listing page
+  /** Pre-filled when the sheet opens from a listing context. */
+  listingAddress?: string;
   listingId?: string;
   /**
    * When true, the SpillPortal is performing its open animation. The sheet
@@ -49,103 +42,199 @@ interface SpillSheetProps {
   portalRevealing?: boolean;
 }
 
-export default function SpillSheet({ isOpen, onClose, listingAddress, listingId, portalRevealing }: SpillSheetProps) {
-  // States
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+interface ListingSearchResult {
+  id: string;
+  address: string;
+}
+
+export default function SpillSheet({
+  isOpen,
+  onClose,
+  listingAddress,
+  listingId,
+  portalRevealing,
+}: SpillSheetProps) {
+  // Authoring
   const [content, setContent] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  // Optional listing pick (when no context was provided by the caller)
+  const [pickedListing, setPickedListing] = useState<ListingSearchResult | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<ListingSearchResult[]>([]);
+  const [searchingListings, setSearchingListings] = useState(false);
+
+  // Identity (lazy — we only ask when they hit submit)
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [posting, setPosting] = useState(false);
-  const [posted, setPosted] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const sheetRef = useRef<HTMLDivElement>(null);
 
-  // Restore saved identity
+  // Submission lifecycle
+  const [posting, setPosting] = useState(false);
+  const [posted, setPosted] = useState(false);
+
+  // Empty-submit feedback (shake + inline hint)
+  const [shaking, setShaking] = useState(false);
+  const [showEmptyHint, setShowEmptyHint] = useState(false);
+
+  // Placeholder selected once per open
+  const [placeholder, setPlaceholder] = useState(COLD_PROMPTS[0]);
+
+  // a11y ids
+  const textareaId = useId();
+  const tagGroupId = useId();
+  const emptyHintId = useId();
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const reducedMotionRef = useRef(false);
+
+  // Resolve reduced-motion once on mount.
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    reducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
+  // Restore saved identity from prior sessions.
   useEffect(() => {
     try {
       const saved = localStorage.getItem("hf_commenter");
       if (saved) {
-        const { name: n, email: e } = JSON.parse(saved);
-        if (n) setName(n);
-        if (e) setEmail(e);
-        if (n && e) setIsJoined(true);
+        const parsed = JSON.parse(saved) as { name?: string; email?: string };
+        if (parsed.name) setName(parsed.name);
+        if (parsed.email) setEmail(parsed.email);
+        if (parsed.name && parsed.email) setIsJoined(true);
       }
     } catch {}
   }, []);
 
-  // Focus textarea when sheet opens. When revealed through the portal we
-  // wait until the pour+rise sequence completes (~1100ms) so the mobile
-  // keyboard doesn't lurch up mid-animation.
+  // Pick a placeholder on each fresh open. Reduced motion users get the
+  // first prompt every time — no rotation, no surprise.
   useEffect(() => {
-    if (isOpen && textareaRef.current) {
-      const delay = portalRevealing ? 1150 : 300;
-      const t = setTimeout(() => textareaRef.current?.focus(), delay);
-      return () => clearTimeout(t);
-    }
-  }, [isOpen, portalRevealing]);
-
-  // Reset state when sheet closes
-  useEffect(() => {
-    if (!isOpen) {
-      setTimeout(() => {
-        setSelectedRole(null);
-        setContent("");
-        setPosted(false);
-        setShowAuth(false);
-      }, 300);
-    }
-  }, [isOpen]);
-
-  // Get current prompt based on role
-  const currentPrompt = selectedRole
-    ? ROLE_PROMPTS[selectedRole]?.[Math.floor(Math.random() * (ROLE_PROMPTS[selectedRole]?.length ?? 1))] ?? "Spill the tea..."
-    : "";
-
-  // Use a ref to store the prompt so it doesn't change on re-render
-  const promptRef = useRef("");
-  useEffect(() => {
-    if (selectedRole && !promptRef.current) {
-      const prompts = ROLE_PROMPTS[selectedRole];
-      if (prompts) {
-        promptRef.current = prompts[Math.floor(Math.random() * prompts.length)];
-      }
-    }
-    if (!selectedRole) promptRef.current = "";
-  }, [selectedRole]);
-
-  const displayPrompt = promptRef.current || currentPrompt;
-
-  // Handle post
-  async function handleSpill() {
-    if (!content.trim() || posting) return;
-
-    if (!isJoined) {
-      setShowAuth(true);
+    if (!isOpen) return;
+    if (reducedMotionRef.current) {
+      setPlaceholder(COLD_PROMPTS[0]);
       return;
     }
+    const idx = Math.floor(Math.random() * COLD_PROMPTS.length);
+    setPlaceholder(COLD_PROMPTS[idx]);
+  }, [isOpen]);
 
+  // Focus the textarea after the portal pour lands so the keyboard
+  // doesn't fight the rise animation.
+  useEffect(() => {
+    if (!isOpen) return;
+    const delay = portalRevealing ? 1150 : 280;
+    const t = setTimeout(() => textareaRef.current?.focus(), delay);
+    return () => clearTimeout(t);
+  }, [isOpen, portalRevealing]);
+
+  // Reset everything once the sheet has fully closed.
+  useEffect(() => {
+    if (isOpen) return;
+    const t = setTimeout(() => {
+      setContent("");
+      setSelectedTag(null);
+      setPickedListing(null);
+      setSearchQuery("");
+      setSearchResults([]);
+      setShowAuth(false);
+      setPosted(false);
+      setShaking(false);
+      setShowEmptyHint(false);
+    }, 320);
+    return () => clearTimeout(t);
+  }, [isOpen]);
+
+  // Lightweight debounced listing search. Only fires when the sheet has
+  // no caller-supplied listing context and the user is typing.
+  useEffect(() => {
+    if (listingId || pickedListing) return;
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    let cancelled = false;
+    setSearchingListings(true);
+    const t = setTimeout(async () => {
+      try {
+        // Reuses the main feed endpoint with `q=` — no new route needed.
+        const res = await fetch(`/api/listings?q=${encodeURIComponent(q)}&page=1`);
+        if (!res.ok) throw new Error("search failed");
+        const data = (await res.json()) as {
+          listings?: Array<{ id: string; address?: string | null; city?: string | null }>;
+        };
+        const mapped: ListingSearchResult[] = (data.listings ?? [])
+          .slice(0, 5)
+          .map((l) => ({
+            id: l.id,
+            address: [l.address, l.city].filter(Boolean).join(", ") || l.id,
+          }));
+        if (!cancelled) setSearchResults(mapped);
+      } catch {
+        if (!cancelled) setSearchResults([]);
+      } finally {
+        if (!cancelled) setSearchingListings(false);
+      }
+    }, 220);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [searchQuery, listingId, pickedListing]);
+
+  // Resolved listing pieces — caller context wins.
+  const effectiveListingId = listingId ?? pickedListing?.id;
+  const effectiveListingAddress = listingAddress ?? pickedListing?.address;
+  const showListingSearch = !listingId && !listingAddress;
+
+  // Tag picker reveals only once the user has written something.
+  const showTags = content.trim().length >= TAG_REVEAL_THRESHOLD;
+
+  const remaining = useMemo(() => MAX_LEN - content.length, [content.length]);
+
+  function triggerEmptyFeedback() {
+    setShowEmptyHint(true);
+    if (!reducedMotionRef.current) {
+      setShaking(true);
+      window.setTimeout(() => setShaking(false), 420);
+    }
+  }
+
+  async function postComment() {
     setPosting(true);
     try {
       const res = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          listingId: listingId || "general",
+          listingId: effectiveListingId || "general",
           name,
           email,
-          content: selectedRole ? `[${selectedRole}] ${content}` : content,
+          content: selectedTag ? `[${selectedTag}] ${content.trim()}` : content.trim(),
         }),
       });
       if (res.ok) {
         setPosted(true);
-        // Haptic feedback
-        if (navigator.vibrate) navigator.vibrate(50);
-        setTimeout(() => onClose(), 1800);
+        if (typeof navigator !== "undefined" && navigator.vibrate) navigator.vibrate(50);
+        window.setTimeout(() => onClose(), 1700);
       }
     } catch {}
     setPosting(false);
+  }
+
+  function handleSpill() {
+    if (posting) return;
+    if (!content.trim()) {
+      triggerEmptyFeedback();
+      return;
+    }
+    if (!isJoined) {
+      setShowAuth(true);
+      return;
+    }
+    void postComment();
   }
 
   function handleAuthSubmit(e: React.FormEvent) {
@@ -156,182 +245,304 @@ export default function SpillSheet({ isOpen, onClose, listingAddress, listingId,
     try {
       localStorage.setItem("hf_commenter", JSON.stringify({ name, email }));
     } catch {}
-    // Auto-post after auth
-    setTimeout(() => handleSpill(), 100);
+    window.setTimeout(() => void postComment(), 80);
   }
 
-  const roles = [
-    { key: "neighbor", emoji: "🏠", label: "Neighbor" },
-    { key: "past renter", emoji: "🔑", label: "Past Renter" },
-    { key: "drove by", emoji: "🚗", label: "Drove By" },
-    { key: "almost bought", emoji: "💔", label: "Almost Bought" },
-    { key: "local", emoji: "📍", label: "Local" },
-    { key: "other", emoji: "💬", label: "Other" },
-  ];
+  // Clear the inline empty-hint the moment the user starts typing.
+  function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const next = e.target.value.slice(0, MAX_LEN);
+    setContent(next);
+    if (showEmptyHint && next.trim().length > 0) setShowEmptyHint(false);
+  }
 
   return (
     <>
-      {/* Backdrop — when the portal is performing its cinematic reveal we
-          keep this lighter so the tilted page + teapot pour stay visible.
-          The portal's own vignette handles the darkening. */}
+      {/* Backdrop — kept light during the portal reveal so the pour stays readable. */}
       <div
         className={`fixed inset-0 z-[60] backdrop-blur-sm transition-opacity duration-300 ${
-          portalRevealing ? "bg-black/30" : "bg-black/70"
+          portalRevealing ? "bg-black/25" : "bg-black/55"
         } ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
+        aria-hidden="true"
       />
 
-      {/* Sheet — when revealed via the SpillPortal we layer the rise + scale
-          animation; otherwise we fall back to the plain translate slide. */}
       <div
-        ref={sheetRef}
-        className={`fixed inset-x-0 bottom-0 z-[61] bg-bg rounded-t-3xl ${
+        role="dialog"
+        aria-modal="true"
+        aria-label="Spill the tea"
+        className={`spillsheet fixed inset-x-0 bottom-0 z-[61] rounded-t-[28px] ${
           portalRevealing
             ? "spill-sheet-rise"
             : `transition-transform duration-300 ease-out ${
                 isOpen ? "translate-y-0" : "translate-y-full"
               }`
         }`}
-        style={{ maxHeight: "92vh", paddingBottom: "env(safe-area-inset-bottom, 16px)" }}
+        style={{
+          maxHeight: "88vh",
+          paddingBottom: "env(safe-area-inset-bottom, 12px)",
+        }}
       >
-        {/* Inner wrapper — when the portal is pouring, hold the sheet's
-            content invisible until the puddle lands and the rise completes. */}
         <div className={portalRevealing ? "spill-sheet-content-delayed" : undefined}>
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-2">
-          <div className="w-10 h-1 rounded-full bg-white/20" />
-        </div>
+          {/* Drag handle — single, quiet escape route alongside the swipe gesture. */}
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="block mx-auto mt-2.5 mb-1 w-12 h-1.5 rounded-full bg-white/25 hover:bg-white/40 transition-colors"
+          />
 
-        {/* Success state */}
-        {posted ? (
-          <div className="flex flex-col items-center justify-center py-16 px-6 animate-in fade-in zoom-in duration-300">
-            <span className="text-6xl mb-4">🫖</span>
-            <p className="text-2xl font-bold text-white mb-2">Tea spilled.</p>
-            <p className="text-secondary text-sm">Your take is live. The block will never be the same.</p>
-          </div>
-        ) : (
-          <div className="px-5 pb-6 overflow-y-auto" style={{ maxHeight: "calc(92vh - 40px)" }}>
-            {/* Header */}
-            <div className="mb-5">
-              <h2 className="text-xl font-bold text-white">
-                {listingAddress ? `Spilling on ${listingAddress}` : "Spill the tea"}
-              </h2>
-              {!listingAddress && (
-                <p className="text-sm text-secondary mt-1">Pick a listing from the feed first, or drop a general take.</p>
-              )}
+          {posted ? (
+            <div className="flex flex-col items-center justify-center py-14 px-6 animate-in fade-in zoom-in duration-300">
+              <span className="text-5xl mb-3" aria-hidden="true">🫖</span>
+              <p className="text-2xl font-semibold text-white mb-1">Tea spilled.</p>
+              <p className="text-secondary text-sm">Your take is live.</p>
             </div>
+          ) : (
+            <div
+              className="px-5 pt-1 pb-5 overflow-y-auto"
+              style={{ maxHeight: "calc(88vh - 24px)" }}
+            >
+              {/* Header — single line, faint. The textarea below is the real headline. */}
+              {effectiveListingAddress ? (
+                <p className="text-[13px] text-secondary mb-2.5 truncate">
+                  On <span className="text-white/90 font-medium">{effectiveListingAddress}</span>
+                  {pickedListing && !listingId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPickedListing(null);
+                        setSearchQuery("");
+                      }}
+                      className="ml-2 text-tertiary hover:text-white underline-offset-2 hover:underline"
+                    >
+                      change
+                    </button>
+                  )}
+                </p>
+              ) : (
+                <div className="h-1.5" />
+              )}
 
-            {/* Textarea — always enabled, the CTA */}
-            <div className="mb-4">
+              {/* The hero — italic, parchment-ish, oversized. */}
+              <label htmlFor={textareaId} className="sr-only">
+                Your take
+              </label>
               <textarea
+                id={textareaId}
                 ref={textareaRef}
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder={selectedRole ? displayPrompt : "What do you know about this place?"}
-                className="w-full h-32 rounded-xl bg-surface border border-divider px-4 py-3 text-white text-base placeholder:text-tertiary/60 focus:outline-none focus:border-accent/50 focus:ring-1 focus:ring-accent/30 resize-none"
-                autoFocus
+                onChange={handleContentChange}
+                placeholder={placeholder}
+                maxLength={MAX_LEN}
+                aria-describedby={showEmptyHint ? emptyHintId : undefined}
+                className="spillsheet-journal w-full min-h-[180px] bg-transparent border-0 px-1 py-2 text-white text-[22px] leading-[1.45] italic font-serif tracking-[-0.005em] placeholder:text-white/35 focus:outline-none resize-none"
               />
-              <div className="flex justify-between items-center mt-1.5">
-                <span className="text-xs text-tertiary">{content.length}/500</span>
-                {content.length > 0 && (
-                  <span className="text-xs text-accent">Ready to spill</span>
-                )}
+
+              {/* Counter — tiny, right-aligned, no chrome. */}
+              <div className="flex justify-end -mt-1 mb-2">
+                <span
+                  className={`text-[11px] ${
+                    remaining < 40 ? "text-amber/90" : "text-tertiary/70"
+                  }`}
+                  aria-live="polite"
+                >
+                  {remaining}
+                </span>
               </div>
-            </div>
 
-            {/* Role-specific prompt hint — subtle, between textarea and role selector */}
-            {selectedRole && displayPrompt && (
-              <p className="text-accent/70 text-sm italic mb-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                {displayPrompt}
-              </p>
-            )}
-
-            {/* Role selector */}
-            <div className="mb-5">
-              <p className="text-xs text-secondary uppercase tracking-wider font-semibold mb-3">Your relationship to this place</p>
-              <div className="grid grid-cols-2 gap-2">
-                {roles.map((role) => (
-                  <button
-                    key={role.key}
-                    type="button"
-                    onClick={() => {
-                      setSelectedRole(selectedRole === role.key ? null : role.key);
-                      promptRef.current = "";
-                    }}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                      selectedRole === role.key
-                        ? "bg-accent text-white shadow-lg shadow-accent/30 scale-[1.02]"
-                        : "bg-surface border border-divider text-secondary hover:border-accent/40"
-                    }`}
-                  >
-                    <span className="text-base">{role.emoji}</span>
-                    {role.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Auth form — slides in when needed */}
-            {showAuth && !isJoined && (
-              <form onSubmit={handleAuthSubmit} className="mb-4 rounded-xl border border-accent/30 bg-accent/5 p-4 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <p className="text-white text-sm font-semibold">One more thing — who's spilling?</p>
-                <div className="flex gap-2">
+              {/* Inline listing search — only when no listing context. */}
+              {showListingSearch && !pickedListing && (
+                <div className="mb-3">
                   <input
                     type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                    required
-                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Adding to a listing? Search…"
+                    className="w-full rounded-full bg-surface/60 border border-divider/70 px-4 py-2 text-sm text-white placeholder:text-tertiary/70 focus:outline-none focus:border-accent/40"
+                    aria-label="Search for a listing to attach this spill to"
                   />
-                  <input
-                    type="email"
-                    placeholder="Email (private)"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 min-w-0 rounded-lg bg-bg border border-divider px-3 py-2.5 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
-                    required
-                  />
+                  {searchQuery.trim().length >= 2 && (
+                    <div className="mt-2 rounded-xl bg-surface/70 border border-divider/60 overflow-hidden">
+                      {searchingListings && searchResults.length === 0 ? (
+                        <p className="px-3 py-2 text-xs text-tertiary">Looking…</p>
+                      ) : searchResults.length === 0 ? (
+                        <p className="px-3 py-2 text-xs text-tertiary">
+                          No matches. Skip it and spill anyway.
+                        </p>
+                      ) : (
+                        <ul className="divide-y divide-divider/40">
+                          {searchResults.map((r) => (
+                            <li key={r.id}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPickedListing(r);
+                                  setSearchResults([]);
+                                  setSearchQuery("");
+                                }}
+                                className="w-full text-left px-3 py-2 text-sm text-white hover:bg-accent/10 transition-colors"
+                              >
+                                {r.address}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="submit"
-                  disabled={!name.trim() || !email.trim()}
-                  className="w-full py-2.5 bg-accent text-white font-bold rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
-                >
-                  Lock in &amp; spill →
-                </button>
-              </form>
-            )}
+              )}
 
-            {/* Spill button — the mic drop */}
-            {!showAuth && (
-              <button
-                type="button"
-                onClick={handleSpill}
-                disabled={!content.trim() || posting}
-                className="w-full py-4 bg-accent text-white text-lg font-extrabold rounded-2xl active:scale-[0.97] transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-accent/20 hover:shadow-accent/40"
+              {/* Tag picker — slides in once they've started writing. */}
+              <div
+                className={`overflow-hidden transition-[max-height,opacity] duration-300 ${
+                  showTags ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
+                }`}
+                aria-hidden={!showTags}
               >
-                {posting ? (
-                  <span className="animate-pulse">Spilling...</span>
-                ) : (
-                  <>🫖 Spill it</>
-                )}
-              </button>
-            )}
+                <div
+                  role="group"
+                  aria-labelledby={tagGroupId}
+                  className="pb-1"
+                >
+                  <p
+                    id={tagGroupId}
+                    className="text-[11px] uppercase tracking-[0.14em] text-tertiary mb-2"
+                  >
+                    Add a tag (optional)
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {TAGS.map((t) => {
+                      const checked = selectedTag === t.key;
+                      return (
+                        <label
+                          key={t.key}
+                          className={`cursor-pointer select-none px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                            checked
+                              ? "bg-accent text-white border-accent"
+                              : "bg-transparent text-secondary border-divider hover:border-accent/50 hover:text-white"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className="sr-only"
+                            checked={checked}
+                            onChange={() =>
+                              setSelectedTag((cur) => (cur === t.key ? null : t.key))
+                            }
+                            tabIndex={showTags ? 0 : -1}
+                          />
+                          {t.label}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
 
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full mt-3 py-2.5 text-secondary text-sm font-medium hover:text-white transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
+              {/* Auth — only when they've tried to submit without identity. */}
+              {showAuth && !isJoined && (
+                <form
+                  onSubmit={handleAuthSubmit}
+                  className="mt-3 mb-1 rounded-2xl border border-accent/30 bg-accent/5 p-3.5 space-y-2.5 animate-in fade-in slide-in-from-bottom-2 duration-200"
+                >
+                  <p className="text-white text-sm font-medium">Who's spilling?</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Your name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="flex-1 min-w-0 rounded-lg bg-bg/80 border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                      required
+                      autoFocus
+                      aria-label="Your name"
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email (private)"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1 min-w-0 rounded-lg bg-bg/80 border border-divider px-3 py-2 text-sm text-white placeholder:text-tertiary focus:outline-none focus:border-accent/50"
+                      required
+                      aria-label="Email (kept private)"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!name.trim() || !email.trim()}
+                    className="w-full py-2.5 bg-accent text-white font-semibold rounded-lg active:scale-[0.98] transition-all disabled:opacity-40"
+                  >
+                    Lock in &amp; spill
+                  </button>
+                </form>
+              )}
+
+              {/* Empty-state inline hint — replaces the disabled-button cue. */}
+              {showEmptyHint && (
+                <p
+                  id={emptyHintId}
+                  className="mt-2 mb-1 text-[12px] text-amber/90 italic"
+                  role="status"
+                >
+                  say something first.
+                </p>
+              )}
+
+              {/* The button never goes gray. */}
+              {!showAuth && (
+                <button
+                  type="button"
+                  onClick={handleSpill}
+                  aria-label="Spill the tea"
+                  className={`mt-3 w-full py-3.5 bg-accent text-white text-base font-semibold rounded-2xl active:scale-[0.97] transition-transform shadow-lg shadow-accent/25 ${
+                    shaking ? "spillsheet-shake" : ""
+                  }`}
+                >
+                  {posting ? (
+                    <span className="animate-pulse">Spilling…</span>
+                  ) : (
+                    <>
+                      <span aria-hidden="true">🫖</span> Spill the tea
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Scoped styles — class names are component-prefixed to avoid collisions. */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+.spillsheet {
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 209, 153, 0.07), transparent 60%),
+    linear-gradient(180deg, #1a1410 0%, #120d0a 100%);
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+}
+.spillsheet-journal {
+  font-family: ui-serif, Georgia, "Iowan Old Style", "Apple Garamond", "Times New Roman", serif;
+  caret-color: #ffb277;
+}
+@keyframes spillsheet-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+.spillsheet-shake {
+  animation: spillsheet-shake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .spillsheet-shake { animation: none; }
+}
+`,
+        }}
+      />
     </>
   );
 }
