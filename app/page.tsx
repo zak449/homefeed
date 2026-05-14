@@ -31,6 +31,8 @@ import ListingFeed from "@/components/ListingFeed";
 import ListingCard from "@/components/ListingCard";
 import SmartListingFeed from "@/components/SmartListingFeed";
 import HeroLive from "@/components/HeroLive";
+import LivePulseTicker from "@/components/LivePulseTicker";
+import { computeLivePulses } from "@/lib/livePulse";
 import FeedFilterChips from "@/components/FeedFilterChips";
 import FallbackImage from "@/components/FallbackImage";
 import { Prisma } from "@prisma/client";
@@ -662,6 +664,9 @@ export default async function HomePage({ searchParams }: { searchParams: Promise
 
           {/* ═══ HERO — GEO-PERSONALIZED LIVE ═══ */}
           <HeroLive userMarket={userMarketResolved} />
+
+          {/* ═══ LIVE PULSE TICKER — fresh activity strip ═══ */}
+          <LivePulseTicker pulses={await computeLivePulses({ userCity: userMarketResolved ?? undefined })} />
 
           {/* ── Featured top take — kept, but visually demoted under the hero ── */}
           {hottestTake && (() => {
