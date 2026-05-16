@@ -194,22 +194,21 @@ async function fetchTodayData(dateKey: string): Promise<TodayData> {
           })
         : [];
       const listingById = new Map(listingRows.map((l) => [l.id, l]));
-      const hotListings: HotListingItem[] = topListingsAgg
-        .map((g) => {
-          const l = listingById.get(g.listingId);
-          if (!l) return null;
-          return {
-            id: l.id,
-            address: l.address,
-            city: l.city,
-            state: l.state,
-            price: l.price,
-            listingType: l.listingType,
-            photo: l.photos[0] ?? null,
-            takes24h: g._count._all,
-          } satisfies HotListingItem;
-        })
-        .filter((x): x is HotListingItem => x !== null);
+      const hotListings: HotListingItem[] = topListingsAgg.flatMap((g) => {
+        const l = listingById.get(g.listingId);
+        if (!l) return [];
+        const item: HotListingItem = {
+          id: l.id,
+          address: l.address,
+          city: l.city,
+          state: l.state,
+          price: l.price,
+          listingType: l.listingType,
+          photo: l.photos[0] ?? null,
+          takes24h: g._count._all,
+        };
+        return [item];
+      });
 
       const neighborhoods: Neighborhood[] = neighborhoodAgg.map((n) => ({
         city: n.city,
